@@ -1,0 +1,15 @@
+{
+  "files.exclude": {
+    ".claude": true,
+    "CLAUDE.md": true,
+    ".mcp.json": true,
+    ".codebuddy": true,
+    "CODEBUDDY.md": true,
+    ".gemini": true,
+    "GEMINI.md": true,
+    ".codex": true,
+    ".agents": true,
+    "AGENTS.md": true,
+    ".cursor": true
+  }
+}

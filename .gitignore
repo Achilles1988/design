@@ -1,0 +1,17 @@
+# Playwright MCP 输出（wn-playwright-installer）
+temp/
+
+# >>> wn-ide-compatible (managed) >>>
+# 各 IDE 入口均由 .wn-ai/ 派生，可随时用同步脚本重建，故不纳入 git；clone 后重跑即可。
+.claude/
+CLAUDE.md
+.mcp.json
+.codebuddy/
+CODEBUDDY.md
+.gemini/
+GEMINI.md
+.codex/
+.agents/
+AGENTS.md
+.cursor/
+# <<< wn-ide-compatible (managed) <<<
