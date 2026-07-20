@@ -1,0 +1,17 @@
+:root {
+  --color-primary: #0c5cab;
+  --color-secondary: #0a4a8a;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-surface: #09090b;
+  --color-text: #fafafa;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --space: 8px;
+  --radius: 8px;
+  --sidebar-w: 256px;
+  --header-h: 60px;
+  --color-border: color-mix(in srgb, var(--color-text) 12%, transparent);
+  --color-surface-2: color-mix(in srgb, var(--color-text) 6%, var(--color-surface));
+  --color-muted: color-mix(in srgb, var(--color-text) 55%, transparent);
+}

@@ -1,3 +1,22 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AppCreatePage } from './features/apps/AppCreatePage'
+import { AppDetailPage } from './features/apps/AppDetailPage'
+import { AppListPage } from './features/apps/AppListPage'
+import { PagePreview } from './preview/PagePreview'
+import { SidebarShell } from './shell/SidebarShell'
+
 export function App() {
-  return <div>Design Engineering</div>
+  return (
+    <BrowserRouter>
+      <SidebarShell>
+        <Routes>
+          <Route path="/" element={<AppListPage />} />
+          <Route path="/apps/new" element={<AppCreatePage />} />
+          <Route path="/apps/:id" element={<AppDetailPage />} />
+          <Route path="/apps/:id/pages/:pageId" element={<PagePreview />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </SidebarShell>
+    </BrowserRouter>
+  )
 }
