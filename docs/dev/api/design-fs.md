@@ -8,7 +8,9 @@ via `designFsPlugin` in `apps/design/vite.config.ts`.
 
 - Active only under `vite dev` (`configureServer`).
 - `vite build` / `vite preview` do not expose write (or list) endpoints.
-  Management UI should treat missing `/__design_fs` as “start with `npm run dev`”.
+- The browser client (`framework/src/lib/api.ts`) treats a missing or non-JSON
+  `/__design_fs` response as unavailable and surfaces:
+  **Start with npm run dev to manage apps**.
 
 ## Content root
 
