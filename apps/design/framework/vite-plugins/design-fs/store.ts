@@ -11,20 +11,21 @@ import { isValidAppId } from '../../src/lib/slug'
 import { validatePathMeta } from '../../src/lib/pathMeta'
 import { resolveContentPath } from './paths'
 
-export function nameToComponentFile(name: string, id: string): string {
-  const fromName = name
+const TS_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/
+
+function toPascalCase(value: string): string {
+  return value
     .trim()
     .split(/[^a-zA-Z0-9]+/)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('')
+}
+
+export function nameToComponentFile(name: string, id: string): string {
+  const fromName = toPascalCase(name)
   const base =
-    fromName ||
-    id
-      .split(/[^a-zA-Z0-9]+/)
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join('')
+    fromName && TS_IDENTIFIER.test(fromName) ? fromName : toPascalCase(id)
   return `${base}.tsx`
 }
 
@@ -70,12 +71,12 @@ export function createContentStore(contentRoot: string) {
     }
     const apps: AppConfig[] = []
     for (const entry of entries) {
-      const appJson = path.join(root, entry, 'app.json')
       try {
+        const appJson = resolveContentPath(root, entry, 'app.json')
         const raw = await fs.readFile(appJson, 'utf8')
         apps.push(JSON.parse(raw) as AppConfig)
       } catch {
-        // skip dirs without valid app.json
+        // skip dirs without valid app.json / invalid entry ids
       }
     }
     return apps
@@ -129,7 +130,8 @@ export function createContentStore(contentRoot: string) {
     if (!isValidAppId(id)) {
       throw new Error(`Invalid app id: ${id}`)
     }
-    await fs.rm(appDir(id), { recursive: true, force: true })
+    await getApp(id)
+    await fs.rm(appDir(id), { recursive: true })
   }
 
   async function listPages(appId: string): Promise<PageEntry[]> {

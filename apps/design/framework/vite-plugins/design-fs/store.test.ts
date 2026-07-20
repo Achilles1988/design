@@ -50,4 +50,20 @@ describe('createContentStore', () => {
     await store.deletePage('orders', 'home')
     await expect(fs.access(file)).rejects.toThrow()
   })
+
+  it('falls back to id when page name yields illegal TS identifier', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    const page = await store.addPage('orders', {
+      id: 'not-found',
+      name: '404 Page',
+    })
+    expect(page.component).toBe('NotFound.tsx')
+    const source = await fs.readFile(
+      path.join(root, 'orders', 'pages', 'NotFound.tsx'),
+      'utf8',
+    )
+    expect(source).toContain('function NotFound(')
+    expect(source).not.toContain('function 404')
+  })
 })
