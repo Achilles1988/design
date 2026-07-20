@@ -1,6 +1,9 @@
 # Playwright MCP 输出（wn-playwright-installer）
 temp/
 
+# Local git worktrees
+.worktrees/
+
 # >>> wn-ide-compatible (managed) >>>
 # 各 IDE 入口均由 .wn-ai/ 派生，可随时用同步脚本重建，故不纳入 git；clone 后重跑即可。
 .claude/
