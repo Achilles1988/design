@@ -36,3 +36,12 @@ Related module work must read module docs first.
 ```shell
 docs/product
 ```
+
+## **Design Spec**
+
+For any page design or UI development, follow that app's visual rules at `docs/design/<app>/rules/design.md` and prefer the installed layout contracts under `docs/design/<app>/layouts/<id>/LAYOUT.md`. The tree below maps each app to its style id and preferred layout id(s).
+
+```shell
+docs/design
+└── design/                      # style: dashboard · layouts: sidebar-shell, split-screen
+```
