@@ -45,7 +45,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 - **Canvas**: previewable page under `canvases/`, listed in `canvases.json`.
 - **Shell / framework**: engineering host UI that ships with the design-engineering app (Apps manager, Rule/Layout browsers, theme toggle, etc. — **not** App Canvases under `<contentRoot>/`). Maintainer surface, not a product design target for typical PRDs.
 - **Track**: `canvas` (**default**) or `shell` (**exceptional**).
-- **Style / Layout contract**: under `<stylesRoot>/<styleId>/design.md` and `<layoutsRoot>/<layoutId>/LAYOUT.md`.
+- **Style / Layout contract**: under `<stylesRoot>/<styleId>/DESIGN.md` (or `design.md`) and `<layoutsRoot>/<layoutId>/LAYOUT.md` — stock paths from `design.project.json`, read-only.
 - **Runner**: `detected` (dev workflow anchors present) or `plan` (none).
 
 ## Step 0 — Detect & route
@@ -126,15 +126,15 @@ If the user insists on shell after the warning: **announce `shell`**, stay the o
 
 **Style (required, canvas):**
 
-1. Read `app.json.style`. Valid iff `<stylesRoot>/<style>/design.md` exists.
-2. If invalid/missing: list stock ids (dirs under `<stylesRoot>` with `design.md`). Recommend one. After confirm, write `app.json.style`.
-3. Empty stock list → STOP (do not create contract files).
+1. Read `app.json.style`. Valid iff `<stylesRoot>/<style>/DESIGN.md` or `design.md` exists.
+2. If invalid/missing: list stock ids (dirs under `<stylesRoot>` with `DESIGN.md` / `design.md`). Recommend one. After confirm, write `app.json.style`.
+3. Empty stock list → STOP (do not create contract files). Do not copy stock packages into a project-local tree.
 
 **Layout (preferred, canvas):**
 
 1. If `<layoutsRoot>/<id>/LAYOUT.md` exists → use it.
 2. Else offer **"AI improvise"** and/or a stock layout id; on confirm, append to `app.json.layouts` if missing.
-3. Recommend only existing layout directory ids. Do not create layout packages.
+3. Recommend only existing layout directory ids. Do not create or copy layout packages.
 
 **Shell track** — lock down:
 
@@ -143,7 +143,7 @@ If the user insists on shell after the warning: **announce `shell`**, stay the o
 - **Separate non-UI** → Step 9.
 - Do **not** force App style/layout contract configuration unless the change truly edits those contracts.
 
-**Never** mention legacy external design-spec skills. Never read design contracts outside `<designRoot>` `styles/` and `layouts/` trees.
+**Never** mention legacy external design-spec skills. Never invent local style/layout mirrors; resolve contracts only under `<stylesRoot>` / `<layoutsRoot>` from the marker (framework stock in this repo).
 
 ## Step 5 — Implement
 

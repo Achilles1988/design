@@ -47,10 +47,11 @@ that kind. Download returns a ZIP of the whole package directory (STORE format).
 
 ### Provenance and refresh
 
-These packages are a **browser library** for Rule / Layout pages — not the
-authoritative style/layout contracts for an App. Authoritative App contracts
-live under `<designRoot>/<stylesRoot|layoutsRoot>/…` as defined in
-[Design project marker and contract resolution](design-project.md).
+These packages are the **authoritative style/layout stock** for Apps (see
+`stylesRoot` / `layoutsRoot` in
+[Design project marker and contract resolution](design-project.md)). Rule / Layout
+pages browse the same tree. Apps store only package **ids** in `app.json`; install /
+replace does **not** copy packages onto disk elsewhere.
 
 The current tree was seeded by copying from the local crawl cache
 `temp/designmd` and `temp/layoutmd` (gitignored Playwright / crawl output). To
@@ -65,9 +66,8 @@ rsync -a --delete --exclude '.DS_Store' --exclude '_template' \
   temp/layoutmd/ apps/design/framework/public/assets/layoutmd/
 ```
 
-Re-run after regenerating `temp/` from the crawl pipeline. Do not treat
-`public/assets` as App contract truth; use `styles/` and `layouts/` under the
-design project root instead.
+Re-run after regenerating `temp/` from the crawl pipeline. Do not maintain a
+project-local `styles/` or `layouts/` mirror of this stock.
 
 See also: [Design project marker and contract resolution](design-project.md).
 
@@ -80,8 +80,8 @@ See also: [Design project marker and contract resolution](design-project.md).
 | `id` | string | Directory name; must match `^[a-z][a-z0-9-]*$` |
 | `name` | string | Display name; trimmed, must be non-empty |
 | `path` | string? | Optional relative path metadata (no `..`, not absolute) |
-| `style` | string | Design-rule id under `<stylesRoot>/` (default: `dashboard`) |
-| `layouts` | string[] | Layout package ids under `<layoutsRoot>/` (default: `["sidebar-shell"]`) |
+| `style` | string | Design-rule id under stock `stylesRoot` (default: `dashboard`) |
+| `layouts` | string[] | Layout package ids under stock `layoutsRoot` (default: `["sidebar-shell"]`) |
 
 ### `canvases.json`
 
@@ -134,7 +134,7 @@ JSON responses use `{ "error": "<message>" }` on failure with status:
 | `GET` | `/apps/:id` | — | `AppConfig` |
 | `POST` | `/apps` | `{ "id", "name", "path"? }` | `AppConfig` |
 | `DELETE` | `/apps/:id` | — | `{ "ok": true }` |
-| `DELETE` | `/apps/:id/layouts/:layoutId` | — | Updated `AppConfig` (removes id from `layouts` in `app.json` only; does not delete the on-disk package under `<layoutsRoot>/`; refuses when it would leave the list empty) |
+| `DELETE` | `/apps/:id/layouts/:layoutId` | — | Updated `AppConfig` (removes id from `layouts` in `app.json` only; does not delete stock packages; refuses when it would leave the list empty) |
 
 ### Canvases
 
@@ -152,28 +152,24 @@ JSON responses use `{ "error": "<message>" }` on failure with status:
 | `GET` | `/assets/:kind/:id/download` | — | ZIP bytes (`application/zip`) |
 | `POST` | `/assets/:kind/:id/apply` | `{ "appId" }` | Updated `AppConfig` |
 
-`POST …/apply` copies the browser-library package into the design project’s
-authoritative contract tree, then updates the target App’s `app.json`. The
-target App is validated (`GET`-equivalent) **before** any contract directory
-is overwritten:
+`POST …/apply` validates that the stock package exists under `assetsRoot`, then
+updates the target App’s `app.json` only (no disk copy). The target App is
+validated (`GET`-equivalent) before writing:
 
-| `kind` | Disk target | `app.json` update |
-|--------|-------------|-------------------|
-| `designmd` | `<stylesRoot>/<id>/` (ensures `design.md`; replaces folder) | replaces `style` with `<id>` |
-| `layoutmd` | `<layoutsRoot>/<id>/` (replaces folder) | appends `<id>` to `layouts` if missing |
-
-Plugin options also require `stylesRoot` and `layoutsRoot` (see
-`apps/design/vite.config.ts`).
+| `kind` | Disk mutation | `app.json` update |
+|--------|---------------|-------------------|
+| `designmd` | none (stock read-only) | replaces `style` with `<id>` |
+| `layoutmd` | none (stock read-only) | appends `<id>` to `layouts` if missing |
 
 ## Browser client
 
 `apps/design/framework/src/lib/api.ts` exports `designApi` with:
 
 - `listApps()`, `getApp(id)`, `createApp({ id, name, path? })`, `deleteApp(id)`
-- `removeAppLayout(appId, layoutId)` (drop a layout id from `app.json` `layouts` only; does not delete the on-disk package)
+- `removeAppLayout(appId, layoutId)` (drop a layout id from `app.json` `layouts` only; does not delete stock packages)
 - `listCanvases(appId)`, `addCanvas(appId, { id, name })`, `deleteCanvas(appId, canvasId)`
 - `listAssets(kind)`, `downloadAssetUrl(kind, id)` (URL helper for ZIP download)
-- `applyAsset(kind, id, appId)` (install layout / replace style + update App)
+- `applyAsset(kind, id, appId)` (install layout / replace style ids on the App)
 
 On non-2xx JSON responses the client throws `Error` with the server `error`
 message (or `statusText` if the body has no string `error`).

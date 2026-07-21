@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { designApi } from '@/lib/api'
 import { emitCanvasesChanged } from '@/lib/canvasEvents'
+import { confirmTip } from '@/lib/confirmTip'
 import type { AppConfig } from '@/lib/types'
 import './apps.css'
 
@@ -31,8 +32,12 @@ export function AppListPage() {
 
   async function onDeleteApp(app: AppConfig) {
     if (busyId) return
-    if (!confirm(`Delete app “${app.name}” (${app.id})? This cannot be undone.`))
-      return
+    const ok = await confirmTip({
+      message: `Delete app “${app.name}”? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     setBusyId(app.id)
     setError(null)
     try {

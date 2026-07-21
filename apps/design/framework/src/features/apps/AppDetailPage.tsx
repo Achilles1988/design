@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
-import { LAYOUT_INSTALL_NOTICE } from '@/lib/assetNotices'
+import { LAYOUT_INSTALL_TIP } from '@/lib/assetNotices'
 import { emitCanvasesChanged } from '@/lib/canvasEvents'
+import { confirmTip } from '@/lib/confirmTip'
 import { isValidAppId, slugify } from '@/lib/slug'
 import type { AppConfig, AssetEntry, CanvasEntry } from '@/lib/types'
 import './apps.css'
@@ -150,7 +151,12 @@ export function AppDetailPage() {
   }
 
   async function onDeleteCanvas(canvas: CanvasEntry) {
-    if (!confirm(`Delete canvas “${canvas.name}” (${canvas.id})?`)) return
+    const ok = await confirmTip({
+      message: `Delete canvas “${canvas.name}”?`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     setBusy(true)
     setFormError(null)
     try {
@@ -168,8 +174,12 @@ export function AppDetailPage() {
 
   async function onDeleteApp() {
     if (!app) return
-    if (!confirm(`Delete app “${app.name}” (${app.id})? This cannot be undone.`))
-      return
+    const ok = await confirmTip({
+      message: `Delete app “${app.name}”? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     setBusy(true)
     setFormError(null)
     try {
@@ -186,13 +196,12 @@ export function AppDetailPage() {
 
   async function onRemoveLayout(layoutId: string) {
     if (!app || busy) return
-    if (
-      !confirm(
-        `Remove layout “${layoutId}” from this App? The on-disk package is kept.`,
-      )
-    ) {
-      return
-    }
+    const ok = await confirmTip({
+      message: `Remove layout “${layoutId}” from this App?`,
+      confirmLabel: 'Remove',
+      danger: true,
+    })
+    if (!ok) return
     setBusy(true)
     setFormError(null)
     try {
@@ -213,7 +222,11 @@ export function AppDetailPage() {
       navigate(`/assets/layout?appId=${encodeURIComponent(app.id)}`)
       return
     }
-    if (!window.confirm(LAYOUT_INSTALL_NOTICE)) return
+    const ok = await confirmTip({
+      message: LAYOUT_INSTALL_TIP,
+      confirmLabel: 'Install',
+    })
+    if (!ok) return
     setBusy(true)
     setFormError(null)
     try {
@@ -262,7 +275,7 @@ export function AppDetailPage() {
       {app ? (
         <dl className="apps-meta">
           <div>
-            <dt>Name</dt>
+            <dt>APP</dt>
             <dd>{app.name}</dd>
           </div>
           <div>
@@ -361,7 +374,7 @@ export function AppDetailPage() {
               <table className="apps-table">
                 <thead>
                   <tr>
-                    <th scope="col">Name</th>
+                    <th scope="col">CANVAS</th>
                     <th scope="col">ID</th>
                     <th scope="col">
                       <span className="apps-sr-only">Actions</span>

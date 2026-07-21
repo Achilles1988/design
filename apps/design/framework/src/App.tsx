@@ -8,6 +8,7 @@ import {
 } from './features/assets/AssetBrowserPage'
 import { CanvasPreview } from './preview/CanvasPreview'
 import { SidebarShell } from './shell/SidebarShell'
+import { ConfirmTipHost } from './ui/ConfirmTipHost'
 
 export function App() {
   return (
@@ -26,6 +27,7 @@ export function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </SidebarShell>
+      <ConfirmTipHost />
     </BrowserRouter>
   )
 }

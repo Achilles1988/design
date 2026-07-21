@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contentRoot": "apps",
-  "stylesRoot": "styles",
-  "layoutsRoot": "layouts",
+  "stylesRoot": "framework/public/assets/designmd",
+  "layoutsRoot": "framework/public/assets/layoutmd",
   "defaultAppId": "design"
 }

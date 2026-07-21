@@ -76,14 +76,9 @@ async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
 export function designFsPlugin(options: {
   contentRoot: string
   assetsRoot: string
-  stylesRoot: string
-  layoutsRoot: string
 }): Plugin {
   const store = createContentStore(options.contentRoot)
-  const assets = createAssetsStore(options.assetsRoot, {
-    stylesRoot: options.stylesRoot,
-    layoutsRoot: options.layoutsRoot,
-  })
+  const assets = createAssetsStore(options.assetsRoot)
   return {
     name: 'design-fs',
     configureServer(server) {
@@ -152,9 +147,9 @@ export function designFsPlugin(options: {
                 return
               }
               const appId = body.appId.trim()
-              // Validate target App before mutating contract directories.
+              // Validate stock package + target App before writing app.json.
+              await assets.assertPackageDir(kind, id)
               await store.getApp(appId)
-              await assets.installPackage(kind, id)
               const app =
                 kind === 'designmd'
                   ? await store.setAppStyle(appId, id)

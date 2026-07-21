@@ -1,5 +1,10 @@
 # Design Project Contract Protocol + `wn-design-prd` Hardening
 
+> **Later update:** Contract stock lives under `stylesRoot` / `layoutsRoot` from
+> `design.project.json` (this repo: `framework/public/assets/designmd` and
+> `…/layoutmd`). Install/replace only writes `app.json` ids. See
+> `docs/dev/api/design-project.md`.
+
 Date: 2026-07-21  
 Status: Approved for implementation planning
 
@@ -41,11 +46,11 @@ Status: Approved for implementation planning
 |-------|------|---------|---------------------------|
 | `schemaVersion` | number | 协议版本 | `1` |
 | `contentRoot` | string | App 内容区（相对根） | `apps` |
-| `stylesRoot` | string | 共享 style 根 | `styles` |
-| `layoutsRoot` | string | 共享 layout 根 | `layouts` |
+| `stylesRoot` | string | 只读 style 库存根 | `framework/public/assets/designmd` |
+| `layoutsRoot` | string | 只读 layout 库存根 | `framework/public/assets/layoutmd` |
 | `defaultAppId` | string | 默认 App id | `design` |
 
-公共 API 说明落在 `docs/dev/api/`（与实现同变更）：描述字段语义、发现算法、解析公式。
+公共 API 说明落在 `docs/dev/api/`（与实现同变更）：描述字段语义、发现算法、解析公式。**现行真相以 `docs/dev/api/design-project.md` 为准**（本文件保留为历史设计记录）。
 
 ### 目录（迁完后）
 
@@ -54,17 +59,12 @@ Status: Approved for implementation planning
   design.project.json
   package.json
   framework/                       # syncable (unchanged intent)
-  styles/
-    <styleId>/                     # e.g. dashboard
-      design.md                    # required contract file
-      …                            # e.g. components.html
-  layouts/
-    <layoutId>/                    # e.g. sidebar-shell, split-screen
-      LAYOUT.md                    # required if layout id is used
-      preview.html?                # migrate if present
+    public/assets/
+      designmd/<styleId>/DESIGN.md
+      layoutmd/<layoutId>/LAYOUT.md
   apps/
     <appId>/                       # includes default app `design`
-      app.json                     # style / layout are ids only
+      app.json                     # style / layouts are ids only
       canvases.json
       canvases/
 ```
@@ -73,33 +73,34 @@ Status: Approved for implementation planning
 
 给定 App 配置 `app.json`：
 
-- Style 契约路径：`<designRoot>/<stylesRoot>/<style>/design.md` — **必须存在**才视为有效 style。
+- Style 契约路径：`<designRoot>/<stylesRoot>/<style>/DESIGN.md`（或 `design.md`）— **必须存在**才视为有效 style。
 - Layout 契约路径：`<designRoot>/<layoutsRoot>/<layout>/LAYOUT.md` — 存在则优先套用；可缺。
 - App 目录：`<designRoot>/<contentRoot>/<appId>/`。
 - Dev：在 `<designRoot>` 执行 `npm run dev`；预览 URL 仍为该工程路由约定（如 `/apps/<appId>/canvases/<canvasId>`）。
+- Install / replace：**只写** `app.json` ids，不拷贝库存包到项目本地镜像。
 
-**禁止**再解析 `docs/design/**`。
+**禁止**再解析 `docs/design/**`，也禁止维护第二份项目本地 `styles/` / `layouts/` 拷贝。
 
 ### 本仓迁移映射
 
-| From | To |
-|------|----|
-| `docs/design/design/rules/*` | `apps/design/styles/dashboard/`（对齐现有 `app.json.style`） |
-| `docs/design/design/layouts/*` | `apps/design/layouts/` |
-| `docs/design/`（整树） | **删除** |
+| From | To（当时迁移动作） | 现行（见 `docs/dev/api/design-project.md`） |
+|------|-------------------|------------------------------------------|
+| `docs/design/design/rules/*` | 曾落到 `apps/design/styles/dashboard/` | 库存：`framework/public/assets/designmd/`（`app.json.style` 只存 id） |
+| `docs/design/design/layouts/*` | 曾落到 `apps/design/layouts/` | 库存：`framework/public/assets/layoutmd/` |
+| `docs/design/`（整树） | **删除** | 仍禁止解析 |
 
-默认 App `apps/design/apps/design/app.json` 的 id 保持与迁后共享库一致（`dashboard` / `sidebar-shell`）。
+默认 App 的 style/layout **id** 保持 `dashboard` / `sidebar-shell`；不再维护项目本地 `styles/` / `layouts/` 镜像。
 
 ### `wn-design-prd` 行为（相对现行 skill 的差分）
 
 1. **Step 发现（先于拷问）**：搜 `design.project.json` → 锁定 `<designRoot>` 与 roots。
 2. **拷问 / 选配**：
    - 读目标 `app.json` 的 style/layout id，按公式解析。
-   - style 无效：列出 `styles/*` 库存 → 推荐 → 确认 → 写回 `app.json.style`；库空 → 硬停。
-   - layout：可缺 → 「AI 自由发挥」；若有更合适库存 layout → 推荐 → 确认 → 写回 `app.json.layout`。
-   - 推荐**只**来自已存在目录 id；不创建 style/layout 契约文件（不复活半个 `wn-design-spec`）。
+   - style 无效：列出 `<stylesRoot>/*` 库存（本仓即 framework `designmd`）→ 推荐 → 确认 → 写回 `app.json.style`；库空 → 硬停。
+   - layout：可缺 → 「AI 自由发挥」；若有更合适库存 layout → 推荐 → 确认 → 追加 `app.json.layouts`。
+   - 推荐**只**来自已存在目录 id；不创建、不拷贝 style/layout 契约文件。
 3. **Worktree**：若锚点 `using-git-worktrees` 存在，调用时带入已声明偏好「始终隔离」，**不征求同意**；缺失则降级当前树并提示。
-4. **实现 / review / 交接**：一切路径相对 `<designRoot>`；design-review 读共享库契约；去掉全部 `wn-design-spec` / `docs/design` 文案。
+4. **实现 / review / 交接**：一切路径相对 `<designRoot>`；design-review 读 marker 指向的库存契约；去掉全部 `wn-design-spec` / `docs/design` 文案。
 5. 编排者模型、两条 runner、非 UI 需求守恒、框架无关、design review 保序等**既有决策保持不变**（见 `2026-07-21-wn-design-prd-design.md`）；本 spec 覆盖其过时的契约路径与前置 skill 口径。
 
 ### 文档与记忆清理面
@@ -122,16 +123,16 @@ Status: Approved for implementation planning
 |-----------|----------|
 | 0 个 `design.project.json` | 硬停，说明需在设计工程根放置 marker |
 | 多个 marker | 询问用户选择 |
-| style 库空或确认后仍无 `design.md` | 硬停，不写 Canvas |
+| style 库空或确认后仍无 `DESIGN.md` / `design.md` | 硬停，不写 Canvas |
 | layout 自由发挥 | design review 仅对照 style + 通用版式健全性 |
 | 预览不可达 / 新 Canvas 未重启 | design review 报错，不静默跳过 |
 | 路径逃逸出 `<designRoot>` | 与现有 design-fs 安全规则一致：拒绝 |
 
 ## Testing / verification
 
-1. 迁后：`apps/design/styles/dashboard/design.md` 与 `layouts/*/LAYOUT.md` 存在；`docs/design/` 不存在。
-2. `design.project.json` 可被从仓库根发现；字段与上表一致。
-3. 默认 App `app.json` id 能解析到迁后契约。
+1. 现行：`<stylesRoot>/dashboard/DESIGN.md`（或 `design.md`）与 `<layoutsRoot>/*/LAYOUT.md` 可解析；无项目本地 `styles/` / `layouts/` 镜像；`docs/design/` 不存在。
+2. `design.project.json` 可被从仓库根发现；`stylesRoot` / `layoutsRoot` 指向 framework 库存。
+3. 默认 App `app.json` id 能解析到库存契约。
 4. `rg 'wn-design-spec|docs/design'` 在约定清理面内无残留（历史 plan 若保留须已改写或明确 superseded）。
 5. `wn-design-prd` / `design-review` 文案：无写死 `apps/design` 作为唯一根；含发现步骤、推荐选配、默认 worktree、无 spec 引导。
 6. memory Design Spec 段描述协议发现 + id 解析，不再贴 `docs/design` 树。

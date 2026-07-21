@@ -1,6 +1,6 @@
 # Design Engineering Framework (Phase 1)
 
-> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Obsolete host-repo contract paths and deprecated spec-install skill guidance in this document have been rewritten to match that protocol. Style/layout files now live under the design project (`design.project.json`).
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/api/design-project.md` (and the historical design note `2026-07-21-design-project-contract-protocol-design.md`). Stock packages live under marker `stylesRoot` / `layoutsRoot` (this repo: `framework/public/assets/designmd` and `…/layoutmd`). Do not treat project-local `styles/` / `layouts/` mirrors as truth.
 
 Date: 2026-07-20  
 Status: Approved for implementation planning (contract paths superseded — see note above)
@@ -11,7 +11,7 @@ Status: Approved for implementation planning (contract paths superseded — see 
 
 ## Context
 
-- 本工程视觉规范现位于设计工程内：`styles/dashboard`、`layouts/sidebar-shell` 与 `split-screen`（经 `design.project.json` 解析；见 `docs/dev/api/design-project.md`）。
+- 本工程视觉规范经 `design.project.json` 解析到 framework 库存（默认 `dashboard` + `sidebar-shell`；见 `docs/dev/api/design-project.md`）。
 - `apps/design` 目前几乎为空；根目录尚无前端工程。
 - 未来本设计工程会同步到其他仓库；安装脚本同步框架，不同步具体应用配置与页面内容。
 
@@ -165,4 +165,4 @@ Minimal React component (page title from name) that the preview route can render
 
 - No TBD placeholders left for phase 1 behavior.
 - Sync story is a constraint on layout, not an implemented feature.
-- Authoritative style/layout contracts live under the design project (`styles/` / `layouts/`); `framework/public/assets/` remains a browser library only.
+- Authoritative style/layout stock is pointed at by `stylesRoot` / `layoutsRoot` in `design.project.json` (this repo: framework `public/assets` packages); Apps store ids only in `app.json`.

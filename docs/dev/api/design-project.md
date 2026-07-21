@@ -40,8 +40,8 @@ Located at `<designRoot>/design.project.json`.
 |-------|------|---------|
 | `schemaVersion` | number | Protocol version for this file. |
 | `contentRoot` | string | App content area, relative to `<designRoot>`. |
-| `stylesRoot` | string | Shared style library root, relative to `<designRoot>`. |
-| `layoutsRoot` | string | Shared layout library root, relative to `<designRoot>`. |
+| `stylesRoot` | string | Read-only style library root, relative to `<designRoot>` (framework stock). |
+| `layoutsRoot` | string | Read-only layout library root, relative to `<designRoot>` (framework stock). |
 | `defaultAppId` | string | Default App id for this installation. |
 
 Initial values in this repository:
@@ -50,11 +50,15 @@ Initial values in this repository:
 {
   "schemaVersion": 1,
   "contentRoot": "apps",
-  "stylesRoot": "styles",
-  "layoutsRoot": "layouts",
+  "stylesRoot": "framework/public/assets/designmd",
+  "layoutsRoot": "framework/public/assets/layoutmd",
   "defaultAppId": "design"
 }
 ```
+
+`stylesRoot` / `layoutsRoot` point at the framework asset library. They are **read-only
+stock**: Apps reference packages by id in `app.json` only. Do not copy packages into a
+project-local tree, and do not edit stock packages from the App/project side.
 
 ## Resolve formulas
 
@@ -62,20 +66,25 @@ Given `<designRoot>` from discovery and an App’s `app.json` (`style` is an id;
 `layouts` is an array of ids — not paths):
 
 - App directory: `<designRoot>/<contentRoot>/<appId>/`
-- Style contract (required): `<designRoot>/<stylesRoot>/<app.json.style>/design.md`
+- Style contract (required): first existing of
+  `<designRoot>/<stylesRoot>/<app.json.style>/DESIGN.md` or
+  `…/design.md`
 - Layout contracts (preferred; each id optional if missing):
   `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md` for each entry in
   `app.json.layouts`
+
+Stock validity: a style id is valid when its package directory contains `DESIGN.md` or
+`design.md`. A layout id is preferred when its package contains `LAYOUT.md`.
 
 Dev server: run `npm run dev` from `<designRoot>`. Preview URLs follow that
 engineering app’s routing (e.g. `/apps/<appId>/canvases/<canvasId>`).
 
 ## Non-sources of truth
 
-- `framework/public/assets/` (including `designmd/` and `layoutmd/` packages exposed via
-  design-fs) is a browser preview library only. It is **not** the authoritative App
-  style/layout contract source. See [design-fs](design-fs.md) provenance notes.
-- The retired repo-level design contract directory (removed with the 2026-07-21 protocol) must not be used. Resolve contracts only under `<designRoot>/<stylesRoot>/` and `<designRoot>/<layoutsRoot>/` per this document.
+- Do **not** invent or maintain a second project-local `styles/` / `layouts/` copy of
+  stock packages. Install / replace only updates `app.json` ids.
+- The retired repo-level design contract directory (removed with the 2026-07-21 protocol)
+  must not be used.
 
 ## See also
 

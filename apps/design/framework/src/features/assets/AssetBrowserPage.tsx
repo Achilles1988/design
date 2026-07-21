@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
-import { LAYOUT_INSTALL_NOTICE } from '@/lib/assetNotices'
+import { LAYOUT_INSTALL_TIP, STYLE_REPLACE_TIP } from '@/lib/assetNotices'
+import { confirmTip } from '@/lib/confirmTip'
 import {
   applyThemeToFrame,
   getTheme,
@@ -21,9 +22,6 @@ type AssetBrowserPageProps = {
 
 const PREVIEW_WIDTH = 1280
 const SCALE = 0.28
-
-const STYLE_REPLACE_WARNING =
-  'Replacing an App style overwrites its design-rule id and replaces the on-disk package under styles/<id>/. Once a style is chosen for an App, changing it later is usually a bad idea and can break existing canvases. Continue?'
 
 function hashHeight(id: string): number {
   let h = 0
@@ -251,11 +249,12 @@ export function AssetBrowserPage({
   }
 
   async function runApply(entry: AssetEntry, appId: string) {
-    if (kind === 'designmd') {
-      if (!window.confirm(STYLE_REPLACE_WARNING)) return
-    } else if (!window.confirm(LAYOUT_INSTALL_NOTICE)) {
-      return
-    }
+    const ok = await confirmTip({
+      message: kind === 'designmd' ? STYLE_REPLACE_TIP : LAYOUT_INSTALL_TIP,
+      confirmLabel: kind === 'designmd' ? 'Replace' : 'Install',
+      danger: kind === 'designmd',
+    })
+    if (!ok) return
     if (busyLock.current) return
     busyLock.current = true
     setBusyId(entry.id)
@@ -519,7 +518,7 @@ export function AssetsRulePage() {
     <AssetBrowserPage
       kind="designmd"
       title="Rule"
-      lead="Pick a design-rule package, copy its id, or replace the style on a target App. Shell theme sync applies only when a package’s preview honors data-theme."
+      lead="Pick a design-rule package, copy its id, or replace the style id on a target App. Shell theme sync applies only when a package’s preview honors data-theme."
       applyLabel="Replace style"
     />
   )
@@ -530,7 +529,7 @@ export function AssetsLayoutPage() {
     <AssetBrowserPage
       kind="layoutmd"
       title="Layout"
-      lead="Pick a layout package, copy its id, or install it onto a target App. Previews follow the shell light/dark theme."
+      lead="Pick a layout package, copy its id, or add it to a target App’s layouts list. Previews follow the shell light/dark theme."
       applyLabel="Install layout"
     />
   )

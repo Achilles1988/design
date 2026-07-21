@@ -79,42 +79,42 @@ describe('createAssetsStore', () => {
     )
   })
 
-  it('installs designmd into stylesRoot and normalizes design.md', async () => {
+  it('asserts stock packages exist with contract files', async () => {
     const root = await makeTemp()
-    const stylesRoot = path.join(root, 'styles')
-    const layoutsRoot = path.join(root, 'layouts')
-    const assetsRoot = path.join(root, 'assets')
-    const pkg = path.join(assetsRoot, 'designmd', 'totality')
+    const pkg = path.join(root, 'designmd', 'totality')
     await fs.mkdir(pkg, { recursive: true })
     await fs.writeFile(path.join(pkg, 'components.html'), '<html></html>')
     await fs.writeFile(path.join(pkg, 'DESIGN.md'), '# Totality')
 
-    const store = createAssetsStore(assetsRoot, { stylesRoot, layoutsRoot })
-    const result = await store.installPackage('designmd', 'totality')
-    expect(result.targetDir).toBe(path.join(stylesRoot, 'totality'))
-    expect(await fs.readFile(path.join(stylesRoot, 'totality', 'design.md'), 'utf8')).toBe(
-      '# Totality',
-    )
-    expect(await fs.readFile(path.join(stylesRoot, 'totality', 'components.html'), 'utf8')).toBe(
-      '<html></html>',
+    const store = createAssetsStore(root)
+    const dir = await store.assertPackageDir('designmd', 'totality')
+    expect(dir).toBe(path.join(root, 'designmd', 'totality'))
+    await expect(store.assertPackageDir('designmd', 'missing')).rejects.toThrow(
+      /not found/i,
     )
   })
 
-  it('installs layoutmd into layoutsRoot', async () => {
+  it('rejects style packages without DESIGN.md', async () => {
     const root = await makeTemp()
-    const stylesRoot = path.join(root, 'styles')
-    const layoutsRoot = path.join(root, 'layouts')
-    const assetsRoot = path.join(root, 'assets')
-    const pkg = path.join(assetsRoot, 'layoutmd', 'split-screen')
+    const pkg = path.join(root, 'designmd', 'bare')
     await fs.mkdir(pkg, { recursive: true })
-    await fs.writeFile(path.join(pkg, 'preview.html'), '<html>p</html>')
-    await fs.writeFile(path.join(pkg, 'LAYOUT.md'), '# layout')
+    await fs.writeFile(path.join(pkg, 'components.html'), '<html></html>')
 
-    const store = createAssetsStore(assetsRoot, { stylesRoot, layoutsRoot })
-    const result = await store.installPackage('layoutmd', 'split-screen')
-    expect(result.targetDir).toBe(path.join(layoutsRoot, 'split-screen'))
-    expect(await fs.readFile(path.join(layoutsRoot, 'split-screen', 'LAYOUT.md'), 'utf8')).toBe(
-      '# layout',
+    const store = createAssetsStore(root)
+    await expect(store.assertPackageDir('designmd', 'bare')).rejects.toThrow(
+      /Style contract missing/i,
+    )
+  })
+
+  it('rejects layout packages without LAYOUT.md', async () => {
+    const root = await makeTemp()
+    const pkg = path.join(root, 'layoutmd', 'bare')
+    await fs.mkdir(pkg, { recursive: true })
+    await fs.writeFile(path.join(pkg, 'preview.html'), '<html></html>')
+
+    const store = createAssetsStore(root)
+    await expect(store.assertPackageDir('layoutmd', 'bare')).rejects.toThrow(
+      /Layout contract missing/i,
     )
   })
 })

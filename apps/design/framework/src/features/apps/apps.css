@@ -99,14 +99,14 @@
 .apps-layout-chip__remove {
   display: inline-grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: none;
   border-radius: 4px;
   background: transparent;
   color: var(--color-muted);
-  font-size: 14px;
+  font-size: 20px;
   line-height: 1;
   cursor: pointer;
 }
@@ -123,10 +123,15 @@
 
 .apps-layout-select {
   min-width: 160px;
-  padding: 6px 10px;
+  appearance: none;
+  padding: 6px 36px 6px 10px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: var(--color-surface);
+  background-color: var(--color-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
   color: var(--color-text);
   font: inherit;
   font-size: 13px;

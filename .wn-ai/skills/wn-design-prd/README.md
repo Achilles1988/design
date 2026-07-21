@@ -1,6 +1,6 @@
 # wn-design-prd
 
-Turn a PRD / design requirement into **real, previewable Canvas design drafts** inside a design-engineering project discovered via `design.project.json` — a "product + design first pass" that follows the target App's style & layout contracts (ids in `app.json`, files under the project's `styles/` and `layouts/`), then hands back any non-UI requirements it didn't implement.
+Turn a PRD / design requirement into **real, previewable Canvas design drafts** inside a design-engineering project discovered via `design.project.json` — a "product + design first pass" that follows the target App's style & layout contracts (ids in `app.json`, files under marker `stylesRoot` / `layoutsRoot`), then hands back any non-UI requirements it didn't implement.
 
 **Default track is Canvas.** Shell/framework edits are a rare maintainer path (usually only in the design-engineering repo that owns the host) — do not offer them lightly. If shell is explicitly confirmed, the skill stays the orchestrator and **detected Superpowers steps (worktree / CR / finish) still run**; only Canvas-specific steps change.
 
@@ -22,7 +22,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 ## Prerequisites
 
 - A `design.project.json` in the design-engineering project.
-- Canvas track: style contract at `<stylesRoot>/<styleId>/design.md` (skill can recommend a stock id and write `app.json` after confirmation).
+- Canvas track: style contract at `<stylesRoot>/<styleId>/DESIGN.md` (or `design.md`); skill can recommend a stock id and write `app.json` after confirmation. Do not copy stock into a project-local mirror.
 - For canvas design review: `npm run dev` from `<designRoot>`; restart after adding Canvases.
 
 ## Bundled agent
