@@ -1,4 +1,4 @@
-import type { AppConfig, PageEntry } from './types'
+import type { AppConfig, CanvasEntry } from './types'
 
 /** Shown when `/__design_fs` is missing (e.g. `vite preview` / production). */
 export const DESIGN_FS_UNAVAILABLE =
@@ -47,15 +47,15 @@ export const designApi = {
     }),
   deleteApp: (id: string) =>
     request<{ ok: true }>(`/__design_fs/apps/${id}`, { method: 'DELETE' }),
-  listPages: (appId: string) =>
-    request<PageEntry[]>(`/__design_fs/apps/${appId}/pages`),
-  addPage: (appId: string, body: { id: string; name: string }) =>
-    request<PageEntry>(`/__design_fs/apps/${appId}/pages`, {
+  listCanvases: (appId: string) =>
+    request<CanvasEntry[]>(`/__design_fs/apps/${appId}/canvases`),
+  addCanvas: (appId: string, body: { id: string; name: string }) =>
+    request<CanvasEntry>(`/__design_fs/apps/${appId}/canvases`, {
       method: 'POST',
       body: JSON.stringify(body),
     }),
-  deletePage: (appId: string, pageId: string) =>
-    request<{ ok: true }>(`/__design_fs/apps/${appId}/pages/${pageId}`, {
+  deleteCanvas: (appId: string, canvasId: string) =>
+    request<{ ok: true }>(`/__design_fs/apps/${appId}/canvases/${canvasId}`, {
       method: 'DELETE',
     }),
 }

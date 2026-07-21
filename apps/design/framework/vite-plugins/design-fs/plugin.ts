@@ -127,19 +127,19 @@ export function designFsPlugin(options: { contentRoot: string }): Plugin {
             return
           }
 
-          // /__design_fs/apps/:id/pages[...]
-          if (parts[3] !== 'pages') {
+          // /__design_fs/apps/:id/canvases[...]
+          if (parts[3] !== 'canvases') {
             sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
             return
           }
 
-          // GET /__design_fs/apps/:id/pages
+          // GET /__design_fs/apps/:id/canvases
           if (parts.length === 4 && method === 'GET') {
-            sendJson(res, 200, await store.listPages(appId))
+            sendJson(res, 200, await store.listCanvases(appId))
             return
           }
 
-          // POST /__design_fs/apps/:id/pages
+          // POST /__design_fs/apps/:id/canvases
           if (parts.length === 4 && method === 'POST') {
             const body = (await parseJsonBody(req)) as {
               id?: string
@@ -149,18 +149,18 @@ export function designFsPlugin(options: { contentRoot: string }): Plugin {
               sendJson(res, 400, { error: 'id and name are required' })
               return
             }
-            const page = await store.addPage(appId, {
+            const canvas = await store.addCanvas(appId, {
               id: body.id,
               name: body.name,
             })
-            sendJson(res, 200, page)
+            sendJson(res, 200, canvas)
             return
           }
 
-          // DELETE /__design_fs/apps/:id/pages/:pageId
+          // DELETE /__design_fs/apps/:id/canvases/:canvasId
           if (parts.length === 5 && method === 'DELETE') {
-            const pageId = parts[4]
-            await store.deletePage(appId, pageId)
+            const canvasId = parts[4]
+            await store.deleteCanvas(appId, canvasId)
             sendJson(res, 200, { ok: true })
             return
           }
