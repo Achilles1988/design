@@ -15,7 +15,7 @@ describe('createContentStore', () => {
     await fs.rm(root, { recursive: true, force: true })
   })
 
-  it('creates app with defaults and empty pages', async () => {
+  it('creates app with defaults and empty canvases', async () => {
     const store = createContentStore(root)
     const app = await store.createApp({ id: 'orders', name: 'Orders' })
     expect(app).toMatchObject({
@@ -26,10 +26,10 @@ describe('createContentStore', () => {
     })
     const raw = await fs.readFile(path.join(root, 'orders', 'app.json'), 'utf8')
     expect(JSON.parse(raw).id).toBe('orders')
-    const pages = JSON.parse(
-      await fs.readFile(path.join(root, 'orders', 'pages.json'), 'utf8'),
+    const canvases = JSON.parse(
+      await fs.readFile(path.join(root, 'orders', 'canvases.json'), 'utf8'),
     )
-    expect(pages.pages).toEqual([])
+    expect(canvases.canvases).toEqual([])
   })
 
   it('rejects blank app names', async () => {
@@ -47,32 +47,32 @@ describe('createContentStore', () => {
     ).rejects.toThrow(/exists/)
   })
 
-  it('adds and deletes blank pages on disk', async () => {
+  it('adds and deletes blank canvases on disk', async () => {
     const store = createContentStore(root)
     await store.createApp({ id: 'orders', name: 'Orders' })
-    const page = await store.addPage('orders', { id: 'home', name: 'Home' })
-    expect(page.component).toBe('Home.tsx')
-    const file = path.join(root, 'orders', 'pages', 'Home.tsx')
+    const canvas = await store.addCanvas('orders', { id: 'home', name: 'Home' })
+    expect(canvas.component).toBe('Home.tsx')
+    const file = path.join(root, 'orders', 'canvases', 'Home.tsx')
     await expect(fs.access(file)).resolves.toBeUndefined()
     expect(await fs.readFile(file, 'utf8')).toContain('<h1>Home</h1>')
-    await store.deletePage('orders', 'home')
+    await store.deleteCanvas('orders', 'home')
     await expect(fs.access(file)).rejects.toThrow()
   })
 
-  it('falls back to id when page name yields illegal TS identifier', async () => {
+  it('falls back to id when canvas name yields illegal TS identifier', async () => {
     const store = createContentStore(root)
     await store.createApp({ id: 'orders', name: 'Orders' })
-    const page = await store.addPage('orders', {
+    const canvas = await store.addCanvas('orders', {
       id: 'not-found',
-      name: '404 Page',
+      name: '404 Canvas',
     })
-    expect(page.component).toBe('NotFound.tsx')
+    expect(canvas.component).toBe('NotFound.tsx')
     const source = await fs.readFile(
-      path.join(root, 'orders', 'pages', 'NotFound.tsx'),
+      path.join(root, 'orders', 'canvases', 'NotFound.tsx'),
       'utf8',
     )
     expect(source).toContain('function NotFound(')
     expect(source).not.toContain('function 404')
-    expect(source).toContain('<h1>404 Page</h1>')
+    expect(source).toContain('<h1>404 Canvas</h1>')
   })
 })

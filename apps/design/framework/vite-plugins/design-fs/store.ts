@@ -4,8 +4,8 @@ import {
   DEFAULT_LAYOUT,
   DEFAULT_STYLE,
   type AppConfig,
-  type PageEntry,
-  type PagesFile,
+  type CanvasEntry,
+  type CanvasesFile,
 } from '../../src/lib/types'
 import { isValidAppId } from '../../src/lib/slug'
 import { validatePathMeta } from '../../src/lib/pathMeta'
@@ -37,23 +37,30 @@ function requireNonEmptyName(name: string, label: string): string {
   return trimmed
 }
 
-export function pagePlaceholderSource(
+export function canvasPlaceholderSource(
   componentFile: string,
-  pageName: string,
+  canvasName: string,
 ): string {
   const fn = componentFile.replace(/\.tsx$/, '')
-  return `export default function ${fn}() {\n  return <h1>${pageName}</h1>\n}\n`
+  return `export default function ${fn}() {\n  return <h1>${canvasName}</h1>\n}\n`
 }
 
-async function readPagesFile(appDir: string): Promise<PagesFile> {
-  const pagesPath = resolveContentPath(appDir, 'pages.json')
-  const raw = await fs.readFile(pagesPath, 'utf8')
-  return JSON.parse(raw) as PagesFile
+async function readCanvasesFile(appDir: string): Promise<CanvasesFile> {
+  const canvasesPath = resolveContentPath(appDir, 'canvases.json')
+  const raw = await fs.readFile(canvasesPath, 'utf8')
+  return JSON.parse(raw) as CanvasesFile
 }
 
-async function writePagesFile(appDir: string, data: PagesFile): Promise<void> {
-  const pagesPath = resolveContentPath(appDir, 'pages.json')
-  await fs.writeFile(pagesPath, `${JSON.stringify(data, null, 2)}\n`, 'utf8')
+async function writeCanvasesFile(
+  appDir: string,
+  data: CanvasesFile,
+): Promise<void> {
+  const canvasesPath = resolveContentPath(appDir, 'canvases.json')
+  await fs.writeFile(
+    canvasesPath,
+    `${JSON.stringify(data, null, 2)}\n`,
+    'utf8',
+  )
 }
 
 export function createContentStore(contentRoot: string) {
@@ -118,7 +125,7 @@ export function createContentStore(contentRoot: string) {
       throw err
     }
 
-    await fs.mkdir(resolveContentPath(dir, 'pages'))
+    await fs.mkdir(resolveContentPath(dir, 'canvases'))
 
     const app: AppConfig = {
       id,
@@ -135,7 +142,7 @@ export function createContentStore(contentRoot: string) {
       `${JSON.stringify(app, null, 2)}\n`,
       'utf8',
     )
-    await writePagesFile(dir, { pages: [] })
+    await writeCanvasesFile(dir, { canvases: [] })
     return app
   }
 
@@ -147,39 +154,43 @@ export function createContentStore(contentRoot: string) {
     await fs.rm(appDir(id), { recursive: true })
   }
 
-  async function listPages(appId: string): Promise<PageEntry[]> {
+  async function listCanvases(appId: string): Promise<CanvasEntry[]> {
     await getApp(appId)
-    const data = await readPagesFile(appDir(appId))
-    return data.pages
+    const data = await readCanvasesFile(appDir(appId))
+    return data.canvases
   }
 
-  async function addPage(
+  async function addCanvas(
     appId: string,
     input: { id: string; name: string },
-  ): Promise<PageEntry> {
+  ): Promise<CanvasEntry> {
     await getApp(appId)
     if (!isValidAppId(input.id)) {
-      throw new Error(`Invalid page id: ${input.id}`)
+      throw new Error(`Invalid canvas id: ${input.id}`)
     }
-    const name = requireNonEmptyName(input.name, 'Page name')
+    const name = requireNonEmptyName(input.name, 'Canvas name')
 
     const dir = appDir(appId)
-    const data = await readPagesFile(dir)
+    const data = await readCanvasesFile(dir)
     const component = nameToComponentFile(name, input.id)
 
-    if (data.pages.some((p) => p.id === input.id)) {
-      throw new Error(`Page already exists: ${input.id}`)
+    if (data.canvases.some((c) => c.id === input.id)) {
+      throw new Error(`Canvas already exists: ${input.id}`)
     }
-    if (data.pages.some((p) => p.component === component)) {
+    if (data.canvases.some((c) => c.component === component)) {
       throw new Error(`Component already exists: ${component}`)
     }
 
-    const componentPath = resolveContentPath(dir, 'pages', component)
+    const componentPath = resolveContentPath(dir, 'canvases', component)
     try {
-      await fs.writeFile(componentPath, pagePlaceholderSource(component, name), {
-        encoding: 'utf8',
-        flag: 'wx',
-      })
+      await fs.writeFile(
+        componentPath,
+        canvasPlaceholderSource(component, name),
+        {
+          encoding: 'utf8',
+          flag: 'wx',
+        },
+      )
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code === 'EEXIST') {
         throw new Error(`Component already exists: ${component}`)
@@ -187,27 +198,27 @@ export function createContentStore(contentRoot: string) {
       throw err
     }
 
-    const page: PageEntry = {
+    const canvas: CanvasEntry = {
       id: input.id,
       name,
       component,
     }
-    data.pages.push(page)
-    await writePagesFile(dir, data)
-    return page
+    data.canvases.push(canvas)
+    await writeCanvasesFile(dir, data)
+    return canvas
   }
 
-  async function deletePage(appId: string, pageId: string): Promise<void> {
+  async function deleteCanvas(appId: string, canvasId: string): Promise<void> {
     await getApp(appId)
     const dir = appDir(appId)
-    const data = await readPagesFile(dir)
-    const idx = data.pages.findIndex((p) => p.id === pageId)
+    const data = await readCanvasesFile(dir)
+    const idx = data.canvases.findIndex((c) => c.id === canvasId)
     if (idx === -1) {
-      throw new Error(`Page not found: ${pageId}`)
+      throw new Error(`Canvas not found: ${canvasId}`)
     }
-    const [removed] = data.pages.splice(idx, 1)
-    await writePagesFile(dir, data)
-    const componentPath = resolveContentPath(dir, 'pages', removed.component)
+    const [removed] = data.canvases.splice(idx, 1)
+    await writeCanvasesFile(dir, data)
+    const componentPath = resolveContentPath(dir, 'canvases', removed.component)
     await fs.rm(componentPath, { force: true })
   }
 
@@ -216,8 +227,8 @@ export function createContentStore(contentRoot: string) {
     getApp,
     createApp,
     deleteApp,
-    listPages,
-    addPage,
-    deletePage,
+    listCanvases,
+    addCanvas,
+    deleteCanvas,
   }
 }

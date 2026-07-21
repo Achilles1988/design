@@ -6,14 +6,14 @@ export type AppConfig = {
   layout: string
 }
 
-export type PageEntry = {
+export type CanvasEntry = {
   id: string
   name: string
   component: string
 }
 
-export type PagesFile = {
-  pages: PageEntry[]
+export type CanvasesFile = {
+  canvases: CanvasEntry[]
 }
 
 export const DEFAULT_STYLE = 'dashboard'
