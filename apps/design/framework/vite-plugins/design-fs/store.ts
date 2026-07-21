@@ -212,6 +212,26 @@ export function createContentStore(contentRoot: string) {
     return app
   }
 
+  async function removeAppLayout(
+    id: string,
+    layoutId: string,
+  ): Promise<AppConfig> {
+    const trimmed = layoutId.trim()
+    if (!trimmed) {
+      throw new Error('layout id is required')
+    }
+    const app = await readAppFile(id)
+    if (!app.layouts.includes(trimmed)) {
+      return app
+    }
+    if (app.layouts.length <= 1) {
+      throw new Error('At least one layout is required')
+    }
+    app.layouts = app.layouts.filter((item) => item !== trimmed)
+    await writeAppFile(app)
+    return app
+  }
+
   async function deleteApp(id: string): Promise<void> {
     if (!isValidAppId(id)) {
       throw new Error(`Invalid app id: ${id}`)
@@ -295,6 +315,7 @@ export function createContentStore(contentRoot: string) {
     deleteApp,
     setAppStyle,
     addAppLayout,
+    removeAppLayout,
     listCanvases,
     addCanvas,
     deleteCanvas,

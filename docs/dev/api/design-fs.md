@@ -134,6 +134,7 @@ JSON responses use `{ "error": "<message>" }` on failure with status:
 | `GET` | `/apps/:id` | — | `AppConfig` |
 | `POST` | `/apps` | `{ "id", "name", "path"? }` | `AppConfig` |
 | `DELETE` | `/apps/:id` | — | `{ "ok": true }` |
+| `DELETE` | `/apps/:id/layouts/:layoutId` | — | Updated `AppConfig` (removes id from `layouts` in `app.json` only; does not delete the on-disk package under `<layoutsRoot>/`; refuses when it would leave the list empty) |
 
 ### Canvases
 
@@ -169,6 +170,7 @@ Plugin options also require `stylesRoot` and `layoutsRoot` (see
 `apps/design/framework/src/lib/api.ts` exports `designApi` with:
 
 - `listApps()`, `getApp(id)`, `createApp({ id, name, path? })`, `deleteApp(id)`
+- `removeAppLayout(appId, layoutId)` (drop a layout id from `app.json` `layouts` only; does not delete the on-disk package)
 - `listCanvases(appId)`, `addCanvas(appId, { id, name })`, `deleteCanvas(appId, canvasId)`
 - `listAssets(kind)`, `downloadAssetUrl(kind, id)` (URL helper for ZIP download)
 - `applyAsset(kind, id, appId)` (install layout / replace style + update App)

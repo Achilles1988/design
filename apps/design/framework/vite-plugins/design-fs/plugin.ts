@@ -221,6 +221,21 @@ export function designFsPlugin(options: {
             return
           }
 
+          // DELETE /__design_fs/apps/:id/layouts/:layoutId
+          if (
+            parts.length === 5 &&
+            parts[3] === 'layouts' &&
+            method === 'DELETE'
+          ) {
+            const layoutId = decodeURIComponent(parts[4] ?? '')
+            if (!layoutId) {
+              sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
+              return
+            }
+            sendJson(res, 200, await store.removeAppLayout(appId, layoutId))
+            return
+          }
+
           // /__design_fs/apps/:id/canvases[...]
           if (parts[3] !== 'canvases') {
             sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })

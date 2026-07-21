@@ -117,6 +117,19 @@ describe('createContentStore', () => {
     expect(again.layouts).toEqual(['sidebar-shell', 'split-screen'])
   })
 
+  it('removes layouts but keeps at least one', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await store.addAppLayout('orders', 'split-screen')
+
+    const afterRemove = await store.removeAppLayout('orders', 'split-screen')
+    expect(afterRemove.layouts).toEqual(['sidebar-shell'])
+
+    await expect(
+      store.removeAppLayout('orders', 'sidebar-shell'),
+    ).rejects.toThrow(/At least one layout is required/)
+  })
+
   it('rejects blank app names', async () => {
     const store = createContentStore(root)
     await expect(

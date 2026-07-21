@@ -53,16 +53,16 @@
 }
 
 .sidebar-shell__theme-toggle {
+  display: inline-grid;
+  place-items: center;
   flex: 0 0 auto;
+  width: 34px;
   height: 34px;
-  padding: 0 12px;
+  padding: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-surface-2);
   color: var(--color-text);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
   cursor: pointer;
 }
 
@@ -73,6 +73,21 @@
 .sidebar-shell__theme-toggle:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+.sidebar-shell__theme-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sidebar-shell__theme-icon--fill {
+  fill: currentColor;
+  stroke: none;
 }
 
 .sidebar-shell__sidebar {

@@ -47,6 +47,11 @@ export const designApi = {
     }),
   deleteApp: (id: string) =>
     request<{ ok: true }>(`/__design_fs/apps/${id}`, { method: 'DELETE' }),
+  removeAppLayout: (appId: string, layoutId: string) =>
+    request<AppConfig>(
+      `/__design_fs/apps/${appId}/layouts/${encodeURIComponent(layoutId)}`,
+      { method: 'DELETE' },
+    ),
   listCanvases: (appId: string) =>
     request<CanvasEntry[]>(`/__design_fs/apps/${appId}/canvases`),
   addCanvas: (appId: string, body: { id: string; name: string }) =>

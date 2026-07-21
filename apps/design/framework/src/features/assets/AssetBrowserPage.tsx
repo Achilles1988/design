@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
+import { LAYOUT_INSTALL_NOTICE } from '@/lib/assetNotices'
 import {
   applyThemeToFrame,
   getTheme,
@@ -23,9 +24,6 @@ const SCALE = 0.28
 
 const STYLE_REPLACE_WARNING =
   'Replacing an App style overwrites its design-rule id and replaces the on-disk package under styles/<id>/. Once a style is chosen for an App, changing it later is usually a bad idea and can break existing canvases. Continue?'
-
-const LAYOUT_INSTALL_NOTICE =
-  'Installing a layout copies the package into layouts/<id>/ (overwriting that folder if it already exists) and adds the id to the App’s layouts list.'
 
 function hashHeight(id: string): number {
   let h = 0
@@ -309,17 +307,17 @@ export function AssetBrowserPage({
         <button
           type="button"
           className="assets-btn assets-btn--ghost"
-          onClick={() => onCopy(entry.id)}
-        >
-          {copiedId === entry.id ? 'Copied' : 'Copy id'}
-        </button>
-        <button
-          type="button"
-          className="assets-btn assets-btn--ghost"
           disabled={isBusy}
           onClick={() => onApply(entry)}
         >
           {applyBusy ? 'Working…' : applyLabel}
+        </button>
+        <button
+          type="button"
+          className="assets-btn assets-btn--ghost"
+          onClick={() => onCopy(entry.id)}
+        >
+          {copiedId === entry.id ? 'Copied' : 'Copy id'}
         </button>
         <button
           type="button"
@@ -414,19 +412,19 @@ export function AssetBrowserPage({
                 <button
                   type="button"
                   className="assets-btn assets-btn--ghost"
-                  onClick={() => onCopy(lightbox.id)}
-                >
-                  {copiedId === lightbox.id ? 'Copied' : 'Copy id'}
-                </button>
-                <button
-                  type="button"
-                  className="assets-btn assets-btn--ghost"
                   disabled={busyId === lightbox.id}
                   onClick={() => onApply(lightbox)}
                 >
                   {busyId === lightbox.id && busyKind === 'apply'
                     ? 'Working…'
                     : applyLabel}
+                </button>
+                <button
+                  type="button"
+                  className="assets-btn assets-btn--ghost"
+                  onClick={() => onCopy(lightbox.id)}
+                >
+                  {copiedId === lightbox.id ? 'Copied' : 'Copy id'}
                 </button>
                 <button
                   type="button"

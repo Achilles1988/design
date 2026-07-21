@@ -79,7 +79,7 @@ export function AppListPage() {
           <table className="apps-table">
             <thead>
               <tr>
-                <th scope="col">Name</th>
+                <th scope="col">App</th>
                 <th scope="col">ID</th>
                 <th scope="col">Path</th>
                 <th scope="col">
@@ -99,7 +99,7 @@ export function AppListPage() {
                   <td className={app.path ? undefined : 'apps-muted'}>
                     {app.path ?? '—'}
                   </td>
-                  <td>
+                  <td className="apps-table__actions">
                     <button
                       className="apps-btn apps-btn--ghost apps-btn--small"
                       type="button"

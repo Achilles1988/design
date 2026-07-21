@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
+import { LAYOUT_INSTALL_NOTICE } from '@/lib/assetNotices'
 import { emitCanvasesChanged } from '@/lib/canvasEvents'
 import { isValidAppId, slugify } from '@/lib/slug'
-import type { AppConfig, CanvasEntry } from '@/lib/types'
+import type { AppConfig, AssetEntry, CanvasEntry } from '@/lib/types'
 import './apps.css'
+
+const BROWSE_LAYOUTS = '__browse__'
 
 async function loadAppData(appId: string): Promise<{
   app: AppConfig
@@ -23,6 +26,10 @@ export function AppDetailPage() {
 
   const [app, setApp] = useState<AppConfig | null>(null)
   const [canvases, setCanvases] = useState<CanvasEntry[] | null>(null)
+  const [layoutOptions, setLayoutOptions] = useState<AssetEntry[] | null>(null)
+  const [layoutOptionsError, setLayoutOptionsError] = useState<string | null>(
+    null,
+  )
   const [loadError, setLoadError] = useState<string | null>(null)
 
   const [canvasName, setCanvasName] = useState('')
@@ -81,6 +88,33 @@ export function AppDetailPage() {
       cancelled = true
     }
   }, [appId])
+
+  useEffect(() => {
+    let cancelled = false
+    setLayoutOptions(null)
+    setLayoutOptionsError(null)
+    designApi
+      .listAssets('layoutmd')
+      .then((data) => {
+        if (!cancelled) {
+          setLayoutOptions(data)
+          setLayoutOptionsError(null)
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setLayoutOptions([])
+          setLayoutOptionsError(
+            err instanceof Error
+              ? err.message
+              : 'Failed to load layout packages',
+          )
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   function onCanvasNameChange(value: string) {
     setCanvasName(value)
@@ -150,6 +184,53 @@ export function AppDetailPage() {
     }
   }
 
+  async function onRemoveLayout(layoutId: string) {
+    if (!app || busy) return
+    if (
+      !confirm(
+        `Remove layout “${layoutId}” from this App? The on-disk package is kept.`,
+      )
+    ) {
+      return
+    }
+    setBusy(true)
+    setFormError(null)
+    try {
+      const next = await designApi.removeAppLayout(appId, layoutId)
+      setApp(next)
+    } catch (err: unknown) {
+      setFormError(
+        err instanceof Error ? err.message : 'Failed to remove layout',
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onLayoutSelect(value: string) {
+    if (!value || !app || busy) return
+    if (value === BROWSE_LAYOUTS) {
+      navigate(`/assets/layout?appId=${encodeURIComponent(app.id)}`)
+      return
+    }
+    if (!window.confirm(LAYOUT_INSTALL_NOTICE)) return
+    setBusy(true)
+    setFormError(null)
+    try {
+      const next = await designApi.applyAsset('layoutmd', value, appId)
+      setApp(next)
+    } catch (err: unknown) {
+      setFormError(
+        err instanceof Error ? err.message : 'Failed to install layout',
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const addableLayouts =
+    layoutOptions?.filter((entry) => !app?.layouts.includes(entry.id)) ?? []
+
   return (
     <div className="apps-page">
       <div className="apps-page__header">
@@ -199,33 +280,72 @@ export function AppDetailPage() {
           <div>
             <dt>Style</dt>
             <dd>
-              <code>{app.style}</code>
+              <Link
+                className="apps-meta__editable"
+                to={`/assets/rule?appId=${encodeURIComponent(app.id)}`}
+                title="Open style library to replace"
+                aria-label={`Edit style ${app.style}`}
+              >
+                <code>{app.style}</code>
+                <span className="apps-meta__edit-hint" aria-hidden="true">
+                  Edit
+                </span>
+              </Link>
             </dd>
           </div>
-          <div>
-            <dt>Layout</dt>
+          <div className="apps-meta__layouts">
+            <dt>Layouts</dt>
             <dd>
-              <code>{app.layouts.join(', ')}</code>
+              <div className="apps-layout-field">
+                <ul className="apps-layout-chips">
+                  {app.layouts.map((layoutId) => (
+                    <li key={layoutId} className="apps-layout-chip">
+                      <code>{layoutId}</code>
+                      <button
+                        type="button"
+                        className="apps-layout-chip__remove"
+                        onClick={() => onRemoveLayout(layoutId)}
+                        disabled={busy || app.layouts.length <= 1}
+                        aria-label={`Remove layout ${layoutId}`}
+                        title={
+                          app.layouts.length <= 1
+                            ? 'At least one layout is required'
+                            : `Remove ${layoutId}`
+                        }
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <select
+                  className="apps-layout-select"
+                  aria-label="Add or browse layouts"
+                  value=""
+                  disabled={busy || layoutOptions === null}
+                  onChange={(e) => {
+                    void onLayoutSelect(e.target.value)
+                  }}
+                >
+                  <option value="">
+                    {layoutOptions === null
+                      ? 'Loading layouts…'
+                      : 'Add layout…'}
+                  </option>
+                  {addableLayouts.map((entry) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.id}
+                    </option>
+                  ))}
+                  <option value={BROWSE_LAYOUTS}>Browse layouts…</option>
+                </select>
+              </div>
+              {layoutOptionsError ? (
+                <p className="apps-field__error">{layoutOptionsError}</p>
+              ) : null}
             </dd>
           </div>
         </dl>
-      ) : null}
-
-      {app ? (
-        <div className="apps-page__asset-links">
-          <Link
-            className="apps-btn apps-btn--ghost"
-            to={`/assets/layout?appId=${encodeURIComponent(app.id)}`}
-          >
-            Install layouts
-          </Link>
-          <Link
-            className="apps-btn apps-btn--ghost"
-            to={`/assets/rule?appId=${encodeURIComponent(app.id)}`}
-          >
-            Replace style
-          </Link>
-        </div>
       ) : null}
 
       {app ? (
@@ -243,7 +363,6 @@ export function AppDetailPage() {
                   <tr>
                     <th scope="col">Name</th>
                     <th scope="col">ID</th>
-                    <th scope="col">Component</th>
                     <th scope="col">
                       <span className="apps-sr-only">Actions</span>
                     </th>
@@ -260,10 +379,7 @@ export function AppDetailPage() {
                       <td>
                         <code>{canvas.id}</code>
                       </td>
-                      <td>
-                        <code>{canvas.component}</code>
-                      </td>
-                      <td>
+                      <td className="apps-table__actions">
                         <button
                           className="apps-btn apps-btn--ghost apps-btn--small"
                           type="button"
