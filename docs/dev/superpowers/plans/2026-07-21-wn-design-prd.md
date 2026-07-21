@@ -1,6 +1,6 @@
 # 实现计划：`wn-design-prd` skill
 
-> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Ignore any `docs/design/**` or `wn-design-spec` guidance below. **Superseded in part by** `2026-07-21-design-project-contract-protocol` for contract-path bullets.
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Obsolete host-repo contract paths and deprecated spec-install skill guidance in this document have been rewritten to match that protocol. **Superseded in part by** `2026-07-21-design-project-contract-protocol` for contract-path bullets.
 
 - Spec: `docs/dev/superpowers/specs/2026-07-21-wn-design-prd-design.md`
 - 日期: 2026-07-21
@@ -109,7 +109,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 
 - **App**: a design package under `apps/design/apps/<appId>/` (`app.json`, `canvases.json`, `canvases/*`).
 - **Canvas**: one previewable page component (`canvases/<Component>.tsx`), listed in `canvases.json`.
-- **Style contract**: `docs/design/<app>/rules/design.md`. **Layout contract**: `docs/design/<app>/layouts/<id>/LAYOUT.md`.
+- **Style contract**: `<designRoot>/<stylesRoot>/<styleId>/design.md`. **Layout contract**: `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md` (via `design.project.json`; see `docs/dev/api/design-project.md`).
 - **Runner**: `detected` (a dev workflow is installed) or `plan` (none installed).
 
 ## Step 0 — Detect & route
@@ -148,16 +148,16 @@ Probe `.wn-ai/skills/` for anchor skills and map them to steps:
 
 Lock down, one item at a time:
 
-- Target **App** (`docs/design/<app>/` exists and has `rules/design.md`).
+- Target **App** under `<designRoot>/<contentRoot>/` with a resolvable `app.json.style` → `design.md`.
 - Which Canvases to **add / modify / delete** (list each).
-- Which **layout** each Canvas follows (reference `docs/design/<app>/layouts/<id>/LAYOUT.md`).
+- Which **layout** each Canvas follows (reference `<layoutsRoot>/<id>/LAYOUT.md`, or AI improvise).
 - Fake-data rules for each Canvas (realistic placeholder content).
 - **Separate non-UI requirements**: pull every requirement unrelated to UI/Canvas (backend logic, data/storage rules, business constraints, permissions, integrations…) and record them verbatim. This skill does NOT implement them; they are returned in Step 9. If unsure whether an item is UI, ask the user to classify it.
 
 **Blocking conditions:**
 
-- Missing style/layout contract for the App → **STOP** and tell the user to run `wn-design-spec` first. Do not invent contracts.
-- No suitable layout exists for a Canvas → offer two paths: (a) user adds a new layout via `wn-design-spec`, or (b) mark the Canvas **"AI improvise the layout"** (design review then judges against style rules + general layout soundness only).
+- Missing style contract for the App → **STOP**; recommend a stock style id from `<stylesRoot>/` and write `app.json` after confirmation (do not invent contract files). See `docs/dev/api/design-project.md`.
+- No suitable layout exists for a Canvas → offer **"AI improvise the layout"** and/or recommend a stock layout id; on confirm write `app.json.layout`.
 
 ## Step 5 — Implement (framework-agnostic)
 
@@ -191,7 +191,7 @@ Ask whether to emit a minimal handoff prompt. If yes, output exactly:
 ```
 Implement: <one-line requirement summary>
 Key notes: <points locked in interrogation — target App, chosen layout, key interactions/data rules>
-Design reference: <stable Canvas source paths, e.g. apps/design/apps/<app>/canvases/<id>.tsx; plus docs/design/<app>/rules|layouts contract paths>
+Design reference: <stable Canvas source paths under <designRoot>/<contentRoot>/…; plus resolved styles/layouts contract paths>
 Non-UI requirements (to implement): <the Step 2 items; "none" if empty>
 ```
 
@@ -204,7 +204,7 @@ Give **stable file paths, not `localhost` URLs** — this prompt is copied into 
 - Hardcoding React/Vue specifics instead of matching existing Canvases.
 - Dropping non-UI requirements because "this skill doesn't implement them".
 - Previewing a newly added Canvas without restarting the dev server.
-- Inventing a style/layout contract instead of stopping for `wn-design-spec`.
+- Inventing a style/layout contract file instead of recommending stock ids / stopping when the style library is empty.
 ````
 
 **验证**：文件存在；`grep -i "react\|vue\|\.tsx render"` 在正文（除 Vocabulary 里的路径示例 `.tsx` 外）**无框架实现写法**；10 步流水线、Step 9 无条件、预览前置含"重启 dev server"均在文中。
@@ -225,7 +225,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 
 - Interrogates the requirement, separating UI work from **non-UI requirements**.
 - Implements Canvas drafts (framework-agnostic — matches the App's existing tech stack).
-- Runs a mandatory visual **design review** against `docs/design/<app>` contracts.
+- Runs a mandatory visual **design review** against contracts resolved via `design.project.json`.
 - Always returns the untouched non-UI requirements; optionally emits a minimal handoff prompt for a downstream product repo.
 
 ## Two runners
@@ -235,7 +235,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 
 ## Prerequisites
 
-- Target App has style/layout contracts under `docs/design/<app>/`. If missing, run `wn-design-spec` first.
+- Target App has a resolvable style contract under `<stylesRoot>/`. If missing, recommend a stock id (do not invent files).
 - For design review, the design app dev server must be running (`cd apps/design && npm run dev`); newly added Canvases require a dev-server **restart** before preview.
 
 ## Bundled agent
@@ -283,7 +283,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 - **S4 部分安装降级**：只装 `using-git-worktrees`、无 `finishing-a-development-branch` → 用 worktree、跳过收尾并提示手动，不整体失败。
 - **S5 路由-不确定**：探测模糊 → 询问用户，不擅自选。
 - **S6 手动覆盖**：用户说"走 plan" → 尊重覆盖。
-- **S7 缺 style/layout 阻断**：目标 App 无 `rules/design.md` → 停并提示先跑 `wn-design-spec`，不继续。
+- **S7 缺 style 阻断**：目标 App 无有效 `design.md` → 停；可推荐库存 style id，确认后写 `app.json`，不自造契约文件。
 - **S8 无合适 layout**：所需 layout 不存在 → 给"新增 / AI 自由发挥"两条出路，不擅自编造。
 - **S9 预览前置**：dev server 未启动 / 新增 Canvas 未重启 → design review 报错并提示启动/重启预览，不静默跳过、不截空图。
 - **S10 交接 prompt 极简 + 稳定引用**：输出 prompt 时含 需求/注意事项/设计稿参考（**文件路径**非 localhost）+ 非 UI 需求块，无 bug 清单。

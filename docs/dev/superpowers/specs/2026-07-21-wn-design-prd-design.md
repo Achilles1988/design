@@ -1,6 +1,6 @@
 # `/wn-design-prd` — PRD-to-Canvas Design Skill
 
-> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Ignore any `docs/design/**` or `wn-design-spec` guidance below.
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Obsolete host-repo contract paths and deprecated spec-install skill guidance in this document have been rewritten to match that protocol.
 
 Date: 2026-07-21
 Status: Approved for implementation planning (contract paths superseded — see note above)
@@ -87,7 +87,7 @@ Status: Approved for implementation planning (contract paths superseded — see 
 | 步骤 | detected（已装开发工作流） | plan（未装） |
 |---|---|---|
 | 1 探测 & 路由 | 按锚点探测已装子技能；不确定就问；可手动覆盖 | 探测到无任何锚点 → 走 plan 模式 |
-| 2 拷问设计细节 & 分离需求 | 定清：改哪个 App、增/改/删哪些 Canvas、每个 Canvas 用哪个 layout、要填的假数据；**并把 PRD 中的非 UI 需求识别、分离、记下**（本 skill 不实现，仅登记以便回吐）；缺 style/layout → 停，让用户先跑 `wn-design-spec`；无合适 layout → 用户新增或选"AI 自由发挥" | 同左 |
+| 2 拷问设计细节 & 分离需求 | 定清：改哪个 App、增/改/删哪些 Canvas、每个 Canvas 用哪个 layout、要填的假数据；**并把 PRD 中的非 UI 需求识别、分离、记下**（本 skill 不实现，仅登记以便回吐）；缺 style → 停并推荐库存 id；无合适 layout → 推荐库存或选"AI 自由发挥" | 同左 |
 | 3 汇总需求包 | 本 skill 自己打包为内部上下文（**不外发、不触发对方的头脑风暴入口**），含 UI 需求与已分离的非 UI 需求 | 本 skill 打包为计划输入 |
 | 4 分支 | **调用** `using-git-worktrees`（缺则降级） | 不建分支 |
 | 5 实现 | 在分支内实现 Canvas 稿（**本 skill 自带实现能力，按目标 App 契约+既有 Canvas 自适应技术栈**）；若装了 `executing-plans`/`subagent-driven-development` 则委托并**指示其不要自动收尾** | 用 IDE 自带 **plan 模式**：先产出实现计划 → 用户批准 → 退出 plan 模式后实现（同样自适应技术栈） |
@@ -101,13 +101,13 @@ Status: Approved for implementation planning (contract paths superseded — see 
 
 ### 拷问阶段（第 2 步）必须定清的字段
 
-- 目标 App（`docs/design/<app>/` 存在，且有 `rules/design.md`）。
+- 目标 App（`<designRoot>/<contentRoot>/<appId>/`，且 `app.json.style` 能解析到 `design.md`）。
 - 本次要**增 / 改 / 删**哪些 Canvas（逐个列出）。
-- 每个 Canvas 采用哪个 layout（引用 `docs/design/<app>/layouts/<id>/LAYOUT.md`）。
+- 每个 Canvas 采用哪个 layout（引用 `<layoutsRoot>/<id>/LAYOUT.md`，或 AI 自由发挥）。
 - 每个 Canvas 需要的假数据（占位内容规则）。
 - **非 UI 需求分离**：从 PRD 中挑出与 UI/Canvas 无关的需求（后端逻辑、数据/存储规则、业务约束、权限、第三方集成等），逐条登记。本 skill 不实现它们，仅保留原文以便第 9 步回吐；不确定某条是否属 UI 时向用户确认归类。
 - 阻断条件：
-  - App 缺 `rules/design.md` 或所需 layout 契约不存在 → **停**，提示先跑 `wn-design-spec`。
+  - App 缺有效 style `design.md` → **停**，推荐库存 style id（确认后写 `app.json`）；layout 可缺或自由发挥。
   - 需要的 layout 不存在也无合适可选 → 让用户"新增 layout"或明确选择"AI 自由发挥"。
 
 ### 非 UI 需求回执（第 9 步，无条件）
@@ -119,7 +119,7 @@ Status: Approved for implementation planning (contract paths superseded — see 
 ```
 实现需求：<一句话需求摘要>
 关键注意事项：<拷问阶段定下的要点，如目标 App、所选 layout、关键交互/数据规则>
-页面设计稿参考：<Canvas 源码文件路径，如 apps/design/apps/<app>/canvases/<id>.tsx；及 docs/design/<app>/rules|layouts 契约路径>
+页面设计稿参考：<Canvas 源码文件路径，如 <designRoot>/<contentRoot>/<app>/canvases/<id>.tsx；及解析后的 styles|layouts 契约路径>
 非 UI 需求（待实现）：<第 2 步分离出的非 UI 需求逐条；无则写"无">
 ```
 
@@ -130,7 +130,7 @@ Status: Approved for implementation planning (contract paths superseded — see 
 
 由 `temp/agents/ui-visual-validator.md` 改造为 `design-review`：
 
-- 对照目标 App 的 `docs/design/<app>/rules/design.md`（style 契约）与所用 `layouts/<id>/LAYOUT.md`（layout 契约）。
+- 对照目标 App 经 `design.project.json` 解析的 style `design.md` 与所用 layout `LAYOUT.md`。
 - 用 Playwright 截 Canvas 预览，做视觉合规校验（是否遵循 style / layout、间距/层级/配色等）。
 - 输出 PASS / 需修复项；两条 runner 都调用它。
 - 不绑定任何外部工作流的目录结构。
@@ -160,7 +160,7 @@ writing-skills 铁律：**先有失败基线场景再写 skill**。落地时用�
 4. **部分安装降级**：只装了 `using-git-worktrees`、没装 `finishing-a-development-branch` → Agent 应用 worktree、跳过收尾并提示手动，不整体失败。
 5. **路由-不确定**：探测结果模糊 → Agent 应**询问用户**而非擅自选择。
 6. **手动覆盖**：用户明说"走 plan" → Agent 尊重覆盖。
-7. **缺 style/layout 阻断**：目标 App 无 `rules/design.md` → Agent 应**停下**并提示先跑 `wn-design-spec`，不继续落地。
+7. **缺 style 阻断**：目标 App 无有效 `design.md` → Agent 应**停下**并推荐库存 style id（不自造契约），不继续落地。
 8. **无合适 layout**：所需 layout 不存在 → Agent 应让用户"新增"或选"AI 自由发挥"，不擅自编造。
 9. **预览前置**：dev server 未启动 → design review 步骤应报错并提示启动预览，而非静默跳过或截空图。
 10. **交接 prompt 极简 + 稳定引用**：用户选择输出 prompt → 含需求/注意事项/设计稿参考三块（设计稿参考为**文件路径**而非 localhost URL，不含 bug 清单）+ 末尾非 UI 需求块。
@@ -176,7 +176,7 @@ writing-skills 铁律：**先有失败基线场景再写 skill**。落地时用�
 2. skill **不打包**任何外部开发工作流步骤，只按锚点探测/调用；自带的唯一 agent 是 `design-review`。
 3. detected 分支采用**编排者模型**：本 skill 全程主控，按步调用子技能，指示实现子技能不自动收尾，强制 `实现→CR→design review→finish` 保序，无回调断裂；部分安装时按映射表逐步降级。
 4. plan 分支用 IDE 自带 plan 模式（先出计划→批准→实现），跳过分支/CR/收尾，仅保留 design review + 可选 prompt。
-5. 缺 style/layout 时阻断并引导 `wn-design-spec`；无合适 layout 时给"新增 / 自由发挥"两条出路。
+5. 缺 style 时阻断并推荐库存 id；无合适 layout 时给"推荐库存 / 自由发挥"两条出路。
 6. 交接 prompt 极简（三块 + 非 UI 需求块）、可选触发、设计稿参考用稳定文件路径，适配"复制即走"的场景。
 7. `design-review` agent 在预览可达的前提下对照 style/layout 契约 + Playwright 截图做视觉校验，两条 runner 都调用。
 8. **非 UI 需求守恒**：非 UI 需求被分离并在第 9 步无条件回吐，两条 runner 都执行，实现"产品+设计过一轮、需求不丢"的定位。
@@ -186,7 +186,7 @@ writing-skills 铁律：**先有失败基线场景再写 skill**。落地时用�
 ## Out of scope
 
 - **API 调用入口**（被另一 skill 程序化驱动）：本期只做 IDE 内 `/wn-design-prd` 调用，SKILL 里预留"后续可被程序化驱动"的语义即可，不实现具体 API。
-- `wn-design-spec` 本身的实现（本 skill 只在缺契约时引导用户去跑它）。
+- 设计工程安装/同步脚本；推荐时自动新建 style/layout 契约草稿（见后续协议 spec）。
 - 具体外部开发工作流（Superpowers 等）步骤的重实现/包装。
 - 交接 prompt 里的详细 bug/约束清单（刻意从简）。
 

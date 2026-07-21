@@ -1,6 +1,6 @@
 # Design Engineering Framework (Phase 1) Implementation Plan
 
-> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Ignore any `docs/design/**` or `wn-design-spec` guidance below. **Superseded in part by** `2026-07-21-design-project-contract-protocol` for contract-path bullets.
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Obsolete host-repo contract paths and deprecated spec-install skill guidance in this document have been rewritten to match that protocol. **Superseded in part by** `2026-07-21-design-project-contract-protocol` for contract-path bullets.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -633,7 +633,7 @@ git commit -m "feat(design): expose Vite design-fs API and client"
 - Consumes: React Router
 - Produces: `SidebarShell` with slots `sidebar` / `header` / `main`; routes per spec
 
-- [ ] **Step 1: Add design tokens from `docs/design/design/rules/design.md`**
+- [ ] **Step 1: Add design tokens from `apps/design/styles/dashboard/design.md`**
 
 `tokens.css`:
 
@@ -830,7 +830,7 @@ git commit -m "feat(design): blank page preview via import.meta.glob"
 
 - [ ] **Step 1: Write README**
 
-Include: purpose, `npm install` / `npm run dev` / `npm test`, directory split (`framework/` syncable vs `apps/` excluded later), pointer to spec and API doc, note that shell follows `docs/design/design`.
+Include: purpose, `npm install` / `npm run dev` / `npm test`, directory split (`framework/` syncable vs `apps/` excluded later), pointer to spec and API doc, note that shell follows in-project style/layout contracts.
 
 - [ ] **Step 2: Full verification**
 

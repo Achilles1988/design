@@ -25,11 +25,16 @@ Open the URL Vite prints (default `http://localhost:5173`). App create/list/dele
 
 ```text
 apps/design/
-  framework/   # Engineering UI, shell, preview, Vite plugin (syncable)
-  apps/        # Managed content root: per-app packages on disk (excluded from later sync)
+  design.project.json   # Marker + roots config (see docs/dev/api/design-project.md)
+  framework/            # Engineering UI, shell, preview, Vite plugin (syncable)
+  styles/               # Shared style contracts: <styleId>/design.md
+  layouts/              # Shared layout contracts: <layoutId>/LAYOUT.md
+  apps/                 # Managed content root: per-app packages on disk (excluded from later sync)
 ```
 
+- `design.project.json` — discovery marker for `<designRoot>` and relative roots.
 - `framework/` — product UI and tooling; intended to stay in sync with the engineering app.
+- `styles/` / `layouts/` — authoritative App contracts resolved from `app.json` style/layout ids.
 - `apps/` — content written by the design-fs API (`app.json`, `canvases.json`, canvas `.tsx` files). Later sync should treat this tree as workspace-local data, not framework source. The local `.gitignore` keeps generated app content out of normal commits by default.
 
 ## Docs

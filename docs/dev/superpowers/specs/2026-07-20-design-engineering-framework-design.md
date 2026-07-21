@@ -1,6 +1,6 @@
 # Design Engineering Framework (Phase 1)
 
-> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Ignore any `docs/design/**` or `wn-design-spec` guidance below. Style/layout files now live under the design project (`design.project.json`); `docs/design/` is retired.
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Obsolete host-repo contract paths and deprecated spec-install skill guidance in this document have been rewritten to match that protocol. Style/layout files now live under the design project (`design.project.json`); `docs/design/` is retired.
 
 Date: 2026-07-20  
 Status: Approved for implementation planning (contract paths superseded — see note above)
@@ -11,7 +11,7 @@ Status: Approved for implementation planning (contract paths superseded — see 
 
 ## Context
 
-- 仓库已有本工程视觉规范：`docs/design/design`（style: `dashboard`，layouts: `sidebar-shell`、`split-screen`）。该目录约束当前工程，不随设计工程同步到其他仓库。
+- 本工程视觉规范现位于设计工程内：`styles/dashboard`、`layouts/sidebar-shell` 与 `split-screen`（经 `design.project.json` 解析；见 `docs/dev/api/design-project.md`）。
 - `apps/design` 目前几乎为空；根目录尚无前端工程。
 - 未来本设计工程会同步到其他仓库；安装脚本同步框架，不同步具体应用配置与页面内容。
 
@@ -20,7 +20,7 @@ Status: Approved for implementation planning (contract paths superseded — see 
 | Topic | Decision |
 |-------|----------|
 | 交互面 | 管理 UI（非 CLI） |
-| 壳视觉 | 遵循 `docs/design/design`：dashboard + sidebar-shell |
+| 壳视觉 | 遵循设计工程内 dashboard + sidebar-shell 契约 |
 | 持久化 | 文件系统 |
 | 目录边界 | 全部在 `apps/design/` 内；`framework/` 可同步，`apps/` 不同步（安装时 exclude） |
 | 技术栈 | React + Vite + TypeScript + React Router |
@@ -134,7 +134,7 @@ Excluded:
 - Style/layout picker and validation for managed apps
 - Skill invocation UI
 - Install/sync scripts to other repositories
-- Auto-linking managed apps to `docs/design/<app>/`
+- Auto-linking managed apps to host-repo doc trees (retired; contracts live in the design project)
 
 ## Placeholder page
 
@@ -148,7 +148,7 @@ Minimal React component (page title from name) that the preview route can render
 
 ## Success criteria
 
-1. `apps/design` is a runnable Vite React app whose shell follows `docs/design/design`.
+1. `apps/design` is a runnable Vite React app whose shell follows in-project style/layout contracts (`design.project.json`).
 2. Operator can manage apps and blank pages entirely from the UI in dev, with files under `apps/design/apps/`.
 3. Content under `apps/` is clearly separable for a future install script exclude.
 4. App `path` is stored as metadata only; no target source tree mutations.
@@ -165,4 +165,4 @@ Minimal React component (page title from name) that the preview route can render
 
 - No TBD placeholders left for phase 1 behavior.
 - Sync story is a constraint on layout, not an implemented feature.
-- `docs/design/` remains host-repo visual rules for this engineering project; not part of the syncable framework package surface.
+- Authoritative style/layout contracts live under the design project (`styles/` / `layouts/`); `framework/public/assets/` remains a browser library only.

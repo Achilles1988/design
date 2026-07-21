@@ -15,7 +15,7 @@ Do not invent conflicting rules; if unsure, ask.
 - MUST read docs/dev/conventions/coding-standards.md before writing any code
 - MUST follow docs/dev/conventions/mandatory.md for the entire development workflow
 - When adding or expanding a public API, protocol, or config surface, leave verifiable notes under `docs/dev/api/` in the same change. Never ship code without the matching docs
-- When `docs/dev/api/` or `docs/dev/design/` already covers the topic, implement and call exactly as documented. On conflict, update the docs first, then the code. Never invent behavior from habit
+- When `docs/dev/api/` already covers the topic, implement and call exactly as documented. On conflict, update the docs first, then the code. Never invent behavior from habit
 
 - Superpowers artifacts output: docs/dev/superpowers
 - Superpowers design specs output: docs/dev/superpowers/specs/
@@ -25,8 +25,7 @@ Do not invent conflicting rules; if unsure, ask.
 docs/dev
 ├── api/                         # 公共 API、协议与配置面说明
 ├── conventions/                 # 术语表、编码规范与强制流程
-├── design/                      # 设计说明与方案文档
-└── superpowers/    # Superpowers 产物（specs/、plans/）
+└── superpowers/                 # Superpowers 产物（specs/、plans/）
 ```
 
 ## Product Documentation

@@ -63,7 +63,7 @@ Given `<designRoot>` from discovery and an App’s `app.json` (`style` and `layo
 
 - App directory: `<designRoot>/<contentRoot>/<appId>/`
 - Style contract (required): `<designRoot>/<stylesRoot>/<app.json.style>/design.md`
-- Layout contract (preferred; optional if missing): `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md`
+- Layout contract (preferred; optional if missing): `<designRoot>/<layoutsRoot>/<app.json.layout>/LAYOUT.md`
 
 Dev server: run `npm run dev` from `<designRoot>`. Preview URLs follow that
 engineering app’s routing (e.g. `/apps/<appId>/canvases/<canvasId>`).
