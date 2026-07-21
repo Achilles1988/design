@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
+import { emitCanvasesChanged } from '@/lib/canvasEvents'
 import { isValidAppId, slugify } from '@/lib/slug'
-import type { AppConfig, PageEntry } from '@/lib/types'
+import type { AppConfig, CanvasEntry } from '@/lib/types'
 import './apps.css'
 
 async function loadAppData(appId: string): Promise<{
   app: AppConfig
-  pages: PageEntry[]
+  canvases: CanvasEntry[]
 }> {
-  const [app, pages] = await Promise.all([
+  const [app, canvases] = await Promise.all([
     designApi.getApp(appId),
-    designApi.listPages(appId),
+    designApi.listCanvases(appId),
   ])
-  return { app, pages }
+  return { app, canvases }
 }
 
 export function AppDetailPage() {
@@ -21,33 +22,33 @@ export function AppDetailPage() {
   const navigate = useNavigate()
 
   const [app, setApp] = useState<AppConfig | null>(null)
-  const [pages, setPages] = useState<PageEntry[] | null>(null)
+  const [canvases, setCanvases] = useState<CanvasEntry[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-  const [pageName, setPageName] = useState('')
-  const [pageId, setPageId] = useState('')
-  const [pageIdDirty, setPageIdDirty] = useState(false)
+  const [canvasName, setCanvasName] = useState('')
+  const [canvasId, setCanvasId] = useState('')
+  const [canvasIdDirty, setCanvasIdDirty] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [busy, setBusy] = useState(false)
   const loadRun = useRef(0)
 
-  const pageIdValid = isValidAppId(pageId)
+  const canvasIdValid = isValidAppId(canvasId)
   const canSubmit =
-    pageName.trim().length > 0 && pageIdValid && !submitting && !busy
+    canvasName.trim().length > 0 && canvasIdValid && !submitting && !busy
 
   async function reload(runId: number) {
     setLoadError(null)
-    const { app: nextApp, pages: nextPages } = await loadAppData(appId)
+    const { app: nextApp, canvases: nextCanvases } = await loadAppData(appId)
     if (runId !== loadRun.current) return
     setApp(nextApp)
-    setPages(nextPages)
+    setCanvases(nextCanvases)
   }
 
   useEffect(() => {
     let cancelled = false
     setApp(null)
-    setPages(null)
+    setCanvases(null)
     setLoadError(null)
 
     if (!appId) {
@@ -58,18 +59,18 @@ export function AppDetailPage() {
     const runId = ++loadRun.current
 
     loadAppData(appId)
-      .then(({ app: nextApp, pages: nextPages }) => {
+      .then(({ app: nextApp, canvases: nextCanvases }) => {
         if (runId !== loadRun.current) return
         if (!cancelled) {
           setApp(nextApp)
-          setPages(nextPages)
+          setCanvases(nextCanvases)
         }
       })
       .catch((err: unknown) => {
         if (runId !== loadRun.current) return
         if (!cancelled) {
           setApp(null)
-          setPages([])
+          setCanvases([])
           setLoadError(
             err instanceof Error ? err.message : 'Failed to load app',
           )
@@ -81,48 +82,50 @@ export function AppDetailPage() {
     }
   }, [appId])
 
-  function onPageNameChange(value: string) {
-    setPageName(value)
-    if (!pageIdDirty) setPageId(slugify(value))
+  function onCanvasNameChange(value: string) {
+    setCanvasName(value)
+    if (!canvasIdDirty) setCanvasId(slugify(value))
   }
 
-  function onPageIdChange(value: string) {
-    setPageIdDirty(true)
-    setPageId(value)
+  function onCanvasIdChange(value: string) {
+    setCanvasIdDirty(true)
+    setCanvasId(value)
   }
 
-  async function onAddPage(event: FormEvent<HTMLFormElement>) {
+  async function onAddCanvas(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!canSubmit) return
 
     setSubmitting(true)
     setFormError(null)
     try {
-      await designApi.addPage(appId, {
-        id: pageId,
-        name: pageName.trim(),
+      await designApi.addCanvas(appId, {
+        id: canvasId,
+        name: canvasName.trim(),
       })
-      setPageName('')
-      setPageId('')
-      setPageIdDirty(false)
+      setCanvasName('')
+      setCanvasId('')
+      setCanvasIdDirty(false)
       await reload(loadRun.current)
+      emitCanvasesChanged()
     } catch (err: unknown) {
-      setFormError(err instanceof Error ? err.message : 'Failed to add page')
+      setFormError(err instanceof Error ? err.message : 'Failed to add canvas')
     } finally {
       setSubmitting(false)
     }
   }
 
-  async function onDeletePage(page: PageEntry) {
-    if (!confirm(`Delete page “${page.name}” (${page.id})?`)) return
+  async function onDeleteCanvas(canvas: CanvasEntry) {
+    if (!confirm(`Delete canvas “${canvas.name}” (${canvas.id})?`)) return
     setBusy(true)
     setFormError(null)
     try {
-      await designApi.deletePage(appId, page.id)
+      await designApi.deleteCanvas(appId, canvas.id)
       await reload(loadRun.current)
+      emitCanvasesChanged()
     } catch (err: unknown) {
       setFormError(
-        err instanceof Error ? err.message : 'Failed to delete page',
+        err instanceof Error ? err.message : 'Failed to delete canvas',
       )
     } finally {
       setBusy(false)
@@ -152,13 +155,10 @@ export function AppDetailPage() {
         <div>
           <h1>{app?.name ?? 'App'}</h1>
           <p className="apps-page__lead">
-            App metadata and blank pages on disk.
+            App metadata and canvases on disk.
           </p>
         </div>
         <div className="apps-page__actions">
-          <Link className="apps-btn apps-btn--ghost" to="/">
-            All apps
-          </Link>
           <button
             className="apps-btn apps-btn--danger"
             type="button"
@@ -212,17 +212,13 @@ export function AppDetailPage() {
 
       {app ? (
         <section className="apps-section">
-          <h2 className="apps-section__title">Pages</h2>
+          <h2 className="apps-section__title">Canvases</h2>
 
-          {pages === null ? (
-            <p className="apps-muted">Loading pages…</p>
+          {canvases === null ? (
+            <p className="apps-muted">Loading canvases…</p>
           ) : null}
 
-          {pages !== null && pages.length === 0 ? (
-            <p className="apps-empty">No pages yet. Add a blank page below.</p>
-          ) : null}
-
-          {pages !== null && pages.length > 0 ? (
+          {canvases !== null && canvases.length > 0 ? (
             <div className="apps-table-wrap">
               <table className="apps-table">
                 <thead>
@@ -236,26 +232,26 @@ export function AppDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pages.map((page) => (
-                    <tr key={page.id}>
+                  {canvases.map((canvas) => (
+                    <tr key={canvas.id}>
                       <td>
-                        <Link to={`/apps/${appId}/pages/${page.id}`}>
-                          {page.name}
+                        <Link to={`/apps/${appId}/canvases/${canvas.id}`}>
+                          {canvas.name}
                         </Link>
                       </td>
                       <td>
-                        <code>{page.id}</code>
+                        <code>{canvas.id}</code>
                       </td>
                       <td>
-                        <code>{page.component}</code>
+                        <code>{canvas.component}</code>
                       </td>
                       <td>
                         <button
                           className="apps-btn apps-btn--ghost apps-btn--small"
                           type="button"
-                          onClick={() => onDeletePage(page)}
+                          onClick={() => onDeleteCanvas(canvas)}
                           disabled={busy || submitting}
-                          aria-label={`Delete page ${page.name}`}
+                          aria-label={`Delete canvas ${canvas.name}`}
                         >
                           Delete
                         </button>
@@ -267,17 +263,17 @@ export function AppDetailPage() {
             </div>
           ) : null}
 
-          <form className="apps-form" onSubmit={onAddPage} noValidate>
-            <h3 className="apps-section__subtitle">Add blank page</h3>
+          <form className="apps-form" onSubmit={onAddCanvas} noValidate>
+            <h3 className="apps-section__subtitle">Add canvas</h3>
 
             <div className="apps-field">
-              <label htmlFor="page-name">Name</label>
+              <label htmlFor="canvas-name">Name</label>
               <input
-                id="page-name"
+                id="canvas-name"
                 name="name"
                 type="text"
-                value={pageName}
-                onChange={(e) => onPageNameChange(e.target.value)}
+                value={canvasName}
+                onChange={(e) => onCanvasNameChange(e.target.value)}
                 required
                 autoComplete="off"
                 placeholder="Home"
@@ -286,15 +282,15 @@ export function AppDetailPage() {
             </div>
 
             <div className="apps-field">
-              <label htmlFor="page-id">ID</label>
+              <label htmlFor="canvas-id">ID</label>
               <input
-                id="page-id"
+                id="canvas-id"
                 name="id"
                 type="text"
-                value={pageId}
-                onChange={(e) => onPageIdChange(e.target.value)}
+                value={canvasId}
+                onChange={(e) => onCanvasIdChange(e.target.value)}
                 aria-invalid={
-                  pageId.length > 0 && !pageIdValid ? true : undefined
+                  canvasId.length > 0 && !canvasIdValid ? true : undefined
                 }
                 autoComplete="off"
                 placeholder="home"
@@ -302,9 +298,11 @@ export function AppDetailPage() {
               />
               <p className="apps-field__hint">
                 Lowercase letter, then letters, digits, or hyphens.
-                {!pageIdDirty ? ' Prefills from name until you edit it.' : null}
+                {!canvasIdDirty
+                  ? ' Prefills from name until you edit it.'
+                  : null}
               </p>
-              {pageId.length > 0 && !pageIdValid ? (
+              {canvasId.length > 0 && !canvasIdValid ? (
                 <p className="apps-field__error">
                   ID must start with a lowercase letter and only contain
                   lowercase letters, digits, or hyphens.
@@ -314,7 +312,7 @@ export function AppDetailPage() {
 
             <div className="apps-form__footer">
               <button className="apps-btn" type="submit" disabled={!canSubmit}>
-                {submitting ? 'Adding…' : 'Add page'}
+                {submitting ? 'Adding…' : 'Add canvas'}
               </button>
             </div>
           </form>
