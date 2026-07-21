@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { designApi } from '@/lib/api'
+import { emitCanvasesChanged } from '@/lib/canvasEvents'
 import type { AppConfig } from '@/lib/types'
 import './apps.css'
 
 export function AppListPage() {
   const [apps, setApps] = useState<AppConfig[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -26,6 +28,23 @@ export function AppListPage() {
       cancelled = true
     }
   }, [])
+
+  async function onDeleteApp(app: AppConfig) {
+    if (busyId) return
+    if (!confirm(`Delete app “${app.name}” (${app.id})? This cannot be undone.`))
+      return
+    setBusyId(app.id)
+    setError(null)
+    try {
+      await designApi.deleteApp(app.id)
+      emitCanvasesChanged()
+      setApps((prev) => (prev ? prev.filter((a) => a.id !== app.id) : prev))
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to delete app')
+    } finally {
+      setBusyId(null)
+    }
+  }
 
   return (
     <div className="apps-page">
@@ -63,6 +82,9 @@ export function AppListPage() {
                 <th scope="col">Name</th>
                 <th scope="col">ID</th>
                 <th scope="col">Path</th>
+                <th scope="col">
+                  <span className="apps-sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -76,6 +98,17 @@ export function AppListPage() {
                   </td>
                   <td className={app.path ? undefined : 'apps-muted'}>
                     {app.path ?? '—'}
+                  </td>
+                  <td>
+                    <button
+                      className="apps-btn apps-btn--ghost apps-btn--small"
+                      type="button"
+                      onClick={() => onDeleteApp(app)}
+                      disabled={busyId !== null}
+                      aria-label={`Delete app ${app.name}`}
+                    >
+                      {busyId === app.id ? 'Deleting…' : 'Delete'}
+                    </button>
                   </td>
                 </tr>
               ))}
