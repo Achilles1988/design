@@ -11,7 +11,7 @@ import { isValidAppId } from '../../src/lib/slug'
 import { validatePathMeta } from '../../src/lib/pathMeta'
 import { resolveContentPath } from './paths'
 
-const TS_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/
+const TS_IDENTIFIER = /^[A-Za-z_][a-zA-Z0-9_]*$/
 
 function toPascalCase(value: string): string {
   return value
@@ -20,6 +20,34 @@ function toPascalCase(value: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('')
+}
+
+/** Normalize on-disk app.json (migrates legacy `layout` string → `layouts`). */
+export function normalizeAppConfig(raw: Record<string, unknown>): AppConfig {
+  const id = typeof raw.id === 'string' ? raw.id : ''
+  const name = typeof raw.name === 'string' ? raw.name : ''
+  const style =
+    typeof raw.style === 'string' && raw.style.trim()
+      ? raw.style.trim()
+      : DEFAULT_STYLE
+
+  let layouts: string[] = []
+  if (Array.isArray(raw.layouts)) {
+    layouts = raw.layouts.filter(
+      (item): item is string => typeof item === 'string' && item.trim().length > 0,
+    )
+  } else if (typeof raw.layout === 'string' && raw.layout.trim()) {
+    layouts = [raw.layout.trim()]
+  }
+  if (layouts.length === 0) {
+    layouts = [DEFAULT_LAYOUT]
+  }
+
+  const app: AppConfig = { id, name, style, layouts }
+  if (typeof raw.path === 'string') {
+    app.path = raw.path
+  }
+  return app
 }
 
 export function nameToComponentFile(name: string, id: string): string {
@@ -70,13 +98,33 @@ export function createContentStore(contentRoot: string) {
     return resolveContentPath(root, id)
   }
 
-  async function getApp(id: string): Promise<AppConfig> {
+  async function readAppFile(id: string): Promise<AppConfig> {
     if (!isValidAppId(id)) {
       throw new Error(`Invalid app id: ${id}`)
     }
     const file = resolveContentPath(root, id, 'app.json')
     const raw = await fs.readFile(file, 'utf8')
-    return JSON.parse(raw) as AppConfig
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    const app = normalizeAppConfig(parsed)
+    const needsRewrite =
+      Object.prototype.hasOwnProperty.call(parsed, 'layout') ||
+      !Array.isArray(parsed.layouts)
+    if (needsRewrite) {
+      await writeAppFile(app)
+    }
+    return app
+  }
+
+  async function writeAppFile(app: AppConfig): Promise<void> {
+    await fs.writeFile(
+      resolveContentPath(root, app.id, 'app.json'),
+      `${JSON.stringify(app, null, 2)}\n`,
+      'utf8',
+    )
+  }
+
+  async function getApp(id: string): Promise<AppConfig> {
+    return readAppFile(id)
   }
 
   async function listApps(): Promise<AppConfig[]> {
@@ -90,9 +138,7 @@ export function createContentStore(contentRoot: string) {
     const apps: AppConfig[] = []
     for (const entry of entries) {
       try {
-        const appJson = resolveContentPath(root, entry, 'app.json')
-        const raw = await fs.readFile(appJson, 'utf8')
-        apps.push(JSON.parse(raw) as AppConfig)
+        apps.push(await readAppFile(entry))
       } catch {
         // skip dirs without valid app.json / invalid entry ids
       }
@@ -131,18 +177,38 @@ export function createContentStore(contentRoot: string) {
       id,
       name,
       style: DEFAULT_STYLE,
-      layout: DEFAULT_LAYOUT,
+      layouts: [DEFAULT_LAYOUT],
     }
     if (pathMeta.value !== undefined) {
       app.path = pathMeta.value
     }
 
-    await fs.writeFile(
-      resolveContentPath(dir, 'app.json'),
-      `${JSON.stringify(app, null, 2)}\n`,
-      'utf8',
-    )
+    await writeAppFile(app)
     await writeCanvasesFile(dir, { canvases: [] })
+    return app
+  }
+
+  async function setAppStyle(id: string, style: string): Promise<AppConfig> {
+    const trimmed = style.trim()
+    if (!trimmed) {
+      throw new Error('style is required')
+    }
+    const app = await readAppFile(id)
+    app.style = trimmed
+    await writeAppFile(app)
+    return app
+  }
+
+  async function addAppLayout(id: string, layoutId: string): Promise<AppConfig> {
+    const trimmed = layoutId.trim()
+    if (!trimmed) {
+      throw new Error('layout id is required')
+    }
+    const app = await readAppFile(id)
+    if (!app.layouts.includes(trimmed)) {
+      app.layouts = [...app.layouts, trimmed]
+      await writeAppFile(app)
+    }
     return app
   }
 
@@ -227,6 +293,8 @@ export function createContentStore(contentRoot: string) {
     getApp,
     createApp,
     deleteApp,
+    setAppStyle,
+    addAppLayout,
     listCanvases,
     addCanvas,
     deleteCanvas,

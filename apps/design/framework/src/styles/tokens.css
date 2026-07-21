@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme='dark'] {
   --color-primary: #0c5cab;
   --color-secondary: #0a4a8a;
   --color-success: #10b981;
@@ -13,5 +14,18 @@
   --header-h: 60px;
   --color-border: color-mix(in srgb, var(--color-text) 12%, transparent);
   --color-surface-2: color-mix(in srgb, var(--color-text) 6%, var(--color-surface));
+  --color-muted: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+
+[data-theme='light'] {
+  --color-primary: #0c5cab;
+  --color-secondary: #0a4a8a;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-surface: #f4f4f5;
+  --color-text: #18181b;
+  --color-border: color-mix(in srgb, var(--color-text) 12%, transparent);
+  --color-surface-2: #ffffff;
   --color-muted: color-mix(in srgb, var(--color-text) 55%, transparent);
 }

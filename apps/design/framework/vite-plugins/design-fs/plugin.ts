@@ -76,9 +76,14 @@ async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
 export function designFsPlugin(options: {
   contentRoot: string
   assetsRoot: string
+  stylesRoot: string
+  layoutsRoot: string
 }): Plugin {
   const store = createContentStore(options.contentRoot)
-  const assets = createAssetsStore(options.assetsRoot)
+  const assets = createAssetsStore(options.assetsRoot, {
+    stylesRoot: options.stylesRoot,
+    layoutsRoot: options.layoutsRoot,
+  })
   return {
     name: 'design-fs',
     configureServer(server) {
@@ -98,6 +103,7 @@ export function designFsPlugin(options: {
 
           // GET /__design_fs/assets/:kind
           // GET /__design_fs/assets/:kind/:id/download
+          // POST /__design_fs/assets/:kind/:id/apply  { appId }
           if (parts[1] === 'assets') {
             const kind = parts[2]
             if (!kind || !isAssetKind(kind)) {
@@ -127,6 +133,33 @@ export function designFsPlugin(options: {
                 'Content-Type': 'application/zip',
                 'Content-Disposition': `attachment; filename="${id}.zip"`,
               })
+              return
+            }
+
+            if (
+              parts.length === 5 &&
+              parts[4] === 'apply' &&
+              method === 'POST'
+            ) {
+              const id = decodeURIComponent(parts[3] ?? '')
+              if (!id) {
+                sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
+                return
+              }
+              const body = (await parseJsonBody(req)) as { appId?: string }
+              if (typeof body.appId !== 'string' || !body.appId.trim()) {
+                sendJson(res, 400, { error: 'appId is required' })
+                return
+              }
+              const appId = body.appId.trim()
+              // Validate target App before mutating contract directories.
+              await store.getApp(appId)
+              await assets.installPackage(kind, id)
+              const app =
+                kind === 'designmd'
+                  ? await store.setAppStyle(appId, id)
+                  : await store.addAppLayout(appId, id)
+              sendJson(res, 200, app)
               return
             }
 

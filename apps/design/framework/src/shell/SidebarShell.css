@@ -35,7 +35,7 @@
   background: var(--color-primary);
   display: grid;
   place-items: center;
-  color: var(--color-text);
+  color: #fff;
   font-weight: 700;
   font-size: 13px;
   flex: 0 0 auto;
@@ -50,6 +50,29 @@
 
 .sidebar-shell__header-spacer {
   flex: 1;
+}
+
+.sidebar-shell__theme-toggle {
+  flex: 0 0 auto;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.sidebar-shell__theme-toggle:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+}
+
+.sidebar-shell__theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
 .sidebar-shell__sidebar {

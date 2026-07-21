@@ -3,7 +3,8 @@ export type AppConfig = {
   name: string
   path?: string
   style: string
-  layout: string
+  /** Installed layout package ids for this App (order preserved). */
+  layouts: string[]
 }
 
 export type CanvasEntry = {

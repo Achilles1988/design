@@ -73,7 +73,7 @@ Lock down, one item at a time:
 
 - Target **App** under `<contentRoot>/` (default suggestion: `defaultAppId` when sensible).
 - Which Canvases to **add / modify / delete**.
-- Which **layout id** each Canvas should follow as design intent (App-level `app.json.layout` is the default; per-canvas intent may differ for review only — do not invent new JSON fields).
+- Which **layout id** each Canvas should follow as design intent (App-level `app.json.layouts` is the default pool; pick one id per Canvas for review only — do not invent new JSON fields).
 - Fake-data rules.
 - **Separate non-UI requirements** (verbatim); return in Step 9.
 
@@ -86,7 +86,7 @@ Lock down, one item at a time:
 **Layout (preferred, not required):**
 
 1. If `<layoutsRoot>/<id>/LAYOUT.md` exists for the chosen id → use it.
-2. If missing/unsuitable: offer **"AI improvise the layout"** and/or recommend a better stock layout id; on confirm, write `app.json.layout`.
+2. If missing/unsuitable: offer **"AI improvise the layout"** and/or recommend a better stock layout id; on confirm, append that id to `app.json.layouts` when not already present.
 3. Recommendations may only use existing layout directory ids. Do not create layout packages.
 
 **Never** mention or invoke legacy external design-spec skills. Never read design contracts outside `<designRoot>` `styles/` and `layouts/` trees.
@@ -94,7 +94,7 @@ Lock down, one item at a time:
 ## Step 5 — Implement (framework-agnostic)
 
 - Read 1–3 existing Canvas files of the target App first; match their tech stack.
-- `app.json.style` / `app.json.layout` are App-level ids. Canvas files export a component only.
+- `app.json.style` / `app.json.layouts` are App-level ids. Canvas files export a component only.
 - Add / modify / delete Canvases via design-fs (or equivalent files under `<contentRoot>`). Keep `canvases.json` in sync on delete.
 - **After ADDING any new Canvas file, restart the design-project dev server** before Step 7.
 

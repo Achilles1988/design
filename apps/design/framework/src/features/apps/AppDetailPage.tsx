@@ -205,10 +205,27 @@ export function AppDetailPage() {
           <div>
             <dt>Layout</dt>
             <dd>
-              <code>{app.layout}</code>
+              <code>{app.layouts.join(', ')}</code>
             </dd>
           </div>
         </dl>
+      ) : null}
+
+      {app ? (
+        <div className="apps-page__asset-links">
+          <Link
+            className="apps-btn apps-btn--ghost"
+            to={`/assets/layout?appId=${encodeURIComponent(app.id)}`}
+          >
+            Install layouts
+          </Link>
+          <Link
+            className="apps-btn apps-btn--ghost"
+            to={`/assets/rule?appId=${encodeURIComponent(app.id)}`}
+          >
+            Replace style
+          </Link>
+        </div>
       ) : null}
 
       {app ? (

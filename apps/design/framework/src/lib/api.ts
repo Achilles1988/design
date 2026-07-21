@@ -62,4 +62,12 @@ export const designApi = {
     request<AssetEntry[]>(`/__design_fs/assets/${kind}`),
   downloadAssetUrl: (kind: AssetKind, id: string) =>
     `/__design_fs/assets/${kind}/${encodeURIComponent(id)}/download`,
+  applyAsset: (kind: AssetKind, id: string, appId: string) =>
+    request<AppConfig>(
+      `/__design_fs/assets/${kind}/${encodeURIComponent(id)}/apply`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ appId }),
+      },
+    ),
 }

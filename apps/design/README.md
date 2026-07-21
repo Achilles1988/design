@@ -34,7 +34,7 @@ apps/design/
 
 - `design.project.json` — discovery marker for `<designRoot>` and relative roots.
 - `framework/` — product UI and tooling; intended to stay in sync with the engineering app.
-- `styles/` / `layouts/` — authoritative App contracts resolved from `app.json` style/layout ids.
+- `styles/` / `layouts/` — authoritative App contracts resolved from `app.json` `style` id and `layouts` ids.
 - `apps/` — content written by the design-fs API (`app.json`, `canvases.json`, canvas `.tsx` files). Later sync should treat this tree as workspace-local data, not framework source. The local `.gitignore` keeps generated app content out of normal commits by default.
 
 ## Docs

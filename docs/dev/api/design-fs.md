@@ -80,8 +80,8 @@ See also: [Design project marker and contract resolution](design-project.md).
 | `id` | string | Directory name; must match `^[a-z][a-z0-9-]*$` |
 | `name` | string | Display name; trimmed, must be non-empty |
 | `path` | string? | Optional relative path metadata (no `..`, not absolute) |
-| `style` | string | Phase 1 default: `dashboard` |
-| `layout` | string | Phase 1 default: `sidebar-shell` |
+| `style` | string | Design-rule id under `<stylesRoot>/` (default: `dashboard`) |
+| `layouts` | string[] | Layout package ids under `<layoutsRoot>/` (default: `["sidebar-shell"]`) |
 
 ### `canvases.json`
 
@@ -149,6 +149,20 @@ JSON responses use `{ "error": "<message>" }` on failure with status:
 |--------|------|------|---------|
 | `GET` | `/assets/:kind` | — | `AssetEntry[]` (`kind`: `designmd` \| `layoutmd`) |
 | `GET` | `/assets/:kind/:id/download` | — | ZIP bytes (`application/zip`) |
+| `POST` | `/assets/:kind/:id/apply` | `{ "appId" }` | Updated `AppConfig` |
+
+`POST …/apply` copies the browser-library package into the design project’s
+authoritative contract tree, then updates the target App’s `app.json`. The
+target App is validated (`GET`-equivalent) **before** any contract directory
+is overwritten:
+
+| `kind` | Disk target | `app.json` update |
+|--------|-------------|-------------------|
+| `designmd` | `<stylesRoot>/<id>/` (ensures `design.md`; replaces folder) | replaces `style` with `<id>` |
+| `layoutmd` | `<layoutsRoot>/<id>/` (replaces folder) | appends `<id>` to `layouts` if missing |
+
+Plugin options also require `stylesRoot` and `layoutsRoot` (see
+`apps/design/vite.config.ts`).
 
 ## Browser client
 
@@ -157,6 +171,7 @@ JSON responses use `{ "error": "<message>" }` on failure with status:
 - `listApps()`, `getApp(id)`, `createApp({ id, name, path? })`, `deleteApp(id)`
 - `listCanvases(appId)`, `addCanvas(appId, { id, name })`, `deleteCanvas(appId, canvasId)`
 - `listAssets(kind)`, `downloadAssetUrl(kind, id)` (URL helper for ZIP download)
+- `applyAsset(kind, id, appId)` (install layout / replace style + update App)
 
 On non-2xx JSON responses the client throws `Error` with the server `error`
 message (or `statusText` if the body has no string `error`).

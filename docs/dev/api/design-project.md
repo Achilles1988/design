@@ -58,12 +58,14 @@ Initial values in this repository:
 
 ## Resolve formulas
 
-Given `<designRoot>` from discovery and an App’s `app.json` (`style` and `layout` are
-**ids only**, not paths):
+Given `<designRoot>` from discovery and an App’s `app.json` (`style` is an id;
+`layouts` is an array of ids — not paths):
 
 - App directory: `<designRoot>/<contentRoot>/<appId>/`
 - Style contract (required): `<designRoot>/<stylesRoot>/<app.json.style>/design.md`
-- Layout contract (preferred; optional if missing): `<designRoot>/<layoutsRoot>/<app.json.layout>/LAYOUT.md`
+- Layout contracts (preferred; each id optional if missing):
+  `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md` for each entry in
+  `app.json.layouts`
 
 Dev server: run `npm run dev` from `<designRoot>`. Preview URLs follow that
 engineering app’s routing (e.g. `/apps/<appId>/canvases/<canvasId>`).

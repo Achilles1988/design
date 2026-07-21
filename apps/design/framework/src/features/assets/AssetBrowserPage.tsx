@@ -1,16 +1,31 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
-import type { AssetEntry, AssetKind } from '@/lib/types'
+import {
+  applyThemeToFrame,
+  getTheme,
+  subscribeTheme,
+  type ThemeMode,
+} from '@/lib/theme'
+import type { AppConfig, AssetEntry, AssetKind } from '@/lib/types'
 import './assets.css'
 
 type AssetBrowserPageProps = {
   kind: AssetKind
   title: string
   lead: string
+  /** Primary apply action label (Install layout / Replace style). */
+  applyLabel: string
 }
 
 const PREVIEW_WIDTH = 1280
 const SCALE = 0.28
+
+const STYLE_REPLACE_WARNING =
+  'Replacing an App style overwrites its design-rule id and replaces the on-disk package under styles/<id>/. Once a style is chosen for an App, changing it later is usually a bad idea and can break existing canvases. Continue?'
+
+const LAYOUT_INSTALL_NOTICE =
+  'Installing a layout copies the package into layouts/<id>/ (overwriting that folder if it already exists) and adds the id to the App’s layouts list.'
 
 function hashHeight(id: string): number {
   let h = 0
@@ -25,14 +40,17 @@ function LazyPreview({
   src,
   title,
   height,
+  theme,
   onOpen,
 }: {
   src: string
   title: string
   height: number
+  theme: ThemeMode
   onOpen: () => void
 }) {
   const hostRef = useRef<HTMLButtonElement>(null)
+  const frameRef = useRef<HTMLIFrameElement>(null)
   const [mounted, setMounted] = useState(false)
   const [ready, setReady] = useState(false)
 
@@ -52,6 +70,11 @@ function LazyPreview({
     return () => io.disconnect()
   }, [mounted])
 
+  useEffect(() => {
+    if (!ready || !frameRef.current) return
+    applyThemeToFrame(frameRef.current, theme)
+  }, [ready, theme])
+
   const frameHeight = Math.round(height / SCALE)
 
   return (
@@ -68,6 +91,7 @@ function LazyPreview({
       ) : null}
       {mounted ? (
         <iframe
+          ref={frameRef}
           className={
             ready
               ? 'assets-card__iframe assets-card__iframe--in'
@@ -77,8 +101,11 @@ function LazyPreview({
           src={src}
           loading="lazy"
           tabIndex={-1}
-          sandbox="allow-scripts"
-          onLoad={() => setReady(true)}
+          sandbox="allow-scripts allow-same-origin"
+          onLoad={(e) => {
+            applyThemeToFrame(e.currentTarget, theme)
+            setReady(true)
+          }}
           style={{
             width: PREVIEW_WIDTH,
             height: frameHeight,
@@ -90,13 +117,36 @@ function LazyPreview({
   )
 }
 
-export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
+export function AssetBrowserPage({
+  kind,
+  title,
+  lead,
+  applyLabel,
+}: AssetBrowserPageProps) {
   const titleId = useId()
+  const [searchParams] = useSearchParams()
+  const contextAppId = searchParams.get('appId')?.trim() || null
+
   const [items, setItems] = useState<AssetEntry[] | null>(null)
+  const [apps, setApps] = useState<AppConfig[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [busyKind, setBusyKind] = useState<'apply' | 'download' | null>(null)
   const [lightbox, setLightbox] = useState<AssetEntry | null>(null)
+  const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
+  const [pickerFor, setPickerFor] = useState<AssetEntry | null>(null)
+  const [pickerAppId, setPickerAppId] = useState('')
+  const busyLock = useRef(false)
+  const lightboxFrameRef = useRef<HTMLIFrameElement>(null)
+
+  useEffect(() => subscribeTheme(setThemeState), [])
+
+  useEffect(() => {
+    if (!lightbox || !lightboxFrameRef.current) return
+    applyThemeToFrame(lightboxFrameRef.current, theme)
+  }, [lightbox, theme])
 
   useEffect(() => {
     let cancelled = false
@@ -119,9 +169,27 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
   }, [kind])
 
   useEffect(() => {
-    if (!lightbox) return
+    let cancelled = false
+    designApi
+      .listApps()
+      .then((data) => {
+        if (!cancelled) setApps(data)
+      })
+      .catch(() => {
+        if (!cancelled) setApps([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!lightbox && !pickerFor) return
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setLightbox(null)
+      if (e.key === 'Escape') {
+        setLightbox(null)
+        setPickerFor(null)
+      }
     }
     window.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
@@ -130,7 +198,7 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
       window.removeEventListener('keydown', onKey)
       document.body.style.overflow = prev
     }
-  }, [lightbox])
+  }, [lightbox, pickerFor])
 
   async function onCopy(id: string) {
     try {
@@ -145,8 +213,10 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
   }
 
   async function onDownload(entry: AssetEntry) {
-    if (busyId) return
+    if (busyLock.current) return
+    busyLock.current = true
     setBusyId(entry.id)
+    setBusyKind('download')
     setError(null)
     try {
       const res = await fetch(designApi.downloadAssetUrl(kind, entry.id))
@@ -166,8 +236,101 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Download failed')
     } finally {
+      busyLock.current = false
       setBusyId(null)
+      setBusyKind(null)
     }
+  }
+
+  function resolveTargetAppId(): string | null {
+    if (contextAppId) {
+      if (!apps) return contextAppId
+      if (apps.some((app) => app.id === contextAppId)) return contextAppId
+      return null
+    }
+    if (apps && apps.length === 1) return apps[0]!.id
+    return null
+  }
+
+  async function runApply(entry: AssetEntry, appId: string) {
+    if (kind === 'designmd') {
+      if (!window.confirm(STYLE_REPLACE_WARNING)) return
+    } else if (!window.confirm(LAYOUT_INSTALL_NOTICE)) {
+      return
+    }
+    if (busyLock.current) return
+    busyLock.current = true
+    setBusyId(entry.id)
+    setBusyKind('apply')
+    setError(null)
+    setNotice(null)
+    try {
+      const app = await designApi.applyAsset(kind, entry.id, appId)
+      const verb = kind === 'designmd' ? 'Replaced style on' : 'Installed layout on'
+      setNotice(`${verb} “${app.name}” (${app.id}).`)
+      setPickerFor(null)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Apply failed')
+    } finally {
+      busyLock.current = false
+      setBusyId(null)
+      setBusyKind(null)
+    }
+  }
+
+  async function onApply(entry: AssetEntry) {
+    if (contextAppId && apps && !apps.some((app) => app.id === contextAppId)) {
+      setError(`Unknown App id in URL: “${contextAppId}”. Pick a valid App.`)
+      if (apps.length > 0) {
+        setPickerAppId(apps[0]!.id)
+        setPickerFor(entry)
+      }
+      return
+    }
+    const fixed = resolveTargetAppId()
+    if (fixed) {
+      await runApply(entry, fixed)
+      return
+    }
+    if (!apps || apps.length === 0) {
+      setError('Create an App first, then install or replace into it.')
+      return
+    }
+    setPickerAppId(apps[0]!.id)
+    setPickerFor(entry)
+  }
+
+  function actionButtons(entry: AssetEntry) {
+    const isBusy = busyId === entry.id
+    const applyBusy = isBusy && busyKind === 'apply'
+    const downloadBusy = isBusy && busyKind === 'download'
+    return (
+      <div className="assets-card__actions">
+        <button
+          type="button"
+          className="assets-btn assets-btn--ghost"
+          onClick={() => onCopy(entry.id)}
+        >
+          {copiedId === entry.id ? 'Copied' : 'Copy id'}
+        </button>
+        <button
+          type="button"
+          className="assets-btn assets-btn--ghost"
+          disabled={isBusy}
+          onClick={() => onApply(entry)}
+        >
+          {applyBusy ? 'Working…' : applyLabel}
+        </button>
+        <button
+          type="button"
+          className="assets-btn assets-btn--ghost"
+          disabled={isBusy}
+          onClick={() => onDownload(entry)}
+        >
+          {downloadBusy ? 'Zipping…' : 'Download'}
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -176,6 +339,11 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
         <div>
           <h1 id={titleId}>{title}</h1>
           <p className="assets-page__lead">{lead}</p>
+          {contextAppId ? (
+            <p className="assets-page__context">
+              Target App: <code>{contextAppId}</code>
+            </p>
+          ) : null}
         </div>
         <p className="assets-page__count">
           {items === null ? '…' : `${items.length} packages`}
@@ -193,6 +361,7 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
       </div>
 
       {error ? <p className="assets-error">{error}</p> : null}
+      {notice ? <p className="assets-notice">{notice}</p> : null}
 
       {items === null && !error ? (
         <p className="assets-muted">Loading packages…</p>
@@ -212,29 +381,14 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
                   src={entry.previewUrl}
                   title={entry.name}
                   height={height}
+                  theme={theme}
                   onOpen={() => setLightbox(entry)}
                 />
                 <div className="assets-card__meta">
                   <div className="assets-card__id" title={entry.id}>
                     {entry.id}
                   </div>
-                  <div className="assets-card__actions">
-                    <button
-                      type="button"
-                      className="assets-btn assets-btn--ghost"
-                      onClick={() => onCopy(entry.id)}
-                    >
-                      {copiedId === entry.id ? 'Copied' : 'Copy id'}
-                    </button>
-                    <button
-                      type="button"
-                      className="assets-btn assets-btn--ghost"
-                      disabled={busyId === entry.id}
-                      onClick={() => onDownload(entry)}
-                    >
-                      {busyId === entry.id ? 'Zipping…' : 'Download'}
-                    </button>
-                  </div>
+                  {actionButtons(entry)}
                 </div>
               </article>
             )
@@ -268,9 +422,21 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
                   type="button"
                   className="assets-btn assets-btn--ghost"
                   disabled={busyId === lightbox.id}
+                  onClick={() => onApply(lightbox)}
+                >
+                  {busyId === lightbox.id && busyKind === 'apply'
+                    ? 'Working…'
+                    : applyLabel}
+                </button>
+                <button
+                  type="button"
+                  className="assets-btn assets-btn--ghost"
+                  disabled={busyId === lightbox.id}
                   onClick={() => onDownload(lightbox)}
                 >
-                  {busyId === lightbox.id ? 'Zipping…' : 'Download'}
+                  {busyId === lightbox.id && busyKind === 'download'
+                    ? 'Zipping…'
+                    : 'Download'}
                 </button>
                 <button
                   type="button"
@@ -283,10 +449,65 @@ export function AssetBrowserPage({ kind, title, lead }: AssetBrowserPageProps) {
             </div>
             <div className="assets-lightbox__frame">
               <iframe
+                ref={lightboxFrameRef}
                 title={`${lightbox.id} enlarged preview`}
                 src={lightbox.previewUrl}
-                sandbox="allow-scripts"
+                sandbox="allow-scripts allow-same-origin"
+                onLoad={(e) => applyThemeToFrame(e.currentTarget, theme)}
               />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {pickerFor && apps ? (
+        <div
+          className="assets-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Choose target App"
+          onClick={() => setPickerFor(null)}
+        >
+          <div
+            className="assets-picker"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="assets-picker__title">Choose target App</h2>
+            <p className="assets-picker__lead">
+              Select which App should receive{' '}
+              <code>{pickerFor.id}</code>.
+            </p>
+            <label className="assets-picker__label" htmlFor="assets-picker-app">
+              App
+            </label>
+            <select
+              id="assets-picker-app"
+              className="assets-picker__select"
+              value={pickerAppId}
+              onChange={(e) => setPickerAppId(e.target.value)}
+            >
+              {apps.map((app) => (
+                <option key={app.id} value={app.id}>
+                  {app.name} ({app.id})
+                </option>
+              ))}
+            </select>
+            <div className="assets-picker__actions">
+              <button
+                type="button"
+                className="assets-btn assets-btn--ghost"
+                onClick={() => setPickerFor(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="assets-btn"
+                disabled={!pickerAppId || busyId === pickerFor.id}
+                onClick={() => runApply(pickerFor, pickerAppId)}
+              >
+                {applyLabel}
+              </button>
             </div>
           </div>
         </div>
@@ -300,7 +521,8 @@ export function AssetsRulePage() {
     <AssetBrowserPage
       kind="designmd"
       title="Rule"
-      lead="Browse installed design-rule packages. Open a preview, copy its id, or download the full package."
+      lead="Pick a design-rule package, copy its id, or replace the style on a target App. Shell theme sync applies only when a package’s preview honors data-theme."
+      applyLabel="Replace style"
     />
   )
 }
@@ -310,7 +532,8 @@ export function AssetsLayoutPage() {
     <AssetBrowserPage
       kind="layoutmd"
       title="Layout"
-      lead="Browse installed layout packages. Open a preview, copy its id, or download the full package."
+      lead="Pick a layout package, copy its id, or install it onto a target App. Previews follow the shell light/dark theme."
+      applyLabel="Install layout"
     />
   )
 }

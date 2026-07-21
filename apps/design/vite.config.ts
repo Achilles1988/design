@@ -13,6 +13,8 @@ export default defineConfig({
     designFsPlugin({
       contentRoot: path.resolve(__dirname, 'apps'),
       assetsRoot: path.resolve(__dirname, 'framework/public/assets'),
+      stylesRoot: path.resolve(__dirname, 'styles'),
+      layoutsRoot: path.resolve(__dirname, 'layouts'),
     }),
   ],
   resolve: {

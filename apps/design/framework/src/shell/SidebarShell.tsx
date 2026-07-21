@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { designApi } from '@/lib/api'
 import { subscribeCanvasesChanged } from '@/lib/canvasEvents'
+import { getTheme, setTheme, subscribeTheme, type ThemeMode } from '@/lib/theme'
 import type { AppConfig, CanvasEntry } from '@/lib/types'
 import './SidebarShell.css'
 
@@ -114,6 +115,7 @@ async function loadTree(): Promise<AppNode[]> {
 export function SidebarShell({ children }: SidebarShellProps) {
   const [nodes, setNodes] = useState<AppNode[]>([])
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
 
   useEffect(() => {
     let cancelled = false
@@ -136,6 +138,8 @@ export function SidebarShell({ children }: SidebarShellProps) {
     }
   }, [])
 
+  useEffect(() => subscribeTheme(setThemeState), [])
+
   function toggle(appId: string) {
     setCollapsed((prev) => {
       const next = new Set(prev)
@@ -143,6 +147,10 @@ export function SidebarShell({ children }: SidebarShellProps) {
       else next.add(appId)
       return next
     })
+  }
+
+  function toggleTheme() {
+    setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
   return (
@@ -155,6 +163,17 @@ export function SidebarShell({ children }: SidebarShellProps) {
           <span className="sidebar-shell__title">Design Engineering</span>
         </div>
         <div className="sidebar-shell__header-spacer" />
+        <button
+          type="button"
+          className="sidebar-shell__theme-toggle"
+          onClick={toggleTheme}
+          aria-label={
+            theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+          }
+          title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        >
+          {theme === 'dark' ? 'Light' : 'Dark'}
+        </button>
       </header>
 
       <aside className="sidebar-shell__sidebar">

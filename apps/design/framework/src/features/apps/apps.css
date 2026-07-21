@@ -30,6 +30,12 @@
   flex-shrink: 0;
 }
 
+.apps-page__asset-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--space) * 1);
+}
+
 .apps-btn {
   display: inline-flex;
   align-items: center;
@@ -39,7 +45,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius);
   background: var(--color-primary);
-  color: var(--color-text);
+  color: #fff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;

@@ -2,7 +2,46 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createContentStore } from './store'
+import { createContentStore, normalizeAppConfig } from './store'
+
+describe('normalizeAppConfig', () => {
+  it('migrates legacy layout string to layouts array', () => {
+    expect(
+      normalizeAppConfig({
+        id: 'orders',
+        name: 'Orders',
+        style: 'dashboard',
+        layout: 'split-screen',
+      }),
+    ).toEqual({
+      id: 'orders',
+      name: 'Orders',
+      style: 'dashboard',
+      layouts: ['split-screen'],
+    })
+  })
+
+  it('filters invalid layouts entries and defaults when empty', () => {
+    expect(
+      normalizeAppConfig({
+        id: 'orders',
+        name: 'Orders',
+        layouts: ['sidebar-shell', '', 3, 'split-screen'],
+      }),
+    ).toMatchObject({
+      style: 'dashboard',
+      layouts: ['sidebar-shell', 'split-screen'],
+    })
+
+    expect(
+      normalizeAppConfig({
+        id: 'orders',
+        name: 'Orders',
+        layouts: [],
+      }).layouts,
+    ).toEqual(['sidebar-shell'])
+  })
+})
 
 describe('createContentStore', () => {
   let root: string
@@ -22,14 +61,60 @@ describe('createContentStore', () => {
       id: 'orders',
       name: 'Orders',
       style: 'dashboard',
-      layout: 'sidebar-shell',
+      layouts: ['sidebar-shell'],
     })
     const raw = await fs.readFile(path.join(root, 'orders', 'app.json'), 'utf8')
-    expect(JSON.parse(raw).id).toBe('orders')
+    expect(JSON.parse(raw)).toMatchObject({
+      id: 'orders',
+      layouts: ['sidebar-shell'],
+    })
+    expect(JSON.parse(raw).layout).toBeUndefined()
     const canvases = JSON.parse(
       await fs.readFile(path.join(root, 'orders', 'canvases.json'), 'utf8'),
     )
     expect(canvases.canvases).toEqual([])
+  })
+
+  it('rewrites legacy layout field to layouts on read', async () => {
+    const store = createContentStore(root)
+    await fs.mkdir(path.join(root, 'legacy'), { recursive: true })
+    await fs.writeFile(
+      path.join(root, 'legacy', 'app.json'),
+      `${JSON.stringify({
+        id: 'legacy',
+        name: 'Legacy',
+        style: 'dashboard',
+        layout: 'split-screen',
+      }, null, 2)}\n`,
+      'utf8',
+    )
+    await fs.writeFile(
+      path.join(root, 'legacy', 'canvases.json'),
+      `${JSON.stringify({ canvases: [] }, null, 2)}\n`,
+      'utf8',
+    )
+
+    const app = await store.getApp('legacy')
+    expect(app.layouts).toEqual(['split-screen'])
+    const disk = JSON.parse(
+      await fs.readFile(path.join(root, 'legacy', 'app.json'), 'utf8'),
+    ) as Record<string, unknown>
+    expect(disk.layouts).toEqual(['split-screen'])
+    expect(disk.layout).toBeUndefined()
+  })
+
+  it('replaces style and appends layouts on apply', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+
+    const afterStyle = await store.setAppStyle('orders', 'totality')
+    expect(afterStyle.style).toBe('totality')
+
+    const afterLayout = await store.addAppLayout('orders', 'split-screen')
+    expect(afterLayout.layouts).toEqual(['sidebar-shell', 'split-screen'])
+
+    const again = await store.addAppLayout('orders', 'split-screen')
+    expect(again.layouts).toEqual(['sidebar-shell', 'split-screen'])
   })
 
   it('rejects blank app names', async () => {
