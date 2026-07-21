@@ -1,6 +1,6 @@
 # Design engineering (Phase 1)
 
-Local Vite + React app for managing design packages on disk: create apps, add blank pages, and preview page modules. The management shell follows the dashboard visual rules and `sidebar-shell` layout under `docs/design/design`.
+Local Vite + React app for managing design packages on disk: create apps, add blank canvases, and preview canvas modules. The management shell follows the dashboard visual rules and `sidebar-shell` layout under `docs/design/design`.
 
 ## Setup
 
@@ -10,7 +10,7 @@ npm install
 npm run dev
 ```
 
-Open the URL Vite prints (default `http://localhost:5173`). App create/list/delete and page CRUD require the design-fs middleware, which only runs under `npm run dev`.
+Open the URL Vite prints (default `http://localhost:5173`). App create/list/delete and canvas CRUD require the design-fs middleware, which only runs under `npm run dev`.
 
 ## Scripts
 
@@ -30,7 +30,7 @@ apps/design/
 ```
 
 - `framework/` — product UI and tooling; intended to stay in sync with the engineering app.
-- `apps/` — content written by the design-fs API (`app.json`, `pages.json`, page `.tsx` files). Later sync should treat this tree as workspace-local data, not framework source. The local `.gitignore` keeps generated app content out of normal commits by default.
+- `apps/` — content written by the design-fs API (`app.json`, `canvases.json`, canvas `.tsx` files). Later sync should treat this tree as workspace-local data, not framework source. The local `.gitignore` keeps generated app content out of normal commits by default.
 
 ## Docs
 

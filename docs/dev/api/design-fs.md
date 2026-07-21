@@ -23,9 +23,9 @@ On-disk layout:
 ```text
 apps/design/apps/<id>/
   app.json
-  pages.json
-  pages/
-    <PageName>.tsx
+  canvases.json
+  canvases/
+    <CanvasName>.tsx
 ```
 
 ## On-disk schemas
@@ -40,11 +40,11 @@ apps/design/apps/<id>/
 | `style` | string | Phase 1 default: `dashboard` |
 | `layout` | string | Phase 1 default: `sidebar-shell` |
 
-### `pages.json`
+### `canvases.json`
 
 ```json
 {
-  "pages": [
+  "canvases": [
     { "id": "home", "name": "Home", "component": "Home.tsx" }
   ]
 }
@@ -54,12 +54,12 @@ apps/design/apps/<id>/
 |-------|------|--------|
 | `id` | string | Same id rules as app `id` |
 | `name` | string | Display name; trimmed, must be non-empty |
-| `component` | string | Filename under `pages/` (e.g. `Home.tsx`) |
+| `component` | string | Filename under `canvases/` (e.g. `Home.tsx`) |
 
-Adding a page appends an entry and writes a placeholder `.tsx`. The component
-filename is derived from the page name (falling back to the page id when the
+Adding a canvas appends an entry and writes a placeholder `.tsx`. The component
+filename is derived from the canvas name (falling back to the canvas id when the
 derived name is not a valid TS identifier), while the placeholder `<h1>` uses
-the trimmed page `name`. Deleting a page removes the entry and the component
+the trimmed canvas `name`. Deleting a canvas removes the entry and the component
 file.
 
 ## Endpoints
@@ -71,8 +71,8 @@ All responses are JSON. Errors use `{ "error": "<message>" }` with status:
 | Condition | Status |
 |-----------|--------|
 | Validation / bad request | `400` |
-| Missing app or page | `404` |
-| Duplicate app/page/component | `409` |
+| Missing app or canvas | `404` |
+| Duplicate app/canvas/component | `409` |
 | Unexpected failure | `500` |
 
 ### Apps
@@ -84,20 +84,20 @@ All responses are JSON. Errors use `{ "error": "<message>" }` with status:
 | `POST` | `/apps` | `{ "id", "name", "path"? }` | `AppConfig` |
 | `DELETE` | `/apps/:id` | — | `{ "ok": true }` |
 
-### Pages
+### Canvases
 
 | Method | Path | Body | Success |
 |--------|------|------|---------|
-| `GET` | `/apps/:id/pages` | — | `PageEntry[]` |
-| `POST` | `/apps/:id/pages` | `{ "id", "name" }` | `PageEntry` |
-| `DELETE` | `/apps/:id/pages/:pageId` | — | `{ "ok": true }` |
+| `GET` | `/apps/:id/canvases` | — | `CanvasEntry[]` |
+| `POST` | `/apps/:id/canvases` | `{ "id", "name" }` | `CanvasEntry` |
+| `DELETE` | `/apps/:id/canvases/:canvasId` | — | `{ "ok": true }` |
 
 ## Browser client
 
 `apps/design/framework/src/lib/api.ts` exports `designApi` with:
 
 - `listApps()`, `getApp(id)`, `createApp({ id, name, path? })`, `deleteApp(id)`
-- `listPages(appId)`, `addPage(appId, { id, name })`, `deletePage(appId, pageId)`
+- `listCanvases(appId)`, `addCanvas(appId, { id, name })`, `deleteCanvas(appId, canvasId)`
 
 On non-2xx responses the client throws `Error` with the server `error` message
 (or `statusText` if the body has no string `error`).
