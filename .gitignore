@@ -1,3 +1,7 @@
+# macOS metadata
+.DS_Store
+*/.DS_Store
+
 # Playwright MCP 输出（wn-playwright-installer）
 temp/
 
