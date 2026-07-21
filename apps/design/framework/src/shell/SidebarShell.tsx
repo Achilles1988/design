@@ -26,6 +26,62 @@ function canvasLinkClassName({ isActive }: { isActive: boolean }) {
     : 'sidebar-shell__nav-link sidebar-shell__nav-link--canvas'
 }
 
+function AppsIcon() {
+  return (
+    <svg
+      className="sidebar-shell__icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  )
+}
+
+function FolderIcon() {
+  return (
+    <svg
+      className="sidebar-shell__icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+    </svg>
+  )
+}
+
+function CanvasIcon() {
+  return (
+    <svg
+      className="sidebar-shell__icon sidebar-shell__icon--sm"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+    </svg>
+  )
+}
+
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      className={
+        open
+          ? 'sidebar-shell__chevron sidebar-shell__chevron--open'
+          : 'sidebar-shell__chevron'
+      }
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  )
+}
+
 async function loadTree(): Promise<AppNode[]> {
   const apps = await designApi.listApps()
   const nodes = await Promise.all(
@@ -90,8 +146,13 @@ export function SidebarShell({ children }: SidebarShellProps) {
       <aside className="sidebar-shell__sidebar">
         <nav className="sidebar-shell__nav" aria-label="Primary">
           <NavLink to="/" end className={navLinkClassName}>
-            Apps
+            <AppsIcon />
+            <span className="sidebar-shell__nav-link-text">Apps</span>
           </NavLink>
+
+          {nodes.length > 0 ? (
+            <div className="sidebar-shell__group-label">Workspace</div>
+          ) : null}
 
           {nodes.map(({ app, canvases }) => {
             const isCollapsed = collapsed.has(app.id)
@@ -107,10 +168,13 @@ export function SidebarShell({ children }: SidebarShellProps) {
                     }
                     onClick={() => toggle(app.id)}
                   >
-                    {isCollapsed ? '▸' : '▾'}
+                    <ChevronIcon open={!isCollapsed} />
                   </button>
                   <NavLink to={`/apps/${app.id}`} className={navLinkClassName}>
-                    {app.name}
+                    <FolderIcon />
+                    <span className="sidebar-shell__nav-link-text">
+                      {app.name}
+                    </span>
                   </NavLink>
                 </div>
 
@@ -121,7 +185,10 @@ export function SidebarShell({ children }: SidebarShellProps) {
                         to={`/apps/${app.id}/canvases/${canvas.id}`}
                         className={canvasLinkClassName}
                       >
-                        {canvas.name}
+                        <CanvasIcon />
+                        <span className="sidebar-shell__nav-link-text">
+                          {canvas.name}
+                        </span>
                       </NavLink>
                     ))
                   : null}
