@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { designApi } from '@/lib/api'
+import { emitCanvasesChanged } from '@/lib/canvasEvents'
 import { isValidAppId, slugify } from '@/lib/slug'
 import './apps.css'
 
@@ -40,6 +41,7 @@ export function AppCreatePage() {
         ...(trimmedPath ? { path: trimmedPath } : {}),
       })
       setSubmitting(false)
+      emitCanvasesChanged()
       navigate(`/apps/${created.id}`)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create app')

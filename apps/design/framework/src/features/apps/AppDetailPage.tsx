@@ -140,6 +140,7 @@ export function AppDetailPage() {
     setFormError(null)
     try {
       await designApi.deleteApp(appId)
+      emitCanvasesChanged()
       navigate('/')
     } catch (err: unknown) {
       setFormError(

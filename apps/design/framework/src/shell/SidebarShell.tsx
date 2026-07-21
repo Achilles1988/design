@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { designApi } from '@/lib/api'
 import { subscribeCanvasesChanged } from '@/lib/canvasEvents'
 import type { AppConfig, CanvasEntry } from '@/lib/types'
@@ -42,25 +42,29 @@ async function loadTree(): Promise<AppNode[]> {
 }
 
 export function SidebarShell({ children }: SidebarShellProps) {
-  const location = useLocation()
   const [nodes, setNodes] = useState<AppNode[]>([])
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     let cancelled = false
-    loadTree().then((next) => {
-      if (!cancelled) setNodes(next)
-    })
-    const unsubscribe = subscribeCanvasesChanged(() => {
-      loadTree().then((next) => {
-        if (!cancelled) setNodes(next)
-      })
-    })
+    function refresh() {
+      loadTree().then(
+        (next) => {
+          if (!cancelled) setNodes(next)
+        },
+        () => {
+          // listApps itself failed (e.g. dev server unavailable); leave the
+          // tree as-is rather than surfacing an unhandled rejection.
+        },
+      )
+    }
+    refresh()
+    const unsubscribe = subscribeCanvasesChanged(refresh)
     return () => {
       cancelled = true
       unsubscribe()
     }
-  }, [location.pathname])
+  }, [])
 
   function toggle(appId: string) {
     setCollapsed((prev) => {
