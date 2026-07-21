@@ -82,6 +82,13 @@
   color: var(--color-text);
 }
 
+.sidebar-shell__nav-link:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  color: var(--color-text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
 .sidebar-shell__nav-link--active {
   background: color-mix(in srgb, var(--color-primary) 22%, transparent);
   color: var(--color-primary);

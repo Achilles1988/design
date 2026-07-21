@@ -29,9 +29,20 @@ export function nameToComponentFile(name: string, id: string): string {
   return `${base}.tsx`
 }
 
-export function pagePlaceholderSource(componentFile: string): string {
+function requireNonEmptyName(name: string, label: string): string {
+  const trimmed = name.trim()
+  if (!trimmed) {
+    throw new Error(`${label} is required`)
+  }
+  return trimmed
+}
+
+export function pagePlaceholderSource(
+  componentFile: string,
+  pageName: string,
+): string {
   const fn = componentFile.replace(/\.tsx$/, '')
-  return `export default function ${fn}() {\n  return <h1>${fn}</h1>\n}\n`
+  return `export default function ${fn}() {\n  return <h1>${pageName}</h1>\n}\n`
 }
 
 async function readPagesFile(appDir: string): Promise<PagesFile> {
@@ -87,10 +98,11 @@ export function createContentStore(contentRoot: string) {
     name: string
     path?: string
   }): Promise<AppConfig> {
-    const { id, name } = input
+    const { id } = input
     if (!isValidAppId(id)) {
       throw new Error(`Invalid app id: ${id}`)
     }
+    const name = requireNonEmptyName(input.name, 'App name')
     const pathMeta = validatePathMeta(input.path)
     if (!pathMeta.ok) {
       throw new Error(pathMeta.error)
@@ -98,14 +110,15 @@ export function createContentStore(contentRoot: string) {
 
     const dir = appDir(id)
     try {
-      await fs.access(dir)
-      throw new Error('App already exists')
+      await fs.mkdir(dir)
     } catch (err) {
-      if ((err as Error).message === 'App already exists') throw err
-      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err
+      if ((err as NodeJS.ErrnoException).code === 'EEXIST') {
+        throw new Error('App already exists')
+      }
+      throw err
     }
 
-    await fs.mkdir(resolveContentPath(dir, 'pages'), { recursive: true })
+    await fs.mkdir(resolveContentPath(dir, 'pages'))
 
     const app: AppConfig = {
       id,
@@ -148,10 +161,11 @@ export function createContentStore(contentRoot: string) {
     if (!isValidAppId(input.id)) {
       throw new Error(`Invalid page id: ${input.id}`)
     }
+    const name = requireNonEmptyName(input.name, 'Page name')
 
     const dir = appDir(appId)
     const data = await readPagesFile(dir)
-    const component = nameToComponentFile(input.name, input.id)
+    const component = nameToComponentFile(name, input.id)
 
     if (data.pages.some((p) => p.id === input.id)) {
       throw new Error(`Page already exists: ${input.id}`)
@@ -162,18 +176,20 @@ export function createContentStore(contentRoot: string) {
 
     const componentPath = resolveContentPath(dir, 'pages', component)
     try {
-      await fs.access(componentPath)
-      throw new Error(`Component already exists: ${component}`)
+      await fs.writeFile(componentPath, pagePlaceholderSource(component, name), {
+        encoding: 'utf8',
+        flag: 'wx',
+      })
     } catch (err) {
-      if ((err as Error).message.startsWith('Component already exists')) throw err
-      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err
+      if ((err as NodeJS.ErrnoException).code === 'EEXIST') {
+        throw new Error(`Component already exists: ${component}`)
+      }
+      throw err
     }
-
-    await fs.writeFile(componentPath, pagePlaceholderSource(component), 'utf8')
 
     const page: PageEntry = {
       id: input.id,
-      name: input.name,
+      name,
       component,
     }
     data.pages.push(page)

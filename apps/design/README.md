@@ -30,7 +30,7 @@ apps/design/
 ```
 
 - `framework/` — product UI and tooling; intended to stay in sync with the engineering app.
-- `apps/` — content written by the design-fs API (`app.json`, `pages.json`, page `.tsx` files). Later sync should treat this tree as workspace-local data, not framework source.
+- `apps/` — content written by the design-fs API (`app.json`, `pages.json`, page `.tsx` files). Later sync should treat this tree as workspace-local data, not framework source. The local `.gitignore` keeps generated app content out of normal commits by default.
 
 ## Docs
 

@@ -6,6 +6,12 @@ type SidebarShellProps = {
   children: ReactNode
 }
 
+function navLinkClassName({ isActive }: { isActive: boolean }) {
+  return isActive
+    ? 'sidebar-shell__nav-link sidebar-shell__nav-link--active'
+    : 'sidebar-shell__nav-link'
+}
+
 export function SidebarShell({ children }: SidebarShellProps) {
   return (
     <div className="sidebar-shell">
@@ -24,21 +30,13 @@ export function SidebarShell({ children }: SidebarShellProps) {
           <NavLink
             to="/"
             end
-            className={({ isActive }) =>
-              isActive
-                ? 'sidebar-shell__nav-link sidebar-shell__nav-link--active'
-                : 'sidebar-shell__nav-link'
-            }
+            className={navLinkClassName}
           >
             Apps
           </NavLink>
           <NavLink
             to="/apps/new"
-            className={({ isActive }) =>
-              isActive
-                ? 'sidebar-shell__nav-link sidebar-shell__nav-link--active'
-                : 'sidebar-shell__nav-link'
-            }
+            className={navLinkClassName}
           >
             New app
           </NavLink>

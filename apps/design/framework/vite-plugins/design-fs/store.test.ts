@@ -32,6 +32,13 @@ describe('createContentStore', () => {
     expect(pages.pages).toEqual([])
   })
 
+  it('rejects blank app names', async () => {
+    const store = createContentStore(root)
+    await expect(
+      store.createApp({ id: 'orders', name: '   ' }),
+    ).rejects.toThrow(/App name is required/)
+  })
+
   it('rejects duplicate id', async () => {
     const store = createContentStore(root)
     await store.createApp({ id: 'orders', name: 'Orders' })
@@ -47,6 +54,7 @@ describe('createContentStore', () => {
     expect(page.component).toBe('Home.tsx')
     const file = path.join(root, 'orders', 'pages', 'Home.tsx')
     await expect(fs.access(file)).resolves.toBeUndefined()
+    expect(await fs.readFile(file, 'utf8')).toContain('<h1>Home</h1>')
     await store.deletePage('orders', 'home')
     await expect(fs.access(file)).rejects.toThrow()
   })
@@ -65,5 +73,6 @@ describe('createContentStore', () => {
     )
     expect(source).toContain('function NotFound(')
     expect(source).not.toContain('function 404')
+    expect(source).toContain('<h1>404 Page</h1>')
   })
 })

@@ -1,9 +1,20 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
 import { isValidAppId, slugify } from '@/lib/slug'
 import type { AppConfig, PageEntry } from '@/lib/types'
 import './apps.css'
+
+async function loadAppData(appId: string): Promise<{
+  app: AppConfig
+  pages: PageEntry[]
+}> {
+  const [app, pages] = await Promise.all([
+    designApi.getApp(appId),
+    designApi.listPages(appId),
+  ])
+  return { app, pages }
+}
 
 export function AppDetailPage() {
   const { id: appId = '' } = useParams<{ id: string }>()
@@ -19,17 +30,16 @@ export function AppDetailPage() {
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [busy, setBusy] = useState(false)
+  const loadRun = useRef(0)
 
   const pageIdValid = isValidAppId(pageId)
   const canSubmit =
     pageName.trim().length > 0 && pageIdValid && !submitting && !busy
 
-  async function reload() {
+  async function reload(runId: number) {
     setLoadError(null)
-    const [nextApp, nextPages] = await Promise.all([
-      designApi.getApp(appId),
-      designApi.listPages(appId),
-    ])
+    const { app: nextApp, pages: nextPages } = await loadAppData(appId)
+    if (runId !== loadRun.current) return
     setApp(nextApp)
     setPages(nextPages)
   }
@@ -45,14 +55,18 @@ export function AppDetailPage() {
       return
     }
 
-    Promise.all([designApi.getApp(appId), designApi.listPages(appId)])
-      .then(([nextApp, nextPages]) => {
+    const runId = ++loadRun.current
+
+    loadAppData(appId)
+      .then(({ app: nextApp, pages: nextPages }) => {
+        if (runId !== loadRun.current) return
         if (!cancelled) {
           setApp(nextApp)
           setPages(nextPages)
         }
       })
       .catch((err: unknown) => {
+        if (runId !== loadRun.current) return
         if (!cancelled) {
           setApp(null)
           setPages([])
@@ -91,7 +105,7 @@ export function AppDetailPage() {
       setPageName('')
       setPageId('')
       setPageIdDirty(false)
-      await reload()
+      await reload(loadRun.current)
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'Failed to add page')
     } finally {
@@ -105,7 +119,7 @@ export function AppDetailPage() {
     setFormError(null)
     try {
       await designApi.deletePage(appId, page.id)
-      await reload()
+      await reload(loadRun.current)
     } catch (err: unknown) {
       setFormError(
         err instanceof Error ? err.message : 'Failed to delete page',
@@ -241,6 +255,7 @@ export function AppDetailPage() {
                           type="button"
                           onClick={() => onDeletePage(page)}
                           disabled={busy || submitting}
+                          aria-label={`Delete page ${page.name}`}
                         >
                           Delete
                         </button>
@@ -289,6 +304,12 @@ export function AppDetailPage() {
                 Lowercase letter, then letters, digits, or hyphens.
                 {!pageIdDirty ? ' Prefills from name until you edit it.' : null}
               </p>
+              {pageId.length > 0 && !pageIdValid ? (
+                <p className="apps-field__error">
+                  ID must start with a lowercase letter and only contain
+                  lowercase letters, digits, or hyphens.
+                </p>
+              ) : null}
             </div>
 
             <div className="apps-form__footer">

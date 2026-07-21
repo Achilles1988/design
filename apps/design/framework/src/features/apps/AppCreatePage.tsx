@@ -39,6 +39,7 @@ export function AppCreatePage() {
         name: name.trim(),
         ...(trimmedPath ? { path: trimmedPath } : {}),
       })
+      setSubmitting(false)
       navigate(`/apps/${created.id}`)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create app')
@@ -90,6 +91,12 @@ export function AppCreatePage() {
             Lowercase letter, then letters, digits, or hyphens.
             {!idDirty ? ' Prefills from name until you edit it.' : null}
           </p>
+          {id.length > 0 && !idValid ? (
+            <p className="apps-field__error">
+              ID must start with a lowercase letter and only contain lowercase
+              letters, digits, or hyphens.
+            </p>
+          ) : null}
         </div>
 
         <div className="apps-field">

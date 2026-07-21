@@ -2,6 +2,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin } from 'vite'
 import { createContentStore } from './store'
 
+const DESIGN_FS_NOT_FOUND = 'Not found'
+
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
@@ -26,6 +28,15 @@ function statusForError(err: unknown): number {
     return 400
   }
   return 500
+}
+
+function sanitizeErrorMessage(err: unknown): string {
+  const code = (err as NodeJS.ErrnoException).code
+  const message = err instanceof Error ? err.message : String(err)
+  if (code === 'ENOENT') {
+    return DESIGN_FS_NOT_FOUND
+  }
+  return message
 }
 
 function sendJson(
@@ -63,7 +74,7 @@ export function designFsPlugin(options: { contentRoot: string }): Plugin {
           const parts = pathname.split('/').filter(Boolean)
           // parts: ['__design_fs', 'apps', ...]
           if (parts[0] !== '__design_fs' || parts[1] !== 'apps') {
-            sendJson(res, 404, { error: 'Not found' })
+            sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
             return
           }
 
@@ -78,10 +89,14 @@ export function designFsPlugin(options: { contentRoot: string }): Plugin {
             const body = (await parseJsonBody(req)) as {
               id?: string
               name?: string
-              path?: string
+              path?: unknown
             }
             if (typeof body.id !== 'string' || typeof body.name !== 'string') {
               sendJson(res, 400, { error: 'id and name are required' })
+              return
+            }
+            if (body.path !== undefined && typeof body.path !== 'string') {
+              sendJson(res, 400, { error: 'path must be a string' })
               return
             }
             const app = await store.createApp({
@@ -95,7 +110,7 @@ export function designFsPlugin(options: { contentRoot: string }): Plugin {
 
           const appId = parts[2]
           if (!appId) {
-            sendJson(res, 404, { error: 'Not found' })
+            sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
             return
           }
 
@@ -114,7 +129,7 @@ export function designFsPlugin(options: { contentRoot: string }): Plugin {
 
           // /__design_fs/apps/:id/pages[...]
           if (parts[3] !== 'pages') {
-            sendJson(res, 404, { error: 'Not found' })
+            sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
             return
           }
 
@@ -150,11 +165,10 @@ export function designFsPlugin(options: { contentRoot: string }): Plugin {
             return
           }
 
-          sendJson(res, 404, { error: 'Not found' })
+          sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
         } catch (err) {
           const status = statusForError(err)
-          const message =
-            err instanceof Error ? err.message : String(err)
+          const message = sanitizeErrorMessage(err)
           sendJson(res, status, { error: message })
         }
       })

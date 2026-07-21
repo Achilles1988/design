@@ -35,7 +35,7 @@ apps/design/apps/<id>/
 | Field | Type | Notes |
 |-------|------|--------|
 | `id` | string | Directory name; must match `^[a-z][a-z0-9-]*$` |
-| `name` | string | Display name |
+| `name` | string | Display name; trimmed, must be non-empty |
 | `path` | string? | Optional relative path metadata (no `..`, not absolute) |
 | `style` | string | Phase 1 default: `dashboard` |
 | `layout` | string | Phase 1 default: `sidebar-shell` |
@@ -53,11 +53,14 @@ apps/design/apps/<id>/
 | Field | Type | Notes |
 |-------|------|--------|
 | `id` | string | Same id rules as app `id` |
-| `name` | string | Used to derive the component filename |
+| `name` | string | Display name; trimmed, must be non-empty |
 | `component` | string | Filename under `pages/` (e.g. `Home.tsx`) |
 
-Adding a page appends an entry and writes a placeholder `.tsx`. Deleting a
-page removes the entry and the component file.
+Adding a page appends an entry and writes a placeholder `.tsx`. The component
+filename is derived from the page name (falling back to the page id when the
+derived name is not a valid TS identifier), while the placeholder `<h1>` uses
+the trimmed page `name`. Deleting a page removes the entry and the component
+file.
 
 ## Endpoints
 

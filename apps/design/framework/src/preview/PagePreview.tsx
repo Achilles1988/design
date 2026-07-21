@@ -6,11 +6,12 @@ import '../features/apps/apps.css'
 
 type PreviewState =
   | { status: 'loading' }
-  | { status: 'missing'; message: string }
+  | { status: 'error'; message: string }
   | { status: 'ready'; Page: ComponentType }
 
-const MISSING_HINT =
+const GLOB_MISS_HINT =
   'Page not found / restart dev server after adding files if glob cache stale'
+const PAGE_ENTRY_MISSING = 'Page entry not found in pages.json'
 
 export function PagePreview() {
   const { id: appId = '', pageId = '' } = useParams<{
@@ -24,7 +25,7 @@ export function PagePreview() {
     setState({ status: 'loading' })
 
     if (!appId || !pageId) {
-      setState({ status: 'missing', message: MISSING_HINT })
+      setState({ status: 'error', message: PAGE_ENTRY_MISSING })
       return
     }
 
@@ -34,7 +35,7 @@ export function PagePreview() {
         const entry = pages.find((p) => p.id === pageId)
         if (!entry) {
           if (!cancelled) {
-            setState({ status: 'missing', message: MISSING_HINT })
+            setState({ status: 'error', message: PAGE_ENTRY_MISSING })
           }
           return
         }
@@ -42,15 +43,15 @@ export function PagePreview() {
         const Page = await loadPageModule(appId, entry.component)
         if (cancelled) return
         if (!Page) {
-          setState({ status: 'missing', message: MISSING_HINT })
+          setState({ status: 'error', message: GLOB_MISS_HINT })
           return
         }
         setState({ status: 'ready', Page })
       } catch (err: unknown) {
         if (!cancelled) {
           setState({
-            status: 'missing',
-            message: err instanceof Error ? err.message : MISSING_HINT,
+            status: 'error',
+            message: err instanceof Error ? err.message : GLOB_MISS_HINT,
           })
         }
       }
@@ -65,7 +66,7 @@ export function PagePreview() {
     return <p className="apps-muted">Loading preview…</p>
   }
 
-  if (state.status === 'missing') {
+  if (state.status === 'error') {
     return (
       <div className="apps-page">
         <p className="apps-error">{state.message}</p>

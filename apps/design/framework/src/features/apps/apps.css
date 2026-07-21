@@ -49,6 +49,11 @@
   background: var(--color-secondary);
 }
 
+.apps-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
 .apps-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -229,6 +234,12 @@
 .apps-field__hint {
   margin: 0;
   color: var(--color-muted);
+  font-size: 12px;
+}
+
+.apps-field__error {
+  margin: 0;
+  color: var(--color-danger);
   font-size: 12px;
 }
 

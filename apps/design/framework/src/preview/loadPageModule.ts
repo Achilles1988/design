@@ -11,6 +11,6 @@ export async function loadPageModule(
   if (!key) return null
   const loader = modules[key]
   if (!loader) return null
-  const mod = (await loader()) as { default: ComponentType }
-  return mod.default
+  const mod = (await loader()) as { default?: ComponentType }
+  return mod.default ?? null
 }
