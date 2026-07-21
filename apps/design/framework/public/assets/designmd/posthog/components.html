@@ -1,0 +1,903 @@
+<!-- source_content_hash: 01f497f751d56296bfcd5eb8806325a4bb4786d364941ec6e65c65fa9ee6d362 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PostHog — Component Preview</title>
+<style>
+  /* ============================================================
+     PostHog design tokens — mapped from DESIGN.md front matter.
+     A playful developer-tools system on a warm cream canvas with
+     hand-drawn hedgehog mascots. Single yellow-orange CTA pill,
+     olive ink, IBM Plex Sans, flat bordered cards, no shadows.
+     ============================================================ */
+  :root {
+    /* Brand & accent — the only saturated chromatic moment */
+    --primary: #f7a501;          /* PostHog yellow-orange */
+    --primary-pressed: #dd9001;
+    --primary-active: #b17816;
+    --on-primary: #23251d;       /* deep olive text on yellow */
+
+    /* Text — olive family, near-black against cream */
+    --ink: #23251d;              /* headlines, nav links */
+    --body: #4d4f46;             /* default paragraph, most-used */
+    --charcoal: #33342d;
+    --mute: #6c6e63;
+    --ash: #9b9c92;
+    --stone: #b6b7af;
+
+    /* Surface — cream, never white canvas */
+    --canvas: #eeefe9;           /* warm cream page background */
+    --surface-soft: #e5e7e0;     /* secondary button, code chip */
+    --surface-card: #ffffff;     /* white card on cream */
+    --surface-doc: #fcfcfa;      /* faintly warm doc-body white */
+    --surface-dark: #23251d;     /* inverted code-block (== ink) */
+    --on-dark: #ffffff;
+
+    /* Hairlines — olive-tinted borders (no shadow system) */
+    --hairline: #bfc1b7;
+    --hairline-soft: #dcdfd2;
+
+    /* Semantic — inline links + doc callout pastels */
+    --link-blue: #1d4ed8;
+    --link-teal: #1078a3;        /* primary inline link */
+    --accent-blue: #2c84e0;
+    --accent-blue-soft: #dceaf6; /* 💡 tip / info */
+    --accent-red: #cd4239;
+    --accent-red-soft: #f7d6d3;  /* ⚠️ warning */
+    --accent-green: #2c8c66;
+    --accent-green-soft: #d9eddf;/* ✅ success */
+    --accent-purple: #7c44a6;
+    --accent-purple-soft: #e7d8ee;/* 📘 note */
+    --focus-ring: rgba(59,130,246,0.5);
+
+    /* Radius — clusters at 4–6px; pill only for chips */
+    --r-none: 0px;
+    --r-xs: 2px;
+    --r-sm: 4px;
+    --r-md: 6px;
+    --r-lg: 8px;
+    --r-full: 9999px;
+
+    /* Spacing — 8px base with fine 2/4/6 steps */
+    --sp-xxs: 2px;
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 24px;
+    --sp-xxl: 32px;
+    --sp-section: 80px;
+
+    /* Type — IBM Plex Sans across every role; mono for code */
+    --font-sans: "IBM Plex Sans", "IBM Plex Sans Variable", -apple-system,
+      system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "Source Code Pro", ui-monospace, "JetBrains Mono",
+      Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--canvas);   /* cream end-to-end, never white */
+    color: var(--body);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* Global focus ring — accessibility */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-xl); }
+
+  .section { padding: var(--sp-section) 0; }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.33;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--body);
+    margin-bottom: var(--sp-md);
+  }
+
+  h2.section-title {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.33;
+    letter-spacing: -0.6px;
+    color: var(--ink);
+  }
+
+  /* ---------- Top nav (cream, same as page) ---------- */
+  .nav {
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .nav-inner {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-xl);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-sm);
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 18px;
+  }
+  .nav-menu {
+    display: flex;
+    gap: var(--sp-lg);
+    margin-left: var(--sp-md);
+  }
+  .nav-menu a {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    padding: var(--sp-xs) 0;
+  }
+  .nav-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-lg);
+  }
+  .nav-right .login { font-size: 16px; font-weight: 600; color: var(--ink); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-sm);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--r-md);
+    padding: var(--sp-sm) var(--sp-lg);
+    height: 40px;
+  }
+  .btn-primary {                 /* the universal PostHog CTA */
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+  .btn-primary:active { background: var(--primary-pressed); }
+  .btn-primary.pill { border-radius: var(--r-full); }
+  .btn-secondary {
+    background: var(--surface-soft);
+    color: var(--ink);
+  }
+  .btn-tertiary {
+    background: transparent;
+    color: var(--ink);
+    padding: var(--sp-sm) var(--sp-md);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 72px 0 var(--sp-section); }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: var(--sp-xxl);
+    align-items: center;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: var(--sp-lg);
+  }
+  .hero p.lead {
+    font-size: 18px;
+    line-height: 1.56;
+    color: var(--body);
+    max-width: 52ch;
+    margin-bottom: var(--sp-xl);
+  }
+  .hero-cta { display: flex; gap: var(--sp-md); flex-wrap: wrap; }
+
+  /* Hedgehog mascot — the entire decorative identity (inline SVG) */
+  .mascot-frame {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mascot { width: 100%; max-width: 240px; height: auto; }
+
+  /* ---------- Product tabs ---------- */
+  .tabs {
+    display: flex;
+    gap: var(--sp-xs);
+    flex-wrap: wrap;
+    margin-bottom: var(--sp-xl);
+  }
+  .tab {
+    background: transparent;
+    color: var(--body);
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--r-md);
+    padding: var(--sp-sm) var(--sp-md);
+    cursor: pointer;
+  }
+  .tab.active {                  /* lifts to white card off cream */
+    background: var(--surface-card);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+  }
+
+  /* ---------- Feature card grid ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-lg);
+  }
+  .card {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);   /* flat, no shadow */
+    border-radius: var(--r-md);
+    padding: var(--sp-xl);
+  }
+  .card .icon {
+    width: 44px;
+    height: 44px;
+    color: var(--ink);
+    margin-bottom: var(--sp-md);
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.56;
+    color: var(--ink);
+    margin-bottom: var(--sp-sm);
+  }
+  .card p {
+    font-size: 15px;
+    line-height: 1.71;
+    color: var(--body);
+    margin-bottom: var(--sp-md);
+  }
+  .card .learn {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--link-teal);
+  }
+  .badge-promo {
+    display: inline-block;
+    background: var(--accent-blue-soft);
+    color: var(--link-blue);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: var(--r-full);
+    padding: var(--sp-xxs) var(--sp-sm);
+    margin-bottom: var(--sp-md);
+  }
+
+  /* Mascot card variant — margin-anchored hedgehog */
+  .card.mascot-card { position: relative; overflow: hidden; }
+  .card.mascot-card .corner-hog {
+    position: absolute;
+    right: -8px;
+    bottom: -8px;
+    width: 88px;
+    height: 88px;
+    opacity: 0.9;
+  }
+
+  /* ---------- Docs layout: sidebar + article ---------- */
+  .doc-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--sp-xxl);
+    align-items: start;
+  }
+  .doc-sidebar {
+    position: sticky;
+    top: 72px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .doc-search {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-sm);
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-sm) var(--sp-md);
+    color: var(--mute);
+    margin-bottom: var(--sp-lg);
+  }
+  .doc-nav-group { margin-bottom: var(--sp-lg); }
+  .doc-nav-group > .head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-sm);
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: var(--sp-sm);
+  }
+  .doc-nav-group .mini-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--body);
+  }
+  .doc-nav-group a {
+    display: block;
+    color: var(--body);
+    padding: 6px var(--sp-sm) 6px 28px;
+    border-radius: var(--r-sm);
+  }
+  .doc-nav-group a.active { color: var(--ink); font-weight: 700; }
+
+  .doc-card {
+    background: var(--surface-doc);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-xl);
+    max-width: 760px;
+  }
+  .doc-card h2 {
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    margin-bottom: var(--sp-md);
+  }
+  .doc-card p {
+    font-size: 15px;
+    line-height: 1.71;
+    color: var(--body);
+    margin-bottom: var(--sp-lg);
+  }
+  .doc-card a.inline { color: var(--link-teal); }
+  .doc-card a.inline:hover { text-decoration: underline; }
+
+  code.inline {
+    background: var(--surface-soft);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: var(--r-xs);
+    padding: var(--sp-xxs) 6px;
+  }
+
+  /* Dark code block inside white doc card — the signature moment */
+  .code-block {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.43;
+    border-radius: var(--r-md);
+    padding: var(--sp-lg) var(--sp-lg);
+    overflow-x: auto;
+    margin-bottom: var(--sp-lg);
+  }
+  .code-block .kw { color: #8fb3e0; }
+  .code-block .str { color: #9ecfa0; }
+  .code-block .num { color: #c9a6dd; }
+  .code-block .cm { color: var(--ash); }
+
+  /* Pastel callout banners — doc-only IA vocabulary */
+  .callout {
+    border-radius: var(--r-md);
+    padding: var(--sp-lg) var(--sp-xl);
+    color: var(--ink);
+    font-size: 16px;
+    margin-bottom: var(--sp-lg);
+    display: flex;
+    gap: var(--sp-md);
+  }
+  .callout .emoji { flex: none; font-size: 18px; line-height: 1.5; }
+  .callout.blue { background: var(--accent-blue-soft); }
+  .callout.green { background: var(--accent-green-soft); }
+  .callout.red { background: var(--accent-red-soft); }
+  .callout.purple { background: var(--accent-purple-soft); }
+  .callout b { color: var(--ink); }
+
+  /* ---------- Pill tabs (filter) ---------- */
+  .pill-tabs { display: flex; gap: var(--sp-sm); flex-wrap: wrap; margin-bottom: var(--sp-xl); }
+  .pill-tab {
+    background: transparent;
+    color: var(--body);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-full);
+    padding: 6px var(--sp-md);
+    cursor: pointer;
+  }
+  .pill-tab.active {             /* flips fully inverted */
+    background: var(--ink);
+    color: var(--on-dark);
+    border-color: var(--ink);
+  }
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-lg);
+  }
+  .tier {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-xxl);
+  }
+  .tier h3 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: var(--ink);
+    margin-bottom: var(--sp-xs);
+  }
+  .tier .price {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: var(--sp-xs);
+  }
+  .tier .price span { font-size: 16px; font-weight: 400; color: var(--mute); }
+  .tier ul { list-style: none; margin: var(--sp-lg) 0; }
+  .tier li {
+    display: flex;
+    gap: var(--sp-sm);
+    align-items: flex-start;
+    font-size: 15px;
+    line-height: 1.71;
+    color: var(--body);
+    margin-bottom: var(--sp-sm);
+  }
+  .tier li .check { color: var(--accent-green); flex: none; margin-top: 3px; }
+  .tier .btn { width: 100%; }
+
+  /* ---------- Form ---------- */
+  .form-card {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-xxl);
+    max-width: 480px;
+  }
+  .field { margin-bottom: var(--sp-lg); }
+  .field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--surface-card);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-sm) var(--sp-md);
+    height: 36px;
+  }
+  .field input:focus {
+    outline: none;
+    border: 2px solid var(--accent-blue);
+    box-shadow: 0 0 0 3px var(--focus-ring);
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: var(--canvas);
+    border-top: 1px solid var(--hairline);
+    padding: var(--sp-xxl) 0;
+    margin-top: var(--sp-section);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--sp-xl);
+  }
+  .footer-col h4 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: var(--sp-md);
+  }
+  .footer-col a {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--body);
+    margin-bottom: var(--sp-sm);
+  }
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-md);
+    margin-top: var(--sp-xl);
+    padding-top: var(--sp-lg);
+    border-top: 1px solid var(--hairline);
+    font-size: 12px;
+    color: var(--mute);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+    .footer-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .section { padding: 64px 0; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-sidebar { position: static; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .nav-menu { display: none; }
+  }
+  @media (max-width: 480px) {
+    .section { padding: 48px 0; }
+    .hero h1 { font-size: 28px; }
+    .grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="./DESIGN.md" aria-label="PostHog home">
+        <!-- hedgehog logo glyph -->
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <circle cx="13" cy="13" r="12" fill="var(--primary)"/>
+          <path d="M7 15c0-3 2.7-5.5 6-5.5s6 2.5 6 5.5" stroke="var(--on-primary)" stroke-width="1.6" fill="none"/>
+          <circle cx="10.5" cy="13" r="1.1" fill="var(--on-primary)"/>
+          <circle cx="15.5" cy="13" r="1.1" fill="var(--on-primary)"/>
+        </svg>
+        PostHog
+      </a>
+      <nav class="nav-menu" aria-label="Primary">
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Community</a>
+        <a href="./DESIGN.md">Company</a>
+      </nav>
+      <div class="nav-right">
+        <a class="login" href="./DESIGN.md">Login</a>
+        <a class="btn btn-primary pill" href="./DESIGN.md">Get started &mdash; free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Product OS for engineers</p>
+        <h1>The new way to build successful products</h1>
+        <p class="lead">Analytics, session replay, feature flags, experiments, and
+          more &mdash; all in one open-source platform, running on a friendly
+          cream canvas with a hedgehog or two along the way.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="./DESIGN.md">Get started &mdash; free</a>
+          <a class="btn btn-secondary" href="./DESIGN.md">Talk to sales</a>
+        </div>
+      </div>
+      <div class="mascot-frame">
+        <!-- Hero hedgehog in a lab coat — the signature decoration -->
+        <svg class="mascot" viewBox="0 0 240 200" fill="none" role="img" aria-label="Hedgehog mascot in a lab coat">
+          <ellipse cx="120" cy="180" rx="80" ry="10" fill="var(--hairline-soft)"/>
+          <!-- spikes -->
+          <path d="M55 130 Q60 80 95 70 L92 95 Q110 60 130 66 L124 92 Q150 62 168 78 L156 100 Q182 82 190 108 Q160 150 120 152 Q78 152 55 130Z" fill="var(--charcoal)"/>
+          <!-- face -->
+          <ellipse cx="70" cy="128" rx="30" ry="26" fill="#e7c9a3"/>
+          <circle cx="60" cy="122" r="3" fill="var(--ink)"/>
+          <circle cx="78" cy="122" r="3" fill="var(--ink)"/>
+          <ellipse cx="46" cy="132" rx="6" ry="5" fill="#3a3630"/>
+          <path d="M62 138 Q69 143 76 138" stroke="var(--ink)" stroke-width="1.6" fill="none"/>
+          <!-- lab coat -->
+          <path d="M92 150 Q120 140 150 152 L156 190 L88 190Z" fill="#ffffff" stroke="var(--hairline)" stroke-width="1.4"/>
+          <rect x="118" y="152" width="4" height="34" fill="var(--hairline)"/>
+          <!-- yellow beaker -->
+          <path d="M158 120 L158 138 L150 158 Q149 164 156 164 L176 164 Q183 164 182 158 L174 138 L174 120Z" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+          <path d="M152 150 L180 150 L176 158 Q149 164 156 164 Z" fill="var(--primary)"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRODUCT TABS + FEATURE GRID ============ -->
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">Understand product usage</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-xl)">Everything in one hog</h2>
+
+      <div class="tabs" role="tablist" aria-label="Product areas">
+        <button class="tab active" role="tab" aria-selected="true">Product analytics</button>
+        <button class="tab" role="tab" aria-selected="false">Session replay</button>
+        <button class="tab" role="tab" aria-selected="false">Feature flags</button>
+        <button class="tab" role="tab" aria-selected="false">Experiments</button>
+        <button class="tab" role="tab" aria-selected="false">Surveys</button>
+      </div>
+
+      <div class="grid">
+        <article class="card">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 20V10M10 20V4M16 20v-8M22 20H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <h3>Trends &amp; funnels</h3>
+          <p>Build any insight from your event data with a point-and-click query engine.</p>
+          <a class="learn" href="./DESIGN.md">Learn more &rarr;</a>
+        </article>
+        <article class="card">
+          <span class="badge-promo">New</span>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M10 9l5 3-5 3V9Z" fill="currentColor"/>
+          </svg>
+          <h3>Session replay</h3>
+          <p>Watch real user sessions to see exactly where people get stuck.</p>
+          <a class="learn" href="./DESIGN.md">Learn more &rarr;</a>
+        </article>
+        <article class="card mascot-card">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 12h6l2-4 4 8 2-4h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>Feature flags</h3>
+          <p>Ship safely with targeted rollouts and instant kill switches.</p>
+          <a class="learn" href="./DESIGN.md">Learn more &rarr;</a>
+          <svg class="corner-hog" viewBox="0 0 88 88" fill="none" aria-hidden="true">
+            <path d="M18 60 Q22 34 44 30 Q66 34 70 60 Q44 74 18 60Z" fill="var(--charcoal)"/>
+            <ellipse cx="30" cy="58" rx="14" ry="12" fill="#e7c9a3"/>
+            <circle cx="25" cy="54" r="1.6" fill="var(--ink)"/>
+            <circle cx="34" cy="54" r="1.6" fill="var(--ink)"/>
+            <ellipse cx="18" cy="60" rx="3" ry="2.6" fill="#3a3630"/>
+          </svg>
+        </article>
+        <article class="card">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3v18M3 8l9-5 9 5-9 5-9-5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+          <h3>A/B experiments</h3>
+          <p>Test hypotheses with statistical significance built right in.</p>
+          <a class="learn" href="./DESIGN.md">Learn more &rarr;</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DOCS LAYOUT ============ -->
+  <section class="section" style="padding-top:0">
+    <div class="wrap doc-layout">
+      <!-- sidebar -->
+      <aside class="doc-sidebar" aria-label="Documentation">
+        <div class="doc-search">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          Ask PostHog AI
+        </div>
+        <div class="doc-nav-group">
+          <div class="head">
+            <svg class="mini-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8 14l3-3 2 2 3-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Product analytics
+          </div>
+          <a href="./DESIGN.md" class="active">Getting started</a>
+          <a href="./DESIGN.md">Creating insights</a>
+          <a href="./DESIGN.md">Trends &amp; funnels</a>
+        </div>
+        <div class="doc-nav-group">
+          <div class="head">
+            <svg class="mini-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 5h16l-6 7v6l-4 2v-8L4 5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            </svg>
+            Feature flags
+          </div>
+          <a href="./DESIGN.md">Installation</a>
+          <a href="./DESIGN.md">Targeting rules</a>
+        </div>
+      </aside>
+
+      <!-- article -->
+      <article class="doc-card">
+        <h2>Capturing your first event</h2>
+        <p>Install the PostHog JavaScript snippet and call <code class="inline">posthog.capture()</code>
+          to send a custom event. Read the full
+          <a class="inline" href="./DESIGN.md">installation guide</a> for framework-specific setups.</p>
+
+        <div class="code-block" role="figure" aria-label="Code sample">
+<span class="cm">// initialize PostHog</span>
+<span class="kw">import</span> posthog <span class="kw">from</span> <span class="str">'posthog-js'</span>
+
+posthog.<span class="num">init</span>(<span class="str">'phc_your_key'</span>, {
+  api_host: <span class="str">'https://us.i.posthog.com'</span>,
+})
+
+<span class="cm">// capture a custom event</span>
+posthog.<span class="num">capture</span>(<span class="str">'signup_completed'</span>, {
+  plan: <span class="str">'free'</span>,
+})
+        </div>
+
+        <div class="callout blue">
+          <span class="emoji" aria-hidden="true">&#128161;</span>
+          <div><b>Tip:</b> Events are batched and flushed automatically &mdash; no
+            need to await each capture call.</div>
+        </div>
+        <div class="callout green">
+          <span class="emoji" aria-hidden="true">&#9989;</span>
+          <div><b>Success:</b> Once installed, your first events appear in the
+            activity feed within seconds.</div>
+        </div>
+        <div class="callout purple">
+          <span class="emoji" aria-hidden="true">&#128218;</span>
+          <div><b>Note:</b> Autocapture records clicks and pageviews without any
+            extra instrumentation.</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <p class="eyebrow">Usage-based pricing</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-lg)">Pay per event, not per seat</h2>
+
+      <div class="pill-tabs" role="tablist" aria-label="Billing period">
+        <button class="pill-tab active" role="tab" aria-selected="true">Monthly</button>
+        <button class="pill-tab" role="tab" aria-selected="false">Annual</button>
+        <button class="pill-tab" role="tab" aria-selected="false">Enterprise</button>
+      </div>
+
+      <div class="pricing-grid">
+        <article class="tier">
+          <h3>Free</h3>
+          <div class="price">$0<span>/mo</span></div>
+          <p style="font-size:15px;color:var(--body)">Generous monthly free tier, forever.</p>
+          <ul>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>1M events / month</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>5k session recordings</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Community support</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Get started</a>
+        </article>
+        <article class="tier">
+          <h3>Scale</h3>
+          <div class="price">$0.00005<span>/event</span></div>
+          <p style="font-size:15px;color:var(--body)">Only pay for what you use, above the free tier.</p>
+          <ul>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited events</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>All products included</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Email &amp; chat support</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Subscribe</a>
+        </article>
+        <article class="tier">
+          <h3>Enterprise</h3>
+          <div class="price">Custom</div>
+          <p style="font-size:15px;color:var(--body)">Advanced security, SSO, and SLAs.</p>
+          <ul>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>SAML SSO &amp; SCIM</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Dedicated support</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom contracts</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Talk to sales</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SIGNUP FORM ============ -->
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <p class="eyebrow">Start free</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-xl)">Create your account</h2>
+      <form class="form-card" onsubmit="return false">
+        <div class="field">
+          <label for="email">Work email</label>
+          <input id="email" type="email" placeholder="you@company.com" />
+        </div>
+        <div class="field">
+          <label for="pw">Password</label>
+          <input id="pw" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%">Get started &mdash; free</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="./DESIGN.md">Analytics</a>
+          <a href="./DESIGN.md">Session replay</a>
+          <a href="./DESIGN.md">Feature flags</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="./DESIGN.md">Docs</a>
+          <a href="./DESIGN.md">Tutorials</a>
+          <a href="./DESIGN.md">Changelog</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Handbook</a>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="./DESIGN.md">Slack</a>
+          <a href="./DESIGN.md">GitHub</a>
+          <a href="./DESIGN.md">Roadmap</a>
+        </div>
+        <div class="footer-col">
+          <h4>Pricing</h4>
+          <a href="./DESIGN.md">Plans</a>
+          <a href="./DESIGN.md">Calculator</a>
+          <a href="./DESIGN.md">Startups</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="./DESIGN.md">Privacy</a>
+          <a href="./DESIGN.md">Terms</a>
+          <a href="./DESIGN.md">DPA</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <svg width="20" height="20" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <circle cx="13" cy="13" r="12" fill="var(--primary)"/>
+          <path d="M7 15c0-3 2.7-5.5 6-5.5s6 2.5 6 5.5" stroke="var(--on-primary)" stroke-width="1.6" fill="none"/>
+        </svg>
+        <span>&copy; 2026 PostHog. Built by hedgehogs, for engineers.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

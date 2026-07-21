@@ -1,0 +1,531 @@
+<!-- source_content_hash: 6e2c5137e4d914b70996d589688374a801b6f29a35c9c019c22abb5e0170bda3 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Raycast — Component Preview</title>
+<style>
+  /* ============================================================
+     Raycast design tokens — mapped from DESIGN.md frontmatter.
+     "The marketing page is the product." Pure near-black canvas,
+     4-step surface ladder, single white CTA pill, Inter with the
+     ss03 stylistic set enabled site-wide (alternate g is the brand
+     signature), hairline borders (no shadows), and a red diagonal
+     stripe gradient band used exactly once in the hero.
+     ============================================================ */
+  :root {
+    /* Primary — white pill is the universal CTA */
+    --primary: #ffffff;
+    --primary-pressed: #e8e8e8;
+    --on-primary: #000000;
+
+    /* Text */
+    --ink: #f4f4f6;
+    --body: #cdcdcd;
+    --charcoal: #d3d3d4;
+    --mute: #9c9c9d;
+    --ash: #6a6b6c;
+    --stone: #434345;
+    --on-dark: #ffffff;
+    --on-dark-mute: rgba(255, 255, 255, 0.72);
+
+    /* Surface ladder — depth without shadows */
+    --canvas: #07080a;
+    --surface: #0d0d0d;
+    --surface-elevated: #101111;
+    --surface-card: #121212;
+    --button-fg: #18191a;
+    --hairline: #242728;
+    --hairline-soft: rgba(255, 255, 255, 0.08);
+    --hairline-strong: rgba(255, 255, 255, 0.16);
+
+    /* Saturated category accents — illustration only, never chrome */
+    --accent-blue: #57c1ff;
+    --accent-blue-soft: rgba(87, 193, 255, 0.15);
+    --accent-red: #ff6161;
+    --accent-red-soft: rgba(255, 97, 97, 0.15);
+    --accent-green: #59d499;
+    --accent-green-soft: rgba(89, 212, 153, 0.15);
+    --accent-yellow: #ffc533;
+    --accent-yellow-soft: rgba(255, 197, 51, 0.15);
+
+    /* Signature gradients */
+    --hero-stripe-start: #ff5757;
+    --hero-stripe-end: #a1131a;
+    --key-bg-start: #121212;
+    --key-bg-end: #0d0d0d;
+
+    /* Type — Inter with ss03 enabled site-wide */
+    --font: "Inter", "Inter Fallback", system-ui, sans-serif;
+
+    /* Radius */
+    --r-none: 0px;
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 10px;
+    --r-xl: 16px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --s-xxs: 2px;
+    --s-xs: 4px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-section: 96px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    /* ss03 alternate g is part of the brand identity */
+    font-feature-settings: "calt", "kern", "liga", "ss03";
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--body);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--on-dark); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 var(--s-xl); }
+  section { padding: var(--s-section) 0; }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: var(--s-lg);
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .brand {
+    display: flex; align-items: center; gap: var(--s-sm);
+    font-weight: 600; font-size: 16px; color: var(--ink);
+  }
+  .brand .mark {
+    width: 20px; height: 20px; border-radius: var(--r-sm);
+    background: linear-gradient(135deg, var(--hero-stripe-start), var(--hero-stripe-end));
+    display: inline-block;
+  }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-md); }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; }
+  .nav-links a:hover { color: var(--on-dark); }
+  .nav-right { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    line-height: 1.6;
+    height: 36px;
+    padding: 8px 16px;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-sm);
+    transition: background 0.15s;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-pressed); text-decoration: none; }
+  .btn-secondary { background: transparent; color: var(--on-dark); }
+  .btn-secondary:hover { text-decoration: none; background: var(--surface-elevated); }
+  .btn-tertiary { background: var(--surface-elevated); color: var(--on-dark); }
+  .btn-install { background: transparent; color: var(--on-dark); border-color: var(--hairline-strong); height: 32px; padding: 6px 14px; }
+
+  /* ---------- Keycap ---------- */
+  .keycap {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 20px; min-width: 20px; padding: 1px 6px;
+    background: linear-gradient(180deg, var(--key-bg-start), var(--key-bg-end));
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xs);
+    font-size: 13px; color: var(--body);
+  }
+
+  /* ---------- Hero stripe band ---------- */
+  .hero {
+    position: relative;
+    padding: var(--s-section) 48px;
+    background: var(--canvas);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 60%;
+    background:
+      repeating-linear-gradient(
+        115deg,
+        transparent 0 60px,
+        rgba(255, 87, 87, 0.0) 60px 80px
+      ),
+      linear-gradient(115deg, transparent 40%, var(--hero-stripe-start) 60%, var(--hero-stripe-end) 78%, transparent 92%);
+    opacity: 0.5;
+    filter: blur(2px);
+    pointer-events: none;
+  }
+  .hero .inner { position: relative; z-index: 1; }
+  .hero h1 {
+    font-weight: 600;
+    font-size: clamp(36px, 7vw, 64px);
+    line-height: 1.1;
+    color: var(--ink);
+    max-width: 16ch;
+  }
+  .hero p { font-size: 18px; line-height: 1.6; color: var(--body); max-width: 52ch; margin-top: var(--s-lg); }
+  .hero .cta-row { display: flex; gap: var(--s-md); margin-top: var(--s-xl); flex-wrap: wrap; align-items: center; }
+
+  /* ---------- Command-palette mockup ---------- */
+  .palette {
+    max-width: 720px;
+    margin: var(--s-xxl) auto 0;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+  }
+  .palette-head {
+    display: flex; align-items: center; gap: var(--s-sm);
+    padding: var(--s-md) var(--s-lg);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .tl { width: 11px; height: 11px; border-radius: var(--r-full); }
+  .tl-r { background: var(--accent-red); }
+  .tl-y { background: var(--accent-yellow); }
+  .tl-g { background: var(--accent-green); }
+  .palette-search {
+    margin-left: var(--s-md); flex: 1;
+    background: var(--surface-elevated);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: 8px 12px;
+    color: var(--mute);
+    font-size: 14px;
+  }
+  .palette-body { padding: var(--s-sm); }
+  .pal-row {
+    display: flex; align-items: center; gap: var(--s-md);
+    padding: 6px 10px;
+    border-radius: var(--r-sm);
+    color: var(--on-dark);
+  }
+  .pal-row.active { background: var(--surface-card); }
+  .pal-icon { width: 24px; height: 24px; border-radius: var(--r-sm); flex: none; }
+  .pal-label { flex: 1; font-size: 16px; }
+  .pal-hint { display: flex; gap: 4px; }
+
+  /* ---------- Section headings ---------- */
+  .eyebrow { font-size: 12px; letter-spacing: 0.4px; text-transform: uppercase; color: var(--mute); margin-bottom: var(--s-md); }
+  .sec-title { font-weight: 500; font-size: clamp(32px, 5vw, 56px); line-height: 1.17; letter-spacing: 0.2px; color: var(--ink); }
+  .sec-lead { font-size: 18px; line-height: 1.6; color: var(--body); max-width: 56ch; margin-top: var(--s-md); }
+
+  /* ---------- Pill tabs ---------- */
+  .tabs { display: flex; gap: var(--s-sm); flex-wrap: wrap; margin: var(--s-xl) 0; }
+  .tab {
+    background: transparent;
+    color: var(--body);
+    font-size: 14px;
+    padding: 4px 10px;
+    border-radius: var(--r-full);
+    border: none;
+    cursor: pointer;
+  }
+  .tab.active { background: var(--surface-elevated); color: var(--on-dark); }
+
+  /* ---------- Feature cards ---------- */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); margin-top: var(--s-xl); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .card.elevated { background: var(--surface-elevated); }
+  .card .icon {
+    width: 40px; height: 40px; border-radius: var(--r-md);
+    display: grid; place-items: center;
+    margin-bottom: var(--s-md);
+  }
+  .icon-blue { background: var(--accent-blue-soft); color: var(--accent-blue); }
+  .icon-red { background: var(--accent-red-soft); color: var(--accent-red); }
+  .icon-green { background: var(--accent-green-soft); color: var(--accent-green); }
+  .card h3 { font-weight: 500; font-size: 20px; color: var(--ink); margin-bottom: var(--s-sm); }
+  .card p { font-size: 14px; color: var(--body); line-height: 1.6; }
+
+  /* ---------- Store extension cards ---------- */
+  .store { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-lg); margin-top: var(--s-xl); }
+  .ext {
+    display: flex; align-items: center; gap: var(--s-lg);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--s-lg);
+  }
+  .app-icon { width: 48px; height: 48px; border-radius: var(--r-md); flex: none; background: var(--surface-card); }
+  .ext .meta { flex: 1; }
+  .ext .name { font-weight: 500; font-size: 16px; color: var(--ink); }
+  .ext .by { font-size: 13px; color: var(--mute); }
+  .ext .desc { font-size: 14px; color: var(--body); margin-top: 2px; }
+
+  /* ---------- Pricing ---------- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); margin-top: var(--s-xl); }
+  .tier {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .tier.featured { background: var(--surface-elevated); }
+  .tier .tname { font-weight: 500; font-size: 24px; color: var(--ink); }
+  .badge-pro {
+    display: inline-block;
+    background: var(--surface-elevated);
+    color: var(--on-dark-mute);
+    font-size: 12px; letter-spacing: 0.4px;
+    padding: 2px 6px; border-radius: var(--r-xs);
+    margin-left: var(--s-sm);
+  }
+  .tier .tprice { font-weight: 500; font-size: 48px; line-height: 1.17; color: var(--ink); margin: var(--s-md) 0; }
+  .tier ul { list-style: none; margin: var(--s-lg) 0; }
+  .tier li { font-size: 14px; padding: 6px 0; color: var(--body); display: flex; gap: var(--s-sm); }
+  .tier li::before { content: "✓"; color: var(--accent-green); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: var(--canvas);
+    border-top: 1px solid var(--hairline);
+    padding: 64px 48px 0;
+    position: relative;
+  }
+  .footer-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s-xl); max-width: 1240px; margin: 0 auto; }
+  .footer-grid h4 { font-size: 14px; font-weight: 500; color: var(--on-dark); margin-bottom: var(--s-md); }
+  .footer-grid a { display: block; padding: 4px 0; font-size: 14px; color: var(--body); }
+  .footer-grid a:hover { color: var(--on-dark); }
+  .footer-bottom {
+    max-width: 1240px; margin: var(--s-xxl) auto 0;
+    padding: var(--s-lg) 0;
+    border-top: 1px solid var(--hairline);
+    font-size: 13px; color: var(--mute);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--s-md);
+  }
+  /* faint red stripe echo at the very top of the footer */
+  footer::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(115deg, transparent 30%, var(--hero-stripe-start), var(--hero-stripe-end) 70%, transparent);
+    opacity: 0.6;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .cards, .pricing { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .store { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .hero { padding: 64px var(--s-xl); }
+    section { padding: 64px 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <header class="nav">
+    <div class="wrap" style="display:flex;align-items:center;gap:var(--s-lg);width:100%;">
+      <div class="brand"><span class="mark" aria-hidden="true"></span>Raycast</div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Pro</a>
+        <a href="./DESIGN.md">AI</a>
+        <a href="./DESIGN.md">Store</a>
+        <a href="./DESIGN.md">Changelog</a>
+        <a href="./DESIGN.md">Pricing</a>
+      </nav>
+      <div class="nav-right">
+        <a href="./DESIGN.md" style="font-size:14px;color:var(--body);">Sign in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero with stripe band + command-palette mockup -->
+  <section class="hero">
+    <div class="wrap inner">
+      <h1>Your shortcut to everything</h1>
+      <p>A blazingly fast, totally extendable launcher. It lets you complete tasks, calculate, share common links, and much more.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="./DESIGN.md">Download for Mac</a>
+        <a class="btn btn-secondary" href="./DESIGN.md">Explore Store →</a>
+      </div>
+
+      <div class="palette" role="group" aria-label="Command palette preview">
+        <div class="palette-head">
+          <span class="tl tl-r" aria-hidden="true"></span>
+          <span class="tl tl-y" aria-hidden="true"></span>
+          <span class="tl tl-g" aria-hidden="true"></span>
+          <div class="palette-search">Search for apps and commands…</div>
+        </div>
+        <div class="palette-body">
+          <div class="pal-row active">
+            <span class="pal-icon" style="background:var(--accent-yellow);" aria-hidden="true"></span>
+            <span class="pal-label">Search Hacker News</span>
+            <span class="pal-hint"><span class="keycap">⌘</span><span class="keycap">↵</span></span>
+          </div>
+          <div class="pal-row">
+            <span class="pal-icon" style="background:var(--accent-green);" aria-hidden="true"></span>
+            <span class="pal-label">Create Linear Issue</span>
+            <span class="pal-hint"><span class="keycap">⌘</span><span class="keycap">L</span></span>
+          </div>
+          <div class="pal-row">
+            <span class="pal-icon" style="background:var(--accent-red);" aria-hidden="true"></span>
+            <span class="pal-label">Send Slack Message</span>
+            <span class="pal-hint"><span class="keycap">⌘</span><span class="keycap">S</span></span>
+          </div>
+          <div class="pal-row">
+            <span class="pal-icon" style="background:var(--accent-blue);" aria-hidden="true"></span>
+            <span class="pal-label">Ask AI</span>
+            <span class="pal-hint"><span class="keycap">Tab</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Core features</div>
+      <h2 class="sec-title">Built for the perfect tools</h2>
+      <div class="cards">
+        <article class="card">
+          <div class="icon icon-blue" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M7 10h6M10 7v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Extensions</h3>
+          <p>Install extensions from the Store to connect the tools you already use.</p>
+        </article>
+        <article class="card elevated">
+          <div class="icon icon-green" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>AI Commands</h3>
+          <p>Bring the power of AI to your fingertips with custom commands and quick answers.</p>
+        </article>
+        <article class="card">
+          <div class="icon icon-red" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6" stroke="currentColor" stroke-width="1.6"/><path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Quicklinks</h3>
+          <p>Jump straight to the pages you visit most with a single keystroke.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Store -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Store</div>
+      <h2 class="sec-title">Extend Raycast</h2>
+      <div class="tabs" role="tablist" aria-label="Store filters">
+        <button class="tab active" role="tab" aria-selected="true">All Extensions</button>
+        <button class="tab" role="tab" aria-selected="false">Recently Added</button>
+        <button class="tab" role="tab" aria-selected="false">Most Popular</button>
+      </div>
+      <div class="store">
+        <article class="ext">
+          <span class="app-icon" style="background:var(--accent-yellow);" aria-hidden="true"></span>
+          <div class="meta"><div class="name">Hacker News</div><div class="by">by thomas</div><div class="desc">Read the latest stories from the front page.</div></div>
+          <a class="btn btn-install" href="./DESIGN.md">Install</a>
+        </article>
+        <article class="ext">
+          <span class="app-icon" style="background:var(--accent-green);" aria-hidden="true"></span>
+          <div class="meta"><div class="name">Linear</div><div class="by">by raycast</div><div class="desc">Create and manage issues without leaving the launcher.</div></div>
+          <a class="btn btn-install" href="./DESIGN.md">Install</a>
+        </article>
+        <article class="ext">
+          <span class="app-icon" style="background:var(--accent-red);" aria-hidden="true"></span>
+          <div class="meta"><div class="name">Slack</div><div class="by">by raycast</div><div class="desc">Set your status and send messages in a keystroke.</div></div>
+          <a class="btn btn-install" href="./DESIGN.md">Install</a>
+        </article>
+        <article class="ext">
+          <span class="app-icon" style="background:var(--accent-blue);" aria-hidden="true"></span>
+          <div class="meta"><div class="name">GitHub</div><div class="by">by raycast</div><div class="desc">Search repos, PRs, and issues instantly.</div></div>
+          <a class="btn btn-install" href="./DESIGN.md">Install</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Pricing</div>
+      <h2 class="sec-title">Choose your plan</h2>
+      <div class="pricing">
+        <div class="tier">
+          <div class="tname">Free <span class="badge-pro">Free</span></div>
+          <div class="tprice">$0</div>
+          <ul><li>Core launcher</li><li>Community extensions</li><li>Basic AI</li></ul>
+          <a class="btn btn-secondary" href="./DESIGN.md" style="width:100%;">Get started</a>
+        </div>
+        <div class="tier featured">
+          <div class="tname">Pro <span class="badge-pro">Pro</span></div>
+          <div class="tprice">$8</div>
+          <ul><li>Advanced AI</li><li>Cloud sync</li><li>Custom themes</li></ul>
+          <a class="btn btn-primary" href="./DESIGN.md" style="width:100%;">Get Pro</a>
+        </div>
+        <div class="tier">
+          <div class="tname">Teams <span class="badge-pro">Team</span></div>
+          <div class="tprice">$15</div>
+          <ul><li>Shared commands</li><li>Admin controls</li><li>Priority support</li></ul>
+          <a class="btn btn-secondary" href="./DESIGN.md" style="width:100%;">Contact us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div><h4>Product</h4><a href="./DESIGN.md">Download</a><a href="./DESIGN.md">Changelog</a><a href="./DESIGN.md">Pro</a></div>
+      <div><h4>Core Features</h4><a href="./DESIGN.md">AI</a><a href="./DESIGN.md">Quicklinks</a><a href="./DESIGN.md">Snippets</a></div>
+      <div><h4>Extensions</h4><a href="./DESIGN.md">Store</a><a href="./DESIGN.md">API</a><a href="./DESIGN.md">Developers</a></div>
+      <div><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Press</a></div>
+      <div><h4>Community</h4><a href="./DESIGN.md">Slack</a><a href="./DESIGN.md">X</a><a href="./DESIGN.md">GitHub</a></div>
+      <div><h4>By Raycast</h4><a href="./DESIGN.md">Blog</a><a href="./DESIGN.md">Manual</a><a href="./DESIGN.md">Status</a></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Raycast Technologies Ltd.</span>
+      <span class="brand" style="font-size:14px;"><span class="mark" aria-hidden="true"></span>Raycast</span>
+    </div>
+  </footer>
+
+</body>
+</html>

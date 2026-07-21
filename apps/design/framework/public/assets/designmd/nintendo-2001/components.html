@@ -1,0 +1,482 @@
+<!-- source_content_hash: 9630af17090d5c39ba9d8b5915a597a96c7552efe1422b3b8c3f31fb3e636716 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nintendo.com (2001) — Component Preview</title>
+<style>
+  /* ============================================================
+     Nintendo.com 2001 — token map
+     Y2K "console chrome" faceplate: brushed-periwinkle beveled
+     metal plates, carbon-navy command layer with halftone texture,
+     warm color rationed as directional signal only (nav-gold,
+     amber, signal-orange), outlined box-art display wordmarks,
+     Arial throughout. Sharp/chamfered corners; roundness reserved
+     for the logo pill, radio dots, circle-arrow badges.
+     ============================================================ */
+  :root {
+    /* Brand & signal */
+    --primary: #e60012;         /* Nintendo Red — logo, alert */
+    --signal: #f68d1f;          /* forward cues, submit */
+    --amber: #ecab37;           /* utility chips, badges */
+    --nav-gold: #e48600;        /* top-nav menu words */
+    --on-primary: #ffffff;
+
+    /* Surface — cool metallic chassis */
+    --canvas: #7a8aba;          /* periwinkle metallic body */
+    --canvas-soft: #9fbee7;     /* pale sky sub-nav */
+    --sky: #9fbee7;
+    --lavender: #acace7;        /* home hero field */
+    --ice: #c0d5e6;             /* news hero field */
+    --periwinkle: #8ba1d4;      /* raised mid panels */
+    --chrome-indigo: #3d4f97;   /* beveled shadow line */
+    --muted-indigo: #60619c;
+    --platinum: #dedede;        /* list-row surface */
+    --surface: #ffffff;         /* content cards, fields */
+    --carbon: #21242e;          /* nav, dark buttons, footer */
+    --hairline: #5a5f8c;
+
+    /* Text */
+    --ink: #21242e;
+    --ink-soft: #3d4f97;
+    --on-dark: #ffffff;
+
+    /* Page-accent hero tints */
+    --systems-teal: #206479;
+    --games-red: #a7282b;
+    --error: #e60012;
+
+    /* Type — Arial, no webfonts */
+    --font: Arial, Helvetica, sans-serif;
+
+    /* Radius */
+    --r-none: 0px;
+    --r-xs: 2px;
+    --r-sm: 4px;
+    --r-md: 6px;
+    --r-lg: 10px;
+    --r-full: 9999px;
+
+    /* Spacing — 8px base */
+    --sp-xxs: 2px;
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 24px;
+    --sp-xxl: 32px;
+    --sp-section: 48px;
+
+    /* Bevel simulation */
+    --bevel-plate: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 0 var(--chrome-indigo);
+    --bevel-raised: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 0 rgba(0,0,0,0.25);
+    --halftone: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ink);
+    background: var(--canvas);
+    padding: var(--sp-md);
+  }
+  .shell { max-width: 840px; margin: 0 auto; }
+  a { color: var(--ink-soft); font-weight: 700; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+  .ui-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.1; }
+  .display {
+    font-family: var(--font);
+    font-size: 44px; font-weight: 900; line-height: 1;
+    color: var(--surface);
+    -webkit-text-stroke: 2px var(--carbon);
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    margin: 0;
+  }
+  .hero-tagline { font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .micro { font-size: 10px; line-height: 1.3; }
+
+  /* Masthead */
+  .masthead { display: flex; align-items: center; gap: var(--sp-md); margin-bottom: var(--sp-sm); }
+  .mascot-bubble {
+    background: var(--surface); color: var(--carbon);
+    border-radius: var(--r-lg);
+    padding: var(--sp-sm) var(--sp-md);
+    font-size: 10px; font-weight: 700;
+    position: relative;
+  }
+  .mascot-bubble::after {
+    content: ""; position: absolute; left: -8px; top: 50%; transform: translateY(-50%);
+    border: 6px solid transparent; border-right-color: var(--surface);
+  }
+  .masthead .spacer { flex: 1; }
+  .search-field {
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xs);
+    height: 22px; padding: 0 var(--sp-xs);
+    font-size: 12px; min-width: 140px;
+  }
+  .chip-amber {
+    background: var(--amber); color: var(--carbon);
+    border: 0; border-radius: var(--r-xs);
+    padding: 4px 10px;
+    box-shadow: var(--bevel-raised);
+    cursor: pointer;
+  }
+
+  /* Nav bar — carbon command layer */
+  .nav-bar {
+    background: var(--carbon);
+    background-image: var(--halftone);
+    background-size: 4px 4px;
+    color: var(--nav-gold);
+    height: 32px;
+    display: flex; align-items: center; gap: var(--sp-lg);
+    padding: 0 var(--sp-sm);
+  }
+  .logo-pill {
+    background: var(--surface); color: var(--primary);
+    border-radius: var(--r-full);
+    padding: 3px 12px;
+    font-weight: 900; font-size: 14px; font-style: italic;
+    -webkit-text-stroke: 0.5px var(--primary);
+  }
+  .nav-bar nav { display: flex; gap: var(--sp-lg); }
+  .nav-bar nav a { color: var(--nav-gold); }
+  .nav-bar .spacer { flex: 1; }
+  .subnav {
+    background: var(--canvas-soft);
+    color: var(--ink);
+    padding: var(--sp-xs) var(--sp-sm);
+    display: flex; gap: var(--sp-md); flex-wrap: wrap;
+    box-shadow: var(--bevel-plate);
+  }
+  .subnav a { color: var(--ink); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Hero panel */
+  .hero-panel {
+    background: var(--lavender);
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(61,79,151,0.15));
+    border-radius: var(--r-md);
+    padding: var(--sp-lg);
+    margin: var(--sp-md) 0;
+    box-shadow: var(--bevel-plate);
+    min-height: 150px;
+    display: flex; flex-direction: column; justify-content: flex-end; gap: var(--sp-sm);
+  }
+  .arrow-btn {
+    width: 22px; height: 22px; border-radius: var(--r-full);
+    background: var(--signal); color: var(--on-primary);
+    border: 0; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: var(--bevel-raised);
+  }
+
+  /* Body two-column */
+  .body-cols { display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-lg); }
+
+  .section-label-bar {
+    background: var(--canvas);
+    color: var(--ink);
+    padding: var(--sp-sm);
+    box-shadow: var(--bevel-plate);
+    display: flex; align-items: center; gap: var(--sp-xs);
+    margin-bottom: var(--sp-sm);
+  }
+
+  /* News rows */
+  .news-row {
+    background: var(--platinum);
+    border-radius: var(--r-sm);
+    padding: var(--sp-sm);
+    display: flex; align-items: center; gap: var(--sp-sm);
+    margin-bottom: var(--sp-xs);
+    box-shadow: var(--bevel-plate);
+  }
+  .news-row .headline { flex: 1; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+  .arrow-chip {
+    width: 18px; height: 18px; border-radius: var(--r-xs);
+    background: var(--signal); color: var(--on-primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: var(--bevel-raised);
+    flex: none;
+  }
+
+  /* Featured tiles */
+  .feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-sm); margin-top: var(--sp-md); }
+  .feat-tile {
+    background: var(--carbon);
+    border-radius: var(--r-sm);
+    padding: var(--sp-xxs);
+    color: var(--on-dark);
+  }
+  .feat-thumb {
+    aspect-ratio: 95 / 60;
+    background: linear-gradient(135deg, var(--systems-teal), var(--chrome-indigo));
+    border: 1px solid var(--chrome-indigo);
+    border-radius: var(--r-xs);
+    margin-bottom: 2px;
+  }
+  .feat-tile .url { font-size: 10px; padding: 2px; }
+
+  /* Right rail */
+  .rail-btn {
+    display: flex; align-items: center; gap: var(--sp-xs);
+    background: var(--carbon);
+    background-image: var(--halftone);
+    background-size: 4px 4px;
+    color: var(--on-dark);
+    padding: var(--sp-md);
+    margin-bottom: var(--sp-xs);
+    cursor: pointer;
+    box-shadow: var(--bevel-raised);
+  }
+  .rail-btn .dot { width: 10px; height: 10px; background: var(--signal); border-radius: var(--r-full); flex: none; }
+
+  .info-box {
+    background: var(--surface);
+    border-radius: var(--r-sm);
+    margin: var(--sp-md) 0;
+    box-shadow: var(--bevel-plate);
+    overflow: hidden;
+  }
+  .info-box .tab {
+    background: var(--amber); color: var(--carbon);
+    padding: var(--sp-xs) var(--sp-sm);
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .info-box .info-body { padding: var(--sp-md); }
+
+  /* Poll panel */
+  .poll-panel {
+    background: var(--periwinkle);
+    border-radius: var(--r-md);
+    padding: var(--sp-md);
+    margin: var(--sp-md) 0;
+    box-shadow: var(--bevel-plate);
+  }
+  .radio-option { display: flex; align-items: center; gap: var(--sp-xs); margin: var(--sp-xs) 0; }
+  .radio-dot {
+    width: 12px; height: 12px; border-radius: var(--r-full);
+    background: var(--surface); border: 1px solid var(--hairline); flex: none;
+  }
+  .btn-submit {
+    background: var(--signal); color: var(--on-primary);
+    border: 0; border-radius: var(--r-xs);
+    padding: var(--sp-sm) var(--sp-lg);
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: var(--bevel-raised);
+    margin-top: var(--sp-sm);
+  }
+
+  /* System tiles (Systems page) */
+  .sys-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-sm); margin-top: var(--sp-md); }
+  .system-tile {
+    background: var(--periwinkle);
+    border-radius: var(--r-sm);
+    padding: var(--sp-sm);
+    text-align: center;
+    box-shadow: var(--bevel-plate);
+  }
+  .system-tile .render {
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(135deg, var(--chrome-indigo), var(--carbon));
+    border-radius: var(--r-xs);
+    margin-bottom: var(--sp-xs);
+  }
+  .system-tile .name { font-size: 13px; font-weight: 900; color: var(--surface); -webkit-text-stroke: 1px var(--carbon); }
+
+  /* Form panel */
+  .form-panel {
+    background: var(--platinum);
+    border-radius: var(--r-md);
+    padding: var(--sp-lg);
+    margin: var(--sp-md) 0;
+    box-shadow: var(--bevel-plate);
+  }
+  .field-row { display: flex; align-items: center; gap: var(--sp-sm); margin-bottom: var(--sp-sm); }
+  .field-label { font-size: 12px; font-weight: 700; width: 90px; }
+  .text-input {
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xs);
+    padding: var(--sp-xs);
+    font-size: 12px; flex: 1;
+  }
+  .dotted-divider { border: 0; border-top: 1px dotted var(--muted-indigo); margin: var(--sp-md) 0; }
+
+  /* Badges */
+  .esrb-square {
+    width: 20px; height: 20px;
+    background: var(--surface); color: var(--carbon);
+    border-radius: var(--r-xs);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    border: 1px solid var(--chrome-indigo);
+  }
+  .esrb-badge {
+    background: var(--amber); color: var(--carbon);
+    border-radius: var(--r-xs);
+    padding: 2px 6px;
+    font-size: 10px; font-weight: 700;
+  }
+
+  /* Footer */
+  .footer-bar {
+    background: var(--carbon);
+    background-image: var(--halftone);
+    background-size: 4px 4px;
+    color: var(--canvas-soft);
+    padding: var(--sp-lg);
+    margin-top: var(--sp-md);
+    display: flex; align-items: center; gap: var(--sp-md); flex-wrap: wrap;
+    font-size: 10px;
+  }
+  .footer-bar .spacer { flex: 1; }
+  .footer-bar a { color: var(--canvas-soft); }
+
+  @media (max-width: 720px) {
+    .body-cols, .sys-grid, .feat-grid { grid-template-columns: 1fr; }
+    .display { font-size: 32px; }
+    .nav-bar { flex-wrap: wrap; height: auto; padding: var(--sp-xs) var(--sp-sm); }
+    .masthead { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+
+    <div class="masthead">
+      <span class="mascot-bubble">Welcome to Nintendo.com!</span>
+      <span class="spacer"></span>
+      <input class="search-field" type="text" aria-label="Search Nintendo.com" placeholder="Search" />
+      <select class="search-field" aria-label="Search category"><option>All</option></select>
+      <button class="chip-amber ui-label">Go</button>
+    </div>
+
+    <header>
+      <div class="nav-bar">
+        <span class="logo-pill">Nintendo</span>
+        <nav class="ui-label" aria-label="Primary">
+          <a href="./DESIGN.md">Games</a>
+          <a href="./DESIGN.md">Systems</a>
+          <a href="./DESIGN.md">News</a>
+          <a href="./DESIGN.md">Nsider</a>
+          <a href="./DESIGN.md">Downloads</a>
+        </nav>
+        <span class="spacer"></span>
+        <button class="chip-amber ui-label">Code Bank</button>
+        <button class="chip-amber ui-label">Game Finder</button>
+      </div>
+      <div class="subnav">
+        <a href="./DESIGN.md">Parents</a>
+        <a href="./DESIGN.md">Customer Service</a>
+        <a href="./DESIGN.md">Corporate</a>
+        <a href="./DESIGN.md">Global</a>
+        <a href="./DESIGN.md">Privacy</a>
+        <a href="./DESIGN.md">Store</a>
+        <a href="./DESIGN.md">Contact</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero-panel" role="img" aria-label="Home hero — box-art wordmark over lavender field">
+        <h1 class="display">Play It On</h1>
+        <p class="hero-tagline" style="color:var(--carbon);">Gorgeous graphics, great sound &mdash; the latest for Game Boy Advance and Nintendo 64.</p>
+        <button class="arrow-btn" aria-label="Go to featured game">&#9654;</button>
+      </div>
+
+      <div class="body-cols">
+        <section>
+          <div class="section-label-bar ui-label">Official News</div>
+          <div class="news-row">
+            <span class="headline"><a href="./DESIGN.md">Super Smash Bros. Melee ships this holiday</a></span>
+            <span class="arrow-chip" aria-hidden="true">&#9656;</span>
+          </div>
+          <div class="news-row">
+            <span class="headline"><a href="./DESIGN.md">Game Boy Advance sales top expectations</a></span>
+            <span class="arrow-chip" aria-hidden="true">&#9656;</span>
+          </div>
+          <div class="news-row">
+            <span class="headline"><a href="./DESIGN.md">The Legend of Zelda: Oracle titles reviewed</a></span>
+            <span class="arrow-chip" aria-hidden="true">&#9656;</span>
+          </div>
+
+          <div class="section-label-bar ui-label" style="margin-top:var(--sp-md);">Featured Sites</div>
+          <div class="feat-grid">
+            <div class="feat-tile"><div class="feat-thumb"></div><div class="url">www.pokemon.com</div></div>
+            <div class="feat-tile"><div class="feat-thumb"></div><div class="url">www.zelda.com</div></div>
+            <div class="feat-tile"><div class="feat-thumb"></div><div class="url">www.mario.com</div></div>
+            <div class="feat-tile"><div class="feat-thumb"></div><div class="url">www.metroid.com</div></div>
+          </div>
+
+          <div class="section-label-bar ui-label" style="margin-top:var(--sp-md);">Systems</div>
+          <div class="sys-grid">
+            <div class="system-tile"><div class="render"></div><div class="name">Nintendo 64</div></div>
+            <div class="system-tile"><div class="render"></div><div class="name">Super NES</div></div>
+            <div class="system-tile"><div class="render"></div><div class="name">Game Boy</div></div>
+          </div>
+
+          <div class="form-panel">
+            <div class="section-label-bar ui-label" style="margin:-16px -16px 12px;">&equiv; Register</div>
+            <div class="field-row"><label class="field-label" for="nn-user">Username</label><input class="text-input" id="nn-user" type="text" /></div>
+            <div class="field-row"><label class="field-label" for="nn-pass">Password</label><input class="text-input" id="nn-pass" type="password" /></div>
+            <div class="field-row"><label class="field-label" for="nn-mail">E-mail</label><input class="text-input" id="nn-mail" type="email" /></div>
+            <hr class="dotted-divider" />
+            <div class="field-row"><label class="field-label" for="nn-month">Birth date</label>
+              <select class="text-input" id="nn-month" aria-label="Month"><option>Month</option></select>
+              <select class="text-input" aria-label="Year"><option>Year</option></select>
+            </div>
+            <button class="btn-submit">Submit</button>
+          </div>
+        </section>
+
+        <aside>
+          <div class="rail-btn ui-label"><span class="dot"></span> Login</div>
+          <div class="rail-btn ui-label"><span class="dot"></span> Subscribe</div>
+          <div class="rail-btn ui-label"><span class="dot"></span> Newsletter</div>
+          <div class="rail-btn ui-label"><span class="dot"></span> Help</div>
+
+          <div class="info-box">
+            <div class="tab">What Is &mdash; Game Finder</div>
+            <div class="info-body">Answer a few questions and we'll match you to the perfect game for your system.</div>
+          </div>
+
+          <div class="poll-panel">
+            <div class="ui-label" style="margin-bottom:var(--sp-sm);">Player's Poll</div>
+            <p>Which console is your favorite?</p>
+            <div class="radio-option"><span class="radio-dot"></span> Nintendo 64</div>
+            <div class="radio-option"><span class="radio-dot"></span> Super NES</div>
+            <div class="radio-option"><span class="radio-dot"></span> Game Boy Advance</div>
+            <button class="btn-submit">Submit</button>
+          </div>
+
+          <div class="info-box">
+            <div class="tab">Ratings</div>
+            <div class="info-body" style="display:flex;align-items:center;gap:8px;">
+              <span class="esrb-square">E</span>
+              <span class="esrb-square">T</span>
+              <span class="micro">ESRB content ratings on every title.</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="footer-bar">
+      <span class="esrb-badge">ESRB &mdash; Privacy Certified</span>
+      <span class="spacer"></span>
+      <span>©1997&ndash;2001 Nintendo. All rights reserved.</span>
+      <a href="./DESIGN.md">Privacy</a>
+    </footer>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!-- source_content_hash: b343df9a67e57f248e9eee704f52b17dff9cf6a46d1dc9f8d7ab36741940db59 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Renault — Component Preview</title>
+<style>
+  /* ============================================================
+     RENAULT design tokens — mapped from DESIGN.md
+     Two-tone canvas (white catalogue / black storytelling) with a
+     single Sunlight Yellow accent and monolithic NouvelR type.
+     ============================================================ */
+  :root {
+    /* Brand & accent — Sunlight Yellow, always paired with black text */
+    --primary: #ffed00;
+    --primary-deep: #e6d200;
+    --on-primary: #000000;
+
+    /* Text */
+    --ink: #000000;
+    --body: #222222;
+    --charcoal: #333333;
+    --mute: #666666;
+    --ash: #8a8a8a;
+    --stone: #c4c4c4;
+    --on-dark: #ffffff;
+    --on-dark-mute: rgba(255, 255, 255, 0.72);
+
+    /* Surface */
+    --canvas: #ffffff;
+    --surface-soft: #f7f7f7;
+    --surface-dark: #000000;
+    --surface-deep: #111111;
+    --hairline: #f2f2f2;
+    --hairline-strong: #000000;
+    --divider-dark: rgba(255, 255, 255, 0.16);
+
+    /* Signal */
+    --badge-new: #ffed00;
+    --error: #be6464;
+    --warning: #f0ad4e;
+    --success: #8dc572;
+    --info: #337ab7;
+
+    /* Type — NouvelR, open-source fallback Inter Tight / Manrope */
+    --font: "NouvelR", "Inter Tight", "Manrope", "HK Grotesk", system-ui, sans-serif;
+
+    /* Radius — square geometry dominates */
+    --r-none: 0px;
+    --r-xs: 2px;
+    --r-sm: 3px;
+    --r-md: 4px;
+    --r-pill: 46px;
+    --r-full: 9999px;
+
+    /* Spacing — base 4/8 */
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 16px;
+    --s-lg: 20px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-xxxl: 40px;
+    --s-section: 80px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--body);
+    background: var(--canvas);
+  }
+
+  h1, h2, h3, h4 {
+    margin: 0;
+    font-weight: 700;
+    line-height: 0.95;
+    color: var(--ink);
+  }
+
+  p { margin: 0; }
+
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 3px solid var(--info);
+    outline-offset: 3px;
+  }
+
+  .wrap {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-inline: var(--s-xl);
+  }
+
+  .overline {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.45;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--mute);
+  }
+
+  /* ---------- Navigation ---------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 60px;
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+  }
+  .nav .wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--s-xl);
+    width: 100%;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: var(--s-xs);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .diamond { display: block; }
+  .nav-links {
+    display: flex;
+    gap: var(--s-xl);
+    margin-left: var(--s-xl);
+  }
+  .nav-links a {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.144px;
+    color: var(--ink);
+    padding: var(--s-xs) 0;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-links a:hover { border-bottom-color: var(--ink); }
+  .nav-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--s-sm);
+  }
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--hairline-strong);
+    background: var(--canvas);
+    border-radius: var(--r-xs);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  /* ---------- Sub-nav pills (the only pill usage) ---------- */
+  .subnav {
+    display: flex;
+    gap: var(--s-xs);
+    padding-block: var(--s-md);
+    overflow-x: auto;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .pill {
+    flex: 0 0 auto;
+    height: 36px;
+    padding: 8px 16px;
+    background: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-pill);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+  .pill[aria-pressed="true"] { background: var(--ink); color: var(--on-dark); }
+
+  /* ---------- Hero (black storytelling band) ---------- */
+  .hero {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+  }
+  .hero-inner {
+    position: relative;
+    display: grid;
+    align-content: end;
+    min-height: 520px;
+    padding-block: var(--s-section);
+    background:
+      radial-gradient(120% 90% at 78% 20%, rgba(122, 60, 190, 0.55), transparent 55%),
+      radial-gradient(90% 80% at 95% 75%, rgba(255, 84, 160, 0.4), transparent 60%),
+      radial-gradient(70% 70% at 60% 90%, rgba(255, 237, 0, 0.28), transparent 55%);
+  }
+  .hero .kicker { color: var(--on-dark-mute); }
+  .hero h1 {
+    color: var(--on-dark);
+    font-size: clamp(40px, 7vw, 56px);
+    margin-block: var(--s-md) var(--s-lg);
+    max-width: 14ch;
+    text-transform: uppercase;
+  }
+  .hero p.sub {
+    color: var(--on-dark-mute);
+    font-size: 19.2px;
+    font-weight: 600;
+    line-height: 1.3;
+    max-width: 42ch;
+    margin-bottom: var(--s-xl);
+  }
+  .hero .car {
+    position: absolute;
+    right: var(--s-xl);
+    bottom: 40%;
+    width: min(46%, 520px);
+    aspect-ratio: 16 / 7;
+    background: linear-gradient(160deg, #3a3a3a, #0c0c0c);
+    border-radius: var(--r-none);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+    clip-path: polygon(6% 62%, 20% 30%, 44% 22%, 70% 30%, 100% 55%, 100% 100%, 0 100%);
+  }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: var(--s-sm); }
+
+  .btn {
+    font-family: var(--font);
+    font-size: 14.4px;
+    font-weight: 700;
+    letter-spacing: 0.144px;
+    line-height: 1;
+    border-radius: var(--r-xs);
+    padding: 14px 24px;
+    min-height: 48px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-deep); }
+  .btn-secondary-dark { background: var(--surface-dark); color: var(--on-dark); }
+  .btn-outline-dark {
+    background: var(--canvas);
+    color: var(--ink);
+    border-color: var(--hairline-strong);
+  }
+  .btn-outline-light {
+    background: transparent;
+    color: var(--on-dark);
+    border-color: var(--on-dark);
+  }
+
+  /* ---------- Section scaffolding ---------- */
+  section { padding-block: var(--s-section); }
+  .section-head { margin-bottom: var(--s-xxxl); }
+  .section-head h2 { font-size: 40px; text-transform: uppercase; }
+  .section-head p { margin-top: var(--s-md); color: var(--mute); max-width: 52ch; }
+
+  /* ---------- Promo tile grid ---------- */
+  .promo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--hairline-strong);
+    border: 1px solid var(--hairline-strong);
+  }
+  .promo {
+    padding: var(--s-xxl);
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--s-md);
+  }
+  .promo h3 { font-size: 24px; text-transform: uppercase; }
+  .promo-light { background: var(--canvas); color: var(--ink); }
+  .promo-dark { background: var(--surface-dark); color: var(--on-dark); }
+  .promo-dark h3 { color: var(--on-dark); }
+  .promo-yellow { background: var(--primary); color: var(--on-primary); }
+  .promo-yellow h3 { color: var(--on-primary); }
+  .promo .link {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.144px;
+    display: inline-flex;
+    gap: var(--s-xs);
+    align-items: center;
+  }
+
+  /* ---------- Vehicle range cards ---------- */
+  .veh-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-xl);
+  }
+  .veh-card { background: var(--canvas); }
+  .veh-photo {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(150deg, #ededed, #d3d3d3);
+    display: grid;
+    place-items: center;
+  }
+  .veh-photo .body-shell {
+    width: 78%;
+    height: 46%;
+    background: linear-gradient(160deg, #9aa0a6, #5c6166);
+    clip-path: polygon(4% 70%, 16% 34%, 42% 24%, 68% 32%, 98% 62%, 98% 100%, 4% 100%);
+  }
+  .badge-new {
+    position: absolute;
+    left: var(--s-md);
+    bottom: var(--s-md);
+    background: var(--badge-new);
+    color: var(--on-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.144px;
+    text-transform: uppercase;
+    border-radius: var(--r-full);
+    padding: 6px 14px;
+  }
+  .veh-info {
+    padding: var(--s-md) 0 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--s-md);
+  }
+  .veh-info h3 { font-size: 20px; }
+  .veh-info .variant { color: var(--charcoal); font-size: 14px; margin-top: var(--s-xxs); }
+  .arrow { color: var(--ink); flex: 0 0 auto; }
+
+  /* ---------- Configurator ---------- */
+  .config { background: var(--surface-soft); }
+  .config-grid {
+    display: grid;
+    grid-template-columns: 58% 1fr;
+    gap: var(--s-xxxl);
+    align-items: start;
+  }
+  .config-visual {
+    aspect-ratio: 16 / 10;
+    background: var(--canvas);
+    border: 1px solid var(--hairline-strong);
+    display: grid;
+    place-items: center;
+  }
+  .config-visual .body-shell {
+    width: 70%;
+    height: 40%;
+    background: linear-gradient(160deg, #ffed00, #e6d200);
+    clip-path: polygon(4% 70%, 16% 34%, 42% 24%, 68% 32%, 98% 62%, 98% 100%, 4% 100%);
+  }
+  .config-panel { background: var(--canvas); border: 1px solid var(--hairline-strong); padding: 0 var(--s-xl); }
+  .config-row {
+    padding-block: var(--s-xl);
+    border-bottom: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .config-row:last-child { border-bottom: 0; }
+  .config-row .label { font-weight: 700; }
+  .config-row .value { color: var(--mute); font-size: 14px; }
+  .swatches { display: flex; gap: var(--s-sm); }
+  .swatch {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--r-full);
+    background: var(--surface-soft);
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .swatch.sun { background: var(--primary); }
+  .swatch.ink { background: var(--ink); }
+  .swatch.silver { background: linear-gradient(160deg, #e5e5e5, #b9b9b9); }
+  .swatch[aria-pressed="true"] { border-color: var(--hairline-strong); box-shadow: 0 0 0 2px var(--canvas) inset; }
+
+  /* ---------- Booking form ---------- */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-xl) var(--s-xxl);
+    max-width: 720px;
+  }
+  .field { display: flex; flex-direction: column; gap: var(--s-xs); }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--charcoal); }
+  .field input {
+    height: 48px;
+    padding: 12px 16px;
+    font-family: var(--font);
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--canvas);
+    border: 0;
+    border-bottom: 1px solid var(--hairline-strong);
+    border-radius: var(--r-none);
+  }
+  .field input::placeholder { color: var(--ash); }
+  .field input:focus-visible { outline: none; border-bottom-width: 2px; border-bottom-color: var(--ink); }
+  .field .err { color: var(--error); font-size: 12px; }
+
+  /* ---------- Button gallery ---------- */
+  .swatch-panel { background: var(--surface-dark); }
+  .btn-gallery { display: flex; flex-wrap: wrap; gap: var(--s-md); align-items: center; }
+
+  /* ---------- Footer (always closes on black) ---------- */
+  footer {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    padding: 64px var(--s-xl);
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: var(--s-xxl);
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+  footer h4 { color: var(--on-dark); font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--s-md); }
+  footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-sm); }
+  footer a { color: var(--on-dark-mute); font-size: 14px; }
+  footer a:hover { color: var(--on-dark); }
+  .foot-bottom {
+    max-width: 1440px;
+    margin: var(--s-xxl) auto 0;
+    padding-top: var(--s-lg);
+    border-top: 1px solid var(--divider-dark);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-md);
+    justify-content: space-between;
+    color: var(--on-dark-mute);
+    font-size: 12px;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .veh-grid { grid-template-columns: repeat(2, 1fr); }
+    .config-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 767px) {
+    section { padding-block: var(--s-xxxl); }
+    .promo-grid, .veh-grid, .form-grid { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .hero .car { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="logo" href="./DESIGN.md" aria-label="Renault home">
+        <svg class="diamond" width="26" height="34" viewBox="0 0 26 34" fill="none" aria-hidden="true">
+          <path d="M13 1 25 17 13 33 1 17Z" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M13 8 20 17 13 26 6 17Z" stroke="currentColor" stroke-width="2.4"/>
+        </svg>
+        Renault
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Models</a>
+        <a href="./DESIGN.md">Services</a>
+        <a href="./DESIGN.md">Renault Life</a>
+        <a href="./DESIGN.md">MyRenault</a>
+      </nav>
+      <div class="nav-right">
+        <button class="icon-btn" aria-label="Language">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Account">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sub-nav pills -->
+  <div class="wrap">
+    <nav class="subnav" aria-label="Sub navigation">
+      <button class="pill" aria-pressed="true">Campaigns</button>
+      <button class="pill">Service &amp; appointment</button>
+      <button class="pill">Ownership transfer</button>
+      <button class="pill">Electric range</button>
+      <button class="pill">Business vehicles</button>
+    </nav>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero" style="padding:0;">
+    <div class="hero-inner wrap">
+      <span class="overline kicker">E-Tech 100% Electric</span>
+      <h1>Scenic E-Tech Electric</h1>
+      <p class="sub">The reinvented family car. Up to 625 km of range, a panoramic solar roof, and the confidence of the new diamond.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary">Configure now</button>
+        <button class="btn btn-outline-light">Book a test drive</button>
+      </div>
+      <div class="car" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- Promo tiles -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="overline">Explore Renault</span>
+        <h2>Choose your journey</h2>
+        <p>Three surface modes — white for browsing, black for storytelling, and a single yellow accent for the moment that matters.</p>
+      </div>
+      <div class="promo-grid">
+        <article class="promo promo-light">
+          <span class="overline">Hybrid range</span>
+          <h3>E-Tech full hybrid models</h3>
+          <a class="link" href="./DESIGN.md">Discover the range
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </article>
+        <article class="promo promo-dark">
+          <span class="overline" style="color:var(--on-dark-mute)">Commercial</span>
+          <h3>Business vehicle campaigns</h3>
+          <a class="link" href="./DESIGN.md">See offers
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </article>
+        <article class="promo promo-yellow">
+          <span class="overline" style="color:var(--on-primary)">Limited</span>
+          <h3>Sunlight Yellow campaign — R5 pre-order</h3>
+          <a class="link" href="./DESIGN.md">Reserve yours
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </article>
+        <article class="promo promo-light">
+          <span class="overline">Passenger cars</span>
+          <h3>Sales campaigns this month</h3>
+          <a class="link" href="./DESIGN.md">View all deals
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vehicle range -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="overline">Full range</span>
+        <h2>The models</h2>
+      </div>
+      <div class="veh-grid">
+        <article class="veh-card">
+          <div class="veh-photo">
+            <div class="body-shell"></div>
+            <span class="badge-new">New</span>
+          </div>
+          <div class="veh-info">
+            <div>
+              <h3>Renault 5 E-Tech</h3>
+              <p class="variant">100% electric · from €25,000</p>
+            </div>
+            <svg class="arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+        </article>
+        <article class="veh-card">
+          <div class="veh-photo"><div class="body-shell"></div></div>
+          <div class="veh-info">
+            <div>
+              <h3>Austral E-Tech</h3>
+              <p class="variant">Full hybrid SUV</p>
+            </div>
+            <svg class="arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+        </article>
+        <article class="veh-card">
+          <div class="veh-photo">
+            <div class="body-shell"></div>
+            <span class="badge-new">New</span>
+          </div>
+          <div class="veh-info">
+            <div>
+              <h3>Scenic E-Tech</h3>
+              <p class="variant">Electric family car</p>
+            </div>
+            <svg class="arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Configurator -->
+  <section class="config">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="overline">Configurator</span>
+        <h2>Build your Renault 5</h2>
+      </div>
+      <div class="config-grid">
+        <div class="config-visual"><div class="body-shell"></div></div>
+        <div class="config-panel">
+          <div class="config-row">
+            <div>
+              <div class="label">Body type</div>
+              <div class="value">5-door hatchback</div>
+            </div>
+            <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
+          <div class="config-row">
+            <div>
+              <div class="label">Engine</div>
+              <div class="value">150 hp · 52 kWh</div>
+            </div>
+            <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+          </div>
+          <div class="config-row">
+            <div class="label">Paint colour</div>
+            <div class="swatches" role="group" aria-label="Paint colour">
+              <button class="swatch sun" aria-pressed="true" aria-label="Sunlight Yellow"></button>
+              <button class="swatch ink" aria-pressed="false" aria-label="Diamond Black"></button>
+              <button class="swatch silver" aria-pressed="false" aria-label="Highland Grey"></button>
+            </div>
+          </div>
+          <div class="config-row">
+            <div>
+              <div class="label">Estimated price</div>
+              <div class="value">€27,400 incl. options</div>
+            </div>
+            <button class="btn btn-primary" style="min-height:40px;padding:10px 18px;">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Booking form -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="overline">Test drive</span>
+        <h2>Book your appointment</h2>
+      </div>
+      <form class="form-grid" novalidate>
+        <div class="field">
+          <label for="fname">First name</label>
+          <input id="fname" type="text" placeholder="Camille" />
+        </div>
+        <div class="field">
+          <label for="lname">Last name</label>
+          <input id="lname" type="text" placeholder="Durand" />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" aria-describedby="email-err" />
+          <span class="err" id="email-err">Please enter a valid email address.</span>
+        </div>
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input id="phone" type="tel" placeholder="+33 6 00 00 00 00" />
+        </div>
+        <div class="field full">
+          <label for="model">Preferred model</label>
+          <input id="model" type="text" placeholder="Renault 5 E-Tech" />
+        </div>
+        <div class="field full">
+          <button class="btn btn-primary" type="submit">Request appointment</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Button gallery on dark -->
+  <section class="swatch-panel">
+    <div class="wrap">
+      <span class="overline" style="color:var(--on-dark-mute)">Actions</span>
+      <h2 style="color:var(--on-dark);font-size:32px;margin:var(--s-md) 0 var(--s-xxl);text-transform:uppercase;">Button system</h2>
+      <div class="btn-gallery">
+        <button class="btn btn-primary">Primary yellow</button>
+        <button class="btn btn-secondary-dark">Secondary black</button>
+        <button class="btn btn-outline-light">Outline light</button>
+        <button class="pill">Sub-nav pill</button>
+        <button class="icon-btn" aria-label="Next" style="background:var(--canvas);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="foot-grid">
+      <div>
+        <a class="logo" href="./DESIGN.md" style="color:var(--on-dark);margin-bottom:var(--s-md);">
+          <svg width="24" height="32" viewBox="0 0 26 34" fill="none" aria-hidden="true">
+            <path d="M13 1 25 17 13 33 1 17Z" stroke="currentColor" stroke-width="2.4"/>
+            <path d="M13 8 20 17 13 26 6 17Z" stroke="currentColor" stroke-width="2.4"/>
+          </svg>
+          Renault
+        </a>
+        <p style="color:var(--on-dark-mute);font-size:14px;max-width:34ch;margin-top:var(--s-md);">Passion for life. A component preview rendered from the Renault DESIGN.md token set.</p>
+      </div>
+      <div>
+        <h4>Models</h4>
+        <ul>
+          <li><a href="./DESIGN.md">Electric</a></li>
+          <li><a href="./DESIGN.md">Hybrid</a></li>
+          <li><a href="./DESIGN.md">Commercial</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <ul>
+          <li><a href="./DESIGN.md">Book a service</a></li>
+          <li><a href="./DESIGN.md">Financing</a></li>
+          <li><a href="./DESIGN.md">MyRenault</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="./DESIGN.md">About</a></li>
+          <li><a href="./DESIGN.md">Newsroom</a></li>
+          <li><a href="./DESIGN.md">Careers</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Renault. Component preview generated from DESIGN.md.</span>
+      <span>Privacy · Cookies · Legal</span>
+    </div>
+  </footer>
+
+</body>
+</html>

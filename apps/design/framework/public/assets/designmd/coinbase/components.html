@@ -1,0 +1,594 @@
+<!-- source_content_hash: c8c67800dd7f58fcc87ed7d267a3bba862e3419e499e8a66d67731a69d2de1d6 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Coinbase — Component Preview</title>
+<style>
+  /* ============================================================
+     Coinbase — inspired design tokens
+     Institutional-calm crypto brand. White canvas + single Coinbase
+     Blue voltage (#0052ff, used scarcely) + dark editorial heroes
+     (#0a0b0d) carrying layered product-UI cards. Display sits at
+     weight 400 (editorial calm, never fintech-bombastic). Pill CTAs,
+     24px cards, full-circle glyphs. Trading green/red are text-only.
+     Source of truth: ./DESIGN.md
+     ============================================================ */
+  :root {
+    /* ── Brand (single voltage) ───────────────────────────── */
+    --primary: #0052ff;
+    --primary-active: #003ecc;
+    --primary-disabled: #a8b8cc;
+    --accent-yellow: #f4b000;   /* asset glyph illustration only */
+
+    /* ── Ink ladder ───────────────────────────────────────── */
+    --ink: #0a0b0d;
+    --body: #5b616e;
+    --body-strong: #0a0b0d;
+    --muted: #7c828a;
+    --muted-soft: #a8acb3;
+
+    /* ── Hairlines ────────────────────────────────────────── */
+    --hairline: #dee1e6;
+    --hairline-soft: #eef0f3;
+
+    /* ── Surfaces ─────────────────────────────────────────── */
+    --canvas: #ffffff;
+    --surface-soft: #f7f7f7;
+    --surface-card: #ffffff;
+    --surface-strong: #eef0f3;
+    --surface-dark: #0a0b0d;
+    --surface-dark-elevated: #16181c;
+
+    /* ── On-color ─────────────────────────────────────────── */
+    --on-primary: #ffffff;
+    --on-dark: #ffffff;
+    --on-dark-soft: #a8acb3;
+
+    /* ── Trading semantics (text-only, never fill) ────────── */
+    --up: #05b169;
+    --down: #cf202f;
+
+    /* ── Type ─────────────────────────────────────────────── */
+    --font-display: "Coinbase Display", Inter, -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-sans: "Coinbase Sans", Inter, -apple-system, system-ui, sans-serif;
+    --font-mono: "Coinbase Mono", "JetBrains Mono", "Geist Mono", ui-monospace, monospace;
+
+    /* ── Radius ───────────────────────────────────────────── */
+    --r-xs: 4px;
+    --r-sm: 8px;
+    --r-md: 12px;   /* inputs */
+    --r-lg: 16px;
+    --r-xl: 24px;   /* cards */
+    --r-pill: 100px;
+    --r-full: 9999px;
+
+    /* ── Spacing (4px base) ───────────────────────────────── */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-base: 16px;
+    --sp-md: 20px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+    --sp-section: 96px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--body);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--primary); color: #fff; }
+
+  h1, h2, h3, h4 { margin: 0; color: var(--ink); }
+  .display { font-family: var(--font-display); font-weight: 400; }
+  p { margin: 0; }
+  a { color: var(--primary); text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-inline: var(--sp-lg);
+  }
+
+  section { padding-block: var(--sp-section); }
+  .band-soft { background: var(--surface-soft); }
+  .band-dark { background: var(--surface-dark); color: var(--on-dark); }
+  .band-dark h1, .band-dark h2, .band-dark h3 { color: var(--on-dark); }
+
+  .mono { font-family: var(--font-mono); font-weight: 500; }
+
+  .eyebrow {
+    display: inline-flex; align-items: center;
+    font-size: 12px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase;
+    color: var(--ink);
+    background: var(--surface-strong);
+    padding: 4px 12px; border-radius: var(--r-pill);
+    margin-bottom: var(--sp-base);
+  }
+  .band-dark .eyebrow { background: var(--surface-dark-elevated); color: var(--on-dark); }
+
+  .section-head { max-width: 640px; margin-bottom: var(--sp-xxl); }
+  .section-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 52px; line-height: 1; letter-spacing: -1.3px; }
+  .section-head p { margin-top: var(--sp-base); font-size: 18px; color: var(--body); }
+  .band-dark .section-head p { color: var(--on-dark-soft); }
+
+  /* ── Buttons — pill geometry ────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: var(--sp-xs);
+    font-family: var(--font-sans);
+    font-size: 16px; font-weight: 600; line-height: 1.15;
+    height: 44px; padding: 12px 20px;
+    border-radius: var(--r-pill);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .12s ease, transform .12s ease, border-color .12s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn--primary { background: var(--primary); color: var(--on-primary); }
+  .btn--primary:hover { background: var(--primary-active); }
+  .btn--lg { height: 56px; padding: 16px 32px; }
+  .btn--secondary { background: var(--surface-strong); color: var(--ink); }
+  .btn--secondary:hover { background: var(--hairline); }
+  .btn--secondary-dark { background: var(--surface-dark-elevated); color: var(--on-dark); }
+  .btn--secondary-dark:hover { background: #23262c; }
+  .btn--outline-dark { background: transparent; color: var(--on-dark); border-color: rgba(255,255,255,.5); }
+  .btn--outline-dark:hover { border-color: #fff; }
+  .btn--text { background: transparent; color: var(--primary); height: auto; padding: 0; }
+  .btn--text:hover { text-decoration: underline; }
+
+  /* ============================================================
+     NAV
+     ============================================================ */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    height: 64px;
+    background: color-mix(in srgb, var(--canvas) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav__inner { display: flex; align-items: center; gap: var(--sp-lg); height: 100%; }
+  .brand { display: inline-flex; align-items: center; gap: var(--sp-xs); font-size: 20px; font-weight: 600; color: var(--ink); }
+  .brand__mark { width: 28px; height: 28px; border-radius: var(--r-full); background: var(--primary); display: grid; place-items: center; }
+  .nav__links { display: flex; gap: var(--sp-md); margin-left: var(--sp-sm); }
+  .nav__links a { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .nav__links a:hover { color: var(--primary); }
+  .nav__actions { display: flex; align-items: center; gap: var(--sp-sm); margin-left: auto; }
+  @media (max-width: 960px) { .nav__links { display: none; } }
+
+  /* ============================================================
+     HERO (dark, layered product-UI cards) — the signature
+     ============================================================ */
+  .hero { background: var(--surface-dark); color: var(--on-dark); overflow: hidden; }
+  .hero__grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: var(--sp-xxl); align-items: center; }
+  .hero h1 { font-family: var(--font-display); font-weight: 400; font-size: 80px; line-height: 1; letter-spacing: -2px; color: var(--on-dark); }
+  .hero .lead { margin-top: var(--sp-lg); font-size: 18px; color: var(--on-dark-soft); max-width: 44ch; }
+  .hero__cta { display: flex; gap: var(--sp-sm); margin-top: var(--sp-xl); flex-wrap: wrap; }
+
+  /* layered product-UI card stack */
+  .ui-stack { position: relative; min-height: 380px; }
+  .ui-card {
+    background: var(--surface-dark-elevated);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--r-xl);
+    padding: var(--sp-xl);
+  }
+  .ui-card--back {
+    position: absolute; inset: 30px -10px auto 40px;
+    transform: rotate(4deg);
+    opacity: .55;
+    padding: var(--sp-lg);
+  }
+  .ui-card--front { position: relative; margin-top: 60px; }
+  .ui-card__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-lg); }
+  .ui-card__bal { font-family: var(--font-mono); font-weight: 500; font-size: 28px; color: var(--on-dark); }
+  .ui-card__label { font-size: 13px; color: var(--on-dark-soft); }
+  .asset-row {
+    display: grid; grid-template-columns: 32px 1fr auto auto;
+    align-items: center; gap: var(--sp-sm);
+    padding: 14px 0;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+  .asset-icon { width: 32px; height: 32px; border-radius: var(--r-full); display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #fff; }
+  .asset-name { color: var(--on-dark); font-size: 14px; font-weight: 600; }
+  .asset-ticker { color: var(--on-dark-soft); font-size: 12px; }
+  .asset-price { font-family: var(--font-mono); font-weight: 500; font-size: 14px; color: var(--on-dark); }
+  .asset-change { font-family: var(--font-mono); font-weight: 500; font-size: 13px; text-align: right; }
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+
+  @media (max-width: 900px) {
+    .hero__grid { grid-template-columns: 1fr; }
+    .ui-card--back { display: none; }
+    .ui-card--front { margin-top: 0; }
+  }
+
+  /* ============================================================
+     ASSET TABLE (light)
+     ============================================================ */
+  .asset-table { border-top: 1px solid var(--hairline); }
+  .asset-table .row {
+    display: grid; grid-template-columns: 32px 1.4fr 1fr 1fr;
+    align-items: center; gap: var(--sp-base);
+    padding: var(--sp-base) 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .asset-table .icon { width: 32px; height: 32px; border-radius: var(--r-full); display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #fff; }
+  .asset-table .nm { color: var(--ink); font-weight: 600; font-size: 16px; }
+  .asset-table .tk { color: var(--muted); font-size: 13px; }
+  .asset-table .pr { font-family: var(--font-mono); font-weight: 500; font-size: 16px; color: var(--ink); text-align: right; }
+  .asset-table .ch { font-family: var(--font-mono); font-weight: 500; font-size: 15px; text-align: right; }
+
+  /* ============================================================
+     FEATURES
+     ============================================================ */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+  .feature {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    padding: var(--sp-xl);
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  .feature:hover { box-shadow: 0 4px 12px rgba(0,0,0,.04); transform: translateY(-2px); }
+  .feature__icon { width: 48px; height: 48px; border-radius: var(--r-full); background: var(--surface-strong); display: grid; place-items: center; color: var(--primary); margin-bottom: var(--sp-base); }
+  .feature h3 { font-size: 18px; font-weight: 600; margin-bottom: var(--sp-xs); }
+  .feature p { font-size: 16px; color: var(--body); }
+
+  /* ============================================================
+     PRICING
+     ============================================================ */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); align-items: stretch; }
+  .price {
+    display: flex; flex-direction: column;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    padding: var(--sp-xl);
+  }
+  .price--featured { background: var(--surface-dark); color: var(--on-dark); border-color: var(--surface-dark); }
+  .price--featured .price__name, .price--featured .price__amount { color: var(--on-dark); }
+  .price--featured .price__list li { color: var(--on-dark-soft); }
+  .price__name { font-size: 18px; font-weight: 600; color: var(--ink); }
+  .price__amount { font-family: var(--font-display); font-weight: 400; font-size: 44px; line-height: 1.09; letter-spacing: -1px; color: var(--ink); margin-block: var(--sp-xs); }
+  .price__amount small { font-family: var(--font-sans); font-size: 14px; color: var(--muted); }
+  .price--featured .price__amount small { color: var(--on-dark-soft); }
+  .price__list { list-style: none; margin: var(--sp-base) 0 var(--sp-lg); padding: 0; display: flex; flex-direction: column; gap: var(--sp-sm); }
+  .price__list li { display: flex; gap: var(--sp-xs); font-size: 14px; color: var(--body); }
+  .price__list svg { flex: none; margin-top: 2px; color: var(--primary); }
+  .price--featured .price__list svg { color: #5b8dff; }
+  .price .btn { width: 100%; justify-content: center; margin-top: auto; }
+
+  /* ============================================================
+     SIGNUP
+     ============================================================ */
+  .signup { max-width: 520px; margin: 0 auto; text-align: center; }
+  .form-row { display: flex; gap: var(--sp-sm); margin-top: var(--sp-lg); }
+  .input {
+    flex: 1; height: 48px;
+    font-family: var(--font-sans); font-size: 16px; color: var(--ink);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+  }
+  .input::placeholder { color: var(--muted); }
+  .input:focus-visible { outline: none; border: 2px solid var(--primary); }
+  .form-hint { margin-top: var(--sp-sm); font-size: 13px; color: var(--muted); }
+
+  /* ============================================================
+     CTA BAND (dark)
+     ============================================================ */
+  .cta-band { text-align: center; }
+  .cta-band h2 { font-family: var(--font-display); font-weight: 400; font-size: 52px; line-height: 1; letter-spacing: -1.3px; margin-bottom: var(--sp-base); }
+  .cta-band p { color: var(--on-dark-soft); font-size: 18px; margin-bottom: var(--sp-lg); }
+  .cta-band__cta { display: inline-flex; gap: var(--sp-sm); flex-wrap: wrap; justify-content: center; }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  .footer { background: var(--canvas); border-top: 1px solid var(--hairline); padding-block: var(--sp-section) var(--sp-xl); }
+  .footer__grid { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: var(--sp-lg); }
+  .footer h4 { font-size: 12px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; color: var(--ink); margin-bottom: var(--sp-sm); }
+  .footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-xs); }
+  .footer ul a { color: var(--body); font-size: 14px; }
+  .footer ul a:hover { color: var(--ink); }
+  .footer__brand p { color: var(--body); font-size: 14px; margin-top: var(--sp-sm); max-width: 34ch; }
+  .footer__bottom {
+    margin-top: var(--sp-xxl); padding-top: var(--sp-base);
+    border-top: 1px solid var(--hairline);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-sm);
+    font-size: 13px; color: var(--muted);
+  }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 1024px) {
+    .grid-3, .price-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer__grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 44px; letter-spacing: -1px; }
+    .section-head h2, .cta-band h2 { font-size: 36px; letter-spacing: -.5px; }
+    .grid-3, .price-grid { grid-template-columns: 1fr; }
+    .form-row { flex-direction: column; }
+    .footer__grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Coinbase home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="2.4"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#fff"/></svg>
+        </span>
+        Coinbase
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="./DESIGN.md">Cryptocurrencies</a>
+        <a href="./DESIGN.md">Individuals</a>
+        <a href="./DESIGN.md">Businesses</a>
+        <a href="./DESIGN.md">Institutions</a>
+        <a href="./DESIGN.md">Developers</a>
+      </nav>
+      <div class="nav__actions">
+        <a class="btn btn--text" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn--primary" href="./DESIGN.md">Sign up</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO (dark) ===================== -->
+    <section class="hero">
+      <div class="container hero__grid">
+        <div>
+          <span class="eyebrow">Regulated · Trusted</span>
+          <h1>The future of money is here</h1>
+          <p class="lead">Buy, sell, and manage crypto with the most trusted exchange. Institutional-grade security, retail-grade simplicity.</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary btn--lg" href="./DESIGN.md">Get started</a>
+            <a class="btn btn--outline-dark btn--lg" href="./DESIGN.md">Explore prices</a>
+          </div>
+        </div>
+
+        <!-- layered product-UI card stack -->
+        <div class="ui-stack" aria-label="Portfolio preview">
+          <div class="ui-card ui-card--back" aria-hidden="true">
+            <div class="ui-card__head"><span class="ui-card__label">Watchlist</span></div>
+            <div class="asset-row"><span class="asset-icon" style="background:#627eea">Ξ</span><span><span class="asset-name">Ethereum</span></span><span class="asset-price">$3,412</span><span class="asset-change up">+2.1%</span></div>
+            <div class="asset-row"><span class="asset-icon" style="background:var(--accent-yellow)">₿</span><span><span class="asset-name">Bitcoin</span></span><span class="asset-price">$67,240</span><span class="asset-change down">-0.8%</span></div>
+          </div>
+          <div class="ui-card ui-card--front">
+            <div class="ui-card__head">
+              <div><div class="ui-card__label">Portfolio balance</div><div class="ui-card__bal">$128,940.22</div></div>
+              <span class="asset-change up">+$2,410 today</span>
+            </div>
+            <div class="asset-row"><span class="asset-icon" style="background:var(--accent-yellow)">₿</span><span><span class="asset-name">Bitcoin</span><br /><span class="asset-ticker">BTC</span></span><span class="asset-price">$67,240</span><span class="asset-change up">+3.2%</span></div>
+            <div class="asset-row"><span class="asset-icon" style="background:#627eea">Ξ</span><span><span class="asset-name">Ethereum</span><br /><span class="asset-ticker">ETH</span></span><span class="asset-price">$3,412</span><span class="asset-change up">+2.1%</span></div>
+            <div class="asset-row"><span class="asset-icon" style="background:#2775ca">$</span><span><span class="asset-name">USD Coin</span><br /><span class="asset-ticker">USDC</span></span><span class="asset-price">$1.00</span><span class="asset-change down">-0.0%</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ASSET TABLE (light) ===================== -->
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Explore</span>
+          <h2>Prices at a glance</h2>
+          <p>Track the top assets by market cap — live prices and 24-hour changes.</p>
+        </div>
+        <div class="asset-table" role="table" aria-label="Top crypto assets">
+          <div class="row">
+            <span class="icon" style="background:var(--accent-yellow)">₿</span>
+            <span><span class="nm">Bitcoin</span> <span class="tk">BTC</span></span>
+            <span class="pr">$67,240.18</span>
+            <span class="ch up">+3.24%</span>
+          </div>
+          <div class="row">
+            <span class="icon" style="background:#627eea">Ξ</span>
+            <span><span class="nm">Ethereum</span> <span class="tk">ETH</span></span>
+            <span class="pr">$3,412.06</span>
+            <span class="ch up">+2.11%</span>
+          </div>
+          <div class="row">
+            <span class="icon" style="background:#f0b90b">◈</span>
+            <span><span class="nm">Solana</span> <span class="tk">SOL</span></span>
+            <span class="pr">$168.44</span>
+            <span class="ch down">-1.42%</span>
+          </div>
+          <div class="row">
+            <span class="icon" style="background:#2775ca">$</span>
+            <span><span class="nm">USD Coin</span> <span class="tk">USDC</span></span>
+            <span class="pr">$1.0000</span>
+            <span class="ch up">+0.01%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURES ===================== -->
+    <section class="band-soft">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Why Coinbase</span>
+          <h2>Built to be trusted</h2>
+          <p>The security, compliance, and simplicity of an institution — available to everyone.</p>
+        </div>
+        <div class="grid-3">
+          <article class="feature">
+            <div class="feature__icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+            <h3>Secure storage</h3>
+            <p>The vast majority of digital assets are kept in cold storage. Your account is protected with 2FA and biometrics.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 12h4l3 7 4-14 3 7h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <h3>Deep liquidity</h3>
+            <p>Trade hundreds of assets with tight spreads and institutional-grade execution, 24/7.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg></div>
+            <h3>Regulated &amp; compliant</h3>
+            <p>Licensed and regulated across jurisdictions, with transparent reserves and clear compliance.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING ===================== -->
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Developer platform</span>
+          <h2>Build on Coinbase</h2>
+          <p>APIs and infrastructure for building the onchain economy. Start free, scale as you grow.</p>
+        </div>
+        <div class="price-grid">
+          <div class="price">
+            <div class="price__name">Starter</div>
+            <div class="price__amount">$0<small> / mo</small></div>
+            <ul class="price__list">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 10,000 API calls / mo</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Public market data</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Community support</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Start free</a>
+          </div>
+
+          <div class="price price--featured">
+            <span class="eyebrow">Most popular</span>
+            <div class="price__name">Scale</div>
+            <div class="price__amount">$299<small> / mo</small></div>
+            <ul class="price__list">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 1M API calls / mo</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Advanced trade API</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Priority support</li>
+            </ul>
+            <a class="btn btn--primary" href="./DESIGN.md">Start free trial</a>
+          </div>
+
+          <div class="price">
+            <div class="price__name">Enterprise</div>
+            <div class="price__amount">Custom</div>
+            <ul class="price__list">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlimited volume</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Dedicated SLA</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Solutions engineer</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Contact sales</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SIGNUP ===================== -->
+    <section class="band-soft">
+      <div class="container signup">
+        <span class="eyebrow">Get started</span>
+        <h2 class="display" style="font-size:44px;letter-spacing:-1px">Sign up in two minutes</h2>
+        <p style="margin-top:var(--sp-xs)">Enter your email to create a free account. By continuing you agree to our <a href="./DESIGN.md">User Agreement</a>.</p>
+        <form class="form-row" onsubmit="return false">
+          <label for="email" style="position:absolute;left:-9999px">Email</label>
+          <input class="input" id="email" type="email" placeholder="you@email.com" autocomplete="email" />
+          <button class="btn btn--primary" type="submit">Sign up</button>
+        </form>
+        <p class="form-hint">Available on web, iOS, and Android.</p>
+      </div>
+    </section>
+
+    <!-- ===================== CTA BAND (dark) ===================== -->
+    <section class="band-dark cta-band">
+      <div class="container">
+        <h2>Take control of your money</h2>
+        <p>Join over 100 million people using Coinbase to get started with crypto.</p>
+        <div class="cta-band__cta">
+          <a class="btn btn--primary btn--lg" href="./DESIGN.md">Get started</a>
+          <a class="btn btn--secondary-dark btn--lg" href="./DESIGN.md">Talk to sales</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a class="brand" href="./DESIGN.md">
+            <span class="brand__mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="2.4"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#fff"/></svg></span>
+            Coinbase
+          </a>
+          <p>The most trusted place for people and businesses to buy, sell, and manage crypto.</p>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="./DESIGN.md">About</a></li>
+            <li><a href="./DESIGN.md">Careers</a></li>
+            <li><a href="./DESIGN.md">Newsroom</a></li>
+            <li><a href="./DESIGN.md">Investors</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Learn</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Crypto basics</a></li>
+            <li><a href="./DESIGN.md">Tips &amp; tutorials</a></li>
+            <li><a href="./DESIGN.md">Market updates</a></li>
+            <li><a href="./DESIGN.md">Bitcoin</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Individuals</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Buy &amp; sell</a></li>
+            <li><a href="./DESIGN.md">Wallet</a></li>
+            <li><a href="./DESIGN.md">Card</a></li>
+            <li><a href="./DESIGN.md">Earn</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Help center</a></li>
+            <li><a href="./DESIGN.md">Contact us</a></li>
+            <li><a href="./DESIGN.md">Status</a></li>
+            <li><a href="./DESIGN.md">Security</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Coinbase. Inspired design preview.</span>
+        <span>Tokens sourced from <a href="./DESIGN.md" style="text-decoration:underline">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

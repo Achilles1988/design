@@ -1,0 +1,350 @@
+<!-- source_content_hash: 87c71f76297277d64f9679e015a50da88e72d86d7b41badf8733eae1e4cde335 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miro — Component Preview</title>
+<style>
+  /* ============================================================
+     Miro design tokens — mapped from DESIGN.md
+     Stark white canvas + canary-yellow wordmark signature · black-pill
+     primary CTAs · pastel feature cards echoing sticky-note palette ·
+     Roobert PRO (Inter fallback) 500/600 · dense dark footer
+     ============================================================ */
+  :root {
+    --primary: #1c1c1e;         /* black — dominant CTA */
+    --on-primary: #ffffff;
+    --brand-yellow: #ffd02f;    /* canary — wordmark, promo banner, yellow tags ONLY */
+    --brand-yellow-deep: #fcb900;
+    --yellow-light: #fff4c4;
+    --yellow-dark: #746019;
+    --brand-blue: #4262ff;      /* inline links, featured-tier border */
+    --blue-pressed: #2a41b6;
+    --coral-light: #ffc6c6;
+    --coral-dark: #600000;
+    --rose-light: #fde0f0;
+    --teal-light: #c3faf5;
+    --moss-dark: #187574;
+    --orange-light: #ffe6cd;
+    --success: #00b473;
+    --canvas: #ffffff;
+    --surface: #f7f8fa;
+    --surface-soft: #fafbfc;
+    --surface-yellow: #fff8e0;
+    --surface-featured: #f5f3ff;
+    --hairline: #e0e2e8;
+    --hairline-soft: #eef0f3;
+    --hairline-strong: #c7cad5;
+    --ink-deep: #050038;
+    --ink: #1c1c1e;
+    --slate: #555a6a;
+    --steel: #6b6f7e;
+    --stone: #8e91a0;
+    --muted: #a5a8b5;
+    --footer-bg: #1c1c1e;
+    --on-dark-muted: #a5a8b5;
+    /* Radius */
+    --r-xs: 4px; --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px;
+    --r-xxl: 20px; --r-xxxl: 28px; --r-feature: 32px; --r-full: 9999px;
+    /* Spacing */
+    --sp-xxs: 4px; --sp-xs: 8px; --sp-sm: 12px; --sp-md: 16px; --sp-lg: 20px;
+    --sp-xl: 24px; --sp-xxl: 32px; --sp-xxxl: 40px; --sp-section-sm: 48px;
+    --sp-section: 64px; --sp-section-lg: 96px; --sp-hero: 120px;
+    --font: "Roobert PRO", Inter, "Noto Sans", -apple-system, sans-serif;
+    --shadow-mockup: rgba(5,0,56,0.08) 0px 12px 32px -4px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--canvas); color: var(--ink); font-family: var(--font);
+    font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--brand-yellow); color: var(--ink); }
+  a { color: var(--brand-blue); text-decoration: none; }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-xxl); }
+
+  /* ---- promo banner ---- */
+  .promo { background: var(--primary); color: var(--on-primary); font-size: 14px; font-weight: 500;
+    text-align: center; padding: var(--sp-sm) var(--sp-md); display: flex; gap: var(--sp-sm);
+    align-items: center; justify-content: center; }
+  .promo .pill { background: var(--brand-yellow); color: var(--ink); font-size: 13px; font-weight: 600;
+    border-radius: var(--r-full); padding: 4px 10px; }
+
+  /* ---- nav ---- */
+  .nav { background: var(--canvas); height: 64px; display: flex; align-items: center;
+    position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--hairline-soft); }
+  .nav .wrap { display: flex; align-items: center; gap: var(--sp-xxl); width: 100%; }
+  .wordmark { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 20px; color: var(--ink); }
+  .wordmark .mark { width: 26px; height: 26px; border-radius: var(--r-sm); background: var(--brand-yellow);
+    display: inline-block; }
+  .nav-links { display: flex; gap: var(--sp-xl); flex: 1; }
+  .nav-links a { color: var(--ink); font-size: 15px; font-weight: 500; }
+  .nav-links a:hover { color: var(--brand-blue); }
+  .nav-cta { display: flex; gap: var(--sp-sm); align-items: center; }
+
+  /* ---- buttons (all pills) ---- */
+  .btn { font-family: var(--font); font-size: 14px; font-weight: 500; border: 0; cursor: pointer;
+    border-radius: var(--r-full); padding: 12px 24px; display: inline-flex; align-items: center;
+    gap: 8px; transition: background .15s, transform .1s; }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: #2c2c34; }
+  .btn-yellow { background: var(--brand-yellow); color: var(--ink); }
+  .btn-secondary { background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong); }
+  .btn-on-dark { background: #fff; color: var(--primary); }
+  .btn:focus-visible { outline: 2px solid var(--brand-blue); outline-offset: 2px; }
+
+  /* ---- hero ---- */
+  .hero { padding: var(--sp-hero) 0 var(--sp-section); text-align: center; }
+  .hero h1 { font-weight: 500; font-size: clamp(40px, 8vw, 80px); line-height: 1.05;
+    letter-spacing: -2px; max-width: 18ch; margin: 0 auto var(--sp-lg); }
+  .hero .subtitle { font-size: 18px; color: var(--slate); max-width: 52ch; margin: 0 auto var(--sp-xl); }
+  .hero-cta { display: flex; gap: var(--sp-sm); justify-content: center; }
+
+  /* ---- whiteboard mockup ---- */
+  .whiteboard { margin-top: var(--sp-section); background: var(--canvas); border: 1px solid var(--hairline-soft);
+    border-radius: var(--r-xl); box-shadow: var(--shadow-mockup); overflow: hidden; }
+  .wb-bar { height: 40px; background: var(--surface); border-bottom: 1px solid var(--hairline-soft);
+    display: flex; align-items: center; gap: 6px; padding: 0 var(--sp-md); }
+  .wb-bar i { width: 10px; height: 10px; border-radius: var(--r-full); background: var(--hairline-strong); }
+  .board { padding: var(--sp-xxl); min-height: 300px; background:
+    radial-gradient(circle at 1px 1px, var(--hairline) 1px, transparent 0) 0 0 / 24px 24px, var(--canvas);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-md); align-content: start; }
+  .note { border-radius: var(--r-sm); padding: var(--sp-md); font-size: 13px; font-weight: 500;
+    min-height: 90px; color: var(--ink); box-shadow: rgba(5,0,56,0.06) 0 4px 12px; }
+  .note.y { background: var(--brand-yellow); }
+  .note.c { background: var(--coral-light); }
+  .note.t { background: var(--teal-light); }
+  .note.r { background: var(--rose-light); }
+  .note.o { background: var(--orange-light); transform: rotate(-1.5deg); }
+  .note.b { background: #d6def7; }
+
+  /* ---- sections ---- */
+  section { padding: var(--sp-section-lg) 0; }
+  .sec-head { text-align: center; max-width: 46ch; margin: 0 auto var(--sp-xxxl); }
+  .sec-head h2 { font-weight: 500; font-size: clamp(32px, 5vw, 48px); line-height: 1.15; letter-spacing: -1px; }
+  .sec-head p { color: var(--slate); margin-top: var(--sp-md); font-size: 18px; }
+
+  /* ---- pastel feature cards ---- */
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-xl); }
+  .fcard { border-radius: var(--r-xxxl); padding: var(--sp-xxl); min-height: 220px; color: var(--ink);
+    display: flex; flex-direction: column; }
+  .fcard .tag { display: inline-block; font-size: 13px; font-weight: 600; border-radius: var(--r-full);
+    padding: 4px 10px; margin-bottom: var(--sp-md); align-self: flex-start; }
+  .fcard h3 { font-size: 22px; font-weight: 500; line-height: 1.3; }
+  .fcard p { font-size: 15px; color: var(--slate); margin-top: var(--sp-sm); }
+  .fcard.yellow { background: var(--brand-yellow); }
+  .fcard.yellow .tag { background: rgba(0,0,0,0.1); }
+  .fcard.coral { background: var(--coral-light); }
+  .fcard.coral .tag { background: rgba(96,0,0,0.12); color: var(--coral-dark); }
+  .fcard.teal { background: var(--teal-light); }
+  .fcard.teal .tag { background: rgba(24,117,116,0.15); color: var(--moss-dark); }
+  .fcard.rose { background: var(--rose-light); }
+  .fcard.rose .tag { background: rgba(0,0,0,0.08); }
+
+  /* ---- stats ---- */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); text-align: center; }
+  .stat .num { font-weight: 500; font-size: 64px; line-height: 1.1; letter-spacing: -1.5px; color: var(--ink); }
+  .stat .lbl { color: var(--slate); font-size: 15px; margin-top: var(--sp-xs); }
+
+  /* ---- pricing 4-tier ---- */
+  .toggle { display: inline-flex; gap: 4px; background: var(--surface); padding: 4px;
+    border-radius: var(--r-full); margin: 0 auto var(--sp-xxxl); }
+  .toggle button { border: 0; background: transparent; font-family: var(--font); font-size: 14px;
+    font-weight: 500; padding: 8px 18px; border-radius: var(--r-full); cursor: pointer; color: var(--slate); }
+  .toggle button.on { background: var(--canvas); color: var(--ink); box-shadow: rgba(5,0,56,0.06) 0 1px 3px; }
+  .pricing { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-md); }
+  .pcard { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-xl);
+    padding: var(--sp-xxl); display: flex; flex-direction: column; }
+  .pcard.featured { background: var(--surface-featured); border: 2px solid var(--brand-blue); }
+  .pcard.enterprise { background: var(--primary); color: var(--on-primary); border-color: transparent; }
+  .pcard .tier { font-size: 22px; font-weight: 500; }
+  .pcard .amt { font-size: 40px; font-weight: 500; letter-spacing: -1px; margin: var(--sp-sm) 0; }
+  .pcard .amt span { font-size: 14px; color: var(--stone); font-weight: 400; }
+  .pcard.enterprise .amt span { color: var(--on-dark-muted); }
+  .plist { list-style: none; margin: var(--sp-md) 0 var(--sp-lg); display: grid; gap: 10px; flex: 1; }
+  .plist li { font-size: 14px; color: var(--slate); display: flex; gap: 8px; align-items: flex-start; }
+  .pcard.enterprise .plist li { color: var(--on-dark-muted); }
+  .plist svg { flex: none; margin-top: 2px; color: var(--success); }
+
+  /* ---- comparison table ---- */
+  .cmp { border: 1px solid var(--hairline); border-radius: var(--r-md); overflow: hidden; margin-top: var(--sp-xxl); }
+  .cmp .divider { background: var(--surface); font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--slate); padding: var(--sp-sm) var(--sp-lg); }
+  .cmp .row { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--sp-md);
+    padding: var(--sp-md) var(--sp-lg); border-bottom: 1px solid var(--hairline-soft); font-size: 14px; align-items: center; }
+  .cmp .row span:first-child { color: var(--ink); }
+  .cmp .row span { color: var(--steel); text-align: center; }
+  .cmp .row span:first-child { text-align: left; }
+  .cmp svg { color: var(--success); }
+
+  /* ---- cta banner ---- */
+  .cta-banner { background: var(--primary); color: var(--on-primary); border-radius: var(--r-feature);
+    padding: var(--sp-section); text-align: center; }
+  .cta-banner h2 { font-weight: 500; font-size: 40px; letter-spacing: -1px; margin-bottom: var(--sp-md); }
+  .cta-banner p { color: var(--on-dark-muted); margin-bottom: var(--sp-xl); }
+
+  /* ---- footer ---- */
+  footer { background: var(--footer-bg); color: #fff; padding: var(--sp-section) 0; }
+  .fcols { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-xl); }
+  .fcols h5 { font-size: 16px; font-weight: 500; color: #fff; margin-bottom: var(--sp-md); }
+  .fcols a { display: block; color: var(--on-dark-muted); font-size: 14px; padding: 4px 0; }
+  .fcols a:hover { color: #fff; }
+
+  @media (max-width: 1000px) { .pricing { grid-template-columns: repeat(2, 1fr); }
+    .cmp .row { grid-template-columns: 1.5fr repeat(4, .6fr); } .fcols { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 640px) { .pricing, .stats { grid-template-columns: 1fr; } .nav-links { display: none; }
+    .fcols { grid-template-columns: 1fr 1fr; } .board { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+  <div class="promo">Get your spot at Miro Innovation Workspace Day <span class="pill">GET YOUR SPOT</span></div>
+
+  <header class="nav">
+    <div class="wrap">
+      <span class="wordmark"><span class="mark"></span>Miro</span>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#product">Product</a>
+        <a href="#solutions">Solutions</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#resources">Resources</a>
+      </nav>
+      <div class="nav-cta">
+        <a href="#pricing" style="color:var(--ink); font-weight:500; font-size:15px;">Login</a>
+        <button class="btn btn-primary">Get started free</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <h1>See how teams get great done with Miro</h1>
+        <p class="subtitle">The innovation workspace where teams map, plan, and build together — powered by AI.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary">Get started free</button>
+          <button class="btn btn-secondary">Book a demo</button>
+        </div>
+
+        <div class="whiteboard" aria-hidden="true">
+          <div class="wb-bar"><i></i><i></i><i></i></div>
+          <div class="board">
+            <div class="note y">Kickoff goals</div>
+            <div class="note c">Research</div>
+            <div class="note t">Design sprint</div>
+            <div class="note r">Retro</div>
+            <div class="note o">Roadmap</div>
+            <div class="note b">Backlog</div>
+            <div class="note t">User flows</div>
+            <div class="note y">Ship it</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="product">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>One workspace, endless ways to collaborate</h2>
+          <p>Pastel cards echo the live sticky-note palette.</p>
+        </div>
+        <div class="feat-grid">
+          <article class="fcard yellow"><span class="tag">Diagramming</span><h3>Map any system</h3><p>Flowcharts, wireframes, and mind maps on an infinite canvas.</p></article>
+          <article class="fcard teal"><span class="tag">AI</span><h3>Miro AI</h3><p>Turn a prompt into a diagram, summary, or plan in seconds.</p></article>
+          <article class="fcard coral"><span class="tag">Workshops</span><h3>Run live sessions</h3><p>Timers, voting, and templates for facilitated meetings.</p></article>
+          <article class="fcard rose"><span class="tag">Docs</span><h3>Docs on canvas</h3><p>Write, embed, and link — all in the same space.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="solutions" style="background:var(--surface-soft);">
+      <div class="wrap">
+        <div class="stats">
+          <div class="stat"><div class="num">100M+</div><div class="lbl">users worldwide</div></div>
+          <div class="stat"><div class="num">99%</div><div class="lbl">of the Fortune 100</div></div>
+          <div class="stat"><div class="num">250K+</div><div class="lbl">organizations</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="wrap" style="text-align:center;">
+        <div class="sec-head"><h2>Plans for every team</h2></div>
+        <div class="toggle" role="tablist" aria-label="Billing">
+          <button role="tab" class="on" aria-selected="true">Monthly</button>
+          <button role="tab" aria-selected="false">Annual <span style="color:var(--yellow-dark);">Save 15%</span></button>
+        </div>
+        <div class="pricing" style="text-align:left;">
+          <article class="pcard">
+            <div class="tier">Free</div>
+            <div class="amt">$0<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>3 editable boards</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Core templates</li>
+            </ul>
+            <button class="btn btn-secondary" style="justify-content:center;">Get started</button>
+          </article>
+          <article class="pcard">
+            <div class="tier">Starter</div>
+            <div class="amt">$8<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Unlimited boards</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Custom templates</li>
+            </ul>
+            <button class="btn btn-secondary" style="justify-content:center;">Try free</button>
+          </article>
+          <article class="pcard featured">
+            <div class="tier">Business</div>
+            <div class="amt">$16<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Miro AI</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>SSO &amp; private boards</li>
+            </ul>
+            <button class="btn btn-primary" style="justify-content:center;">Try free</button>
+          </article>
+          <article class="pcard enterprise">
+            <div class="tier">Enterprise</div>
+            <div class="amt" style="font-size:28px;">Custom</div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Advanced security</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Dedicated support</li>
+            </ul>
+            <button class="btn btn-on-dark" style="justify-content:center;">Contact sales</button>
+          </article>
+        </div>
+
+        <div class="cmp" style="text-align:left;">
+          <div class="divider">Collaboration</div>
+          <div class="row"><span>Editable boards</span><span>3</span><span><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span><span><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span><span><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span></div>
+          <div class="row"><span>Miro AI</span><span>—</span><span>—</span><span><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span><span><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span></div>
+          <div class="divider">Security</div>
+          <div class="row"><span>SSO / SAML</span><span>—</span><span>—</span><span><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span><span><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="cta-banner">
+          <h2>Get great done, together</h2>
+          <p>Join millions of teams building in Miro.</p>
+          <button class="btn btn-on-dark">Get started free</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap fcols">
+      <div><h5>Product</h5><a href="./DESIGN.md">Diagramming</a><a href="./DESIGN.md">Miro AI</a><a href="./DESIGN.md">Templates</a></div>
+      <div><h5>Solutions</h5><a href="./DESIGN.md">Agile</a><a href="./DESIGN.md">Product</a><a href="./DESIGN.md">UX</a></div>
+      <div><h5>Tools</h5><a href="./DESIGN.md">Mind map</a><a href="./DESIGN.md">Flowchart</a><a href="./DESIGN.md">Kanban</a></div>
+      <div><h5>Resources</h5><a href="./DESIGN.md">Help center</a><a href="./DESIGN.md">Blog</a><a href="./DESIGN.md">Community</a></div>
+      <div><h5>Company</h5><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Contact</a></div>
+      <div><h5>Plans</h5><a href="./DESIGN.md">Pricing</a><a href="./DESIGN.md">Enterprise</a><a href="./DESIGN.md">Education</a></div>
+    </div>
+  </footer>
+
+</body>
+</html>

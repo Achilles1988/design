@@ -1,0 +1,287 @@
+<!-- source_content_hash: 9230c7b3951371fc2edc04958962e32bb7ec9a9b703aa6b72eaf5c7991b7c984 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webflow — Component Preview</title>
+<style>
+  /* ============================================================
+     Webflow design tokens — mapped from DESIGN.md
+     Near-black #080808 primary on white canvas · five-stop chromatic
+     category palette as full-fill cards · WF Visual Sans (Inter sub) at
+     500/600, weight ceiling 600 · tight 4px buttons, 8px cards, no pills
+     ============================================================ */
+  :root {
+    --primary: #080808;        /* near-black — every primary CTA, heading, wordmark */
+    --on-primary: #ffffff;
+    --ink: #080808;
+    --ink-strong: #222222;
+    --body: #363636;
+    --body-mid: #5a5a5a;
+    --mute: #898989;
+    --mute-soft: #ababab;
+    --hairline: #d8d8d8;
+    --canvas: #ffffff;
+    /* Five-stop chromatic category palette (surface fills, never buttons) */
+    --accent-purple: #7a3dff;
+    --accent-pink: #ed52cb;
+    --accent-blue: #3b89ff;
+    --accent-blue-deep: #006acc;
+    --accent-blue-info: #146ef5;
+    --accent-orange: #ff6b00;
+    --accent-green: #00d722;
+    --accent-yellow: #ffae13;
+    --accent-red: #ee1d36;
+    /* Radius */
+    --r-none: 0px; --r-xs: 2px; --r-sm: 4px; --r-md: 8px; --r-full: 9999px;
+    /* Spacing (4px base) */
+    --sp-xxs: 2px; --sp-xs: 4px; --sp-sm: 8px; --sp-md: 12px; --sp-lg: 16px;
+    --sp-xl: 20px; --sp-2xl: 24px; --sp-3xl: 32px;
+    /* Layered signature drop-shadow */
+    --shadow-2: 0 84px 24px rgba(0,0,0,0), 0 54px 22px rgba(0,0,0,0.01),
+                0 30px 18px rgba(0,0,0,0.04), 0 13px 13px rgba(0,0,0,0.08),
+                0 3px 7px rgba(0,0,0,0.09);
+    --font: "WF Visual Sans Variable", Inter, system-ui, -apple-system, sans-serif;
+    --mono: "WFVisualSans-Mono", Inconsolata, ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--canvas); color: var(--body); font-family: var(--font);
+    font-size: 16px; line-height: 1.6; letter-spacing: -0.16px; -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01" 1; }
+  ::selection { background: var(--accent-purple); color: #fff; }
+  a { color: var(--ink); text-decoration: none; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--sp-3xl); }
+
+  /* ---- nav ---- */
+  .nav { background: var(--canvas); border-bottom: 1px solid var(--hairline);
+    padding: var(--sp-lg) 0; position: sticky; top: 0; z-index: 40; }
+  .nav .wrap { display: flex; align-items: center; gap: var(--sp-3xl); }
+  .wordmark { font-weight: 600; font-size: 20px; letter-spacing: -0.5px; color: var(--ink); }
+  .nav-links { display: flex; gap: var(--sp-2xl); flex: 1; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .nav-links a:hover { color: var(--accent-purple); }
+  .nav-cta { display: flex; gap: var(--sp-md); }
+
+  /* ---- buttons (4px rectangle, weight 500, never pill) ---- */
+  .btn { font-family: var(--font); font-size: 16px; font-weight: 500; letter-spacing: -0.16px;
+    border: 0; cursor: pointer; border-radius: var(--r-sm); padding: 12px 20px;
+    display: inline-flex; align-items: center; gap: 8px; transition: opacity .15s; }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-secondary { background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline); }
+  .btn-text { background: transparent; color: var(--ink); padding: 8px 0; }
+  .btn-text::after { content: " →"; }
+  .btn:hover { opacity: 0.88; }
+  .btn:focus-visible { outline: 2px solid var(--accent-blue-info); outline-offset: 2px; }
+
+  /* ---- hero ---- */
+  .hero { padding: 96px 0 64px; }
+  .eyebrow { font-size: 15px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--accent-purple); margin-bottom: var(--sp-lg); }
+  .display-xxl { font-weight: 600; font-size: clamp(44px, 8vw, 80px); line-height: 1.04;
+    letter-spacing: -0.8px; color: var(--ink); max-width: 16ch; }
+  .lead { font-size: 20px; line-height: 1.6; color: var(--body); max-width: 52ch; margin: var(--sp-2xl) 0; }
+  .hero-cta { display: flex; gap: var(--sp-md); }
+
+  /* ---- section scaffold ---- */
+  section { padding: 80px 0; }
+  .sec-head { max-width: 44ch; margin-bottom: 48px; }
+  .display-lg { font-weight: 600; font-size: clamp(32px, 5vw, 44.8px); line-height: 1.04;
+    letter-spacing: -0.4px; color: var(--ink); }
+  .display-md { font-weight: 500; font-size: 32px; line-height: 1.3; color: var(--ink); }
+  .sub { color: var(--body-mid); margin-top: var(--sp-lg); font-size: 18px; }
+
+  /* ---- category cards (signature five-stop) ---- */
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-lg); }
+  .cat { border-radius: var(--r-md); padding: var(--sp-3xl); min-height: 200px; color: #fff;
+    display: flex; flex-direction: column; justify-content: space-between; }
+  .cat h3 { font-size: 32px; font-weight: 500; line-height: 1.2; }
+  .cat p { font-size: 14px; opacity: 0.92; margin-top: var(--sp-sm); }
+  .cat.purple { background: var(--accent-purple); }
+  .cat.pink { background: var(--accent-pink); }
+  .cat.blue { background: var(--accent-blue); }
+  .cat.orange { background: var(--accent-orange); }
+  .cat.green { background: var(--accent-green); color: var(--primary); }
+
+  /* ---- feature cards ---- */
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-lg); }
+  .card { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-md);
+    padding: var(--sp-3xl); }
+  .card.elev { box-shadow: var(--shadow-2); border-color: transparent; }
+  .card.dark { background: var(--primary); color: var(--on-primary); border-color: transparent; }
+  .card h4 { font-size: 20px; font-weight: 500; color: inherit; margin-bottom: var(--sp-sm); }
+  .card.dark h4 { color: #fff; }
+  .card p { font-size: 16px; color: var(--body); }
+  .card.dark p { color: rgba(255,255,255,0.72); }
+  .badge { display: inline-block; background: var(--accent-blue-info); color: #fff;
+    font-size: 12.8px; font-weight: 550; border-radius: var(--r-sm); padding: 4px 8px; margin-bottom: var(--sp-md); }
+
+  /* ---- pricing ---- */
+  .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-lg); }
+  .pcard { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-md);
+    padding: var(--sp-3xl); }
+  .pcard.featured { box-shadow: var(--shadow-2); border-color: transparent; }
+  .pcard .tier { font-size: 24px; font-weight: 600; color: var(--ink); letter-spacing: -0.096px; }
+  .pcard .amt { font-size: 44px; font-weight: 600; letter-spacing: -0.4px; color: var(--ink); margin: var(--sp-md) 0; }
+  .pcard .amt span { font-size: 16px; color: var(--mute); font-weight: 400; }
+  .plist { list-style: none; margin: var(--sp-lg) 0; display: grid; gap: 10px; }
+  .plist li { font-size: 14px; color: var(--body); display: flex; gap: 8px; align-items: flex-start; }
+  .plist svg { flex: none; margin-top: 2px; color: var(--accent-green); }
+  .pcard .btn { width: 100%; justify-content: center; margin-top: var(--sp-md); }
+
+  /* ---- form ---- */
+  .form { max-width: 440px; }
+  .field { margin-bottom: var(--sp-lg); }
+  .field label { display: block; font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: var(--sp-xs); }
+  .input { width: 100%; background: var(--canvas); border: 1px solid var(--hairline); color: var(--ink);
+    font-family: var(--font); font-size: 16px; border-radius: var(--r-sm); padding: 12px 16px; }
+  .input:focus { outline: none; border-color: var(--accent-blue-info); box-shadow: 0 0 0 3px rgba(20,110,245,0.15); }
+
+  /* ---- footer ---- */
+  footer { background: var(--canvas); border-top: 1px solid var(--hairline); padding: 64px 0; }
+  .fcols { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: var(--sp-3xl); }
+  .fcols h5 { font-size: 12.8px; font-weight: 550; text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--ink); margin-bottom: var(--sp-md); }
+  .fcols a { display: block; color: var(--body-mid); font-size: 14px; padding: 4px 0; }
+  .fcols a:hover { color: var(--ink); }
+  .mono { font-family: var(--mono); font-size: 12px; color: var(--mute); }
+
+  @media (max-width: 720px) { .fcols { grid-template-columns: 1fr 1fr; } .nav-links { display: none; } }
+</style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <span class="wordmark">Webflow</span>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#platform">Platform</a>
+        <a href="#solutions">Solutions</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#resources">Resources</a>
+      </nav>
+      <div class="nav-cta">
+        <button class="btn btn-secondary">Log in</button>
+        <button class="btn btn-primary">Get started — it's free</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">The website experience platform</p>
+        <h1 class="display-xxl">Build with the power of code — without writing any</h1>
+        <p class="lead">Design, build, and launch responsive websites visually, while writing clean, semantic code for you.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary">Start building</button>
+          <button class="btn btn-secondary">Contact sales</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="platform">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="display-lg">One platform, every surface</h2>
+          <p class="sub">Each category maps to a product surface — full-fill colour, never a button.</p>
+        </div>
+        <div class="cat-grid">
+          <article class="cat purple"><h3>Designer</h3><p>Visual canvas with real CSS control.</p></article>
+          <article class="cat pink"><h3>Interactions</h3><p>Animate on scroll, hover, and load.</p></article>
+          <article class="cat blue"><h3>CMS</h3><p>Dynamic content, structured your way.</p></article>
+          <article class="cat orange"><h3>Hosting</h3><p>Fast, secure, global by default.</p></article>
+          <article class="cat green"><h3>Ecommerce</h3><p>Sell without templates or plugins.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="solutions">
+      <div class="wrap">
+        <div class="sec-head"><h2 class="display-lg">Everything the team needs</h2></div>
+        <div class="feat-grid">
+          <article class="card elev">
+            <span class="badge">New</span>
+            <h4>Clean semantic code</h4>
+            <p>Webflow writes production-ready HTML, CSS, and JavaScript as you design.</p>
+          </article>
+          <article class="card">
+            <h4>Responsive by default</h4>
+            <p>Design across every breakpoint from one canvas — no separate mobile file.</p>
+          </article>
+          <article class="card dark">
+            <h4>Enterprise-grade</h4>
+            <p>SSO, audit logs, and 99.99% uptime for teams that ship at scale.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="wrap">
+        <div class="sec-head"><h2 class="display-lg">Simple, scalable pricing</h2></div>
+        <div class="pricing">
+          <article class="pcard">
+            <div class="tier">Starter</div>
+            <div class="amt">$0<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>2 pages</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>webflow.io subdomain</li>
+            </ul>
+            <button class="btn btn-secondary">Choose Starter</button>
+          </article>
+          <article class="pcard featured">
+            <div class="tier">CMS</div>
+            <div class="amt">$29<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Custom domain</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>2,000 CMS items</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Site search</li>
+            </ul>
+            <button class="btn btn-primary">Choose CMS</button>
+          </article>
+          <article class="pcard">
+            <div class="tier">Business</div>
+            <div class="amt">$49<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>10,000 CMS items</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Form file upload</li>
+            </ul>
+            <button class="btn btn-secondary">Choose Business</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="resources">
+      <div class="wrap">
+        <div class="sec-head"><h2 class="display-md">Get the newsletter</h2></div>
+        <form class="form" onsubmit="return false">
+          <div class="field">
+            <label for="email">Email address</label>
+            <input class="input" id="email" type="email" placeholder="you@company.com">
+          </div>
+          <button class="btn btn-primary" type="submit">Subscribe</button>
+        </form>
+        <p class="mono" style="margin-top:var(--sp-lg);">npm install @webflow/cli</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap fcols">
+      <div>
+        <span class="wordmark">Webflow</span>
+        <p style="color:var(--body-mid); font-size:14px; margin-top:var(--sp-sm);">The website experience platform.</p>
+      </div>
+      <div><h5>Product</h5><a href="./DESIGN.md">Designer</a><a href="./DESIGN.md">CMS</a><a href="./DESIGN.md">Hosting</a></div>
+      <div><h5>Solutions</h5><a href="./DESIGN.md">Marketing</a><a href="./DESIGN.md">Ecommerce</a><a href="./DESIGN.md">Enterprise</a></div>
+      <div><h5>Resources</h5><a href="./DESIGN.md">University</a><a href="./DESIGN.md">Blog</a><a href="./DESIGN.md">Templates</a></div>
+      <div><h5>Company</h5><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a></div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!-- source_content_hash: 962be23cd947e87a86b2ffbc0440e9d0808243a6ef3af2aa04e8e7cc04d48ba3 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Intercom — Component Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     Intercom — Design tokens (from DESIGN.md front matter)
+     Cream canvas + charcoal primary + single Fin Orange (product-only).
+     Saans -> Inter 500 (display) / 400 (body). SaansMono -> JetBrains Mono.
+     Product screenshots are the protagonist; ornament is rare.
+     ============================================================ */
+  :root {
+    /* --- Colors: brand & accent --- */
+    --primary: #111111;            /* charcoal — system primary */
+    --on-primary: #ffffff;
+    --ink: #111111;
+    --ink-muted: #626260;
+    --ink-subtle: #7b7b78;
+    --ink-tertiary: #9c9fa5;
+    --canvas: #f5f1ec;             /* soft cream — never pure white */
+    --surface-1: #ffffff;          /* floating card white */
+    --surface-2: #ebe7e1;          /* darker cream — discount banner, alt rows */
+    --inverse-canvas: #000000;     /* true black quote strip */
+    --inverse-surface-1: #313130;
+    --inverse-ink: #ffffff;
+    --inverse-ink-muted: #9c9fa5;
+    --hairline: #d3cec6;           /* warm 1px card border */
+    --hairline-soft: #ebe7e1;      /* softer FAQ / footer divider */
+    --fin-orange: #ff5600;         /* AI-product accent — Fin CTA & badge ONLY */
+    /* report palette — in-product mockups only, never brand surfaces */
+    --report-orange: #fe4c02;
+    --report-blue: #65b5ff;
+    --report-green: #0bdf50;
+    --report-pink: #ff2067;
+    --report-lime: #b3e01c;
+    --report-cyan: #03b2cb;
+    --brand-blue: #0007cb;
+    --semantic-error: #c41c1c;
+    --semantic-success: #0bdf50;
+
+    /* --- Typography --- */
+    --font: 'Inter', 'Saans Fallback', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SaansMono Fallback', ui-monospace, monospace;
+
+    /* --- Rounded --- */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;    /* buttons, inputs */
+    --r-lg: 12px;   /* cards, FAQ rows */
+    --r-xl: 16px;   /* product mockup tiles */
+    --r-xxl: 24px;  /* oversized CTA banners */
+    --r-pill: 9999px;
+    --r-full: 9999px;
+
+    /* --- Spacing (base 8) --- */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+    --sp-section: 96px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--fin-orange); color: var(--on-primary); }
+  a { color: inherit; }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-lg); }
+  .narrow { max-width: 860px; margin: 0 auto; padding: 0 var(--sp-lg); }
+
+  /* --- Type scale (Saans weight 500 display / 400 body, negative tracking) --- */
+  .display-xl { font-size: clamp(40px, 8vw, 72px); font-weight: 500; line-height: 1.05; letter-spacing: -2px; }
+  .display-lg { font-size: clamp(34px, 6vw, 56px); font-weight: 500; line-height: 1.1; letter-spacing: -1.4px; }
+  .display-md { font-size: clamp(28px, 4vw, 40px); font-weight: 500; line-height: 1.15; letter-spacing: -0.8px; }
+  .headline   { font-size: 28px; font-weight: 500; line-height: 1.2; letter-spacing: -0.5px; }
+  .card-title { font-size: 22px; font-weight: 500; line-height: 1.25; letter-spacing: -0.3px; }
+  .subhead    { font-size: 20px; font-weight: 400; line-height: 1.4; letter-spacing: -0.2px; color: var(--ink-muted); }
+  .body-lg    { font-size: 18px; font-weight: 400; line-height: 1.5; letter-spacing: -0.1px; }
+  .body-sm    { font-size: 14px; font-weight: 400; line-height: 1.5; }
+  .caption    { font-size: 12px; font-weight: 400; line-height: 1.4; color: var(--ink-subtle); }
+  .eyebrow    { font-size: 14px; font-weight: 500; line-height: 1.3; color: var(--ink-muted); }
+  .mono       { font-family: var(--font-mono); font-size: 13px; font-weight: 400; line-height: 1.5; }
+
+  /* --- Buttons (rounded rectangle 8px, never pill) --- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-xs);
+    font-family: inherit; font-size: 15px; font-weight: 500; line-height: 1.2;
+    padding: 10px 18px; border-radius: var(--r-md);
+    border: 1px solid transparent; cursor: pointer; text-decoration: none;
+    transition: background .16s ease, border-color .16s ease, transform .16s ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: #000; }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-secondary { background: var(--surface-1); color: var(--ink); border-color: var(--hairline); }
+  .btn-secondary:hover { border-color: var(--ink-tertiary); }
+  .btn-tertiary { background: transparent; color: var(--ink); }
+  .btn-tertiary:hover { background: var(--surface-2); }
+  .btn-fin { background: var(--fin-orange); color: var(--on-primary); }
+  .btn-fin:hover { filter: brightness(1.05); }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(17,17,17,.28); }
+  .btn-fin:focus-visible { box-shadow: 0 0 0 3px rgba(255,86,0,.4); }
+
+  /* --- Nav --- */
+  .nav { position: sticky; top: 0; z-index: 30; background: rgba(245,241,236,.86); backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline-soft); }
+  .nav .wrap { display: flex; align-items: center; gap: var(--sp-lg); height: 56px; }
+  .brand { display: flex; align-items: center; gap: var(--sp-xs); font-weight: 500; font-size: 18px; letter-spacing: -0.4px; text-decoration: none; color: var(--ink); }
+  .brand .mark { width: 26px; height: 26px; border-radius: var(--r-md); background: var(--primary); display: grid; place-items: center; }
+  .nav-links { display: flex; gap: var(--sp-lg); margin-left: var(--sp-sm); }
+  .nav-links a { text-decoration: none; color: var(--ink-muted); font-size: 14px; transition: color .15s ease; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-spacer { flex: 1; }
+  .nav-right { display: flex; align-items: center; gap: var(--sp-sm); }
+  .nav a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(17,17,17,.2); border-radius: var(--r-xs); }
+
+  /* --- Section scaffolding --- */
+  section { padding: var(--sp-section) 0; }
+  .section-head { max-width: 60ch; margin: 0 auto var(--sp-xxl); text-align: center; }
+  .section-head .eyebrow { margin-bottom: var(--sp-sm); }
+  .section-head h2 { margin: 0 0 var(--sp-md); }
+  .section-head p { margin: 0 auto; color: var(--ink-muted); max-width: 52ch; }
+
+  /* --- Hero --- */
+  .hero { padding: var(--sp-section) 0 var(--sp-xl); }
+  .hero .wrap { display: grid; grid-template-columns: 1fr; text-align: center; }
+  .hero .badge-fin { display: inline-flex; align-items: center; gap: var(--sp-xs); align-self: center; background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-pill); padding: 6px 14px; font-size: 13px; font-weight: 500; margin-bottom: var(--sp-lg); }
+  .hero .badge-fin .dot { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--fin-orange); }
+  .hero h1 { margin: 0 auto var(--sp-lg); max-width: 18ch; }
+  .hero .lead { margin: 0 auto var(--sp-xl); max-width: 46ch; color: var(--ink-muted); }
+  .hero-actions { display: flex; gap: var(--sp-sm); justify-content: center; flex-wrap: wrap; }
+
+  /* --- Product mockup card (the protagonist) --- */
+  .product-mockup-card { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-xl); padding: var(--sp-lg); margin-top: var(--sp-xxl); }
+  .mock-toolbar { display: flex; align-items: center; gap: var(--sp-xs); padding-bottom: var(--sp-md); border-bottom: 1px solid var(--hairline-soft); margin-bottom: var(--sp-md); }
+  .mock-toolbar .tdot { width: 10px; height: 10px; border-radius: var(--r-full); background: var(--hairline); }
+  .mock-toolbar .tlabel { margin-left: var(--sp-sm); font-size: 13px; color: var(--ink-subtle); }
+  .mock-body { display: grid; grid-template-columns: 200px 1fr 240px; gap: var(--sp-md); min-height: 300px; }
+  .mock-side { background: var(--canvas); border-radius: var(--r-md); padding: var(--sp-md); }
+  .mock-conv { display: flex; gap: var(--sp-xs); align-items: center; padding: var(--sp-xs) var(--sp-xs); border-radius: var(--r-sm); font-size: 13px; }
+  .mock-conv.active { background: var(--surface-2); }
+  .mock-avatar { width: 26px; height: 26px; border-radius: var(--r-full); background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 500; flex: none; }
+  .mock-main { background: var(--canvas); border-radius: var(--r-md); padding: var(--sp-md); display: flex; flex-direction: column; gap: var(--sp-sm); }
+  .msg { max-width: 78%; padding: var(--sp-sm) var(--sp-md); border-radius: var(--r-lg); font-size: 14px; }
+  .msg.them { background: var(--surface-1); border: 1px solid var(--hairline); align-self: flex-start; }
+  .msg.fin { background: var(--fin-orange); color: #fff; align-self: flex-start; }
+  .msg.you { background: var(--primary); color: #fff; align-self: flex-end; }
+  .mock-report { background: var(--canvas); border-radius: var(--r-md); padding: var(--sp-md); }
+  .mock-report h4 { margin: 0 0 var(--sp-sm); font-size: 13px; font-weight: 500; color: var(--ink-muted); }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 96px; }
+  .bar { flex: 1; border-radius: var(--r-xs) var(--r-xs) 0 0; }
+  .kpi-row { display: flex; gap: var(--sp-sm); margin-top: var(--sp-md); }
+  .kpi { flex: 1; }
+  .kpi .n { font-size: 20px; font-weight: 500; letter-spacing: -0.4px; }
+  .kpi .l { font-size: 11px; color: var(--ink-subtle); }
+
+  /* --- Customer logo marquee --- */
+  .logos { display: flex; flex-wrap: wrap; gap: var(--sp-md); justify-content: center; align-items: center; }
+  .logo-tile { background: var(--canvas); color: var(--ink-muted); border-radius: var(--r-xs); padding: var(--sp-md) var(--sp-lg); font-weight: 500; font-size: 15px; letter-spacing: -0.3px; }
+
+  /* --- Feature cards --- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+  .feature-card { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--sp-lg); }
+  .feature-card .ic { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--surface-2); display: grid; place-items: center; margin-bottom: var(--sp-md); }
+  .feature-card h3 { margin: 0 0 var(--sp-xs); }
+  .feature-card p { margin: 0; color: var(--ink-muted); font-size: 15px; }
+
+  /* --- Testimonial (black inverse strip) --- */
+  .quote-strip { background: var(--inverse-canvas); color: var(--inverse-ink); border-radius: var(--r-xxl); padding: var(--sp-xxl); text-align: center; }
+  .quote-strip blockquote { margin: 0 auto; max-width: 40ch; font-size: clamp(24px, 4vw, 32px); font-weight: 500; line-height: 1.25; letter-spacing: -0.5px; }
+  .quote-meta { display: inline-flex; align-items: center; gap: var(--sp-sm); margin-top: var(--sp-lg); color: var(--inverse-ink-muted); }
+  .quote-meta .av { width: 40px; height: 40px; border-radius: var(--r-full); background: var(--inverse-surface-1); display: grid; place-items: center; font-weight: 500; color: #fff; }
+
+  /* --- Pricing --- */
+  .price-toggle { display: inline-flex; gap: 4px; background: var(--surface-2); border-radius: var(--r-pill); padding: 4px; margin: 0 auto var(--sp-xl); }
+  .price-tab { border: none; background: transparent; color: var(--ink-muted); font-family: inherit; font-size: 15px; font-weight: 500; padding: 8px 16px; border-radius: var(--r-pill); cursor: pointer; }
+  .price-tab[aria-selected="true"] { background: var(--surface-1); color: var(--ink); }
+  .price-tab:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(17,17,17,.22); }
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); align-items: stretch; }
+  .pricing-card { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--sp-lg); display: flex; flex-direction: column; }
+  .pricing-card.featured { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .pricing-card.featured .subhead, .pricing-card.featured .caption { color: var(--ink-tertiary); }
+  .tier-name { display: flex; align-items: center; gap: var(--sp-xs); }
+  .badge-fin-sm { background: var(--fin-orange); color: #fff; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--r-xs); }
+  .price-amt { font-size: 40px; font-weight: 500; letter-spacing: -1px; line-height: 1; margin: var(--sp-sm) 0 var(--sp-xxs); }
+  .price-amt span { font-size: 15px; font-weight: 400; color: var(--ink-muted); letter-spacing: 0; }
+  .pricing-card.featured .price-amt span { color: var(--ink-tertiary); }
+  .plist { list-style: none; margin: var(--sp-md) 0 var(--sp-lg); padding: 0; display: grid; gap: var(--sp-sm); flex: 1; }
+  .plist li { display: flex; gap: var(--sp-xs); align-items: flex-start; font-size: 14px; }
+  .plist svg { flex: none; margin-top: 2px; }
+
+  /* --- Startup discount card --- */
+  .startup-card { background: var(--surface-2); border-radius: var(--r-lg); padding: var(--sp-xl); display: flex; align-items: center; justify-content: space-between; gap: var(--sp-lg); flex-wrap: wrap; }
+  .startup-card h3 { margin: 0 0 var(--sp-xs); }
+  .startup-card p { margin: 0; color: var(--ink-muted); }
+
+  /* --- FAQ --- */
+  .faq { max-width: 820px; margin: 0 auto; }
+  .faq-row { border-bottom: 1px solid var(--hairline-soft); padding: var(--sp-lg) var(--sp-xs); }
+  .faq-row summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--sp-md); font-size: 18px; font-weight: 500; letter-spacing: -0.2px; }
+  .faq-row summary::-webkit-details-marker { display: none; }
+  .faq-row summary .chev { transition: transform .2s ease; flex: none; }
+  .faq-row[open] summary .chev { transform: rotate(180deg); }
+  .faq-row p { margin: var(--sp-sm) 0 0; color: var(--ink-muted); font-size: 15px; }
+  .faq-row summary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(17,17,17,.2); border-radius: var(--r-xs); }
+
+  /* --- Form --- */
+  .contact { max-width: 520px; margin: var(--sp-xl) auto 0; display: grid; gap: var(--sp-md); }
+  .field label { display: block; margin-bottom: var(--sp-xxs); font-size: 14px; font-weight: 500; }
+  .text-input { width: 100%; font-family: inherit; font-size: 16px; color: var(--ink); background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-md); padding: 10px 14px; transition: border-color .15s ease, box-shadow .15s ease; }
+  .text-input::placeholder { color: var(--ink-tertiary); }
+  .text-input:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(17,17,17,.12); }
+
+  /* --- CTA banner --- */
+  .cta-banner { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--sp-xxl); text-align: center; }
+  .cta-banner h2 { margin: 0 auto var(--sp-md); max-width: 22ch; }
+  .cta-banner p { margin: 0 auto var(--sp-lg); color: var(--ink-muted); max-width: 44ch; }
+
+  /* --- Footer --- */
+  footer.site { background: var(--canvas); border-top: 1px solid var(--hairline-soft); }
+  footer.site .wrap { padding: 64px var(--sp-xl); }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: var(--sp-lg); }
+  .foot-col h4 { font-size: 13px; font-weight: 500; margin: 0 0 var(--sp-sm); color: var(--ink); }
+  .foot-col a { display: block; text-decoration: none; color: var(--ink-muted); font-size: 14px; padding: 5px 0; }
+  .foot-col a:hover { color: var(--ink); }
+  .foot-col a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(17,17,17,.18); border-radius: var(--r-xs); }
+  .foot-legal { display: flex; justify-content: space-between; align-items: center; margin-top: var(--sp-xl); padding-top: var(--sp-lg); border-top: 1px solid var(--hairline-soft); color: var(--ink-subtle); font-size: 13px; flex-wrap: wrap; gap: var(--sp-sm); }
+
+  /* --- Responsive --- */
+  @media (max-width: 1023px) {
+    .grid-3, .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .mock-body { grid-template-columns: 1fr; }
+    .mock-side, .mock-report { display: none; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 767px) {
+    .nav-links { display: none; }
+    .grid-3, .pricing-grid { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav">
+    <div class="wrap">
+      <a href="./DESIGN.md" class="brand" aria-label="Intercom home">
+        <span class="mark" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3 3v6M7.5 3v9M12 3v6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+        Intercom
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">Fin AI Agent</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Customers</a>
+        <a href="./DESIGN.md">Resources</a>
+      </nav>
+      <span class="nav-spacer"></span>
+      <div class="nav-right">
+        <a href="./DESIGN.md" class="btn btn-tertiary">Sign in</a>
+        <a href="./DESIGN.md" class="btn btn-primary">Start free trial</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <span class="badge-fin"><span class="dot" aria-hidden="true"></span> Meet Fin — the #1 AI agent for customer service</span>
+      <h1 id="hero-title" class="display-xl">The complete AI-first customer service platform.</h1>
+      <p class="lead body-lg">Intercom resolves conversations instantly with Fin, and gives your team one workspace to support every customer — beautifully.</p>
+      <div class="hero-actions">
+        <a href="./DESIGN.md" class="btn btn-primary">Start free trial</a>
+        <a href="./DESIGN.md" class="btn btn-fin">Try Fin AI Agent</a>
+      </div>
+
+      <!-- product mockup: the protagonist -->
+      <div class="product-mockup-card" role="img" aria-label="Intercom inbox with Fin AI resolving a conversation, and a report panel">
+        <div class="mock-toolbar">
+          <span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span><span class="tdot" aria-hidden="true"></span>
+          <span class="tlabel">Inbox — Fin AI Agent</span>
+        </div>
+        <div class="mock-body">
+          <aside class="mock-side" aria-hidden="true">
+            <div class="mock-conv active"><span class="mock-avatar">AL</span><span>Alex Lee · Billing</span></div>
+            <div class="mock-conv"><span class="mock-avatar" style="background:var(--report-blue);color:#111">MK</span><span>Maria K. · Refund</span></div>
+            <div class="mock-conv"><span class="mock-avatar" style="background:var(--report-pink)">JT</span><span>Jon T. · Setup</span></div>
+            <div class="mock-conv"><span class="mock-avatar" style="background:var(--report-green);color:#111">SP</span><span>Sam P. · Login</span></div>
+          </aside>
+          <div class="mock-main" aria-hidden="true">
+            <div class="msg them">Hi! How do I upgrade my plan?</div>
+            <div class="msg fin">You can upgrade anytime under Settings → Billing. Want me to open it for you?</div>
+            <div class="msg them">Yes please 🙌</div>
+            <div class="msg you">Done — Fin handled it. Anything else?</div>
+          </div>
+          <div class="mock-report" aria-hidden="true">
+            <h4>Resolution rate</h4>
+            <div class="bars">
+              <span class="bar" style="height:48%;background:var(--report-blue)"></span>
+              <span class="bar" style="height:66%;background:var(--report-cyan)"></span>
+              <span class="bar" style="height:54%;background:var(--report-lime)"></span>
+              <span class="bar" style="height:82%;background:var(--report-green)"></span>
+              <span class="bar" style="height:94%;background:var(--fin-orange)"></span>
+            </div>
+            <div class="kpi-row">
+              <div class="kpi"><div class="n">56%</div><div class="l">Auto-resolved</div></div>
+              <div class="kpi"><div class="n">1m</div><div class="l">First reply</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LOGO MARQUEE ===================== -->
+  <section style="padding-top:0">
+    <div class="wrap">
+      <p class="caption" style="text-align:center;margin-bottom:var(--sp-lg)">Trusted by 25,000+ high-performing support teams</p>
+      <div class="logos">
+        <span class="logo-tile">Amplitude</span>
+        <span class="logo-tile">Notion</span>
+        <span class="logo-tile">Lightspeed</span>
+        <span class="logo-tile">Coda</span>
+        <span class="logo-tile">Anthropic</span>
+        <span class="logo-tile">Monzo</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURES ===================== -->
+  <section aria-labelledby="feat-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">One platform, built for AI</p>
+        <h2 id="feat-title" class="display-md">Everything customer service should be.</h2>
+        <p>From instant AI resolutions to a beautifully fast human inbox — all in one place.</p>
+      </div>
+      <div class="grid-3">
+        <article class="feature-card">
+          <span class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#111" stroke-width="1.6"/><path d="M7 10.5 9.2 13 13 7.5" stroke="#111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3 class="card-title">Fin AI Agent</h3>
+          <p>Resolves up to 56% of conversations instantly, in 45+ languages, with human-quality answers.</p>
+        </article>
+        <article class="feature-card">
+          <span class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="12" rx="2" stroke="#111" stroke-width="1.6"/><path d="M3 8h14" stroke="#111" stroke-width="1.6"/></svg></span>
+          <h3 class="card-title">Help Desk</h3>
+          <p>A single, lightning-fast inbox that unifies email, chat, phone, and social in one shared workspace.</p>
+        </article>
+        <article class="feature-card">
+          <span class="ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 15V9M10 15V5M16 15v-3" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <h3 class="card-title">Reports &amp; Insights</h3>
+          <p>Measure resolution rate, CSAT, and team performance with dashboards that update in real time.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== QUOTE STRIP (black) ===================== -->
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="quote-strip">
+        <blockquote>"Fin resolves half our conversations before a human ever sees them. It changed how we scale support."</blockquote>
+        <div class="quote-meta">
+          <span class="av" aria-hidden="true">DR</span>
+          <span><strong style="color:#fff;font-weight:500">Dana Rivera</strong> · Head of Support, Amplitude</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRICING ===================== -->
+  <section aria-labelledby="pricing-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Pricing</p>
+        <h2 id="pricing-title" class="display-md">Plans that scale with you.</h2>
+      </div>
+      <div style="text-align:center">
+        <div class="price-toggle" role="tablist" aria-label="Billing period">
+          <button class="price-tab" role="tab" aria-selected="true">Monthly</button>
+          <button class="price-tab" role="tab" aria-selected="false">Yearly · save 20%</button>
+        </div>
+      </div>
+      <div class="pricing-grid">
+        <article class="pricing-card">
+          <div class="tier-name"><span class="headline" style="font-size:22px">Essential</span></div>
+          <div class="price-amt">$39 <span>/ seat / mo</span></div>
+          <p class="subhead" style="font-size:15px">For small teams getting started.</p>
+          <ul class="plist">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Shared inbox &amp; help desk</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Basic reporting</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Email &amp; chat channels</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-secondary" style="width:100%">Start free trial</a>
+        </article>
+        <article class="pricing-card featured">
+          <div class="tier-name"><span class="headline" style="font-size:22px;color:#fff">Advanced</span><span class="badge-fin-sm">Popular</span></div>
+          <div class="price-amt">$99 <span>/ seat / mo</span></div>
+          <p class="subhead" style="font-size:15px;color:var(--ink-tertiary)">For growing teams that need more power.</p>
+          <ul class="plist">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Everything in Essential</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Advanced workflows</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Multilingual support</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-secondary" style="width:100%">Start free trial</a>
+        </article>
+        <article class="pricing-card">
+          <div class="tier-name"><span class="headline" style="font-size:22px">Fin AI Agent</span><span class="badge-fin-sm">AI</span></div>
+          <div class="price-amt">$0.99 <span>/ resolution</span></div>
+          <p class="subhead" style="font-size:15px">Pay only for conversations Fin resolves.</p>
+          <ul class="plist">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#ff5600" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Human-quality answers</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#ff5600" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 45+ languages</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#ff5600" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Outcome-based pricing</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-fin" style="width:100%">Try Fin AI Agent</a>
+        </article>
+      </div>
+
+      <div class="startup-card" style="margin-top:var(--sp-xl)">
+        <div>
+          <h3 class="card-title">Startups get 90% off.</h3>
+          <p>Early-stage company? Get Intercom's Advanced plan and Fin for a fraction of the price.</p>
+        </div>
+        <a href="./DESIGN.md" class="btn btn-primary">Apply now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="alt" style="background:transparent" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">FAQ</p>
+        <h2 id="faq-title" class="display-md">Questions, answered.</h2>
+      </div>
+      <div class="faq">
+        <details class="faq-row" open>
+          <summary>How is Fin priced?
+            <svg class="chev" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="m4 7 5 5 5-5" stroke="#111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <p>Fin is billed per resolution — you only pay $0.99 when Fin successfully resolves a customer conversation, so cost scales with outcomes.</p>
+        </details>
+        <details class="faq-row">
+          <summary>Can I use Intercom without Fin?
+            <svg class="chev" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="m4 7 5 5 5-5" stroke="#111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <p>Yes. The help desk, inbox, and reporting work fully on their own. Fin is an add-on you can enable whenever you're ready.</p>
+        </details>
+        <details class="faq-row">
+          <summary>Is there a free trial?
+            <svg class="chev" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="m4 7 5 5 5-5" stroke="#111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </summary>
+          <p>Every plan starts with a 14-day free trial — no credit card required. You can invite your team and connect channels in minutes.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACT FORM ===================== -->
+  <section style="padding-top:0" aria-labelledby="contact-title">
+    <div class="narrow">
+      <div class="section-head" style="margin-bottom:var(--sp-lg)">
+        <p class="eyebrow">Talk to sales</p>
+        <h2 id="contact-title" class="display-md">See Intercom in action.</h2>
+      </div>
+      <form class="contact" onsubmit="return false">
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" class="text-input" type="text" placeholder="Jane Doe" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="wemail">Work email</label>
+          <input id="wemail" class="text-input" type="email" placeholder="jane@company.com" autocomplete="email" />
+        </div>
+        <a href="./DESIGN.md" class="btn btn-primary" style="justify-self:start">Request a demo</a>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== CTA BANNER ===================== -->
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="cta-banner">
+        <h2 class="headline">Start delivering better support today.</h2>
+        <p>Join thousands of teams resolving more conversations with AI-first customer service.</p>
+        <div class="hero-actions">
+          <a href="./DESIGN.md" class="btn btn-primary">Start free trial</a>
+          <a href="./DESIGN.md" class="btn btn-secondary">Talk to sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-col">
+          <a href="./DESIGN.md" class="brand" style="margin-bottom:var(--sp-sm)">
+            <span class="mark" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3 3v6M7.5 3v9M12 3v6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            Intercom
+          </a>
+          <p class="caption" style="max-width:28ch">The AI-first customer service platform.</p>
+        </div>
+        <div class="foot-col">
+          <h4>Product</h4>
+          <a href="./DESIGN.md">Fin AI Agent</a>
+          <a href="./DESIGN.md">Help Desk</a>
+          <a href="./DESIGN.md">Inbox</a>
+          <a href="./DESIGN.md">Reports</a>
+        </div>
+        <div class="foot-col">
+          <h4>Solutions</h4>
+          <a href="./DESIGN.md">Startups</a>
+          <a href="./DESIGN.md">Enterprise</a>
+          <a href="./DESIGN.md">E-commerce</a>
+          <a href="./DESIGN.md">Financial services</a>
+        </div>
+        <div class="foot-col">
+          <h4>Resources</h4>
+          <a href="./DESIGN.md">Help Center</a>
+          <a href="./DESIGN.md">Blog</a>
+          <a href="./DESIGN.md">Community</a>
+          <a href="./DESIGN.md">Developers</a>
+        </div>
+        <div class="foot-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Customers</a>
+          <a href="./DESIGN.md">Contact</a>
+        </div>
+      </div>
+      <div class="foot-legal">
+        <span>© 2026 Intercom, Inc. All rights reserved.</span>
+        <span>Design tokens sourced from <a href="./DESIGN.md" style="color:var(--ink-muted);text-decoration:underline;text-underline-offset:3px">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

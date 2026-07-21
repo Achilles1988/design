@@ -1,0 +1,398 @@
+<!-- source_content_hash: e186c614b1223fe7015670472ac6bc84b5b3fdd5de5325b3ce5bfb7fbe9c8d6e -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dell 1996 — Component Preview</title>
+<style>
+  /* ============================================================
+     Dell.com 1996 — token map
+     Catalog-era fossil: literal black page frame, flat color-block
+     "ribbon cards" in eight web-safe tints, Arial Black display,
+     Times Roman serif body (the era's signature inversion),
+     hand-cut GIF stickers, classic Mosaic #0000ee links. No radius
+     except round award seals. No soft shadows — hard bevels only.
+     ============================================================ */
+  :root {
+    /* Brand & accent */
+    --primary: #e91d2a;         /* Dell Red — CTA panel + phone only */
+    --on-primary: #ffffff;
+    --yellow-sticker: #fcc20f;
+    --purple-stripe: #6a26a4;
+    --link: #0000ee;            /* classic Netscape 3.x blue */
+
+    /* Frame / neutrals */
+    --canvas: #ffffff;
+    --ink: #000000;
+    --frame-ink: #000000;
+
+    /* Ribbon-card tint family — one per product line */
+    --tint-olive: #8e8a25;
+    --tint-sage: #b3bd95;
+    --tint-salmon: #d77a7a;
+    --tint-peach: #e6915d;
+    --tint-lime: #c0d4a7;
+    --tint-sky: #9ab6c8;
+    --tint-steel: #a5b8c0;
+    --tint-periwinkle: #8c9ae0;
+
+    /* Type — system stack, no webfonts */
+    --font-display: "Arial Black", Helvetica, system-ui, sans-serif;
+    --font-ui: Helvetica, Arial, system-ui, sans-serif;
+    --font-body: "Times New Roman", Times, serif;
+
+    /* Radius */
+    --r-none: 0px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --sp-xxs: 2px;
+    --sp-xs: 4px;
+    --sp-s: 6px;
+    --sp-sm: 8px;
+    --sp-m: 10px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 20px;
+    --sp-xxl: 24px;
+    --sp-section-sm: 32px;
+    --sp-section: 40px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--frame-ink);   /* frame shows around the page */
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--ink);
+    padding: 8px;                   /* the literal page-frame */
+  }
+  .page { background: var(--canvas); max-width: 820px; margin: 0 auto; }
+  a { color: var(--link); text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+  h1, h2, h3 { margin: 0; }
+  .display { font-family: var(--font-display); font-size: 36px; font-weight: 900; line-height: 1.0; letter-spacing: 0; }
+  .heading-1 { font-family: var(--font-display); font-size: 24px; font-weight: 900; line-height: 1.05; }
+  .heading-2 { font-family: var(--font-ui); font-size: 16px; font-weight: 700; line-height: 1.2; text-transform: uppercase; }
+  .heading-3 { font-family: var(--font-ui); font-size: 14px; font-weight: 700; line-height: 1.2; text-transform: uppercase; }
+  .body-sm { font-size: 12px; }
+  .caption { font-size: 11px; line-height: 1.35; }
+
+  /* Top banner */
+  .top-banner {
+    background: var(--frame-ink);
+    color: var(--canvas);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: var(--sp-lg);
+    flex-wrap: wrap;
+  }
+  .top-banner .tagline { font-family: var(--font-ui); font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .top-banner .spacer { flex: 1; }
+  .buy-sticker {
+    background: var(--yellow-sticker);
+    color: var(--ink);
+    border: 1px solid var(--frame-ink);
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 700;
+    padding: 4px 8px;
+    box-shadow: 1px 1px 0 var(--frame-ink);
+  }
+  .buy-sticker .a { background: var(--purple-stripe); color: var(--canvas); padding: 0 2px; }
+  .phone-callout {
+    background: var(--frame-ink);
+    color: var(--primary);
+    font-family: var(--font-ui);
+    font-size: 16px; font-weight: 700;
+    padding: 4px 8px;
+  }
+
+  /* Body two-column */
+  .body-cols { display: flex; gap: 0; }
+  .left-rail { width: 30%; border-right: 1px solid var(--frame-ink); padding: var(--sp-lg); }
+  .right-col { width: 70%; padding: var(--sp-lg); }
+
+  .icon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-sm); margin-bottom: var(--sp-lg); }
+  .icon-link {
+    display: block;
+    background: var(--canvas);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase;
+    padding: 8px;
+    border: 1px solid var(--frame-ink);
+    text-align: center;
+  }
+  .icon-link:hover { background: var(--yellow-sticker); }
+
+  /* CTA red panel */
+  .cta-red {
+    background: var(--primary);
+    color: var(--on-primary);
+    border: 1px solid var(--frame-ink);
+    padding: 16px;
+    font-family: var(--font-body);
+  }
+  .cta-red h2 { font-family: var(--font-display); font-size: 24px; font-weight: 900; margin-bottom: var(--sp-sm); }
+
+  /* Section eyebrow color block */
+  .eyebrow-block {
+    padding: 24px 16px;
+    margin-bottom: var(--sp-section-sm);
+  }
+  .eyebrow-block.olive { background: var(--tint-olive); color: var(--ink); }
+  .eyebrow-block.salmon { background: var(--tint-salmon); color: var(--ink); }
+  .eyebrow-block .display { color: var(--ink); }
+
+  /* Ribbon cards */
+  .ribbon { border: 1px solid var(--frame-ink); margin-bottom: var(--sp-section); position: relative; }
+  .ribbon-title {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 14px; font-weight: 700;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--frame-ink);
+    display: flex; align-items: center; gap: var(--sp-sm);
+  }
+  .ribbon-body {
+    padding: 12px 16px;
+    color: var(--ink);
+    display: flex; gap: var(--sp-lg); align-items: flex-start;
+  }
+  .ribbon-body.sage { background: var(--tint-sage); }
+  .ribbon-body.salmon { background: var(--tint-salmon); }
+  .ribbon-body.peach { background: var(--tint-peach); }
+  .ribbon-body.lime { background: var(--tint-lime); }
+  .ribbon-body.sky { background: var(--tint-sky); }
+  .ribbon-body.steel { background: var(--tint-steel); }
+  .ribbon-body.periwinkle { background: var(--tint-periwinkle); }
+  .ribbon-copy { flex: 1; }
+  .product-photo {
+    width: 110px; height: 90px; flex: none;
+    background: repeating-linear-gradient(45deg,#dcdcdc,#dcdcdc 6px,#c8c8c8 6px,#c8c8c8 12px);
+    border: 1px solid var(--frame-ink);
+    box-shadow: 2px 2px 0 var(--frame-ink);   /* hard bevel, no soft shadow */
+  }
+  .new-burst {
+    position: absolute; top: -6px; right: 90px;
+    background: var(--yellow-sticker);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 700;
+    padding: 4px 8px;
+    transform: rotate(-15deg);
+    box-shadow: 1px 1px 0 var(--frame-ink);
+  }
+
+  /* Cert seal */
+  .cert-seal {
+    width: 64px; height: 64px;
+    border-radius: var(--r-full);
+    background: var(--primary);
+    color: var(--canvas);
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-family: var(--font-ui);
+    font-size: 9px; font-weight: 700; line-height: 1.1;
+    border: 3px solid var(--canvas);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+
+  /* Buttons / inputs */
+  .row { display: flex; gap: var(--sp-md); align-items: center; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase;
+    border-radius: var(--r-none);
+    padding: 6px 16px;
+    border: 1px solid var(--frame-ink);
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--frame-ink); color: var(--on-primary); }
+  .btn-secondary { background: var(--canvas); color: var(--ink); }
+  .text-input {
+    background: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--frame-ink);
+    border-radius: var(--r-none);
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 4px 6px;
+  }
+
+  /* Footer */
+  .footer-band {
+    border-top: 1px solid var(--frame-ink);
+    padding: 16px;
+    background: var(--canvas);
+  }
+  .icon-nav {
+    display: flex; justify-content: space-around; gap: var(--sp-lg);
+    border-top: 2px solid #2f7d32;
+    border-bottom: 2px solid #2f7d32;
+    padding: var(--sp-md) 0;
+    margin-bottom: var(--sp-md);
+  }
+  .icon-nav a {
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    text-align: center;
+  }
+  .glyph { width: 28px; height: 28px; margin: 0 auto 4px; display: block; }
+
+  @media (max-width: 640px) {
+    body { padding: 4px; }
+    .body-cols { flex-direction: column; }
+    .left-rail, .right-col { width: 100%; border-right: 0; }
+    .left-rail { border-bottom: 1px solid var(--frame-ink); }
+    .icon-grid { grid-template-columns: 1fr; }
+    .display { font-size: 28px; }
+    .ribbon-body { flex-direction: column; }
+    .product-photo { width: 100%; }
+    .new-burst { right: 8px; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+
+    <header class="top-banner">
+      <span class="tagline">Build Your Own Computer. Online.</span>
+      <span class="spacer"></span>
+      <span class="buy-sticker">BUY <span class="a">a</span> DELL</span>
+      <span class="phone-callout">1-800-213-DELL</span>
+    </header>
+
+    <div class="body-cols">
+      <aside class="left-rail">
+        <nav class="icon-grid" aria-label="Site sections">
+          <a class="icon-link" href="./DESIGN.md">Online Store</a>
+          <a class="icon-link" href="./DESIGN.md">Service</a>
+          <a class="icon-link" href="./DESIGN.md">Why Dell?</a>
+          <a class="icon-link" href="./DESIGN.md">Government</a>
+          <a class="icon-link" href="./DESIGN.md">Worldwide</a>
+          <a class="icon-link" href="./DESIGN.md">Order Status</a>
+          <a class="icon-link" href="./DESIGN.md">Company Info</a>
+          <a class="icon-link" href="./DESIGN.md">Careers</a>
+        </nav>
+
+        <div class="cta-red">
+          <h2>Find your system.</h2>
+          <p>At Dell.com, we'll help you find the right system, configure it, price it, and order it &mdash; all from Dell's award-winning service and support teams.</p>
+          <div class="row" style="margin-top:12px;">
+            <input class="text-input" type="text" aria-label="Search" placeholder="Search" />
+            <button class="btn btn-primary">Go</button>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:20px;">
+          <span class="cert-seal">PC MAG READERS' CHOICE</span>
+        </div>
+      </aside>
+
+      <main class="right-col">
+        <div class="eyebrow-block olive">
+          <h1 class="display">DIMENSION DESKTOPS</h1>
+        </div>
+
+        <article class="ribbon">
+          <span class="new-burst">NEW!</span>
+          <h3 class="ribbon-title">DIMENSION XPS</h3>
+          <div class="ribbon-body peach">
+            <div class="ribbon-copy">
+              <p>Reliable PC's for high-performance computing. Configure your Pentium system with up to 128MB RAM and a 4GB hard drive.</p>
+              <div class="row" style="margin-top:8px;">
+                <button class="btn btn-primary">Configure &amp; Buy</button>
+                <a href="./DESIGN.md">See details</a>
+              </div>
+            </div>
+            <span class="product-photo" role="img" aria-label="Dimension XPS product photo"></span>
+          </div>
+        </article>
+
+        <div class="eyebrow-block salmon">
+          <h1 class="display">OPTIPLEX DESKTOP SYSTEMS</h1>
+        </div>
+
+        <article class="ribbon">
+          <h3 class="ribbon-title">OPTIPLEX GX PRO</h3>
+          <div class="ribbon-body salmon">
+            <div class="ribbon-copy">
+              <p>Managed PC's for the enterprise desktop. Built for stability, security, and total cost of ownership.</p>
+              <div class="row" style="margin-top:8px;">
+                <button class="btn btn-primary">Configure &amp; Buy</button>
+                <a href="./DESIGN.md">See details</a>
+              </div>
+            </div>
+            <span class="product-photo" role="img" aria-label="OptiPlex GX Pro product photo"></span>
+          </div>
+        </article>
+
+        <article class="ribbon">
+          <h3 class="ribbon-title">LATITUDE NOTEBOOKS</h3>
+          <div class="ribbon-body sage">
+            <div class="ribbon-copy">
+              <p>Take the power with you. Full-size keyboard, active-matrix display, and all-day battery for the mobile professional.</p>
+              <div class="row" style="margin-top:8px;">
+                <button class="btn btn-secondary">Learn More</button>
+                <a href="./DESIGN.md">See details</a>
+              </div>
+            </div>
+            <span class="product-photo" role="img" aria-label="Latitude notebook product photo"></span>
+          </div>
+        </article>
+
+        <article class="ribbon">
+          <h3 class="ribbon-title">POWEREDGE SERVERS</h3>
+          <div class="ribbon-body periwinkle">
+            <div class="ribbon-copy">
+              <p>Enterprise-class servers engineered for reliability and expansion. RAID support and hot-swappable drives standard.</p>
+              <div class="row" style="margin-top:8px;">
+                <button class="btn btn-secondary">Learn More</button>
+                <a href="./DESIGN.md">See details</a>
+              </div>
+            </div>
+            <span class="product-photo" role="img" aria-label="PowerEdge server product photo"></span>
+          </div>
+        </article>
+
+        <article class="ribbon">
+          <h3 class="ribbon-title">DELLWARE</h3>
+          <div class="ribbon-body sky">
+            <div class="ribbon-copy">
+              <p>Software and peripherals to complete your system &mdash; monitors, printers, and thousands of titles.</p>
+              <div class="row" style="margin-top:8px;">
+                <button class="btn btn-secondary">Browse Catalog</button>
+                <a href="./DESIGN.md">See details</a>
+              </div>
+            </div>
+            <span class="product-photo" role="img" aria-label="Dellware catalog product photo"></span>
+          </div>
+        </article>
+      </main>
+    </div>
+
+    <footer class="footer-band">
+      <nav class="icon-nav" aria-label="Footer navigation">
+        <a href="./DESIGN.md"><svg class="glyph" viewBox="0 0 28 28" fill="none" stroke="#000" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M16 16l6 6"/></svg>FIND</a>
+        <a href="./DESIGN.md"><svg class="glyph" viewBox="0 0 28 28" fill="none" stroke="#000" stroke-width="1.5"><path d="M4 14L14 5l10 9"/><path d="M7 12v10h14V12"/></svg>HOME</a>
+        <a href="./DESIGN.md"><svg class="glyph" viewBox="0 0 28 28" fill="none" stroke="#000" stroke-width="1.5"><rect x="5" y="9" width="18" height="13"/><path d="M9 9V6h10v3"/></svg>ONLINE STORE</a>
+        <a href="./DESIGN.md"><svg class="glyph" viewBox="0 0 28 28" fill="none" stroke="#000" stroke-width="1.5"><path d="M18 6l4 4-9 9-4-4z"/><path d="M8 16l-3 7 7-3"/></svg>SERVICE &amp; SUPPORT</a>
+      </nav>
+      <p class="body-sm"><a href="./DESIGN.md">Copyright</a> © 1996 Dell Computer Corporation. <a href="./DESIGN.md">(Terms of Use)</a></p>
+      <p class="caption">This site is best viewed with browser versions 3.0 and higher.</p>
+    </footer>
+
+  </div>
+</body>
+</html>

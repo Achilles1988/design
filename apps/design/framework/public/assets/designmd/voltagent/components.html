@@ -1,0 +1,661 @@
+<!-- source_content_hash: 4457887741ae5e965e205282b03c4bff83e47dd7a03cd7f38c64623a17569fcd -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VoltAgent — Component Preview</title>
+<style>
+  /* ============================================================
+     VoltAgent design tokens — mapped from DESIGN.md front matter.
+     Developer AI-agent platform: unrelenting near-black canvas,
+     one electric-green accent, hairline-bordered feature cards
+     (hairlines ARE the elevation), Inter calm 60px display at
+     weight 400, SF Mono code mockups + inline chips, 6px buttons.
+     ============================================================ */
+  :root {
+    /* Brand & accent — the single electric green, reserved */
+    --primary: #00d992;
+    --primary-soft: #2fd6a1;     /* ghost buttons, focus */
+    --primary-deep: #10b981;     /* inline links */
+    --on-primary: #101010;       /* near-black text on green */
+
+    /* Text — off-white on dark */
+    --ink: #f2f2f2;
+    --ink-strong: #ffffff;       /* hero headline */
+    --body: #bdbdbd;
+    --mute: #8b949e;
+
+    /* Surface — dark-only, no light mode */
+    --canvas: #101010;
+    --canvas-soft: #1a1a1a;      /* code blocks, inputs */
+    --canvas-text-soft: #f5f6f7;
+
+    /* Hairlines — the brand's only true elevation */
+    --hairline: #3d3a39;
+    --hairline-soft: #b8b3b0;
+    --dashed: rgba(79,93,117,0.4);
+
+    /* Radius */
+    --r-none: 0px;
+    --r-xs: 4px;
+    --r-sm: 6px;                 /* buttons, inputs */
+    --r-md: 8px;                 /* cards, code blocks */
+    --r-pill: 9999px;            /* status tags only */
+
+    /* Spacing — 4px base */
+    --sp-xxs: 2px;
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 20px;
+    --sp-2xl: 24px;
+    --sp-3xl: 32px;
+    --sp-4xl: 40px;
+    --sp-5xl: 48px;
+    --sp-6xl: 64px;
+
+    /* Type — Inter (narrative) + SF Mono (anything terminal) */
+    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "SF Mono", "SFMono-Regular", "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--canvas);   /* near-black, only surface */
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.625;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "calt", "rlig";
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--primary-soft);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-3xl); }
+  .band { padding: var(--sp-5xl) 0; }
+
+  /* signature dashed divider between section bands */
+  .dashed-divider { border-top: 1px dashed var(--dashed); }
+
+  .eyebrow {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 2.52px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: var(--sp-lg);
+  }
+  h2.section-title {
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 40px;
+    letter-spacing: -0.9px;
+    color: var(--ink-strong);
+  }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    background: var(--canvas);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2xl);
+    padding: var(--sp-md) 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-sm);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--ink-strong);
+  }
+  .nav-menu { display: flex; gap: var(--sp-2xl); margin-left: var(--sp-lg); }
+  .nav-menu a { font-size: 14px; color: var(--body); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--sp-lg); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-sm);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    border-radius: var(--r-sm);        /* 6px, not pills */
+    padding: var(--sp-md) var(--sp-lg);
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
+  }
+  .btn-outline {
+    background: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+  }
+  .btn-ghost {
+    background: var(--canvas);
+    color: var(--primary-soft);
+    border: none;
+    padding: var(--sp-md) 0;
+  }
+
+  /* inline status pill — the only 9999px shape */
+  .pill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-pill);
+    padding: var(--sp-xs) var(--sp-md);
+    font-size: 14px;
+  }
+  .pill-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); }
+
+  /* ---------- Hero band ---------- */
+  .hero { padding: var(--sp-6xl) 0; }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-5xl);
+    align-items: center;
+  }
+  .hero h1 {
+    font-size: 60px;
+    font-weight: 400;               /* calm, never 700 */
+    line-height: 60px;
+    letter-spacing: -0.65px;
+    color: var(--ink-strong);
+    margin: var(--sp-lg) 0;
+  }
+  .hero p.lead {
+    font-size: 18px;
+    line-height: 28px;
+    color: var(--body);
+    max-width: 46ch;
+    margin-bottom: var(--sp-2xl);
+  }
+  .hero-cta { display: flex; gap: var(--sp-md); flex-wrap: wrap; align-items: center; }
+
+  /* ---------- Code mockup ---------- */
+  .code-mockup {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .code-titlebar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-sm);
+    padding: var(--sp-md) var(--sp-lg);
+    border-bottom: 1px solid var(--hairline);
+    background: var(--canvas-soft);
+  }
+  .code-titlebar .fname {
+    margin-left: var(--sp-sm);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--mute);
+  }
+  .code-titlebar .copy {
+    margin-left: auto;
+    color: var(--mute);
+    background: transparent;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xs);
+    padding: 2px 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .code-body {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--canvas-text-soft);
+    padding: var(--sp-xl);
+    overflow-x: auto;
+  }
+  .code-body .cm { color: var(--mute); }
+  .code-body .fn { color: var(--primary); }
+  .code-body .str { color: #9ecfa0; }
+  .code-body .kw { color: #7bb0e8; }
+
+  code.chip {
+    background: var(--canvas-soft);
+    color: var(--canvas-text-soft);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    border-radius: var(--r-sm);
+    padding: var(--sp-xxs) var(--sp-sm);
+  }
+
+  /* ---------- Feature cards ---------- */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2xl); }
+  .card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);   /* hairline IS elevation */
+    border-radius: var(--r-md);
+    padding: var(--sp-2xl);
+  }
+  .card.emphasized { border-width: 3px; }          /* 3px hairline = emphasis */
+  .card .ficon {
+    width: 36px; height: 36px;
+    color: var(--primary);
+    margin-bottom: var(--sp-lg);
+  }
+  .card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 28px;
+    color: var(--ink-strong);
+    margin-bottom: var(--sp-sm);
+  }
+  .card p {
+    font-size: 16px;
+    line-height: 26px;
+    color: var(--body);
+  }
+  .card .num {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    color: var(--primary);
+    margin-bottom: var(--sp-sm);
+  }
+
+  /* ---------- Green divider band ---------- */
+  .green-band {
+    border-top: 2px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
+    background: var(--canvas);
+    text-align: center;
+  }
+  .green-band .inner { padding: var(--sp-4xl) var(--sp-3xl); }
+  .green-band h2 {
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -0.9px;
+    color: var(--ink-strong);
+    margin-bottom: var(--sp-lg);
+  }
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2xl); }
+  .tier {
+    background: var(--canvas-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-2xl);
+  }
+  .tier.featured {                 /* polarity-flipped: light fill, dark text */
+    background: var(--ink);
+    color: var(--on-primary);
+    border-color: var(--ink);
+  }
+  .tier h3 { font-size: 20px; font-weight: 600; margin-bottom: var(--sp-xs); color: inherit; }
+  .tier.featured h3 { color: var(--on-primary); }
+  .tier .price {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    color: var(--ink-strong);
+    margin-bottom: var(--sp-lg);
+  }
+  .tier.featured .price { color: var(--on-primary); }
+  .tier .price span { font-size: 14px; color: var(--mute); }
+  .tier.featured .price span { color: rgba(16,16,16,0.6); }
+  .tier ul { list-style: none; margin-bottom: var(--sp-2xl); }
+  .tier li {
+    display: flex; gap: var(--sp-sm); align-items: flex-start;
+    font-size: 14px; line-height: 22px; color: var(--body); margin-bottom: var(--sp-sm);
+  }
+  .tier.featured li { color: rgba(16,16,16,0.85); }
+  .tier li .check { color: var(--primary); flex: none; margin-top: 4px; }
+  .tier.featured li .check { color: var(--primary-deep); }
+  .tier .btn { width: 100%; }
+
+  /* ---------- Form / auth card ---------- */
+  .auth-card {
+    background: var(--canvas-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-2xl);
+    max-width: 440px;
+  }
+  .field { margin-bottom: var(--sp-lg); }
+  .field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--canvas-soft);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: var(--sp-md) var(--sp-lg);
+  }
+  .field input::placeholder { color: var(--mute); }
+  .field input:focus {
+    outline: none;
+    border-color: var(--primary-soft);
+    box-shadow: 0 0 0 3px rgba(0,217,146,0.2);
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: var(--canvas);
+    border-top: 1px solid var(--hairline);
+    padding: var(--sp-4xl) 0;
+    color: var(--body);
+  }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: var(--sp-2xl); }
+  .footer-col h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: var(--sp-md);
+  }
+  .footer-col a { display: block; font-size: 14px; color: var(--body); margin-bottom: var(--sp-sm); }
+  .footer-bottom {
+    margin-top: var(--sp-3xl);
+    padding-top: var(--sp-lg);
+    border-top: 1px dashed var(--dashed);
+    font-size: 12px;
+    color: var(--mute);
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    .grid, .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .band { padding: var(--sp-4xl) 0; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 40px; line-height: 44px; }
+    .grid, .pricing-grid { grid-template-columns: 1fr; }
+    .nav-menu { display: none; }
+  }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 32px; line-height: 36px; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="./DESIGN.md" aria-label="VoltAgent home">
+        <!-- lightning glyph in brand green -->
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <path d="M12 2 4 13h6l-1 7 8-11h-6l1-7Z" fill="var(--primary)"/>
+        </svg>
+        VoltAgent
+      </a>
+      <nav class="nav-menu" aria-label="Primary">
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Framework</a>
+        <a href="./DESIGN.md">Examples</a>
+        <a href="./DESIGN.md">Pricing</a>
+      </nav>
+      <div class="nav-right">
+        <a class="nav-link" href="./DESIGN.md" style="font-size:14px;color:var(--body)">Sign in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HERO BAND ============ -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="pill-tag"><span class="dot"></span>v1.0 &mdash; now live</span>
+        <h1>AI Agent Engineering Platform</h1>
+        <p class="lead">Build, run, and observe production-grade AI agents with a
+          TypeScript-first framework that reads like documentation and ships like
+          software.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="./DESIGN.md">Get Started</a>
+          <code class="chip">npx create-voltagent-app@latest</code>
+        </div>
+      </div>
+
+      <!-- code mockup with copy-to-clipboard -->
+      <div class="code-mockup" role="figure" aria-label="Code sample">
+        <div class="code-titlebar">
+          <svg width="42" height="12" viewBox="0 0 42 12" aria-hidden="true">
+            <circle cx="6" cy="6" r="5" fill="#3d3a39"/>
+            <circle cx="21" cy="6" r="5" fill="#3d3a39"/>
+            <circle cx="36" cy="6" r="5" fill="var(--primary)"/>
+          </svg>
+          <span class="fname">agent.ts</span>
+          <button class="copy" type="button">Copy</button>
+        </div>
+        <div class="code-body">
+<span class="cm">// define an agent</span>
+<span class="kw">import</span> { Agent } <span class="kw">from</span> <span class="str">"@voltagent/core"</span>
+
+<span class="kw">const</span> agent = <span class="fn">new</span> Agent({
+  name: <span class="str">"support-bot"</span>,
+  model: <span class="str">"gpt-4o"</span>,
+  tools: [searchDocs, createTicket],
+})
+
+<span class="kw">await</span> agent.<span class="fn">run</span>(<span class="str">"How do I reset my key?"</span>)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="dashed-divider"></div></div>
+
+  <!-- ============ FEATURE GRID ============ -->
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Everything you need</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-3xl)">Engineered for agents in production</h2>
+      <div class="grid">
+        <article class="card emphasized">
+          <svg class="ficon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+          <h3>Observability</h3>
+          <p>Trace every step, tool call, and token &mdash; with a visual console
+            built for debugging agent runs.</p>
+        </article>
+        <article class="card">
+          <svg class="ficon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <h3>Tool calling</h3>
+          <p>Register typed tools once and let the framework handle routing,
+            retries, and validation.</p>
+        </article>
+        <article class="card">
+          <svg class="ficon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <h3>Memory</h3>
+          <p>Pluggable memory backends keep context across sessions with a single
+            configuration line.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GREEN DIVIDER BAND ============ -->
+  <section class="green-band">
+    <div class="wrap">
+      <div class="inner">
+        <h2>From prototype to production in one framework</h2>
+        <p style="color:var(--body);max-width:52ch;margin:0 auto var(--sp-2xl)">
+          Ship your first agent today and scale to millions of runs without
+          rewriting a line.</p>
+        <a class="btn btn-primary" href="./DESIGN.md">Read the Docs</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAT ROW ============ -->
+  <section class="band">
+    <div class="wrap">
+      <div class="grid">
+        <div class="card">
+          <div class="num">99.99%</div>
+          <p>runtime uptime across managed agent deployments</p>
+        </div>
+        <div class="card">
+          <div class="num">&lt;40ms</div>
+          <p>median orchestration overhead per agent step</p>
+        </div>
+        <div class="card">
+          <div class="num">12k+</div>
+          <p>developers building on the open-source framework</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="dashed-divider"></div></div>
+
+  <!-- ============ PRICING ============ -->
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Pricing</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-3xl)">Simple, usage-based plans</h2>
+      <div class="pricing-grid">
+        <article class="tier">
+          <h3>Hobby</h3>
+          <div class="price">$0<span>/mo</span></div>
+          <ul>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>10k agent runs / month</li>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Community support</li>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Local console</li>
+          </ul>
+          <a class="btn btn-outline" href="./DESIGN.md">Start free</a>
+        </article>
+        <article class="tier featured">
+          <span class="pill-tag" style="margin-bottom:var(--sp-md);background:var(--on-primary);color:var(--primary);border-color:var(--on-primary)"><span class="dot"></span>Most popular</span>
+          <h3>Pro</h3>
+          <div class="price">$49<span>/mo</span></div>
+          <ul>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>1M agent runs / month</li>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Hosted observability</li>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority support</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Choose Pro</a>
+        </article>
+        <article class="tier">
+          <h3>Enterprise</h3>
+          <div class="price">Custom</div>
+          <ul>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited runs</li>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>SSO &amp; audit logs</li>
+            <li><svg class="check" width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Dedicated SLA</li>
+          </ul>
+          <a class="btn btn-outline" href="./DESIGN.md">Contact sales</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="dashed-divider"></div></div>
+
+  <!-- ============ AUTH FORM ============ -->
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Get started</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-3xl)">Create your account</h2>
+      <form class="auth-card" onsubmit="return false">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@company.com" />
+        </div>
+        <div class="field">
+          <label for="pw">Password</label>
+          <input id="pw" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%">Create account</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a class="brand" href="./DESIGN.md" style="margin-bottom:var(--sp-md)">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+              <path d="M12 2 4 13h6l-1 7 8-11h-6l1-7Z" fill="var(--primary)"/>
+            </svg>
+            VoltAgent
+          </a>
+          <p style="font-size:14px;color:var(--mute);max-width:32ch">
+            The open-source framework for building production AI agents.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="./DESIGN.md">Framework</a>
+          <a href="./DESIGN.md">Console</a>
+          <a href="./DESIGN.md">Pricing</a>
+        </div>
+        <div class="footer-col">
+          <h4>Developers</h4>
+          <a href="./DESIGN.md">Docs</a>
+          <a href="./DESIGN.md">Examples</a>
+          <a href="./DESIGN.md">GitHub</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Blog</a>
+          <a href="./DESIGN.md">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 VoltAgent. Built for developers, in the dark.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

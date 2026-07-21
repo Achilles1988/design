@@ -1,0 +1,334 @@
+<!-- source_content_hash: 375f0a20ada88cdee5e995ca7edcfbd584ddf5f887024deebd1bc75bfd55b1bc -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bugatti — Component Preview</title>
+<style>
+  /* ============================================================
+     Bugatti design tokens (from DESIGN.md)
+     The most austere luxury-auto interface: pure black canvas,
+     white UPPERCASE letterspaced display, full-bleed photography.
+     NO accent color (one desaturated ice-blue for links only),
+     no decoration, no shadows. A rigid three-typeface trinity:
+       Display (uppercase headlines + wordmark, wide tracking)
+       Text Regular (SERIF body)
+       Monospace (buttons, nav, captions)
+     Weight is ALWAYS 400 — emphasis via size, tracking, case, family.
+     ============================================================ */
+  :root {
+    /* Text — total monochrome; ice-blue is the only non-mono hue (links) */
+    --primary: #ffffff;
+    --ink: #ffffff;
+    --on-dark: #ffffff;
+    --on-primary: #000000;
+    --body: #cccccc;
+    --body-strong: #e6e6e6;
+    --muted: #999999;
+    --muted-soft: #666666;
+    --link: #c3d9f3;
+
+    /* Surfaces — even cards stay nearly-black, no contrast jump */
+    --canvas: #000000;
+    --surface-soft: #0d0d0d;
+    --surface-card: #141414;
+    --surface-elevated: #1f1f1f;
+    --hairline: #262626;
+    --hairline-strong: #3a3a3a;
+
+    --warning: #d4a017;
+    --success: #5fa657;
+
+    /* Typeface trinity — open-source substitutes preserve the split */
+    --font-display: "Bugatti Display", "Saira Condensed", "Arial Narrow", sans-serif;
+    --font-text: "Bugatti Text Regular", "EB Garamond", Garamond, "Times New Roman", serif;
+    --font-mono: "Bugatti Monospace", "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+
+    /* Radius — binary: 0 for everything, pill for buttons */
+    --r-none: 0px;
+    --r-pill: 9999px;
+
+    /* Spacing — generous; 120px section rhythm frames the cars */
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 16px;
+    --s-lg: 24px;
+    --s-xl: 40px;
+    --s-xxl: 64px;
+    --s-section: 120px;
+
+    --maxw: 1280px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--body);
+    font-family: var(--font-text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--ink);
+    text-transform: uppercase;
+    margin: 0;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 1px solid var(--link);
+    outline-offset: 4px;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding-inline: var(--s-lg); }
+  section { padding-block: var(--s-section); }
+
+  /* Mono utility — buttons, captions, nav, dates */
+  .mono { font-family: var(--font-mono); text-transform: uppercase; }
+
+  /* Buttons — transparent pill + 1px white outline (Bugatti's signature) */
+  .btn {
+    display: inline-flex; align-items: center; gap: var(--s-xs);
+    height: 44px; padding: 0 var(--s-xl);
+    font-family: var(--font-mono); font-weight: 400; font-size: 14px;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    background: transparent; color: var(--on-dark);
+    border: 1px solid var(--on-dark); border-radius: var(--r-pill);
+    cursor: pointer;
+  }
+  .btn--icon { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: var(--r-pill); }
+  .link-inline { color: var(--link); text-decoration: underline; }
+  .link-caps { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2.5px; font-size: 14px; color: var(--on-dark); display: inline-flex; gap: 8px; align-items: center; }
+
+  /* Top nav — transparent, MENU · wordmark · STORE */
+  header.nav { position: absolute; top: 0; left: 0; right: 0; z-index: 20; height: 56px; }
+  .nav__inner { height: 56px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; max-width: var(--maxw); margin: 0 auto; padding-inline: var(--s-lg); }
+  .nav__inner .mono { font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px; }
+  .wordmark { font-family: var(--font-display); font-size: 14px; letter-spacing: 6px; color: var(--ink); text-align: center; text-transform: uppercase; }
+  .nav__right { text-align: right; }
+
+  /* Hero photo band — full-bleed photography, centered display-xl */
+  .hero {
+    position: relative; min-height: 90vh;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 140px var(--s-lg) var(--s-xxl);
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.85)),
+      radial-gradient(120% 90% at 50% 40%, #1c1c1c, #000 70%);
+    overflow: hidden;
+  }
+  .hero .cap { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--on-dark); margin-bottom: var(--s-lg); }
+  .hero h1 { font-size: clamp(32px, 8vw, 64px); letter-spacing: 4px; line-height: 1.1; }
+  .hero .btn { margin-top: var(--s-xl); }
+
+  /* Career callout card — floats over hero, surface-card, 0px, 320px */
+  .callout {
+    position: absolute; right: var(--s-xl); bottom: var(--s-xl); z-index: 2;
+    width: 320px; background: var(--surface-card); padding: var(--s-md);
+    border-radius: var(--r-none);
+  }
+  .callout .thumb { aspect-ratio: 16/9; background: linear-gradient(135deg, #222, #0c0c0c); margin-bottom: var(--s-sm); }
+  .callout p { margin: 0 0 var(--s-sm); font-size: 14px; }
+
+  .eyebrow { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--muted); margin: 0 0 var(--s-md); }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-lg); margin-bottom: var(--s-xl); flex-wrap: wrap; }
+  .section-head h2 { font-size: clamp(28px, 5vw, 48px); letter-spacing: 3px; }
+
+  /* Model photo cards — photo on black, display-md name, mono specs */
+  .model-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-xl); }
+  .model-card .photo { aspect-ratio: 21/9; background: linear-gradient(135deg, #1a1a1a, #050505); }
+  .model-card h3 { font-size: 32px; letter-spacing: 2px; margin: var(--s-md) 0 var(--s-xs); }
+  .model-card .specs { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--muted); margin-bottom: var(--s-sm); }
+
+  /* Spec cells — transparent, hairline dividers */
+  .spec-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .spec-cell { padding: var(--s-lg) 0; border-top: 1px solid var(--hairline); }
+  .spec-cell .val { font-family: var(--font-display); font-size: 24px; letter-spacing: 1px; color: var(--ink); }
+  .spec-cell .lbl { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  /* Newsroom cards — canvas + hairline, serif excerpt */
+  .news-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-xl); }
+  .news-card { border: 1px solid var(--hairline); padding: var(--s-lg); }
+  .news-card .thumb { aspect-ratio: 16/9; background: linear-gradient(135deg, #1e1e1e, #070707); margin-bottom: var(--s-md); }
+  .news-card .date { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--muted); }
+  .news-card h3 { font-size: 20px; letter-spacing: 1px; margin: var(--s-xs) 0 var(--s-sm); }
+  .news-card p { font-size: 14px; color: var(--body); }
+
+  /* Career listing rows — hairline divider, mono meta */
+  .rows { border-top: 1px solid var(--hairline); }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-lg); padding: var(--s-lg) 0; border-bottom: 1px solid var(--hairline); }
+  .row h3 { font-family: var(--font-display); font-size: 20px; letter-spacing: 1px; }
+  .row .meta { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--muted); }
+
+  /* Form — transparent, bottom-border only */
+  .form { max-width: 560px; display: grid; gap: var(--s-lg); }
+  .field { display: flex; flex-direction: column; gap: var(--s-xs); }
+  label { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--muted); }
+  input {
+    height: 44px; padding: var(--s-sm) 0;
+    background: transparent; color: var(--on-dark);
+    border: 0; border-bottom: 1px solid var(--hairline-strong); border-radius: var(--r-none);
+    font-family: var(--font-text); font-size: 16px;
+  }
+  input::placeholder { color: var(--muted); }
+  input:focus { border-bottom-color: var(--on-dark); }
+
+  /* CTA band — full-bleed photo + centered display-md */
+  .cta-band { text-align: center; background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.85)), radial-gradient(80% 60% at 50% 50%, #191919, #000 70%); padding-block: 80px; }
+  .cta-band h2 { font-size: clamp(24px, 4vw, 32px); letter-spacing: 2px; margin-bottom: var(--s-xl); }
+
+  /* Footer — black, 4-column, wordmark centered at bottom */
+  footer.site { background: var(--canvas); border-top: 1px solid var(--hairline); padding-block: var(--s-xxl); color: var(--muted); }
+  .foot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-lg); }
+  .foot-grid h4 { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--on-dark); margin-bottom: var(--s-md); }
+  .foot-grid a { display: block; padding: 6px 0; font-size: 14px; color: var(--muted); }
+  .foot-word { text-align: center; margin-top: var(--s-xxl); font-family: var(--font-display); letter-spacing: 6px; color: var(--ink); font-size: 20px; text-transform: uppercase; }
+  .foot-legal { text-align: center; margin-top: var(--s-md); font-size: 14px; color: var(--muted-soft); }
+
+  @media (max-width: 900px) {
+    .spec-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .callout { display: none; }
+    .model-grid, .news-grid, .spec-grid, .foot-grid { grid-template-columns: 1fr; }
+    .nav__inner .mono { display: none; }
+    section { padding-block: var(--s-xxl); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top nav: transparent, MENU · centered wordmark · STORE -->
+  <header class="nav">
+    <div class="nav__inner">
+      <span class="mono">Menu</span>
+      <a class="wordmark" href="./DESIGN.md">Bugatti</a>
+      <span class="mono nav__right">Store</span>
+    </div>
+  </header>
+
+  <!-- Hero photo band: mono caption + centered display-xl + transparent pill -->
+  <main>
+  <section class="hero" aria-label="Hero">
+    <div>
+      <p class="cap">Honoring a visionary creator</p>
+      <h1>Tourbillon</h1>
+      <div><a class="btn" href="./DESIGN.md">Discover</a></div>
+    </div>
+    <aside class="callout" aria-label="Careers">
+      <div class="thumb" role="img" aria-label="Bugatti atelier"></div>
+      <p>Are you ready for a new adventure?</p>
+      <a class="link-caps" href="./DESIGN.md">Explore our opportunities →</a>
+    </aside>
+  </section>
+
+  <!-- Model photo cards -->
+  <section>
+    <div class="wrap">
+      <div class="section-head"><h2>The lineup</h2><a class="link-caps" href="./DESIGN.md">All models →</a></div>
+      <div class="model-grid">
+        <article class="model-card">
+          <div class="photo" role="img" aria-label="Bugatti Tourbillon"></div>
+          <h3>Tourbillon</h3>
+          <p class="specs">1800 ch · V16 hybrid · 445 km/h</p>
+          <a class="link-inline" href="./DESIGN.md">Discover</a>
+        </article>
+        <article class="model-card">
+          <div class="photo" role="img" aria-label="Bugatti Mistral"></div>
+          <h3>W16 Mistral</h3>
+          <p class="specs">1600 ch · roadster · limited to 99</p>
+          <a class="link-inline" href="./DESIGN.md">Discover</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Spec cells -->
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Technical data · Tourbillon</p>
+      <div class="spec-grid">
+        <div class="spec-cell"><div class="val">1800</div><div class="lbl">Horsepower (ch)</div></div>
+        <div class="spec-cell"><div class="val">V16</div><div class="lbl">Naturally aspirated</div></div>
+        <div class="spec-cell"><div class="val">445</div><div class="lbl">km/h top speed</div></div>
+        <div class="spec-cell"><div class="val">2.0s</div><div class="lbl">0–100 km/h</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsroom cards: serif excerpt -->
+  <section>
+    <div class="wrap">
+      <div class="section-head"><h2>Newsroom</h2></div>
+      <div class="news-grid">
+        <article class="news-card">
+          <div class="thumb" role="img" aria-label="Press image"></div>
+          <span class="date">12 November 2025</span>
+          <h3>A new hommage</h3>
+          <p>The atelier unveils a coachbuilt masterpiece honoring the marque's founding vision, hand-finished over thousands of hours.</p>
+        </article>
+        <article class="news-card">
+          <div class="thumb" role="img" aria-label="Press image"></div>
+          <span class="date">03 October 2025</span>
+          <h3>Engineering the impossible</h3>
+          <p>Inside the development of the V16 hybrid powertrain — a study in restraint and precision, unmatched in the segment.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Career listing rows -->
+  <section>
+    <div class="wrap">
+      <div class="section-head"><h2>Careers</h2></div>
+      <div class="rows">
+        <div class="row"><h3>Senior Powertrain Engineer</h3><span class="meta">Molsheim · Engineering →</span></div>
+        <div class="row"><h3>Master Coachbuilder</h3><span class="meta">Molsheim · Atelier →</span></div>
+        <div class="row"><h3>Brand Experience Lead</h3><span class="meta">Paris · Marketing →</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form: transparent, underline only -->
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Register your interest</p>
+      <div class="section-head"><h2>Contact</h2></div>
+      <form class="form" onsubmit="return false">
+        <div class="field"><label for="nm">Full name</label><input id="nm" placeholder="Full name" /></div>
+        <div class="field"><label for="em">Email</label><input id="em" type="email" placeholder="you@example.com" /></div>
+        <div><button class="btn" type="submit">Submit</button></div>
+      </form>
+    </div>
+  </section>
+  </main>
+
+  <!-- CTA band -->
+  <section class="cta-band">
+    <div class="wrap">
+      <h2>Discover Bugatti</h2>
+      <a class="btn" href="./DESIGN.md">Contact us</a>
+    </div>
+  </section>
+
+  <!-- Footer: 4-column, wordmark centered at very bottom -->
+  <footer class="site">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div><h4>Bugatti</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Atelier</a><a href="./DESIGN.md">Newsroom</a></div>
+        <div><h4>Models</h4><a href="./DESIGN.md">Tourbillon</a><a href="./DESIGN.md">Mistral</a><a href="./DESIGN.md">Heritage</a></div>
+        <div><h4>Heritage</h4><a href="./DESIGN.md">History</a><a href="./DESIGN.md">La Maison</a><a href="./DESIGN.md">Coachbuilding</a></div>
+        <div><h4>Connect</h4><a href="./DESIGN.md">Contact</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Store</a></div>
+      </div>
+      <div class="foot-word">Bugatti</div>
+      <div class="foot-legal">© Bugatti Automobiles S.A.S. — token-driven component preview generated from DESIGN.md. Not an official Bugatti product.</div>
+    </div>
+  </footer>
+
+</body>
+</html>

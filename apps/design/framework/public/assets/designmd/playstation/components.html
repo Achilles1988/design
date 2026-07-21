@@ -1,0 +1,564 @@
+<!-- source_content_hash: 2a56c109af6cb847fa091b768f719b498ac56b582d010860e73ea5fb72a1590d -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PlayStation — Component Preview</title>
+<style>
+  /* ============================================================
+     PlayStation design tokens — mapped from DESIGN.md front matter.
+     A three-canvas chapter system (black / white / PlayStation Blue)
+     that scrolls like a console launch trailer. SST renders display
+     copy at weight 300 for an airy, editorial premium feel.
+     ============================================================ */
+  :root {
+    /* Brand & accent */
+    --primary: #0070d1;            /* PlayStation Blue — universal primary CTA */
+    --primary-pressed: #0064b7;
+    --primary-active: #004d8d;
+    --on-primary: #ffffff;
+    --link-light: #0064b7;
+    --link-dark: #53b1ff;
+    --commerce: #d53b00;           /* orange — store / buy / pre-order only */
+    --commerce-pressed: #aa2f00;
+    --on-commerce: #ffffff;
+
+    /* Ink */
+    --ink: #000000;
+    --ink-deep: #121314;
+    --ink-elevated: #181818;
+    --charcoal: #1f2024;
+
+    /* Text on light */
+    --body-light: rgba(0,0,0,0.6);
+    --mute-light: #6b6b6b;
+    --ash-light: #cccccc;
+
+    /* Text on dark */
+    --on-dark: #ffffff;
+    --body-dark: rgba(255,255,255,0.7);
+    --on-dark-mute: #cccccc;
+    --mute-dark: rgba(229,229,229,0.55);
+    --ash-dark: rgba(229,229,229,0.2);
+
+    /* Surfaces */
+    --canvas-light: #ffffff;
+    --surface-soft: #f3f3f3;
+    --surface-card: #f5f7fa;       /* cool-blue-tinted card */
+    --surface-filter: rgba(245,247,250,0.3);
+    --canvas-dark: #000000;
+    --surface-dark-elevated: #121314;
+    --surface-dark-card: #181818;
+    --hairline-light: #f3f3f3;
+    --hairline-dark: rgba(229,229,229,0.2);
+
+    /* Semantic */
+    --warning: #c81b3a;
+
+    /* PS Plus gold gradient — the only chrome gradient, PS Plus only */
+    --ps-plus-gold-start: #ffce21;
+    --ps-plus-gold-mid: #f5a623;
+    --ps-plus-gold-end: #ee8e00;
+
+    /* Radius — 4 / 8 / pill rhythm, structural surfaces flat 0px */
+    --r-none: 0px;
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 16px;
+    --r-full: 9999px;
+
+    /* Spacing — 8px base */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+    --sp-section: 96px;
+
+    /* Type — PlayStation SST (proprietary); Roboto/Inter open fallback.
+       Display renders at weight 300 — the brand's airy signature. */
+    --font-display: "PlayStation SST", "Roboto", "Inter", Arial, Helvetica, sans-serif;
+    --font-body: "PlayStation SST", "Inter", "Roboto", Arial, Helvetica, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.1px;
+    color: var(--ink);
+    background: var(--canvas-light);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  /* ---- Bands: the three-canvas chapter system ---- */
+  .band {
+    padding: var(--sp-section) var(--sp-xxl);
+    border: 0;
+    border-radius: var(--r-none);
+  }
+  .band--dark { background: var(--canvas-dark); color: var(--on-dark); }
+  .band--light { background: var(--canvas-light); color: var(--ink); }
+  .band--blue { background: var(--primary); color: var(--on-primary); }
+  .band--dark-grad {
+    background: linear-gradient(180deg, var(--surface-dark-elevated), var(--canvas-dark));
+    color: var(--on-dark);
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; }
+
+  /* ---- Display type scale (SST light) ---- */
+  .display-xl { font-family: var(--font-display); font-size: 54px; font-weight: 300; line-height: 1.25; letter-spacing: -0.1px; margin: 0; }
+  .display-lg { font-family: var(--font-display); font-size: 44px; font-weight: 300; line-height: 1.25; letter-spacing: 0.1px; margin: 0; }
+  .display-md { font-family: var(--font-display); font-size: 35px; font-weight: 300; line-height: 1.25; margin: 0; }
+  .heading-xl { font-family: var(--font-display); font-size: 28px; font-weight: 300; line-height: 1.25; letter-spacing: 0.1px; margin: 0; }
+  .heading-lg { font-family: var(--font-display); font-size: 22px; font-weight: 300; line-height: 1.25; letter-spacing: 0.1px; margin: 0; }
+  .heading-md { font-size: 18px; font-weight: 600; line-height: 1; margin: 0; }
+  .body-strong { font-size: 18px; font-weight: 500; line-height: 1.25; letter-spacing: 0.4px; }
+  .body-sm { font-size: 16px; line-height: 1.5; }
+  .caption-md { font-size: 14px; line-height: 1.5; }
+  .caption-sm { font-size: 12px; font-weight: 500; line-height: 1.5; }
+  .eyebrow {
+    font-size: 12px; font-weight: 500; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--primary);
+    margin: 0 0 var(--sp-md);
+  }
+  .band--dark .eyebrow, .band--blue .eyebrow { color: var(--link-dark); }
+  .band--blue .eyebrow { color: rgba(255,255,255,0.85); }
+  .lead { max-width: 520px; }
+  .band--dark .lead, .band--dark-grad .lead { color: var(--body-dark); }
+  .band--light .lead { color: var(--body-light); }
+
+  /* ---- Buttons — every CTA is a pill ---- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: var(--font-body); font-size: 18px; font-weight: 700; letter-spacing: 0.45px;
+    line-height: 1.25; height: 48px; padding: 0 28px;
+    border-radius: var(--r-full); border: 1px solid transparent;
+    cursor: pointer; transition: background-color 120ms ease, box-shadow 120ms ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:active { background: var(--primary-active); box-shadow: 0 4px 12px rgba(0,0,0,0.16); }
+  .btn-commerce { background: var(--commerce); color: var(--on-commerce); }
+  .btn-commerce:active { background: var(--commerce-pressed); }
+  .btn-secondary-light { background: transparent; color: var(--ink); border-color: var(--ash-light); }
+  .btn-secondary-dark { background: transparent; color: var(--on-dark); border-color: var(--hairline-dark); }
+  .btn-sm { height: 40px; font-size: 14px; letter-spacing: 0.324px; padding: 0 18px; }
+
+  /* ---- Nav ---- */
+  header { position: sticky; top: 0; z-index: 20; }
+  .primary-nav {
+    background: var(--canvas-dark); color: var(--on-dark);
+    height: 48px; display: flex; align-items: center; gap: var(--sp-lg);
+    padding: 0 var(--sp-xxl);
+  }
+  .ps-logo { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+  .ps-logo svg { display: block; }
+  .nav-links { display: flex; gap: var(--sp-lg); list-style: none; margin: 0; padding: 0; flex: 1; }
+  .nav-links a { font-size: 18px; font-weight: 500; letter-spacing: 0.4px; color: var(--on-dark); opacity: 0.85; }
+  .nav-links a:hover { opacity: 1; }
+  .nav-right { display: flex; align-items: center; gap: var(--sp-md); }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: var(--r-full);
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; color: var(--on-dark); border: 0; cursor: pointer;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.12); }
+  .avatar { width: 32px; height: 32px; border-radius: var(--r-full); background: var(--primary); }
+  .sub-nav {
+    background: var(--canvas-dark); color: var(--on-dark);
+    height: 40px; display: flex; align-items: center; gap: var(--sp-lg);
+    padding: 0 var(--sp-xxl); border-top: 1px solid var(--hairline-dark);
+  }
+  .sub-nav a { font-size: 14px; color: var(--on-dark-mute); }
+  .sub-nav a[aria-current="true"] { color: var(--on-dark); box-shadow: 0 2px 0 var(--primary); }
+
+  /* ---- Hero ---- */
+  .hero-grid { display: grid; grid-template-columns: minmax(0,0.9fr) 1.4fr; gap: var(--sp-xxl); align-items: center; }
+  .hero-copy .cta-row { margin-top: var(--sp-xl); display: flex; gap: var(--sp-md); flex-wrap: wrap; }
+  .console-render {
+    aspect-ratio: 16 / 11; border-radius: var(--r-md);
+    background:
+      radial-gradient(120% 90% at 50% 30%, #2a3550 0%, #0a0e1a 70%),
+      var(--surface-dark-card);
+    display: grid; place-items: center; position: relative; overflow: hidden;
+  }
+  .console-render::after {
+    content: ""; width: 46%; height: 70%; border-radius: 10px;
+    background: linear-gradient(180deg, #f7f9ff, #cfd6e6);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+
+  /* ---- Console showcase (light band) ---- */
+  .showcase { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-lg); margin-top: var(--sp-xl); }
+  .thumb {
+    aspect-ratio: 1; border-radius: var(--r-md); background: var(--surface-card);
+    border: 1px solid var(--hairline-light); display: grid; place-items: center;
+  }
+  .thumb .chip { width: 52%; height: 52%; border-radius: 8px; background: linear-gradient(160deg,#dfe6f2,#c3ccdd); }
+
+  /* ---- Game tile rail (dark band) ---- */
+  .rail { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-lg); margin-top: var(--sp-xl); }
+  .game-tile { background: var(--surface-dark-elevated); border-radius: var(--r-md); overflow: hidden; }
+  .game-art { aspect-ratio: 16 / 9; position: relative; }
+  .art-a { background: linear-gradient(135deg, #4a1d6e, #0e1030); }
+  .art-b { background: linear-gradient(135deg, #6e2b1d, #301010); }
+  .art-c { background: linear-gradient(135deg, #1d4a6e, #0a1a2e); }
+  .art-d { background: linear-gradient(135deg, #1d6e4a, #0a2e1c); }
+  .game-meta { padding: var(--sp-md); color: var(--on-dark); }
+  .game-meta .plat { color: var(--on-dark-mute); }
+  .badge-info {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--primary); color: var(--on-primary);
+    font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: var(--r-full);
+  }
+  .paddles { display: flex; gap: var(--sp-sm); margin-top: var(--sp-lg); justify-content: flex-end; align-items: center; }
+  .paddle { width: 48px; height: 48px; border-radius: var(--r-full); background: rgba(255,255,255,0.16); color: var(--on-dark); border: 0; cursor: pointer; display: grid; place-items: center; }
+  .dots { display: flex; gap: var(--sp-xs); align-items: center; margin-right: auto; }
+  .dot { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--ash-dark); }
+  .dot.active { background: var(--on-dark); }
+
+  /* ---- Filter chips ---- */
+  .filters { display: flex; gap: var(--sp-sm); flex-wrap: wrap; margin: var(--sp-lg) 0; }
+  .chip {
+    font-size: 14px; font-weight: 700; letter-spacing: 0.324px;
+    padding: 8px 16px; border-radius: var(--r-full);
+    background: var(--surface-filter); color: var(--ink); border: 1px solid var(--hairline-light);
+    cursor: pointer;
+  }
+  .chip.active { background: var(--canvas-light); border-color: var(--ash-light); }
+
+  /* ---- PS Plus banner — the only gold gradient ---- */
+  .ps-plus {
+    border-radius: var(--r-md); overflow: hidden; background: var(--surface-dark-elevated); color: var(--on-dark);
+  }
+  .ps-plus-bar { height: 6px; background: linear-gradient(90deg, var(--ps-plus-gold-start), var(--ps-plus-gold-mid), var(--ps-plus-gold-end)); }
+  .ps-plus-body { padding: var(--sp-xxl) var(--sp-xl); display: grid; grid-template-columns: repeat(3,1fr); gap: var(--sp-lg); align-items: start; }
+  .tier { background: var(--surface-dark-card); border-radius: var(--r-md); padding: var(--sp-lg); }
+  .tier .price { font-family: var(--font-display); font-weight: 300; font-size: 28px; }
+  .ps-plus-head { grid-column: 1 / -1; }
+
+  /* ---- Feature cards (light) ---- */
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); margin-top: var(--sp-xl); }
+  .feature-card { background: var(--canvas-light); border: 1px solid var(--hairline-light); border-radius: var(--r-md); padding: var(--sp-xl); }
+  .feature-card .ico { width: 44px; height: 44px; border-radius: var(--r-md); background: var(--surface-card); display: grid; place-items: center; margin-bottom: var(--sp-md); color: var(--primary); }
+  .feature-card p { color: var(--body-light); }
+
+  /* ---- Form + support ---- */
+  .form-card { max-width: 560px; }
+  .field { margin-bottom: var(--sp-md); }
+  .field label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .field input {
+    width: 100%; height: 48px; padding: 12px 16px;
+    border: 1px solid var(--ash-light); border-radius: var(--r-sm);
+    font-family: var(--font-body); font-size: 18px; color: var(--ink); background: var(--canvas-light);
+  }
+  .field input:focus { outline: none; border: 2px solid var(--primary); padding: 11px 15px; }
+  .hint { font-size: 12px; color: var(--mute-light); }
+  .err { color: var(--warning); }
+
+  .support-search {
+    display: flex; align-items: center; gap: var(--sp-sm);
+    height: 56px; padding: 12px 24px; border-radius: var(--r-full);
+    background: var(--canvas-light); border: 1px solid var(--ash-light); max-width: 640px;
+  }
+  .support-search input { border: 0; outline: none; flex: 1; font-family: var(--font-body); font-size: 18px; }
+  .support-rows { max-width: 720px; margin-top: var(--sp-lg); }
+  .support-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0; border-bottom: 1px solid var(--hairline-light); color: var(--ink);
+  }
+
+  /* ---- Footer ---- */
+  footer { background: var(--primary); color: var(--on-primary); padding: var(--sp-xxl); }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: var(--sp-lg); }
+  .footer-word { font-family: var(--font-display); font-weight: 300; font-size: 28px; }
+  .footer-grid h4 { font-size: 14px; font-weight: 600; margin: 0 0 var(--sp-sm); }
+  .footer-grid ul { list-style: none; margin: 0; padding: 0; }
+  .footer-grid li { margin-bottom: 8px; }
+  .footer-grid a { font-size: 14px; color: rgba(255,255,255,0.85); }
+  .footer-grid a:hover { color: var(--on-primary); }
+  .footer-fine { border-top: 1px solid rgba(255,255,255,0.2); margin-top: var(--sp-xl); padding-top: var(--sp-md); font-size: 12px; color: rgba(255,255,255,0.8); }
+
+  .section-head { margin-bottom: var(--sp-lg); }
+
+  @media (max-width: 1024px) {
+    .rail, .ps-plus-body, .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    .showcase { grid-template-columns: repeat(3, 1fr); }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .band { padding: 64px var(--sp-lg); }
+    .hero-grid { grid-template-columns: 1fr; }
+    .display-xl { font-size: 40px; }
+    .nav-links { display: none; }
+    .rail, .feature-grid { grid-template-columns: 1fr; }
+    .showcase { grid-template-columns: repeat(2, 1fr); }
+    .ps-plus-body { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .band { padding: 48px var(--sp-md); }
+    .display-xl { font-size: 32px; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="primary-nav" aria-label="Primary">
+    <a class="ps-logo" href="./DESIGN.md" aria-label="PlayStation home">
+      <svg width="26" height="20" viewBox="0 0 26 20" fill="none" aria-hidden="true">
+        <path d="M3 17V3l7 2.4v9.2L7 13.6V6.2L3 5v12Z" fill="#fff"/>
+        <path d="M13 12.5l6-2.1c1.6-.6 3.7-.5 4.9.2 1.1.7.9 1.7-.6 2.3l-4.6 1.6v-1.9l3.3-1.2c.8-.3.9-.6.3-.8-.6-.2-1.5-.1-2.3.2L13 12.9v-.4Z" fill="#fff"/>
+        <path d="M2 15.4l9 3.1v-1.8L4 14.4c-.8-.3-.9-.7-.1-1l7.1-2.5v-1.7L3 12c-1.6.6-1.9 1.6-.9 2.4.2.2.5.4.9.5l-1 .5Z" fill="#fff"/>
+      </svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="./DESIGN.md">Games</a></li>
+      <li><a href="./DESIGN.md">PS5</a></li>
+      <li><a href="./DESIGN.md">PS VR2</a></li>
+      <li><a href="./DESIGN.md">Subscriptions</a></li>
+      <li><a href="./DESIGN.md">Hardware</a></li>
+      <li><a href="./DESIGN.md">News</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h15l-1.5 9h-11L6 4H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="19" r="1.5" fill="currentColor"/><circle cx="17" cy="19" r="1.5" fill="currentColor"/></svg>
+      </button>
+      <span class="avatar" aria-hidden="true"></span>
+    </div>
+  </nav>
+  <div class="sub-nav" aria-label="Section">
+    <a href="./DESIGN.md" aria-current="true">Overview</a>
+    <a href="./DESIGN.md">Consoles</a>
+    <a href="./DESIGN.md">Accessories</a>
+    <a href="./DESIGN.md">PlayStation Plus</a>
+  </div>
+</header>
+
+<main>
+  <!-- Chapter 1 — dark hero -->
+  <section class="band band--dark" aria-labelledby="hero-h">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">PlayStation 5</p>
+        <h1 id="hero-h" class="display-xl">Discover all PS5 consoles and accessories</h1>
+        <p class="lead">Play has no limits. Explore the console, the DualSense controller, and a growing catalog of exclusive worlds.</p>
+        <div class="cta-row">
+          <button class="btn btn-primary">Learn more</button>
+          <button class="btn btn-secondary-dark">Watch trailer</button>
+        </div>
+      </div>
+      <div class="console-render" role="img" aria-label="PS5 console and DualSense controller render"></div>
+    </div>
+  </section>
+
+  <!-- Chapter 2 — light console showcase -->
+  <section class="band band--light" aria-labelledby="show-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Hardware</p>
+        <h2 id="show-h" class="display-lg">The console lineup</h2>
+      </div>
+      <div class="showcase">
+        <div class="thumb"><span class="chip"></span></div>
+        <div class="thumb"><span class="chip"></span></div>
+        <div class="thumb"><span class="chip"></span></div>
+        <div class="thumb"><span class="chip"></span></div>
+        <div class="thumb"><span class="chip"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 3 — dark game rail -->
+  <section class="band band--dark" aria-labelledby="rail-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Games</p>
+        <h2 id="rail-h" class="display-lg">Great PS4 &amp; PS5 games out now or coming soon</h2>
+      </div>
+      <div class="rail">
+        <article class="game-tile">
+          <div class="game-art art-a"><span class="badge-info">New</span></div>
+          <div class="game-meta"><p class="heading-md">Astral Depths</p><p class="body-sm plat">PS5</p></div>
+        </article>
+        <article class="game-tile">
+          <div class="game-art art-b"><span class="badge-info">Pre-order</span></div>
+          <div class="game-meta"><p class="heading-md">Ember Reign</p><p class="body-sm plat">PS5 · PS4</p></div>
+        </article>
+        <article class="game-tile">
+          <div class="game-art art-c"><span class="badge-info">Coming Soon</span></div>
+          <div class="game-meta"><p class="heading-md">Tidebreaker</p><p class="body-sm plat">PS5</p></div>
+        </article>
+        <article class="game-tile">
+          <div class="game-art art-d"></div>
+          <div class="game-meta"><p class="heading-md">Verdant Halls</p><p class="body-sm plat">PS VR2</p></div>
+        </article>
+      </div>
+      <div class="paddles">
+        <span class="dots" aria-hidden="true"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></span>
+        <button class="paddle" aria-label="Previous games"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 5-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="paddle" aria-label="Next games"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 4 — light: PS5 games listing with filters -->
+  <section class="band band--light" aria-labelledby="list-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Browse</p>
+        <h2 id="list-h" class="display-md">PS5 games</h2>
+      </div>
+      <div class="filters" role="group" aria-label="Filter games">
+        <button class="chip active" aria-pressed="true">All</button>
+        <button class="chip" aria-pressed="false">Coming Soon</button>
+        <button class="chip" aria-pressed="false">PlayStation VR2</button>
+        <button class="chip" aria-pressed="false">Recently Released</button>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="5" stroke="currentColor" stroke-width="2"/></svg></div>
+          <h3 class="heading-lg">PlayStation Store</h3>
+          <p class="body-sm">Save big during the latest sale — thousands of games discounted.</p>
+          <p style="margin-top:var(--sp-md)"><button class="btn btn-commerce btn-sm">Buy now</button></p>
+        </article>
+        <article class="feature-card">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3 class="heading-lg">Accessories</h3>
+          <p class="body-sm">DualSense Edge, Pulse Elite, and more first-party hardware.</p>
+          <p style="margin-top:var(--sp-md)"><button class="btn btn-secondary-light btn-sm">Learn more</button></p>
+        </article>
+        <article class="feature-card">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/></svg></div>
+          <h3 class="heading-lg">Remote Play</h3>
+          <p class="body-sm">Stream your PS5 to compatible devices anywhere in the house.</p>
+          <p style="margin-top:var(--sp-md)"><button class="btn btn-secondary-light btn-sm">Set up</button></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 5 — light: PS Plus banner (gold gradient) -->
+  <section class="band band--light" aria-labelledby="plus-h">
+    <div class="wrap">
+      <div class="ps-plus">
+        <div class="ps-plus-bar" aria-hidden="true"></div>
+        <div class="ps-plus-body">
+          <div class="ps-plus-head">
+            <p class="eyebrow" style="color:var(--ps-plus-gold-mid)">Membership</p>
+            <h2 id="plus-h" class="heading-xl">Discover PlayStation Plus</h2>
+          </div>
+          <div class="tier">
+            <h3 class="heading-md">Essential</h3>
+            <p class="price">$9.99<span class="body-sm">/mo</span></p>
+            <p class="body-sm" style="color:var(--on-dark-mute)">Monthly games, online multiplayer, exclusive discounts.</p>
+          </div>
+          <div class="tier">
+            <h3 class="heading-md">Extra</h3>
+            <p class="price">$14.99<span class="body-sm">/mo</span></p>
+            <p class="body-sm" style="color:var(--on-dark-mute)">Everything in Essential plus a catalog of hundreds of games.</p>
+          </div>
+          <div class="tier">
+            <h3 class="heading-md">Premium</h3>
+            <p class="price">$17.99<span class="body-sm">/mo</span></p>
+            <p class="body-sm" style="color:var(--on-dark-mute)">Classics, cloud streaming, and time-limited game trials.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 6 — blue action band -->
+  <section class="band band--blue" aria-labelledby="action-h">
+    <div class="wrap">
+      <p class="eyebrow">Now available</p>
+      <h2 id="action-h" class="display-md">Join the launch. Pre-order today.</h2>
+      <p class="lead" style="color:rgba(255,255,255,0.85)">Secure your copy and jump in the moment servers go live.</p>
+      <div class="cta-row" style="margin-top:var(--sp-xl); display:flex; gap:var(--sp-md); flex-wrap:wrap;">
+        <button class="btn btn-commerce">Pre-order now</button>
+        <button class="btn btn-secondary-dark">View editions</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter 7 — light: newsletter + support -->
+  <section class="band band--light" aria-labelledby="news-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Stay in the loop</p>
+        <h2 id="news-h" class="display-md">Get PlayStation news</h2>
+      </div>
+      <form class="form-card" novalidate>
+        <div class="field">
+          <label for="ps-email">Email address</label>
+          <input id="ps-email" type="email" placeholder="you@example.com" autocomplete="email" />
+          <p class="hint">We'll send updates on games, sales, and hardware.</p>
+        </div>
+        <button class="btn btn-primary" type="submit">Subscribe</button>
+      </form>
+
+      <div style="margin-top:var(--sp-xxl)">
+        <label for="ps-support" class="eyebrow" style="display:block">Support center</label>
+        <div class="support-search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="ps-support" type="search" placeholder="Search the support center" />
+        </div>
+        <div class="support-rows">
+          <a class="support-row" href="./DESIGN.md"><span class="body-strong">Account &amp; security</span><span aria-hidden="true">›</span></a>
+          <a class="support-row" href="./DESIGN.md"><span class="body-strong">PlayStation Store &amp; refunds</span><span aria-hidden="true">›</span></a>
+          <a class="support-row" href="./DESIGN.md"><span class="body-strong">Hardware &amp; repairs</span><span aria-hidden="true">›</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer aria-label="Site footer">
+  <div class="wrap footer-grid">
+    <div>
+      <p class="footer-word">PlayStation</p>
+      <p class="caption-md" style="color:rgba(255,255,255,0.85)">Play has no limits.</p>
+    </div>
+    <div>
+      <h4>Games</h4>
+      <ul><li><a href="./DESIGN.md">PS5 games</a></li><li><a href="./DESIGN.md">PS4 games</a></li><li><a href="./DESIGN.md">PS VR2</a></li></ul>
+    </div>
+    <div>
+      <h4>Hardware</h4>
+      <ul><li><a href="./DESIGN.md">PS5 console</a></li><li><a href="./DESIGN.md">Controllers</a></li><li><a href="./DESIGN.md">Accessories</a></li></ul>
+    </div>
+    <div>
+      <h4>Account</h4>
+      <ul><li><a href="./DESIGN.md">Sign in</a></li><li><a href="./DESIGN.md">PlayStation Plus</a></li><li><a href="./DESIGN.md">Wallet</a></li></ul>
+    </div>
+    <div>
+      <h4>Support</h4>
+      <ul><li><a href="./DESIGN.md">Help center</a></li><li><a href="./DESIGN.md">Contact us</a></li><li><a href="./DESIGN.md">Repairs</a></li></ul>
+    </div>
+  </div>
+  <div class="wrap footer-fine">© 2026 Sony Interactive Entertainment. Design tokens sourced from <a href="./DESIGN.md" style="color:var(--on-primary); text-decoration:underline;">DESIGN.md</a>.</div>
+</footer>
+
+</body>
+</html>

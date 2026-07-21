@@ -1,0 +1,544 @@
+<!-- source_content_hash: 50987e29b603cc7503ebe724af810fcf43845e96fdd4083e0fbe5fe00d2cdd2e -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ClickHouse — Component Preview</title>
+<style>
+  /* ============================================================
+     ClickHouse design tokens — mapped from DESIGN.md frontmatter.
+     Highest-contrast database interface: near-pure black canvas
+     (#0a0a0a) with electric yellow (#faff69) as the singular brand
+     voltage. Yellow does every primary CTA, every stat-callout
+     number, every full-bleed yellow band — scarce on elements,
+     generous on bands. Inter 700 display with negative tracking
+     (-1 to -2.5px); JetBrains Mono for SQL. No serif counter-voice.
+     No drop shadows — depth is canvas vs barely-lighter surface.
+     ============================================================ */
+  :root {
+    /* Brand voltage */
+    --primary: #faff69;
+    --primary-active: #e6eb52;
+    --primary-disabled: #3a3a1f;
+    --on-primary: #0a0a0a;
+    --on-yellow: #0a0a0a;
+
+    /* Surface — subtle lift, no shadow */
+    --canvas: #0a0a0a;
+    --surface-soft: #121212;
+    --surface-card: #1a1a1a;
+    --surface-elevated: #242424;
+    --surface-yellow-band: #faff69;
+    --hairline: #2a2a2a;
+    --hairline-strong: #3a3a3a;
+
+    /* Text */
+    --ink: #ffffff;
+    --on-dark: #ffffff;
+    --body: #cccccc;
+    --body-strong: #e6e6e6;
+    --muted: #888888;
+    --muted-soft: #5a5a5a;
+
+    /* Semantic / syntax accents */
+    --accent-emerald: #22c55e;
+    --accent-rose: #ef4444;
+    --accent-blue: #3b82f6;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #ef4444;
+
+    /* Type */
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Radius — hierarchical, no pills except badges */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-pill: 9999px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 16px;
+    --s-lg: 24px;
+    --s-xl: 32px;
+    --s-xxl: 48px;
+    --s-section: 96px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--canvas);
+    color: var(--body);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: var(--r-xs);
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-lg); }
+
+  .section { padding: var(--s-section) 0; }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--primary);
+    display: inline-block;
+    margin-bottom: var(--s-md);
+  }
+
+  h1, h2, h3 { color: var(--ink); font-weight: 700; }
+
+  /* ---------- Top nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    height: 64px;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--hairline);
+    display: flex; align-items: center;
+  }
+  .nav .wrap { display: flex; align-items: center; gap: var(--s-xl); width: 100%; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); font-size: 18px; letter-spacing: -0.3px; }
+  .brand .mark {
+    width: 26px; height: 26px; border-radius: var(--r-sm);
+    background: var(--primary);
+    display: grid; place-items: center;
+    color: var(--on-primary); font-weight: 700; font-size: 15px;
+  }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-md); }
+  .nav-links a { color: var(--body); font-size: 14px; font-weight: 500; }
+  .nav-links a:hover { color: var(--ink); text-decoration: none; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-md); }
+  .nav-right .signin { color: var(--body); font-size: 14px; font-weight: 600; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font); font-size: 14px; font-weight: 600; line-height: 1;
+    border: none; cursor: pointer;
+    padding: 12px 20px; height: 40px;
+    border-radius: var(--r-md);
+    text-decoration: none;
+    transition: background .15s ease, color .15s ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-active); text-decoration: none; }
+  .btn-secondary { background: var(--surface-card); color: var(--on-dark); }
+  .btn-secondary:hover { background: var(--surface-elevated); text-decoration: none; }
+  .btn-on-yellow { background: var(--on-primary); color: var(--ink); }
+  .btn-on-yellow:hover { background: #1f1f1f; text-decoration: none; }
+  .btn-disabled { background: var(--primary-disabled); color: var(--muted); cursor: not-allowed; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: var(--s-section) 0 var(--s-xxl); }
+  .hero-grid { display: grid; grid-template-columns: 7fr 5fr; gap: var(--s-xxl); align-items: center; }
+  .hero h1 { font-size: clamp(44px, 7vw, 72px); line-height: 1.05; letter-spacing: -2.5px; }
+  .hero h1 .hl { color: var(--primary); }
+  .hero p.lead { margin: var(--s-lg) 0 var(--s-xl); font-size: 18px; color: var(--body); max-width: 34ch; }
+  .hero-cta { display: flex; gap: var(--s-sm); flex-wrap: wrap; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-card); color: var(--on-dark);
+    font-size: 13px; font-weight: 500;
+    padding: 4px 12px; border-radius: var(--r-pill);
+    margin-bottom: var(--s-lg);
+  }
+  .badge .dot { width: 7px; height: 7px; border-radius: var(--r-full); background: var(--primary); }
+
+  /* ---------- Code window ---------- */
+  .code-window {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+  .code-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px var(--s-md);
+    border-bottom: 1px solid var(--hairline);
+    background: var(--surface-soft);
+  }
+  .code-titlebar .tl { width: 11px; height: 11px; border-radius: var(--r-full); background: var(--hairline-strong); }
+  .code-titlebar .fname { margin-left: 6px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .code-body { padding: var(--s-lg); font-family: var(--mono); font-size: 14px; line-height: 1.7; overflow-x: auto; }
+  .code-body .ln { display: block; white-space: pre; }
+  .kw { color: var(--primary); }
+  .fn { color: var(--accent-blue); }
+  .str { color: var(--accent-emerald); }
+  .num { color: #d8b4fe; }
+  .cm { color: var(--muted-soft); }
+  .status-bar {
+    display: flex; align-items: center; gap: var(--s-md);
+    padding: 8px var(--s-md);
+    border-top: 1px solid var(--hairline);
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+  }
+  .status-bar .ok { color: var(--accent-emerald); }
+
+  /* ---------- Stat callouts ---------- */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-xl); }
+  .stat { text-align: left; }
+  .stat .num-big { font-size: 56px; font-weight: 700; line-height: 1.0; letter-spacing: -1.5px; color: var(--primary); }
+  .stat .lbl { margin-top: var(--s-xs); font-size: 14px; color: var(--body); }
+
+  /* ---------- Logo strip ---------- */
+  .logo-strip { border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); padding: var(--s-xl) 0; }
+  .logo-strip .row { display: flex; flex-wrap: wrap; gap: var(--s-xxl); align-items: center; justify-content: center; }
+  .logo-strip .lg { color: var(--muted); font-weight: 700; font-size: 18px; letter-spacing: -0.4px; }
+
+  /* ---------- Category tabs ---------- */
+  .tabs { display: flex; gap: var(--s-xs); flex-wrap: wrap; margin-bottom: var(--s-xl); }
+  .tab { background: transparent; color: var(--muted); font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: var(--r-md); border: none; cursor: pointer; }
+  .tab.active { background: var(--surface-card); color: var(--on-dark); }
+
+  /* ---------- Feature cards ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .feature-card { border-radius: var(--r-lg); padding: var(--s-xl); }
+  .feature-dark { background: var(--surface-card); color: var(--on-dark); border: 1px solid var(--hairline); }
+  .feature-yellow { background: var(--surface-yellow-band); color: var(--on-yellow); }
+  .feature-card .fi { width: 40px; height: 40px; border-radius: var(--r-md); display: grid; place-items: center; margin-bottom: var(--s-md); }
+  .feature-dark .fi { background: var(--surface-elevated); }
+  .feature-yellow .fi { background: rgba(10,10,10,0.12); }
+  .feature-card h3 { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: var(--s-xs); }
+  .feature-yellow h3 { color: var(--on-yellow); }
+  .feature-card p { font-size: 14px; }
+  .feature-dark p { color: var(--body); }
+  .feature-yellow p { color: rgba(10,10,10,0.72); }
+
+  /* ---------- Pricing ---------- */
+  .grid-price { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); align-items: stretch; }
+  .price-card { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-xl); display: flex; flex-direction: column; }
+  .price-card.featured { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .price-card h3 { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+  .price-card.featured h3 { color: var(--on-primary); }
+  .price-card .price { font-size: 32px; font-weight: 700; letter-spacing: -1px; color: var(--ink); margin: var(--s-sm) 0; }
+  .price-card.featured .price { color: var(--on-primary); }
+  .price-card .price span { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .price-card.featured .price span { color: rgba(10,10,10,0.6); }
+  .price-card ul { list-style: none; margin: var(--s-md) 0 var(--s-lg); display: grid; gap: 10px; }
+  .price-card li { font-size: 14px; color: var(--body); display: flex; gap: 8px; }
+  .price-card.featured li { color: rgba(10,10,10,0.85); }
+  .price-card li::before { content: "✓"; color: var(--primary); font-weight: 700; }
+  .price-card.featured li::before { color: var(--on-primary); }
+  .price-card .btn { margin-top: auto; width: 100%; justify-content: center; }
+  .badge-yellow-pill { display: inline-block; background: var(--on-primary); color: var(--primary); font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; border-radius: var(--r-pill); margin-bottom: var(--s-md); }
+
+  /* ---------- Events card ---------- */
+  .events { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-lg); }
+  .event-card { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-lg); }
+  .event-card .date { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--primary); }
+  .event-card h3 { font-size: 18px; font-weight: 600; margin: 8px 0; }
+  .event-card .loc { font-size: 14px; color: var(--muted); margin-bottom: var(--s-md); }
+
+  /* ---------- Newsletter / input ---------- */
+  .signup { display: flex; gap: var(--s-sm); max-width: 460px; }
+  .text-input {
+    flex: 1; background: var(--surface-card); color: var(--on-dark);
+    font-family: var(--font); font-size: 16px;
+    border: 1px solid var(--hairline); border-radius: var(--r-md);
+    padding: 10px 14px; height: 40px;
+  }
+  .text-input::placeholder { color: var(--muted); }
+  .text-input:focus { outline: none; border-color: var(--primary); }
+
+  /* ---------- Yellow CTA band ---------- */
+  .cta-band {
+    background: var(--primary); color: var(--on-primary);
+    border-radius: var(--r-lg); padding: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s-xl); flex-wrap: wrap;
+  }
+  .cta-band h2 { font-size: 40px; font-weight: 700; letter-spacing: -1.5px; line-height: 1.15; color: var(--on-primary); max-width: 20ch; }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--canvas); border-top: 1px solid var(--hairline); padding: 64px 0; color: var(--muted); }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--s-xl); }
+  .foot-brand .brand { margin-bottom: var(--s-md); }
+  .foot-col h4 { color: var(--on-dark); font-size: 13px; font-weight: 600; margin-bottom: var(--s-md); }
+  .foot-col a { display: block; color: var(--muted); font-size: 14px; padding: 5px 0; }
+  .foot-col a:hover { color: var(--on-dark); text-decoration: none; }
+  .foot-bottom { border-top: 1px solid var(--hairline); margin-top: var(--s-xl); padding-top: var(--s-lg); font-size: 13px; color: var(--muted-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s-sm); }
+
+  .sec-head { max-width: 60ch; margin-bottom: var(--s-xl); }
+  .sec-head h2 { font-size: clamp(32px, 4vw, 56px); line-height: 1.1; letter-spacing: -2px; }
+  .sec-head p { margin-top: var(--s-md); color: var(--body); font-size: 18px; }
+
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-3, .grid-price, .events { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .cta-band { padding: var(--s-xl); }
+    .cta-band h2 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== Top nav ===== -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./DESIGN.md" aria-label="ClickHouse home">
+        <span class="mark" aria-hidden="true">CH</span> ClickHouse
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">Use Cases</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Resources</a>
+        <a href="./DESIGN.md">Customers</a>
+      </nav>
+      <div class="nav-right">
+        <a class="signin" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="badge"><span class="dot" aria-hidden="true"></span> Now with vector search</span>
+        <h1>The leading <span class="hl">database</span> for AI &amp; analytics</h1>
+        <p class="lead">Query billions of rows in milliseconds. ClickHouse is the fastest, most resource-efficient columnar database for real-time analytics.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="./DESIGN.md">Start free trial</a>
+          <a class="btn btn-secondary" href="./DESIGN.md">Read the docs</a>
+        </div>
+      </div>
+      <div class="code-window" role="img" aria-label="SQL query example">
+        <div class="code-titlebar">
+          <span class="tl" aria-hidden="true"></span><span class="tl" aria-hidden="true"></span><span class="tl" aria-hidden="true"></span>
+          <span class="fname">query.sql</span>
+        </div>
+        <div class="code-body">
+<span class="ln"><span class="cm">-- Real-time aggregation over 2.8B rows</span></span>
+<span class="ln"><span class="kw">SELECT</span> country,</span>
+<span class="ln">       <span class="fn">count</span>() <span class="kw">AS</span> events,</span>
+<span class="ln">       <span class="fn">avg</span>(latency_ms) <span class="kw">AS</span> p50</span>
+<span class="ln"><span class="kw">FROM</span> analytics.events</span>
+<span class="ln"><span class="kw">WHERE</span> ts &gt;= <span class="fn">now</span>() - <span class="kw">INTERVAL</span> <span class="num">1</span> <span class="kw">HOUR</span></span>
+<span class="ln"><span class="kw">GROUP BY</span> country</span>
+<span class="ln"><span class="kw">ORDER BY</span> events <span class="kw">DESC</span></span>
+<span class="ln"><span class="kw">LIMIT</span> <span class="num">10</span>;</span>
+        </div>
+        <div class="status-bar">
+          <span class="ok">✓ 10 rows</span>
+          <span>elapsed: 0.042s</span>
+          <span>processed: 2.83 billion rows</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Logo strip ===== -->
+  <div class="logo-strip">
+    <div class="wrap row">
+      <span class="lg">Anthropic</span>
+      <span class="lg">Lyft</span>
+      <span class="lg">Sony</span>
+      <span class="lg">Cloudflare</span>
+      <span class="lg">Vantage</span>
+      <span class="lg">Twilio</span>
+    </div>
+  </div>
+
+  <!-- ===== Stats ===== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Trusted at scale</span>
+        <h2>Built and backed by a massive open-source community</h2>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="num-big">38k+</div><div class="lbl">GitHub stars</div></div>
+        <div class="stat"><div class="num-big">2.8k+</div><div class="lbl">Contributors</div></div>
+        <div class="stat"><div class="num-big">47k+</div><div class="lbl">Community members</div></div>
+        <div class="stat"><div class="num-big">779+</div><div class="lbl">Releases shipped</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Features (dark + yellow rhythm) ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="wrap">
+      <div class="tabs" role="tablist" aria-label="Feature categories">
+        <button class="tab active" role="tab" aria-selected="true">Performance</button>
+        <button class="tab" role="tab" aria-selected="false">Scalability</button>
+        <button class="tab" role="tab" aria-selected="false">Cost</button>
+        <button class="tab" role="tab" aria-selected="false">Ecosystem</button>
+      </div>
+      <div class="grid-3">
+        <article class="feature-card feature-yellow">
+          <div class="fi" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3>Blazing fast queries</h3>
+          <p>Vectorized execution and columnar storage deliver sub-second answers over petabyte datasets.</p>
+        </article>
+        <article class="feature-card feature-dark">
+          <div class="fi" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#faff69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <h3>Elastic scale</h3>
+          <p>Separate storage and compute. Scale nodes independently and pay only for what you use.</p>
+        </article>
+        <article class="feature-card feature-dark">
+          <div class="fi" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#faff69" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3>Lower total cost</h3>
+          <p>Best-in-class compression cuts storage bills. Efficient hardware use means fewer nodes.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Pricing ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Pricing</span>
+        <h2>Deploy your way</h2>
+        <p>Start free, then scale to production. No credit card required to explore.</p>
+      </div>
+      <div class="grid-price">
+        <div class="price-card">
+          <h3>Development</h3>
+          <div class="price">$0<span> / forever</span></div>
+          <ul>
+            <li>Up to 1 TB storage</li>
+            <li>Community support</li>
+            <li>Auto-scaling compute</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Start free</a>
+        </div>
+        <div class="price-card featured">
+          <span class="badge-yellow-pill">Most popular</span>
+          <h3>Production</h3>
+          <div class="price">$0.20<span> / GB-hr</span></div>
+          <ul>
+            <li>Unlimited storage</li>
+            <li>99.9% SLA + priority support</li>
+            <li>SOC 2, HIPAA compliant</li>
+            <li>Advanced monitoring</li>
+          </ul>
+          <a class="btn btn-on-yellow" href="./DESIGN.md">Get Started</a>
+        </div>
+        <div class="price-card">
+          <h3>Enterprise</h3>
+          <div class="price">Custom</div>
+          <ul>
+            <li>Dedicated infrastructure</li>
+            <li>Custom compliance</li>
+            <li>24/7 white-glove support</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Contact sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Events ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Community</span>
+        <h2>Meet us in person</h2>
+      </div>
+      <div class="events">
+        <article class="event-card">
+          <div class="date">Aug 14 · Meetup</div>
+          <h3>ClickHouse Berlin: Real-time analytics at scale</h3>
+          <div class="loc">Berlin, Germany · 18:00 CET</div>
+          <a class="btn btn-secondary" href="./DESIGN.md">Register</a>
+        </article>
+        <article class="event-card">
+          <div class="date">Sep 03 · Webinar</div>
+          <h3>Migrating from Postgres to ClickHouse</h3>
+          <div class="loc">Online · 10:00 PT</div>
+          <a class="btn btn-secondary" href="./DESIGN.md">Register</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Yellow CTA band ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="wrap">
+      <div class="cta-band">
+        <h2>Start querying in under a minute.</h2>
+        <div>
+          <form class="signup" onsubmit="return false;" aria-label="Sign up">
+            <input class="text-input" type="email" placeholder="you@company.com" aria-label="Work email" />
+            <button class="btn btn-on-yellow" type="submit">Get Started</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <a class="brand" href="./DESIGN.md"><span class="mark" aria-hidden="true">CH</span> ClickHouse</a>
+          <p style="font-size:14px;color:var(--muted);max-width:34ch;">The fastest open-source columnar database for real-time analytics and AI.</p>
+        </div>
+        <div class="foot-col">
+          <h4>Product</h4>
+          <a href="./DESIGN.md">Cloud</a>
+          <a href="./DESIGN.md">Self-managed</a>
+          <a href="./DESIGN.md">Integrations</a>
+          <a href="./DESIGN.md">Pricing</a>
+        </div>
+        <div class="foot-col">
+          <h4>Resources</h4>
+          <a href="./DESIGN.md">Documentation</a>
+          <a href="./DESIGN.md">Blog</a>
+          <a href="./DESIGN.md">Benchmarks</a>
+          <a href="./DESIGN.md">Changelog</a>
+        </div>
+        <div class="foot-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Events</a>
+          <a href="./DESIGN.md">Contact</a>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 ClickHouse, Inc. All rights reserved.</span>
+        <span>Design tokens from <a href="./DESIGN.md">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

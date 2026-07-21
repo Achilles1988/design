@@ -1,0 +1,488 @@
+<!-- source_content_hash: 3640298bd2957aee80ce88eb465a7541ba835ec105cba364a6a621d885c7f34f -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Superhuman — Component Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     Superhuman — Design tokens (from DESIGN.md front matter)
+     Three-canvas polarity: indigo navy hero / white body / deep-teal closing band.
+     Super Sans VF -> Inter Variable at sub-default weights 460 / 540 / 600.
+     ============================================================ */
+  :root {
+    /* --- Colors: brand & accent --- */
+    --primary: #1b1938;            /* indigo navy — hero canvas, primary CTA, featured tier */
+    --primary-deep: #0e0c1f;       /* pressed / gradient stop */
+    --on-primary: #ffffff;
+    --ink: #292827;                /* warm dark grey body ink — never pure black */
+    --ink-mute: #73706d;
+    --ink-faint: #9a9794;
+    --canvas: #ffffff;
+    --canvas-soft: #fafaf8;        /* barely-warm off-white alternating rows */
+    --surface-violet-soft: #c9b4fa;/* hero pill CTA + atmospheric backdrop */
+    --surface-teal-deep: #0e3030;  /* signature closing-CTA band */
+    --surface-teal-mid: #155555;   /* nested chrome inside teal band */
+    --hairline: #e8e4dd;           /* warm 1px borders on light */
+    --hairline-dark: #3f3a52;      /* 1px borders on dark */
+    --on-dark-mute: #bcbac9;
+    --on-dark-faint: #5a5772;
+
+    /* --- Typography --- */
+    --font-display: 'Super Sans VF', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    /* Sub-default weights are the brand's typographic warmth signature */
+    --wght-body: 460;
+    --wght-mid: 540;
+    --wght-cap: 600;
+    --wght-strong: 700;
+
+    /* --- Rounded --- */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;   /* signature button shape — rounded rectangle, never pill */
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-full: 9999px;
+
+    /* --- Spacing (base 8) --- */
+    --sp-xxs: 2px;
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 24px;
+    --sp-xxl: 32px;
+    --sp-huge: 64px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: var(--wght-body);
+    font-variation-settings: "wght" 460;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--surface-violet-soft); color: var(--primary); }
+  a { color: inherit; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--sp-xl); }
+  .narrow { max-width: 960px; margin: 0 auto; padding: 0 var(--sp-xl); }
+
+  /* --- Type scale --- */
+  .display-xxl { font-size: clamp(40px, 8vw, 64px); font-weight: var(--wght-mid); font-variation-settings: "wght" 540; line-height: 0.96; letter-spacing: -1.4px; }
+  .display-xl  { font-size: clamp(34px, 6vw, 48px); font-weight: var(--wght-body); font-variation-settings: "wght" 460; line-height: 0.96; letter-spacing: -1.32px; }
+  .display-lg  { font-size: 28px; font-weight: var(--wght-mid); font-variation-settings: "wght" 540; line-height: 1.14; letter-spacing: -0.63px; }
+  .display-md  { font-size: 22px; font-weight: var(--wght-body); font-variation-settings: "wght" 460; line-height: 1.1; letter-spacing: -0.315px; }
+  .heading-lg  { font-size: 20px; font-weight: var(--wght-body); font-variation-settings: "wght" 460; line-height: 1.2; letter-spacing: -0.4px; }
+  .body-lg     { font-size: 18px; font-weight: var(--wght-mid); font-variation-settings: "wght" 540; line-height: 1.5; letter-spacing: -0.135px; }
+  .caption     { font-size: 14px; font-weight: var(--wght-body); font-variation-settings: "wght" 460; line-height: 1.4; color: var(--ink-mute); }
+  .micro       { font-size: 12px; font-weight: var(--wght-mid); font-variation-settings: "wght" 540; line-height: 1.4; }
+  .eyebrow { font-size: 12px; font-weight: var(--wght-mid); font-variation-settings: "wght" 540; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-mute); }
+  .eyebrow.on-dark { color: var(--surface-violet-soft); }
+
+  /* --- Buttons --- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-sm);
+    font-family: inherit; font-size: 16px; font-weight: var(--wght-strong);
+    font-variation-settings: "wght" 700;
+    line-height: 1; padding: 12px 20px; border-radius: var(--r-md);
+    border: 1px solid transparent; cursor: pointer; text-decoration: none;
+    transition: background .18s ease, transform .18s ease, border-color .18s ease;
+  }
+  .btn-primary-dark { background: var(--primary); color: var(--on-primary); }
+  .btn-primary-dark:hover { background: var(--primary-deep); }
+  .btn-primary-dark:active { background: var(--primary-deep); transform: translateY(1px); }
+  .btn-secondary-outline { background: var(--canvas); color: var(--ink); border-color: var(--hairline-dark); }
+  .btn-secondary-outline:hover { background: var(--canvas-soft); }
+  .btn-on-dark-pill { background: var(--surface-violet-soft); color: var(--primary); border-radius: var(--r-full); }
+  .btn-on-dark-pill:hover { filter: brightness(1.05); }
+  .btn-on-teal { background: var(--canvas); color: var(--surface-teal-deep); }
+  .btn-on-teal:hover { background: var(--canvas-soft); }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(201,180,250,.6); }
+
+  /* --- Nav --- */
+  .nav {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(27,25,56,.82); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--hairline-dark);
+    color: var(--on-primary);
+  }
+  .nav .wrap { display: flex; align-items: center; gap: var(--sp-xl); padding-top: var(--sp-lg); padding-bottom: var(--sp-lg); }
+  .brand { display: flex; align-items: center; gap: var(--sp-sm); font-weight: var(--wght-mid); font-variation-settings: "wght" 540; font-size: 18px; letter-spacing: -0.3px; }
+  .brand .mark { width: 26px; height: 26px; border-radius: var(--r-sm); background: var(--surface-violet-soft); display: grid; place-items: center; }
+  .nav-links { display: flex; gap: var(--sp-xl); margin-left: var(--sp-lg); }
+  .nav-links a { text-decoration: none; font-size: 15px; color: var(--on-dark-mute); font-weight: var(--wght-body); font-variation-settings: "wght" 460; transition: color .15s ease; }
+  .nav-links a:hover { color: var(--on-primary); }
+  .nav-spacer { flex: 1; }
+  .nav a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(201,180,250,.5); border-radius: var(--r-xs); }
+
+  /* --- Hero: indigo navy + violet-sky atmospheric backdrop + half-bleed portrait --- */
+  .hero {
+    position: relative; overflow: hidden;
+    background: var(--primary); color: var(--on-primary);
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(1000px 620px at 78% 18%, rgba(201,180,250,.55), transparent 60%),
+      radial-gradient(760px 520px at 92% 62%, rgba(120,160,235,.42), transparent 62%),
+      radial-gradient(900px 700px at 20% 110%, rgba(14,12,31,.9), transparent 60%),
+      linear-gradient(160deg, var(--primary) 0%, var(--primary-deep) 100%);
+  }
+  .hero .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--sp-huge); align-items: center; padding-top: 96px; padding-bottom: 112px; }
+  .hero-copy .eyebrow { margin-bottom: var(--sp-lg); }
+  .hero-copy h1 { margin: 0 0 var(--sp-xl); }
+  .hero-copy p { color: var(--on-dark-mute); max-width: 30ch; margin: 0 0 var(--sp-xxl); }
+  .hero-actions { display: flex; gap: var(--sp-md); flex-wrap: wrap; }
+
+  /* half-bleed portrait subject (twilight, looking off-frame) — CSS placeholder */
+  .portrait {
+    position: relative; height: 420px; border-radius: var(--r-xl);
+    overflow: hidden; border: 1px solid var(--hairline-dark);
+    background:
+      radial-gradient(120px 160px at 58% 34%, rgba(255,240,230,.32), transparent 70%),
+      linear-gradient(200deg, #4a3f6e 0%, #2a2748 42%, #171530 100%);
+  }
+  .portrait::after {
+    content: ""; position: absolute; right: 8%; bottom: 0; width: 58%; height: 82%;
+    border-radius: 46% 46% 0 0 / 60% 60% 0 0;
+    background: linear-gradient(180deg, rgba(201,180,250,.5), rgba(27,25,56,.9));
+    box-shadow: inset 0 20px 60px rgba(14,12,31,.7);
+  }
+  .portrait .glow { position: absolute; left: 12%; top: 18%; width: 120px; height: 120px; border-radius: var(--r-full); background: radial-gradient(circle, rgba(255,255,255,.28), transparent 70%); filter: blur(6px); }
+
+  /* --- Section scaffolding (white body) --- */
+  section { padding: var(--sp-huge) 0; }
+  .section-head { max-width: 62ch; margin-bottom: var(--sp-xxl); }
+  .section-head h2 { margin: var(--sp-md) 0 var(--sp-md); }
+  .section-head p { color: var(--ink-mute); margin: 0; }
+  .alt { background: var(--canvas-soft); }
+
+  /* --- Feature tab pills + rows --- */
+  .pill-tabs { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-bottom: var(--sp-xxl); }
+  .pill-tab { background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline); border-radius: var(--r-full); padding: 8px 16px; font-size: 14px; font-weight: var(--wght-cap); font-variation-settings: "wght" 600; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+  .pill-tab[aria-selected="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .pill-tab:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(27,25,56,.25); }
+
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+  .feature-row { background: var(--canvas-soft); border: 1px solid var(--hairline); border-radius: var(--r-md); padding: var(--sp-xl); }
+  .feature-row .ic { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--primary); display: grid; place-items: center; margin-bottom: var(--sp-lg); }
+  .feature-row h3 { margin: 0 0 var(--sp-sm); }
+  .feature-row p { margin: 0; color: var(--ink-mute); font-size: 15px; }
+
+  /* --- Feature cards (white) --- */
+  .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-lg); }
+  .card-feature { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--sp-xxl); }
+  .card-feature h3 { margin: 0 0 var(--sp-md); }
+  .card-feature p { margin: 0; color: var(--ink-mute); }
+  .card-feature .link { display: inline-block; margin-top: var(--sp-lg); font-weight: var(--wght-cap); font-variation-settings: "wght" 600; text-decoration: underline; text-underline-offset: 3px; font-size: 15px; }
+  .card-feature .link:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(27,25,56,.25); border-radius: var(--r-xs); }
+
+  /* --- Pricing --- */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); align-items: stretch; }
+  .card-pricing { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--sp-xxl); display: flex; flex-direction: column; }
+  .card-pricing.featured { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .card-pricing.featured .caption, .card-pricing.featured p { color: var(--on-dark-mute); }
+  .price { font-size: 44px; font-weight: var(--wght-mid); font-variation-settings: "wght" 540; letter-spacing: -1.5px; line-height: 1; margin: var(--sp-md) 0 var(--sp-xs); }
+  .price span { font-size: 15px; font-weight: var(--wght-body); font-variation-settings: "wght" 460; color: var(--ink-mute); letter-spacing: 0; }
+  .card-pricing.featured .price span { color: var(--on-dark-mute); }
+  .feat-list { list-style: none; margin: var(--sp-xl) 0; padding: 0; display: grid; gap: var(--sp-md); flex: 1; }
+  .feat-list li { display: flex; gap: var(--sp-sm); align-items: flex-start; font-size: 15px; }
+  .feat-list svg { flex: none; margin-top: 2px; }
+
+  /* --- Form --- */
+  .signup { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-md); max-width: 520px; }
+  .field label { display: block; margin-bottom: var(--sp-xs); }
+  input.text-input {
+    width: 100%; font-family: inherit; font-size: 16px; font-weight: var(--wght-body);
+    font-variation-settings: "wght" 460; color: var(--ink);
+    background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-sm);
+    padding: 12px 12px; transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  input.text-input::placeholder { color: var(--ink-faint); }
+  input.text-input:focus-visible { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,25,56,.16); }
+
+  /* --- Closing teal band (non-negotiable) --- */
+  .teal-band {
+    background: var(--surface-teal-deep); color: var(--on-primary);
+    text-align: center;
+  }
+  .teal-band .wrap { padding: 112px var(--sp-xl); }
+  .teal-band h2 { margin: 0 auto var(--sp-xl); max-width: 22ch; }
+  .teal-band .sub { color: rgba(255,255,255,.72); max-width: 46ch; margin: 0 auto var(--sp-xxl); }
+  .teal-chrome { display: inline-flex; gap: var(--sp-sm); align-items: center; background: var(--surface-teal-mid); border-radius: var(--r-full); padding: 6px 6px 6px 16px; margin-bottom: var(--sp-xxl); font-size: 13px; }
+
+  /* --- Footer --- */
+  footer.site { background: var(--canvas); border-top: 1px solid var(--hairline); }
+  footer.site .wrap { padding: var(--sp-huge) var(--sp-xl); }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: var(--sp-xl); }
+  .foot-col h4 { font-size: 13px; font-weight: var(--wght-cap); font-variation-settings: "wght" 600; margin: 0 0 var(--sp-md); color: var(--ink); }
+  .foot-col a { display: block; text-decoration: none; color: var(--ink-mute); font-size: 14px; padding: var(--sp-xs) 0; }
+  .foot-col a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .foot-col a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(27,25,56,.2); border-radius: var(--r-xs); }
+  .foot-legal { display: flex; justify-content: space-between; align-items: center; margin-top: var(--sp-huge); padding-top: var(--sp-xl); border-top: 1px solid var(--hairline); color: var(--ink-faint); font-size: 13px; flex-wrap: wrap; gap: var(--sp-md); }
+
+  /* --- Responsive --- */
+  @media (max-width: 1023px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: var(--sp-xxl); }
+    .portrait { height: 320px; }
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 767px) {
+    .nav-links { display: none; }
+    .feature-grid, .card-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .signup { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .teal-band .wrap { padding: 64px var(--sp-xl); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV (dark) ===================== -->
+  <header class="nav">
+    <div class="wrap">
+      <a href="./DESIGN.md" class="brand" aria-label="Superhuman home">
+        <span class="mark" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 9.5 7 2l5 7.5" stroke="#1b1938" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Superhuman
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">AI</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Customers</a>
+      </nav>
+      <span class="nav-spacer"></span>
+      <a href="./DESIGN.md" class="btn btn-on-dark-pill">Get Started</a>
+    </div>
+  </header>
+
+  <!-- ===================== HERO (indigo + violet-sky + half-bleed portrait) ===================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow on-dark">The fastest email experience ever made</p>
+        <h1 id="hero-title" class="display-xxl">Email that flies at the speed of thought.</h1>
+        <p class="body-lg">Blaze through your inbox twice as fast. Superhuman blends keyboard-first speed with AI that drafts, triages, and follows up for you.</p>
+        <div class="hero-actions">
+          <a href="./DESIGN.md" class="btn btn-on-dark-pill">Get Started</a>
+          <a href="./DESIGN.md" class="btn btn-secondary-outline" style="background:transparent;color:var(--on-primary);border-color:var(--hairline-dark)">Watch the demo</a>
+        </div>
+      </div>
+      <div class="portrait" aria-hidden="true">
+        <span class="glow"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURE PICKER (pill tabs + rows) ===================== -->
+  <section aria-labelledby="feat-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">One inbox, superpowered</p>
+        <h2 id="feat-title" class="display-xl">Everything you need to move faster.</h2>
+        <p class="body-lg">Choose a surface to see how Superhuman compresses the work.</p>
+      </div>
+      <div class="pill-tabs" role="tablist" aria-label="Feature categories">
+        <button class="pill-tab" role="tab" aria-selected="true">Mail</button>
+        <button class="pill-tab" role="tab" aria-selected="false">AI</button>
+        <button class="pill-tab" role="tab" aria-selected="false">Calendar</button>
+        <button class="pill-tab" role="tab" aria-selected="false">Channels</button>
+        <button class="pill-tab" role="tab" aria-selected="false">Insights</button>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-row">
+          <span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="4" width="14" height="10" rx="1.5" stroke="#fff" stroke-width="1.6"/><path d="m3 5 6 5 6-5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+          <h3 class="heading-lg">Split Inbox</h3>
+          <p>Auto-sort mail into focused lanes so the important stuff surfaces first.</p>
+        </article>
+        <article class="feature-row">
+          <span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v14M2 9h14" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+          <h3 class="heading-lg">Instant Search</h3>
+          <p>Find anyone or anything in milliseconds — no waiting, no spinners.</p>
+        </article>
+        <article class="feature-row">
+          <span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9.5 8 13l6-8" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3 class="heading-lg">Follow-up Reminders</h3>
+          <p>Never drop a thread. Superhuman nudges you exactly when it matters.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURE CARDS (white) ===================== -->
+  <section class="alt" aria-labelledby="cards-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Built for teams that move</p>
+        <h2 id="cards-title" class="display-lg">A calmer, faster way to work.</h2>
+      </div>
+      <div class="card-grid">
+        <article class="card-feature">
+          <h3 class="display-md">AI that writes like you</h3>
+          <p>Draft replies in your own voice, summarize long threads, and turn intent into a finished message in a single keystroke.</p>
+          <a href="./DESIGN.md" class="link">Explore Superhuman AI</a>
+        </article>
+        <article class="card-feature">
+          <h3 class="display-md">Keyboard-first, always</h3>
+          <p>Every action has a shortcut. Move at the speed of thought without ever reaching for the mouse.</p>
+          <a href="./DESIGN.md" class="link">See the command palette</a>
+        </article>
+        <article class="card-feature">
+          <h3 class="display-md">Read statuses &amp; presence</h3>
+          <p>Know when your message was seen and when your teammates are online — coordinate without the back-and-forth.</p>
+          <a href="./DESIGN.md" class="link">Learn about collaboration</a>
+        </article>
+        <article class="card-feature">
+          <h3 class="display-md">Undo send &amp; snippets</h3>
+          <p>Recall a message before it lands, and fire off reusable snippets to shave minutes off every reply.</p>
+          <a href="./DESIGN.md" class="link">Browse power features</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRICING ===================== -->
+  <section aria-labelledby="pricing-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Simple, sober pricing</p>
+        <h2 id="pricing-title" class="display-xl">Choose your speed.</h2>
+      </div>
+      <div class="pricing-grid">
+        <article class="card-pricing">
+          <p class="eyebrow">Starter</p>
+          <div class="price">$25 <span>/ month</span></div>
+          <p class="caption">For individuals getting to inbox zero.</p>
+          <ul class="feat-list">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#1b1938" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Split Inbox &amp; shortcuts</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#1b1938" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Instant search</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#1b1938" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Read statuses</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-secondary-outline" style="width:100%">Choose Starter</a>
+        </article>
+        <article class="card-pricing featured">
+          <p class="eyebrow" style="color:var(--surface-violet-soft)">Business · Most popular</p>
+          <div class="price">$40 <span>/ month</span></div>
+          <p>For teams that live in their inbox.</p>
+          <ul class="feat-list">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#c9b4fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Everything in Starter</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#c9b4fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Superhuman AI drafting</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#c9b4fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Team collaboration</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-on-dark-pill" style="width:100%">Choose Business</a>
+        </article>
+        <article class="card-pricing">
+          <p class="eyebrow">Enterprise</p>
+          <div class="price">Custom</div>
+          <p class="caption">For organizations at scale.</p>
+          <ul class="feat-list">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#1b1938" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Everything in Business</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#1b1938" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> SSO &amp; SCIM</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="#1b1938" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Dedicated success</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-secondary-outline" style="width:100%">Contact Sales</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== NEWSLETTER FORM (white) ===================== -->
+  <section class="alt" aria-labelledby="form-title">
+    <div class="narrow">
+      <div class="section-head">
+        <p class="eyebrow">Stay in the loop</p>
+        <h2 id="form-title" class="display-lg">Get productivity notes, once a week.</h2>
+        <p>No noise. Just a considered, slow-tempo dispatch on doing your best work.</p>
+      </div>
+      <form class="signup" onsubmit="return false">
+        <div class="field">
+          <label for="email" class="caption">Work email</label>
+          <input id="email" class="text-input" type="email" placeholder="you@company.com" autocomplete="email" />
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <a href="./DESIGN.md" class="btn btn-primary-dark">Subscribe</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== CLOSING TEAL BAND (non-negotiable) ===================== -->
+  <section class="teal-band" aria-labelledby="cta-title">
+    <div class="wrap">
+      <span class="teal-chrome">
+        Trusted by high-performing teams
+        <span class="btn btn-on-teal" style="padding:6px 12px;font-size:12px">4.9 ★</span>
+      </span>
+      <h2 id="cta-title" class="display-lg">Ready to fly through your inbox?</h2>
+      <p class="sub body-lg">Join the teams saving hours every week. Your fastest email experience starts today.</p>
+      <a href="./DESIGN.md" class="btn btn-on-teal">Get Started</a>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-col">
+          <a href="./DESIGN.md" class="brand" style="color:var(--ink);margin-bottom:var(--sp-md)">
+            <span class="mark" aria-hidden="true" style="background:var(--primary)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 9.5 7 2l5 7.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            Superhuman
+          </a>
+          <p class="caption" style="max-width:26ch">The fastest email experience ever made — now with AI.</p>
+        </div>
+        <div class="foot-col">
+          <h4>Product</h4>
+          <a href="./DESIGN.md">Features</a>
+          <a href="./DESIGN.md">Superhuman AI</a>
+          <a href="./DESIGN.md">Integrations</a>
+          <a href="./DESIGN.md">Download</a>
+        </div>
+        <div class="foot-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Blog</a>
+          <a href="./DESIGN.md">Press</a>
+        </div>
+        <div class="foot-col">
+          <h4>Resources</h4>
+          <a href="./DESIGN.md">Help Center</a>
+          <a href="./DESIGN.md">Community</a>
+          <a href="./DESIGN.md">Shortcuts</a>
+          <a href="./DESIGN.md">Status</a>
+        </div>
+        <div class="foot-col">
+          <h4>Legal</h4>
+          <a href="./DESIGN.md">Privacy</a>
+          <a href="./DESIGN.md">Terms</a>
+          <a href="./DESIGN.md">Security</a>
+        </div>
+      </div>
+      <div class="foot-legal">
+        <span>© 2026 Superhuman Labs. All rights reserved.</span>
+        <span>Design tokens sourced from <a href="./DESIGN.md" style="color:var(--ink-mute);text-decoration:underline;text-underline-offset:3px">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

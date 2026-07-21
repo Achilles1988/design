@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<!-- source_content_hash: 3f36f897e5aad870344dd97e282c8f125ad208dc99449bb08dd38b9259d2f451 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ollama — Component Preview</title>
+<style>
+  /* ============================================================
+     Ollama design tokens — mapped from DESIGN.md
+     Defiantly minimal, documentation-first. Paper-white canvas
+     end-to-end (no surface alternation), pure-black pill CTAs,
+     inline curl install snippet, hand-drawn llama, terminal card
+     with macOS traffic-lights, single inverted dark "Max" tier.
+     SF Pro Rounded (→Nunito) headings + system sans body + mono.
+     Every interactive element is a full pill (rounded.full).
+     ============================================================ */
+  :root {
+    /* Brand — black is the only brand color */
+    --primary: #000000;
+    --on-primary: #ffffff;
+    --ink: #000000;
+    --ink-deep: #090909;
+    --charcoal: #525252;
+    --body: #737373;
+    --mute: #a3a3a3;
+    /* Surface — one continuous white sheet */
+    --canvas: #ffffff;
+    --surface-soft: #fafafa;
+    --surface-card: #ffffff;
+    --hairline: #e5e5e5;
+    --hairline-strong: #d4d4d4;
+    /* The single inverted surface */
+    --surface-dark: #171717;
+    --on-dark: #ffffff;
+    --on-dark-mute: rgba(255,255,255,0.7);
+    /* Terminal traffic lights (only "semantic" colors) */
+    --terminal-red: #ff5f56;
+    --terminal-yellow: #ffbd2e;
+    --terminal-green: #27c93f;
+    /* The only blue in the system */
+    --focus-ring: rgba(59,130,246,0.5);
+
+    /* SF Pro Rounded (Apple) → Nunito open-source substitute */
+    --font-display: 'SF Pro Rounded', 'Nunito', system-ui, -apple-system, sans-serif;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-full: 9999px;
+
+    --s-xxs: 2px;
+    --s-xs: 4px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-section: 88px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--canvas);
+    color: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 var(--s-xl); }
+  .wrap-wide { max-width: 960px; margin: 0 auto; padding: 0 var(--s-xl); }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus-ring); }
+
+  h1, h2, h3 { font-family: var(--font-display); color: var(--ink); }
+
+  /* ---- Nav ---- */
+  .nav { height: 56px; display: flex; align-items: center; border-bottom: 1px solid var(--hairline); position: sticky; top: 0; background: var(--canvas); z-index: 20; }
+  .nav .inner { max-width: 960px; margin: 0 auto; padding: 0 var(--s-xl); display: flex; align-items: center; gap: var(--s-lg); width: 100%; }
+  .brand { display: flex; align-items: center; gap: var(--s-sm); font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--ink); }
+  .nav-links { display: flex; gap: var(--s-lg); }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .nav-links a:hover { color: var(--body); }
+  .search-pill {
+    margin-left: auto;
+    background: var(--surface-soft);
+    border: none;
+    border-radius: var(--r-full);
+    height: 36px;
+    padding: 8px 16px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--ink);
+    width: 200px;
+  }
+  .search-pill::placeholder { color: var(--mute); }
+  .search-pill:focus { outline: none; background: var(--canvas); box-shadow: 0 0 0 3px var(--focus-ring); }
+  .nav-cta { display: flex; align-items: center; gap: var(--s-md); }
+  .nav-cta .signin { font-size: 14px; font-weight: 500; color: var(--ink); }
+
+  /* ---- Llama mascot (hand-drawn line illustration) ---- */
+  .llama { display: block; margin: 0 auto var(--s-lg); }
+
+  /* ---- Buttons — all pills ---- */
+  .btn {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--r-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 36px;
+    padding: 8px 20px;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--ink-deep); }
+  .btn-secondary { background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline-strong); }
+  .btn-secondary:hover { border-color: var(--mute); }
+  .btn-on-dark { background: var(--canvas); color: var(--ink); }
+
+  /* ---- Hero ---- */
+  .hero { text-align: center; padding: var(--s-section) 0 var(--s-xxl); }
+  .hero h1 { font-size: 36px; font-weight: 500; line-height: 1.11; margin-bottom: var(--s-lg); }
+  .hero .subline { font-size: 16px; color: var(--body); margin-bottom: var(--s-xl); }
+
+  /* ---- Install snippet (signature) ---- */
+  .install-snippet {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-md);
+    max-width: 480px;
+    margin: 0 auto var(--s-lg);
+    background: var(--surface-soft);
+    border-radius: var(--r-full);
+    height: 48px;
+    padding: 12px 20px;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--ink);
+    text-align: left;
+  }
+  .install-snippet .cmd { overflow-x: auto; white-space: nowrap; }
+  .install-snippet .copy { flex-shrink: 0; color: var(--body); cursor: pointer; display: flex; }
+  .hero-cta { display: flex; gap: var(--s-md); justify-content: center; }
+
+  /* ---- Section scaffold ---- */
+  section.band { padding: var(--s-section) 0; }
+  .band h2 { font-size: 30px; font-weight: 500; line-height: 1.2; text-align: center; margin-bottom: var(--s-sm); }
+  .band .band-sub { text-align: center; color: var(--body); margin-bottom: var(--s-xxl); }
+
+  /* ---- Automate split ---- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-xxl); align-items: center; }
+  .split h3 { font-family: var(--font-display); font-size: 24px; font-weight: 600; margin-bottom: var(--s-md); }
+  .split p { color: var(--body); margin-bottom: var(--s-lg); }
+  .command-tag {
+    display: inline-block;
+    background: var(--surface-soft);
+    border-radius: var(--r-full);
+    padding: 6px 12px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  /* ---- Terminal card ---- */
+  .terminal-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .traffic-lights { display: flex; gap: var(--s-xs); margin-bottom: var(--s-md); }
+  .tl { width: 12px; height: 12px; border-radius: var(--r-full); }
+  .tl.r { background: var(--terminal-red); }
+  .tl.y { background: var(--terminal-yellow); }
+  .tl.g { background: var(--terminal-green); }
+  .terminal-card .line { color: var(--ink); }
+  .terminal-card .cm { color: var(--mute); }
+  .terminal-card .out { color: var(--body); }
+
+  /* ---- Data-stays-yours strip ---- */
+  .privacy { text-align: center; }
+  .lock-icon { display: inline-flex; margin-bottom: var(--s-md); color: var(--ink); }
+
+  /* ---- Pricing ---- */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .price-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xxl);
+  }
+  .price-card.dark { background: var(--surface-dark); color: var(--on-dark); border-color: var(--surface-dark); }
+  .price-card .mini-llama { margin-bottom: var(--s-md); }
+  .price-card .tier { font-family: var(--font-display); font-size: 20px; font-weight: 500; color: var(--ink); }
+  .price-card.dark .tier { color: var(--on-dark); }
+  .price-card .desc { font-size: 14px; color: var(--body); margin: var(--s-xs) 0 var(--s-lg); }
+  .price-card.dark .desc { color: var(--on-dark-mute); }
+  .price-card .price { font-family: var(--font-display); font-size: 30px; font-weight: 500; color: var(--ink); margin-bottom: var(--s-lg); }
+  .price-card.dark .price { color: var(--on-dark); }
+  .price-card .btn { width: 100%; margin-bottom: var(--s-lg); }
+  .plus-label { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: var(--s-md); }
+  .price-card.dark .plus-label { color: var(--on-dark); }
+  .feature-bullet { display: flex; gap: var(--s-sm); font-size: 14px; color: var(--charcoal); padding: 4px 0; }
+  .price-card.dark .feature-bullet { color: var(--on-dark-mute); }
+  .feature-bullet .check { color: var(--ink); }
+  .price-card.dark .feature-bullet .check { color: var(--on-dark); }
+
+  /* ---- FAQ ---- */
+  .faq-row { padding: 16px 0; border-bottom: 1px solid var(--hairline); }
+  .faq-row .q { font-size: 18px; font-weight: 500; color: var(--ink); margin-bottom: var(--s-xs); }
+  .faq-row .a { font-size: 16px; color: var(--body); }
+
+  /* ---- Footer ---- */
+  footer { border-top: 1px solid var(--hairline); padding: 32px 24px; }
+  .footer-inner { max-width: 960px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-lg); }
+  .footer-inner a { font-size: 12px; color: var(--body); }
+  .footer-inner a:hover { color: var(--ink); }
+  .footer-copy { font-size: 12px; color: var(--body); margin-left: auto; }
+
+  @media (max-width: 850px) { .pricing-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 768px) {
+    .nav-links, .search-pill { display: none; }
+    .split { grid-template-columns: 1fr; }
+    .footer-copy { margin-left: 0; }
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 28px; }
+    .install-snippet { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+  <header class="nav">
+    <div class="inner">
+      <div class="brand">
+        <svg class="mini-mark" width="22" height="22" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M12 30c-2-6-1-14 3-17 1 3 2 4 5 4s4-1 5-4c4 3 5 11 3 17" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="20" r="1.4" fill="#000"/><circle cx="24" cy="20" r="1.4" fill="#000"/></svg>
+        Ollama
+      </div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Models</a>
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Pricing</a>
+      </nav>
+      <input class="search-pill" type="search" placeholder="Search models" aria-label="Search models">
+      <div class="nav-cta">
+        <a class="signin" href="./DESIGN.md">Sign in</a>
+        <button class="btn btn-primary">Download</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <svg class="llama" width="96" height="96" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+        <path d="M30 78c-6-14-4-34 8-42 3 7 6 9 10 9s7-2 10-9c12 8 14 28 8 42" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M34 40c-4-6-4-14 0-18 2 5 5 6 5 6M62 40c4-6 4-14 0-18-2 5-5 6-5 6" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="40" cy="46" r="2.4" fill="#000"/>
+        <circle cx="56" cy="46" r="2.4" fill="#000"/>
+      </svg>
+      <h1>The easiest way to build with open models</h1>
+      <p class="subline">Run large language models locally, or scale to the cloud when you need to.</p>
+      <div class="install-snippet">
+        <span class="cmd">curl -fsSL https://ollama.com/install.sh | sh</span>
+        <span class="copy" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="2"/></svg></span>
+      </div>
+      <div class="hero-cta">
+        <button class="btn btn-primary">Download</button>
+        <button class="btn btn-secondary">Browse models</button>
+      </div>
+    </section>
+
+    <section class="band wrap">
+      <div class="split">
+        <div>
+          <h3>Automate your work</h3>
+          <p>Wire local models into your everyday tools and let them run tasks for you — no data leaves your machine.</p>
+          <span class="command-tag">ollama launch openclaw</span>
+        </div>
+        <div class="terminal-card">
+          <div class="traffic-lights"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span></div>
+          <div class="line">$ ollama run llama3.2</div>
+          <div class="cm"># pulling manifest…</div>
+          <div class="out">>>> summarize ./notes.md</div>
+          <div class="out">Done — 3 key points extracted.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band wrap-wide">
+      <h2>Pricing</h2>
+      <p class="band-sub">Start local. Scale cloud.</p>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <svg class="mini-llama" width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M12 30c-2-6-1-14 3-17 1 3 2 4 5 4s4-1 5-4c4 3 5 11 3 17" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="tier">Free</div>
+          <div class="desc">Everything to run models locally.</div>
+          <div class="price">$0</div>
+          <button class="btn btn-secondary">Get started</button>
+          <div class="plus-label">Includes:</div>
+          <div class="feature-bullet"><span class="check">✓</span> Unlimited local models</div>
+          <div class="feature-bullet"><span class="check">✓</span> CLI & REST API</div>
+          <div class="feature-bullet"><span class="check">✓</span> Community support</div>
+        </div>
+        <div class="price-card">
+          <svg class="mini-llama" width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M12 30c-2-6-1-14 3-17 1 3 2 4 5 4s4-1 5-4c4 3 5 11 3 17" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="tier">Pro</div>
+          <div class="desc">Cloud inference when you need scale.</div>
+          <div class="price">$20</div>
+          <button class="btn btn-primary">Get Pro</button>
+          <div class="plus-label">Everything in Free, plus:</div>
+          <div class="feature-bullet"><span class="check">✓</span> Hosted cloud models</div>
+          <div class="feature-bullet"><span class="check">✓</span> Higher rate limits</div>
+          <div class="feature-bullet"><span class="check">✓</span> Priority support</div>
+        </div>
+        <div class="price-card dark">
+          <svg class="mini-llama" width="32" height="32" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M12 30c-2-6-1-14 3-17 1 3 2 4 5 4s4-1 5-4c4 3 5 11 3 17" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="tier">Max</div>
+          <div class="desc">Solve harder tasks, faster.</div>
+          <div class="price">$200</div>
+          <button class="btn btn-on-dark">Get Max</button>
+          <div class="plus-label">Everything in Pro, plus:</div>
+          <div class="feature-bullet"><span class="check">✓</span> Access larger models on data-center-grade hardware</div>
+          <div class="feature-bullet"><span class="check">✓</span> Highest rate limits</div>
+          <div class="feature-bullet"><span class="check">✓</span> Dedicated support</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band wrap">
+      <div class="privacy">
+        <span class="lock-icon" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6"/></svg></span>
+        <h2>Your data stays yours</h2>
+        <p class="band-sub" style="margin-bottom:0;">Run everything locally. No telemetry, no lock-in — your prompts and files never leave your machine.</p>
+      </div>
+    </section>
+
+    <section class="band wrap">
+      <h2>Frequently asked questions</h2>
+      <p class="band-sub"></p>
+      <div class="faq-row">
+        <div class="q">Is Ollama free?</div>
+        <div class="a">Yes — running models locally is completely free. Pro and Max add hosted cloud inference for teams that need scale.</div>
+      </div>
+      <div class="faq-row">
+        <div class="q">Which models are supported?</div>
+        <div class="a">Llama, Mistral, Gemma, Phi, and hundreds more from the model library — plus your own custom GGUF files.</div>
+      </div>
+      <div class="faq-row">
+        <div class="q">Does it work offline?</div>
+        <div class="a">Once a model is downloaded, everything runs on your machine with no internet connection required.</div>
+      </div>
+      <div class="faq-row">
+        <div class="q">How do I get support?</div>
+        <div class="a">Community help is available on Discord and GitHub. Pro and Max plans include priority support.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <a href="./DESIGN.md">Download</a>
+      <a href="./DESIGN.md">Blog</a>
+      <a href="./DESIGN.md">Docs</a>
+      <a href="./DESIGN.md">GitHub</a>
+      <a href="./DESIGN.md">Discord</a>
+      <a href="./DESIGN.md">X</a>
+      <a href="./DESIGN.md">Contact</a>
+      <a href="./DESIGN.md">Privacy</a>
+      <a href="./DESIGN.md">Terms</a>
+      <span class="footer-copy">© 2026 Ollama</span>
+    </div>
+  </footer>
+</body>
+</html>

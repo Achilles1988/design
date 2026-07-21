@@ -1,0 +1,798 @@
+<!-- source_content_hash: d649be85daf075c98a17071e707e3901c6e19150044a81716acd01ef1169cc83 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NVIDIA — Component Preview</title>
+<style>
+  /* ============================================================
+     NVIDIA design tokens — mapped from DESIGN.md front matter.
+     Engineering-grade marketing: two-mode surface (black hero/
+     footer chapters + paper-white body), single violently-
+     saturated NVIDIA Green accent, 2px angular geometry, hairline
+     rules, corner-square motif, NVIDIA-EMEA (→ Inter) 400/700.
+     ============================================================ */
+  :root {
+    /* Brand & accent — the one color doing all the work */
+    --primary: #76b900;          /* NVIDIA Green */
+    --primary-dark: #5a8d00;     /* pressed */
+    --on-primary: #000000;
+    --accent-green-pale: #bff230;
+
+    /* Surface — two-mode architecture */
+    --canvas: #ffffff;           /* paper-white body */
+    --surface-dark: #000000;     /* black hero/footer chapters */
+    --surface-soft: #f7f7f7;     /* breadcrumb, sub-nav, alt rows */
+    --surface-elevated: #1a1a1a; /* nested dark panels */
+
+    /* Hairlines — separation without shadow */
+    --hairline: #cccccc;
+    --hairline-strong: #5e5e5e;  /* dividers on dark */
+
+    /* Text */
+    --ink: #000000;
+    --body: #1a1a1a;
+    --mute: #757575;
+    --stone: #898989;
+    --ash: #a7a7a7;
+    --on-dark: #ffffff;
+    --on-dark-mute: rgba(255,255,255,0.7);
+
+    /* Semantic */
+    --link-blue: #0046a4;        /* the only blue — inline links */
+    --error: #e52020;
+    --warning: #df6500;
+    --success-deep: #3f8500;
+    --accent-purple: #952fc6;
+    --accent-purple-pale: #f9d4ff;
+    --accent-yellow-pale: #feeeb2;
+
+    /* Radius — aggressively angular; 2px everywhere */
+    --r-none: 0px;
+    --r-xs: 1px;
+    --r-sm: 2px;
+    --r-full: 9999px;
+
+    /* Spacing — 8px base */
+    --sp-xxs: 2px;
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 24px;
+    --sp-xxl: 32px;
+    --sp-section: 64px;
+
+    /* Type — NVIDIA-EMEA → Inter / Arial fallback */
+    --font-sans: "NVIDIA-EMEA", "Inter", Arial, Helvetica, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-xl); }
+  .section { padding: var(--sp-section) 0; }
+
+  .eyebrow {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.43;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: var(--sp-md);
+  }
+  h2.section-title {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ink);
+  }
+
+  /* ---------- Utility bar (black) ---------- */
+  .utility-bar {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    height: 32px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    border-bottom: 1px solid var(--hairline-strong);
+  }
+  .utility-bar .inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 var(--sp-xl);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-lg);
+  }
+  .utility-bar a { color: var(--on-dark-mute); }
+
+  /* ---------- Primary nav (black) ---------- */
+  .nav {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 var(--sp-xl);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-xl);
+  }
+  .brand { display: flex; align-items: center; gap: var(--sp-sm); }
+  .brand .wordmark {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--on-dark);
+    letter-spacing: 0.5px;
+  }
+  .nav-menu { display: flex; gap: var(--sp-lg); margin-left: var(--sp-md); }
+  .nav-menu a {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--on-dark);
+  }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--sp-lg); }
+  .nav-right .login { font-size: 16px; font-weight: 700; color: var(--on-dark); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-sm);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+    border: 2px solid transparent;
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    padding: 11px 24px;
+    height: 44px;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
+  }
+  .btn-primary:active { background: var(--primary-dark); border-color: var(--primary-dark); }
+  .btn-outline {                  /* clear pane bordered in green */
+    background: transparent;
+    color: var(--ink);
+    border: 2px solid var(--primary);
+    padding: 11px 22px;
+  }
+  .btn-outline-dark {
+    background: transparent;
+    color: var(--on-dark);
+    border: 1px solid var(--on-dark);
+  }
+  .btn-ghost {                    /* inline arrow link, green */
+    background: transparent;
+    color: var(--primary);
+    border: none;
+    padding: 0;
+    height: auto;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  /* ---------- Hero chapter (black) ---------- */
+  .hero {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    /* full-bleed rendered scene stand-in via layered gradients */
+    background-image:
+      radial-gradient(120% 90% at 78% 30%, rgba(118,185,0,0.20), transparent 55%),
+      linear-gradient(90deg, #000 30%, #050805 60%, #0c140c 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero .hero-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-xxl);
+    align-items: center;
+  }
+  .hero h1 {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--on-dark);
+    margin-bottom: var(--sp-lg);
+  }
+  .hero p.subhead {
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--on-dark-mute);
+    max-width: 40ch;
+    margin-bottom: var(--sp-xl);
+  }
+  .hero-cta { display: flex; gap: var(--sp-md); flex-wrap: wrap; }
+  /* rendered-scene placeholder card with green wireframe */
+  .hero-render {
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--hairline-strong);
+    background:
+      repeating-linear-gradient(90deg, rgba(118,185,0,0.10) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(0deg, rgba(118,185,0,0.10) 0 1px, transparent 1px 40px),
+      radial-gradient(80% 80% at 50% 50%, rgba(118,185,0,0.28), #0a0f08);
+    position: relative;
+  }
+  .hero-render .cube {
+    position: absolute;
+    inset: 30% 34%;
+    border: 2px solid var(--primary);
+    transform: rotate(12deg);
+  }
+
+  /* ---------- Breadcrumb + sub-nav ---------- */
+  .breadcrumb {
+    background: var(--surface-soft);
+    color: var(--body);
+    height: 48px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .breadcrumb .sep { color: var(--mute); margin: 0 var(--sp-sm); }
+  .sub-nav {
+    background: var(--surface-soft);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-xl);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .sub-nav a {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .sub-nav a.active { color: var(--primary); }
+
+  /* ---------- Cards (with corner-square) ---------- */
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-xl); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+  .card {
+    position: relative;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);   /* flat, no shadow */
+    border-radius: var(--r-sm);
+    padding: var(--sp-xl);
+  }
+  /* the signature corner-square — 12px green square, top-left */
+  .card .corner-square {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+  }
+  .card .thumb {
+    aspect-ratio: 16 / 9;
+    background:
+      radial-gradient(70% 90% at 60% 40%, rgba(118,185,0,0.25), transparent),
+      linear-gradient(135deg, #0d0d0d, #232323);
+    border-radius: var(--r-sm);
+    margin-bottom: var(--sp-md);
+  }
+  .card .badge-tag {
+    display: inline-block;
+    background: var(--surface-soft);
+    color: var(--body);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: var(--r-sm);
+    padding: var(--sp-xs) 10px;
+    margin-bottom: var(--sp-md);
+  }
+  .card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.47;
+    color: var(--ink);
+    margin-bottom: var(--sp-sm);
+  }
+  .card p {
+    font-size: 15px;
+    line-height: 1.67;
+    color: var(--body);
+    margin-bottom: var(--sp-md);
+  }
+
+  /* feature-card — icon + heading */
+  .feature-card {
+    position: relative;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: var(--sp-xxl);
+  }
+  .feature-card .corner-square {
+    position: absolute; top: 0; left: 0; width: 12px; height: 12px;
+    background: var(--primary);
+  }
+  .feature-card .ficon { color: var(--primary); width: 28px; height: 28px; margin-bottom: var(--sp-md); }
+  .feature-card h3 { font-size: 20px; font-weight: 700; line-height: 1.25; color: var(--ink); margin-bottom: var(--sp-sm); }
+  .feature-card p { font-size: 16px; line-height: 1.5; color: var(--body); }
+
+  /* callout-stat — massive green numeric */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); }
+  .callout-stat {
+    position: relative;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: var(--sp-xxl);
+  }
+  .callout-stat .corner-square {
+    position: absolute; bottom: 0; right: 0; width: 12px; height: 12px;
+    background: var(--primary);
+  }
+  .callout-stat .num {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--primary);
+    margin-bottom: var(--sp-sm);
+  }
+  .callout-stat .cap { font-size: 16px; color: var(--body); }
+
+  /* ---------- Pill tabs (filter strip) ---------- */
+  .pill-tabs { display: flex; gap: var(--sp-sm); flex-wrap: wrap; margin-bottom: var(--sp-xl); }
+  .pill-tab {
+    background: transparent;
+    color: var(--ink);
+    font-size: 14.4px;
+    font-weight: 700;
+    letter-spacing: 0.144px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: 10px 18px;
+    cursor: pointer;
+  }
+  .pill-tab.active { background: var(--ink); color: var(--on-dark); border-color: var(--ink); }
+
+  /* ---------- Dark CTA strip ---------- */
+  .cta-strip {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+  }
+  .cta-strip .inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 64px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-xl);
+    flex-wrap: wrap;
+  }
+  .cta-strip h2 {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--on-dark);
+  }
+
+  /* ---------- Form ---------- */
+  .form-card {
+    position: relative;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: var(--sp-xxl);
+    max-width: 520px;
+  }
+  .form-card .corner-square {
+    position: absolute; top: 0; left: 0; width: 12px; height: 12px; background: var(--primary);
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-lg); }
+  .field { margin-bottom: var(--sp-lg); }
+  .field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--body);
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: 12px 16px;
+    height: 44px;
+  }
+  .field input:focus {
+    outline: none;
+    border: 2px solid var(--primary);   /* green border is the only focus signal */
+  }
+
+  /* ---------- Footer chapter (black) ---------- */
+  footer {
+    background: var(--surface-dark);
+    color: var(--on-dark-mute);
+    padding: 64px 0 var(--sp-xl);
+  }
+  .footer-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-xl); }
+  .footer-col h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--on-dark);
+    margin-bottom: var(--sp-md);
+  }
+  .footer-col a {
+    display: block;
+    font-size: 15px;
+    color: var(--on-dark-mute);
+    margin-bottom: var(--sp-sm);
+  }
+  .footer-fine {
+    margin-top: var(--sp-xxl);
+    padding-top: var(--sp-lg);
+    border-top: 1px solid var(--hairline-strong);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-md);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--mute);
+    flex-wrap: wrap;
+  }
+  .footer-fine .spacer { flex: 1; }
+  .link-inline { color: var(--link-blue); text-decoration: underline; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+    .footer-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .section { padding: 48px 0; }
+    .hero .hero-inner { grid-template-columns: 1fr; padding: 48px 24px; }
+    .hero h1 { font-size: 36px; }
+    .grid, .grid-3, .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+    .nav-menu, .sub-nav { display: none; }
+    .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .section { padding: 32px 0; }
+    .hero h1 { font-size: 32px; }
+    .grid, .grid-3, .stat-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ UTILITY BAR ============ -->
+  <div class="utility-bar">
+    <div class="inner">
+      <a href="./DESIGN.md">United States</a>
+      <a href="./DESIGN.md">Login</a>
+      <a href="./DESIGN.md">Account</a>
+    </div>
+  </div>
+
+  <!-- ============ PRIMARY NAV (black) ============ -->
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="./DESIGN.md" aria-label="NVIDIA home">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <rect width="26" height="26" fill="var(--primary)"/>
+          <path d="M6 18V8h3l5 7V8h2v10h-3l-5-7v7H6Z" fill="#000"/>
+        </svg>
+        <span class="wordmark">NVIDIA</span>
+      </a>
+      <nav class="nav-menu" aria-label="Primary">
+        <a href="./DESIGN.md">Products</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Industries</a>
+        <a href="./DESIGN.md">Resources</a>
+        <a href="./DESIGN.md">Company</a>
+      </nav>
+      <div class="nav-right">
+        <a class="login" href="./DESIGN.md" aria-label="Search">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </a>
+        <a class="btn btn-primary" href="./DESIGN.md">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HERO CHAPTER (black) ============ -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <p class="eyebrow">Accelerated Computing</p>
+        <h1>The engine of modern AI</h1>
+        <p class="subhead">From data center to edge, NVIDIA accelerates the world's
+          most demanding workloads with a single, unified platform.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="./DESIGN.md">Get Started</a>
+          <a class="btn btn-outline-dark" href="./DESIGN.md">Watch the Video</a>
+        </div>
+      </div>
+      <div class="hero-render" aria-hidden="true">
+        <div class="cube"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BREADCRUMB + SUB-NAV ============ -->
+  <div class="breadcrumb">
+    <div class="wrap" style="display:flex;align-items:center">
+      <a href="./DESIGN.md">Home</a><span class="sep">&rsaquo;</span>
+      <a href="./DESIGN.md">Solutions</a><span class="sep">&rsaquo;</span>
+      <span>AI</span>
+    </div>
+  </div>
+  <nav class="sub-nav" aria-label="Section">
+    <div class="wrap" style="display:flex;align-items:center;gap:var(--sp-xl)">
+      <a href="./DESIGN.md" class="active">Overview</a>
+      <a href="./DESIGN.md">Training</a>
+      <a href="./DESIGN.md">Inference</a>
+      <a href="./DESIGN.md">Data Science</a>
+    </div>
+  </nav>
+
+  <!-- ============ FEATURE GRID (white body) ============ -->
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">Platform</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-xl)">Explore our AI solutions</h2>
+      <div class="grid grid-3">
+        <article class="feature-card">
+          <span class="corner-square"></span>
+          <svg class="ficon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="4" y="4" width="16" height="16" rx="1" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M8 4v16M16 4v16M4 8h16M4 16h16" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+          <h3>Agentic AI</h3>
+          <p>Build and deploy autonomous agents that reason, plan, and act across
+            complex enterprise workflows.</p>
+        </article>
+        <article class="feature-card">
+          <span class="corner-square"></span>
+          <svg class="ficon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 12h6l2-5 4 10 2-5h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>Inference</h3>
+          <p>Serve large models at scale with the lowest latency and highest
+            throughput on the market.</p>
+        </article>
+        <article class="feature-card">
+          <span class="corner-square"></span>
+          <svg class="ficon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <h3>Data Science</h3>
+          <p>Accelerate the full pipeline &mdash; from ETL to model training &mdash;
+            with GPU-native libraries.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAT CALLOUTS ============ -->
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <p class="eyebrow">By the numbers</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-xl)">Proven at scale</h2>
+      <div class="stat-grid">
+        <div class="callout-stat">
+          <span class="corner-square"></span>
+          <div class="num">4&times;</div>
+          <div class="cap">faster training vs. prior generation</div>
+        </div>
+        <div class="callout-stat">
+          <span class="corner-square"></span>
+          <div class="num">60%</div>
+          <div class="cap">lower total cost of ownership</div>
+        </div>
+        <div class="callout-stat">
+          <span class="corner-square"></span>
+          <div class="num">30&times;</div>
+          <div class="cap">inference throughput at peak</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESOURCE CARDS + FILTER ============ -->
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <p class="eyebrow">Latest in AI</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-lg)">Resources</h2>
+      <div class="pill-tabs" role="tablist" aria-label="Resource filter">
+        <button class="pill-tab active" role="tab" aria-selected="true">All</button>
+        <button class="pill-tab" role="tab" aria-selected="false">White papers</button>
+        <button class="pill-tab" role="tab" aria-selected="false">Webinars</button>
+        <button class="pill-tab" role="tab" aria-selected="false">Blog</button>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <span class="corner-square"></span>
+          <div class="thumb"></div>
+          <span class="badge-tag">White paper</span>
+          <h3>Scaling transformer training</h3>
+          <p>A technical deep dive into distributed training strategies.</p>
+          <a class="btn btn-ghost" href="./DESIGN.md">Read More &rarr;</a>
+        </article>
+        <article class="card">
+          <span class="corner-square"></span>
+          <div class="thumb"></div>
+          <span class="badge-tag">Webinar</span>
+          <h3>Deploying inference at the edge</h3>
+          <p>Watch our engineers walk through a production reference architecture.</p>
+          <a class="btn btn-ghost" href="./DESIGN.md">Read More &rarr;</a>
+        </article>
+        <article class="card">
+          <span class="corner-square"></span>
+          <div class="thumb"></div>
+          <span class="badge-tag">Blog</span>
+          <h3>What's new in the SDK</h3>
+          <p>Highlights from the latest platform release and developer tooling.</p>
+          <a class="btn btn-ghost" href="./DESIGN.md">Read More &rarr;</a>
+        </article>
+        <article class="card">
+          <span class="corner-square"></span>
+          <div class="thumb"></div>
+          <span class="badge-tag">Guide</span>
+          <h3>Getting started with agents</h3>
+          <p>Follow this step-by-step guide to ship your first agentic workflow.</p>
+          <a class="btn btn-ghost" href="./DESIGN.md">Read More &rarr;</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SIGNUP FORM ============ -->
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <p class="eyebrow">Get in touch</p>
+      <h2 class="section-title" style="margin-bottom:var(--sp-xl)">Talk to our team</h2>
+      <form class="form-card" onsubmit="return false">
+        <span class="corner-square"></span>
+        <div class="form-row">
+          <div class="field">
+            <label for="fn">First name</label>
+            <input id="fn" type="text" placeholder="Jane" />
+          </div>
+          <div class="field">
+            <label for="ln">Last name</label>
+            <input id="ln" type="text" placeholder="Doe" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="wm">Work email</label>
+          <input id="wm" type="email" placeholder="jane@company.com" />
+        </div>
+        <p style="font-size:15px;color:var(--body);margin-bottom:var(--sp-lg)">
+          Read our <a class="link-inline" href="./DESIGN.md">privacy policy</a> before submitting.
+        </p>
+        <div style="display:flex;gap:var(--sp-md);flex-wrap:wrap">
+          <button class="btn btn-primary" type="submit">Submit</button>
+          <a class="btn btn-outline" href="./DESIGN.md">Read the Documentation</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ DARK CTA STRIP ============ -->
+  <section class="cta-strip">
+    <div class="inner">
+      <h2>Ready to get started with accelerated AI?</h2>
+      <div style="display:flex;gap:var(--sp-md);flex-wrap:wrap">
+        <a class="btn btn-primary" href="./DESIGN.md">Get Started</a>
+        <a class="btn btn-outline-dark" href="./DESIGN.md">Contact Sales</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER CHAPTER (black) ============ -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Products</h4>
+          <a href="./DESIGN.md">GPUs</a>
+          <a href="./DESIGN.md">Systems</a>
+          <a href="./DESIGN.md">Networking</a>
+        </div>
+        <div class="footer-col">
+          <h4>Software</h4>
+          <a href="./DESIGN.md">AI Enterprise</a>
+          <a href="./DESIGN.md">SDKs</a>
+          <a href="./DESIGN.md">Frameworks</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="./DESIGN.md">Documentation</a>
+          <a href="./DESIGN.md">Developer</a>
+          <a href="./DESIGN.md">Training</a>
+        </div>
+        <div class="footer-col">
+          <h4>Solutions</h4>
+          <a href="./DESIGN.md">Healthcare</a>
+          <a href="./DESIGN.md">Automotive</a>
+          <a href="./DESIGN.md">Robotics</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Newsroom</a>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <a href="./DESIGN.md">Contact</a>
+          <a href="./DESIGN.md">Community</a>
+          <a href="./DESIGN.md">Forums</a>
+        </div>
+      </div>
+      <div class="footer-fine">
+        <span>&copy; 2026 NVIDIA Corporation</span>
+        <span class="spacer"></span>
+        <a href="./DESIGN.md">Privacy Policy</a>
+        <a href="./DESIGN.md">Legal</a>
+        <a href="./DESIGN.md">Accessibility</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

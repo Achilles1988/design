@@ -1,0 +1,483 @@
+<!-- source_content_hash: 19f2f7e6073d708f46d2512e6bab3c7c417cf2b4d9f57ff6ec6f2e056ea942b0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tesla — Component Preview</title>
+<style>
+  /* ============================================================
+     TESLA design tokens — mapped from DESIGN.md
+     Radical subtraction: white canvas, photography-first,
+     a single Electric Blue CTA, no shadows / gradients / borders.
+     ============================================================ */
+  :root {
+    /* The one chromatic colour */
+    --electric-blue: #3E6AE1;
+    --electric-blue-hover: #3457c5;
+
+    /* Surface */
+    --white: #ffffff;
+    --light-ash: #f4f4f4;
+    --carbon-dark: #171A20;
+    --frosted: rgba(255, 255, 255, 0.75);
+
+    /* Text hierarchy */
+    --graphite: #393C41;
+    --pewter: #5C5E62;
+    --silver-fog: #8E8E8E;
+
+    /* Lines */
+    --cloud-gray: #eeeeee;
+    --pale-silver: #d0d1d2;
+
+    /* Type — Universal Sans, system fallback */
+    --font-display: "Universal Sans Display", -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --font-text: "Universal Sans Text", -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+    /* Radius — sharp by default, 4px on controls */
+    --r-flat: 0px;
+    --r-control: 4px;
+    --r-card: 12px;
+    --r-dot: 50%;
+
+    /* Spacing — base 8 */
+    --s-1: 8px;
+    --s-2: 16px;
+    --s-3: 24px;
+    --s-4: 32px;
+    --s-5: 48px;
+    --s-6: 64px;
+
+    /* Universal motion */
+    --ease: cubic-bezier(0.5, 0, 0, 0.75);
+    --dur: 0.33s;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.43;
+    color: var(--graphite);
+    background: var(--white);
+  }
+
+  h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 500; color: var(--carbon-dark); }
+  p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--electric-blue);
+  }
+
+  /* ---------- Navigation (floats, frosted on scroll) ---------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    height: 56px;
+    padding-inline: var(--s-3);
+    background: var(--frosted);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+  }
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: 0.42em;
+    color: var(--carbon-dark);
+    padding-left: 0.42em;
+  }
+  .nav-center {
+    display: flex;
+    gap: var(--s-1);
+    margin-inline: auto;
+  }
+  .nav-btn {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--carbon-dark);
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-control);
+    padding: 4px 16px;
+    min-height: 32px;
+    cursor: pointer;
+    transition: color var(--dur), background-color var(--dur);
+  }
+  .nav-btn:hover { background: rgba(0, 0, 0, 0.05); }
+  .nav-icons { display: flex; gap: var(--s-1); }
+  .nav-ico {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-control);
+    color: var(--carbon-dark);
+    cursor: pointer;
+    transition: background-color var(--dur);
+  }
+  .nav-ico:hover { background: rgba(0, 0, 0, 0.05); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    font-family: var(--font-text);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    border-radius: var(--r-control);
+    min-height: 40px;
+    width: 200px;
+    padding: 4px 24px;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: background-color var(--dur), color var(--dur), border-color var(--dur), box-shadow 0.25s;
+  }
+  .btn-primary { background: var(--electric-blue); color: var(--white); }
+  .btn-primary:hover { background: var(--electric-blue-hover); }
+  .btn-secondary { background: var(--white); color: var(--graphite); box-shadow: 0 0 0 1px var(--pale-silver) inset; }
+  .btn-secondary:hover { box-shadow: 0 0 0 1px var(--carbon-dark) inset; }
+
+  .text-link {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--pewter);
+    transition: color var(--dur);
+  }
+  .text-link:hover { color: var(--carbon-dark); text-decoration: underline; }
+
+  /* ---------- Hero (100vh, photography-first) ---------- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    text-align: center;
+    padding: 96px var(--s-3) var(--s-6);
+    /* Cinematic photo stand-in — polished concrete under hazy sky */
+    background:
+      linear-gradient(180deg, #cdd6e0 0%, #dfe4ea 42%, #cfd2d6 70%, #bfc2c6 100%);
+    overflow: hidden;
+  }
+  .hero::after {
+    /* silhouette of a vehicle on the ground plane */
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 20%;
+    transform: translateX(-50%);
+    width: min(58%, 640px);
+    height: 20%;
+    background: linear-gradient(160deg, #6f747b, #2b2f36);
+    clip-path: polygon(3% 74%, 15% 40%, 40% 26%, 63% 30%, 90% 52%, 100% 74%, 100% 100%, 0 100%);
+    opacity: 0.9;
+  }
+  .hero-head { align-self: end; z-index: 1; }
+  .hero h1 {
+    font-size: 40px;
+    line-height: 1.2;
+    color: var(--carbon-dark);
+  }
+  .hero .promo {
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--electric-blue);
+    margin-top: var(--s-1);
+  }
+  .hero-cta {
+    z-index: 1;
+    display: flex;
+    gap: var(--s-2);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Generic section ---------- */
+  .section { padding: var(--s-6) var(--s-3); max-width: 1383px; margin: 0 auto; }
+  .section-title {
+    font-size: 40px;
+    line-height: 1.2;
+    text-align: center;
+    margin-bottom: var(--s-5);
+  }
+  .section-title + .lede { text-align: center; color: var(--pewter); max-width: 52ch; margin: -32px auto var(--s-5); }
+
+  /* ---------- Vehicle dropdown grid ---------- */
+  .veh-panel { background: var(--white); }
+  .veh-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-3);
+  }
+  .veh-card { text-align: center; }
+  .veh-img {
+    aspect-ratio: 16 / 10;
+    display: grid;
+    place-items: center;
+    background: var(--white);
+  }
+  .veh-img .shell {
+    width: 82%;
+    height: 52%;
+    background: linear-gradient(160deg, #b9bdc2, #7c8087);
+    clip-path: polygon(3% 72%, 16% 40%, 40% 26%, 64% 30%, 92% 52%, 100% 72%, 100% 100%, 0 100%);
+  }
+  .veh-card h3 { font-family: var(--font-text); font-size: 17px; font-weight: 500; line-height: 1.18; margin-top: var(--s-1); }
+  .veh-links { display: flex; gap: var(--s-3); justify-content: center; margin-top: var(--s-1); }
+
+  /* ---------- Category cards ---------- */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: var(--s-2);
+  }
+  .cat-card {
+    position: relative;
+    aspect-ratio: 2 / 1;
+    border-radius: var(--r-card);
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+  }
+  .cat-card .label {
+    position: relative;
+    z-index: 1;
+    color: var(--white);
+    font-size: 16px;
+    font-weight: 500;
+    padding: var(--s-3);
+  }
+  .cat-a { background: linear-gradient(135deg, #464b52 0%, #6a7078 55%, #2a2e34 100%); }
+  .cat-b { background: linear-gradient(135deg, #545a63 0%, #7d838b 60%, #33373d 100%); }
+
+  /* ---------- Inputs / persistent chat bar ---------- */
+  .form-inline { display: flex; gap: var(--s-2); flex-wrap: wrap; align-items: flex-end; max-width: 640px; margin: 0 auto; }
+  .field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 220px; }
+  .field label { font-size: 12px; font-weight: 500; color: var(--pewter); }
+  .field input {
+    height: 40px;
+    padding: 0 12px;
+    font-family: var(--font-text);
+    font-size: 14px;
+    color: var(--carbon-dark);
+    background: var(--white);
+    border: 1px solid var(--pale-silver);
+    border-radius: var(--r-control);
+  }
+  .field input::placeholder { color: var(--silver-fog); }
+  .field input:focus-visible { border-color: var(--electric-blue); }
+
+  /* ---------- Depth / motion demo ---------- */
+  .alt { background: var(--light-ash); }
+  .dots { display: flex; gap: var(--s-1); justify-content: center; margin-top: var(--s-3); }
+  .dot { width: 8px; height: 8px; border-radius: var(--r-dot); background: var(--pale-silver); border: 0; cursor: pointer; }
+  .dot[aria-current="true"] { background: var(--carbon-dark); }
+
+  /* ---------- Persistent chat bar ---------- */
+  .chatbar {
+    position: sticky;
+    bottom: 0;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: 12px var(--s-3);
+    background: var(--white);
+    border-top: 1px solid var(--cloud-gray);
+  }
+  .chatbar .chat-input {
+    display: flex;
+    align-items: center;
+    gap: var(--s-1);
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--pale-silver);
+    border-radius: var(--r-control);
+    color: var(--silver-fog);
+  }
+  .chatbar .chat-input span { color: var(--carbon-dark); font-weight: 500; }
+  .chatbar .chat-input em { font-style: normal; color: var(--silver-fog); }
+  .chatbar .send {
+    margin-left: auto;
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    color: var(--electric-blue);
+  }
+  .chatbar .btn-secondary { width: auto; min-height: 40px; padding: 4px 18px; }
+
+  /* ---------- Footer ---------- */
+  footer {
+    padding: var(--s-5) var(--s-3);
+    background: var(--white);
+    border-top: 1px solid var(--cloud-gray);
+  }
+  .foot-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-5);
+    justify-content: center;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .foot-links a { font-size: 12px; color: var(--pewter); transition: color var(--dur); }
+  .foot-links a:hover { color: var(--carbon-dark); }
+  .copy { text-align: center; color: var(--silver-fog); font-size: 12px; margin-top: var(--s-3); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .veh-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .nav-center { display: none; }
+    .hero h1 { font-size: 28px; }
+    .hero-cta { flex-direction: column; align-items: center; }
+    .btn { width: 100%; max-width: 320px; }
+    .veh-grid { grid-template-columns: 1fr; }
+    .cat-grid { grid-template-columns: 1fr; }
+    .chatbar .btn-secondary { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="nav">
+    <a class="wordmark" href="./DESIGN.md" aria-label="Tesla home">TESLA</a>
+    <nav class="nav-center" aria-label="Primary">
+      <button class="nav-btn">Vehicles</button>
+      <button class="nav-btn">Energy</button>
+      <button class="nav-btn">Charging</button>
+      <button class="nav-btn">Discover</button>
+      <button class="nav-btn">Shop</button>
+    </nav>
+    <div class="nav-icons">
+      <button class="nav-ico" aria-label="Help">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>
+      </button>
+      <button class="nav-ico" aria-label="Language">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>
+      </button>
+      <button class="nav-ico" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-head">
+      <h1>Model Y</h1>
+      <p class="promo">0% APR Available</p>
+    </div>
+    <div class="hero-cta">
+      <button class="btn btn-primary">Order Now</button>
+      <button class="btn btn-secondary">View Inventory</button>
+    </div>
+  </section>
+
+  <!-- Vehicle grid (dropdown panel style) -->
+  <section class="section veh-panel">
+    <h2 class="section-title">Our Vehicles</h2>
+    <div class="veh-grid">
+      <article class="veh-card">
+        <div class="veh-img"><div class="shell"></div></div>
+        <h3>Model 3</h3>
+        <div class="veh-links">
+          <a class="text-link" href="./DESIGN.md">Learn</a>
+          <a class="text-link" href="./DESIGN.md">Order</a>
+        </div>
+      </article>
+      <article class="veh-card">
+        <div class="veh-img"><div class="shell"></div></div>
+        <h3>Model Y</h3>
+        <div class="veh-links">
+          <a class="text-link" href="./DESIGN.md">Learn</a>
+          <a class="text-link" href="./DESIGN.md">Order</a>
+        </div>
+      </article>
+      <article class="veh-card">
+        <div class="veh-img"><div class="shell"></div></div>
+        <h3>Model S</h3>
+        <div class="veh-links">
+          <a class="text-link" href="./DESIGN.md">Learn</a>
+          <a class="text-link" href="./DESIGN.md">Order</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Category cards -->
+  <section class="section">
+    <h2 class="section-title">Explore the Lineup</h2>
+    <div class="cat-grid">
+      <article class="cat-card cat-a"><span class="label">Sport Sedan</span></article>
+      <article class="cat-card cat-b"><span class="label">Midsize SUV</span></article>
+    </div>
+  </section>
+
+  <!-- Design order form + carousel dots -->
+  <section class="section alt">
+    <h2 class="section-title">Reserve Your Configuration</h2>
+    <p class="lede">Whitespace as a luxury signal — one message per screen, a single blue action.</p>
+    <form class="form-inline" novalidate>
+      <div class="field">
+        <label for="name">Full name</label>
+        <input id="name" type="text" placeholder="Enter your name" />
+      </div>
+      <div class="field">
+        <label for="zip">ZIP code</label>
+        <input id="zip" type="text" placeholder="What's Dog Mode?" />
+      </div>
+      <button class="btn btn-primary" type="submit" style="width:auto;">Continue</button>
+    </form>
+    <div class="dots" role="tablist" aria-label="Vehicle carousel">
+      <button class="dot" aria-current="true" aria-label="Slide 1"></button>
+      <button class="dot" aria-label="Slide 2"></button>
+      <button class="dot" aria-label="Slide 3"></button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="./DESIGN.md">Model 3</a>
+      <a href="./DESIGN.md">Model Y</a>
+      <a href="./DESIGN.md">Solar Roof</a>
+      <a href="./DESIGN.md">Powerwall</a>
+      <a href="./DESIGN.md">Careers</a>
+      <a href="./DESIGN.md">Privacy</a>
+      <a href="./DESIGN.md">Legal</a>
+    </nav>
+    <p class="copy">© 2026 Tesla. Component preview generated from DESIGN.md.</p>
+  </footer>
+
+  <!-- Persistent chat bar -->
+  <div class="chatbar">
+    <div class="chat-input">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4V5Z"/></svg>
+      <span>Ask a Question</span>
+      <em>— What's Dog Mode?</em>
+      <button class="send" aria-label="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l16-8-6 16-3-6-7-2Z"/></svg>
+      </button>
+    </div>
+    <button class="btn btn-secondary">Schedule a Drive Today</button>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,921 @@
+<!-- source_content_hash: 754ffcf35dcd39ef8aef450085ce936aaca5b872ff92caa66be99e91a5c3d5ec -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mintlify — Component Preview</title>
+<style>
+  /* ============================================================
+     Mintlify design tokens — mapped from DESIGN.md frontmatter.
+     Dual-mode documentation infrastructure aesthetic:
+     atmospheric sky-gradient marketing heroes + dense dev-grade
+     documentation surfaces. Signature Mintlify mint reserved for
+     accent CTAs / active states; black-pill primaries dominate.
+     ============================================================ */
+  :root {
+    /* Brand & accent */
+    --primary: #0a0a0a;          /* black — dominant marketing CTA */
+    --on-primary: #ffffff;
+    --brand-green: #00d4a4;      /* Mintlify mint — signature accent */
+    --brand-green-deep: #00b48a; /* pressed mint */
+    --brand-green-soft: #7cebcb; /* soft success tint */
+    --brand-tag: #3772cf;        /* documentation tag / reference blue */
+    --brand-warn: #c37d0d;       /* code warning highlight */
+    --brand-annotate: #1ba673;   /* inline annotation green */
+    --brand-error: #d45656;      /* required / error red */
+    --brand-cursor: #888888;
+
+    /* Hero atmospheric gradients */
+    --hero-sky-from: #87a8c8;    /* homepage sky-blue */
+    --hero-sky-to: #f5e9d8;      /* homepage cream */
+    --hero-dark-from: #1a3d4a;   /* startups dark teal */
+    --hero-dark-to: #2d5a4f;     /* startups mint-teal */
+    --testimonial-orange: #f55a3c;
+    --testimonial-orange-deep: #cc3a1f;
+
+    /* Surface */
+    --canvas: #ffffff;
+    --canvas-dark: #0a0a0a;
+    --surface: #f7f7f7;
+    --surface-soft: #fafafa;
+    --surface-code: #1c1c1e;     /* dark code-block wrapper */
+    --hairline: #e5e5e5;
+    --hairline-soft: #ededed;
+    --hairline-dark: #1f1f1f;
+
+    /* Text */
+    --ink: #0a0a0a;
+    --charcoal: #1c1c1e;
+    --slate: #3a3a3c;
+    --steel: #5a5a5c;
+    --stone: #888888;
+    --muted: #a8a8aa;
+    --on-dark: #ffffff;
+    --on-dark-muted: #b3b3b3;
+
+    /* Radius scale — tightly disciplined */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-xxl: 24px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 20px;
+    --sp-xl: 24px;
+    --sp-xxl: 32px;
+    --sp-xxxl: 40px;
+    --sp-section-sm: 48px;
+    --sp-section: 64px;
+    --sp-section-lg: 96px;
+    --sp-hero: 120px;
+
+    /* Type families — Inter for prose, Geist Mono for code */
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "Geist Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--brand-green);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-xxl); }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--steel);
+    margin: 0 0 var(--sp-md);
+  }
+
+  .section-title {
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin: 0 0 var(--sp-md);
+  }
+
+  .section-lead {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--steel);
+    margin: 0 auto var(--sp-xxl);
+    max-width: 620px;
+  }
+
+  section { padding: var(--sp-section-lg) 0; }
+
+  .center { text-align: center; }
+
+  /* ---------- Promo banner ---------- */
+  .promo-banner {
+    background: var(--canvas-dark);
+    color: var(--on-dark);
+    font-size: 14px;
+    font-weight: 500;
+    padding: var(--sp-sm) var(--sp-md);
+    text-align: center;
+  }
+  .promo-banner .mint { color: var(--brand-green); }
+
+  /* ---------- Top nav ---------- */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .topnav-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-xl);
+    height: 64px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-xs);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.4px;
+  }
+  .brand-mark {
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+  }
+  .nav-links {
+    display: flex;
+    gap: var(--sp-lg);
+    margin-left: var(--sp-md);
+  }
+  .nav-links a {
+    font-size: 14px;
+    color: var(--steel);
+    padding: var(--sp-xs) 0;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--sp-md); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-xs);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+    padding: 10px 20px;
+    border-radius: var(--r-full);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .16s ease, border-color .16s ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--charcoal); }
+  .btn-accent { background: var(--brand-green); color: var(--primary); }
+  .btn-accent:hover { background: var(--brand-green-deep); }
+  .btn-on-dark { background: var(--on-dark); color: var(--primary); }
+  .btn-secondary { background: transparent; color: var(--ink); border-color: var(--hairline); }
+  .btn-secondary:hover { border-color: var(--stone); }
+  .btn-secondary.on-dark { color: var(--on-dark); border-color: rgba(255,255,255,.4); }
+  .btn-ghost { background: transparent; color: var(--ink); border-radius: var(--r-md); padding: 8px 12px; }
+
+  /* ---------- Hero (sky gradient) ---------- */
+  .hero-sky {
+    background: linear-gradient(180deg, var(--hero-sky-from) 0%, var(--hero-sky-to) 100%);
+    padding: var(--sp-hero) 0 var(--sp-section-lg);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  /* atmospheric cloud illustration via layered radial washes */
+  .hero-sky::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(420px 200px at 18% 30%, rgba(255,255,255,.55), transparent 70%),
+      radial-gradient(520px 240px at 82% 22%, rgba(255,255,255,.45), transparent 70%),
+      radial-gradient(360px 180px at 55% 60%, rgba(255,255,255,.35), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-sky .wrap { position: relative; }
+  .hero-display {
+    font-size: clamp(40px, 8vw, 72px);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin: 0 auto var(--sp-lg);
+    max-width: 820px;
+    color: var(--ink);
+  }
+  .hero-sub {
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--slate);
+    margin: 0 auto var(--sp-xl);
+    max-width: 560px;
+  }
+  .hero-actions { display: flex; gap: var(--sp-sm); justify-content: center; flex-wrap: wrap; }
+
+  /* ---------- Hero product mockup ---------- */
+  .mockup {
+    margin: var(--sp-xxxl) auto 0;
+    max-width: 960px;
+    background: var(--canvas);
+    border: 1px solid var(--hairline-soft);
+    border-radius: var(--r-lg);
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 24px 48px -8px;
+    overflow: hidden;
+    text-align: left;
+  }
+  .mockup-topbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-md);
+    padding: var(--sp-sm) var(--sp-md);
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .mockup-search {
+    background: var(--surface);
+    color: var(--steel);
+    font-size: 14px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-xs) var(--sp-md);
+    flex: 1;
+    max-width: 320px;
+  }
+  .mockup-body { display: grid; grid-template-columns: 200px 1fr 160px; min-height: 320px; }
+  .mockup-sidebar { border-right: 1px solid var(--hairline-soft); padding: var(--sp-md); }
+  .mockup-toc { border-left: 1px solid var(--hairline-soft); padding: var(--sp-md); }
+  .side-head {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--steel);
+    padding: var(--sp-md) 0 var(--sp-xs);
+  }
+  .side-item {
+    font-size: 14px;
+    color: var(--steel);
+    border-radius: var(--r-sm);
+    padding: var(--sp-xs) var(--sp-sm);
+  }
+  .side-item.active { background: var(--surface); color: var(--ink); font-weight: 500; }
+  .side-item.active .dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--brand-green); margin-right: 6px; vertical-align: middle;
+  }
+  .mockup-prose { padding: var(--sp-lg); }
+  .mockup-prose h4 { font-size: 22px; font-weight: 600; margin: 0 0 var(--sp-sm); }
+  .mockup-prose p { font-size: 14px; color: var(--steel); margin: 0 0 var(--sp-md); }
+  .toc-item { font-size: 13px; color: var(--steel); padding: 3px 0; }
+  .toc-item.active { color: var(--ink); font-weight: 500; border-left: 2px solid var(--brand-green); padding-left: var(--sp-xs); margin-left: -2px; }
+
+  /* ---------- Logo wall ---------- */
+  .logo-wall {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--sp-md);
+    align-items: center;
+  }
+  .logo-item {
+    color: var(--steel);
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    padding: var(--sp-lg);
+    opacity: .8;
+  }
+
+  /* ---------- Feature cards ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); }
+  .card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xl);
+  }
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    display: grid; place-items: center;
+    margin-bottom: var(--sp-md);
+    color: var(--brand-green-deep);
+  }
+  .card h3 { font-size: 18px; font-weight: 600; line-height: 1.4; margin: 0 0 var(--sp-xs); }
+  .card p { font-size: 14px; color: var(--steel); margin: 0; line-height: 1.5; }
+
+  /* ---------- Code block ---------- */
+  .code-block {
+    background: var(--surface-code);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    font-family: var(--font-mono);
+    text-align: left;
+  }
+  .code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface-code);
+    color: var(--on-dark-muted);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    padding: var(--sp-xs) var(--sp-md);
+    border-bottom: 1px solid var(--hairline-dark);
+  }
+  .copy-btn {
+    background: transparent;
+    color: var(--on-dark-muted);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    border: 1px solid var(--hairline-dark);
+    border-radius: var(--r-sm);
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .code-body {
+    color: var(--on-dark);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: var(--sp-md);
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .tok-key { color: var(--brand-tag); }
+  .tok-str { color: var(--brand-green-soft); }
+  .tok-fn { color: var(--brand-green); }
+  .tok-com { color: var(--stone); }
+  .tok-warn { color: var(--brand-warn); }
+  code.inline {
+    background: var(--surface);
+    color: var(--charcoal);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xs);
+    padding: 2px 6px;
+  }
+
+  /* ---------- Documentation 3-column ---------- */
+  .docs-grid { display: grid; grid-template-columns: 240px 1fr 200px; gap: var(--sp-xxl); }
+  .docs-sidebar .side-head { padding-top: 0; }
+  .docs-prose { max-width: 720px; }
+  .docs-prose h3 { font-size: 28px; font-weight: 600; line-height: 1.25; margin: 0 0 var(--sp-md); }
+  .docs-prose p { font-size: 16px; color: var(--slate); line-height: 1.5; }
+
+  /* segmented tabs */
+  .seg-tabs { display: flex; gap: var(--sp-md); border-bottom: 1px solid var(--hairline); margin: var(--sp-lg) 0; }
+  .seg-tab {
+    font-size: 14px; font-weight: 500; color: var(--steel);
+    padding: var(--sp-sm) var(--sp-md);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+  }
+  .seg-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+  /* property rows */
+  .property-row { padding: var(--sp-md) 0; border-bottom: 1px solid var(--hairline-soft); }
+  .property-head { display: flex; align-items: center; gap: var(--sp-xs); margin-bottom: var(--sp-xxs); }
+  .badge {
+    display: inline-flex; align-items: center;
+    font-size: 13px; font-weight: 600; line-height: 1.4;
+    border-radius: var(--r-sm);
+    padding: 2px 8px;
+  }
+  .badge-type { background: var(--surface); color: var(--steel); font-family: var(--font-mono); font-weight: 400; padding: 2px 6px; }
+  .badge-required { background: var(--brand-error); color: var(--on-dark); font-size: 11px; letter-spacing: .5px; text-transform: uppercase; border-radius: var(--r-sm); padding: 2px 6px; }
+  .badge-tag { background: rgba(55, 114, 207, 0.15); color: var(--brand-tag); }
+  .property-desc { font-size: 14px; color: var(--steel); margin: 0; }
+
+  /* ---------- Pricing ---------- */
+  .price-toggle {
+    display: inline-flex;
+    background: var(--surface);
+    border-radius: var(--r-full);
+    padding: 4px;
+    gap: 4px;
+    margin: 0 auto var(--sp-xxl);
+  }
+  .toggle-opt {
+    font-size: 14px; font-weight: 500; color: var(--steel);
+    border-radius: var(--r-full);
+    padding: 6px 16px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: var(--sp-xs);
+  }
+  .toggle-opt.active { background: var(--canvas); color: var(--ink); box-shadow: rgba(0,0,0,.06) 0 1px 2px; }
+  .badge-discount { background: var(--brand-green); color: var(--primary); font-size: 13px; font-weight: 600; border-radius: var(--r-full); padding: 2px 8px; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); align-items: start; }
+  .pricing-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xxl);
+  }
+  .pricing-card.featured {
+    border: 2px solid var(--brand-green);
+    box-shadow: rgba(0, 212, 164, 0.08) 0px 8px 24px;
+  }
+  .tier-name { font-size: 28px; font-weight: 600; line-height: 1.25; margin: 0 0 var(--sp-xs); }
+  .tier-price { font-size: 56px; font-weight: 600; letter-spacing: -1.5px; line-height: 1.1; margin: 0 0 var(--sp-md); }
+  .tier-price span { font-size: 16px; font-weight: 400; color: var(--steel); }
+  .tier-features { list-style: none; padding: 0; margin: var(--sp-lg) 0; }
+  .tier-features li { display: flex; gap: var(--sp-xs); font-size: 14px; color: var(--slate); padding: var(--sp-xs) 0; }
+  .check { color: var(--brand-green-deep); flex-shrink: 0; }
+  .pricing-card .btn { width: 100%; }
+
+  /* ---------- Testimonial ---------- */
+  .testimonial {
+    background: var(--testimonial-orange);
+    color: var(--on-dark);
+    border-radius: var(--r-lg);
+    padding: var(--sp-section);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--sp-xxl);
+    align-items: center;
+  }
+  .testimonial blockquote {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0 0 var(--sp-lg);
+  }
+  .testimonial cite { font-style: normal; font-size: 14px; font-weight: 500; opacity: .9; }
+  .testimonial-photo {
+    width: 140px; height: 140px;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, var(--testimonial-orange-deep), #8a2410);
+    flex-shrink: 0;
+  }
+
+  /* ---------- Startups dark hero band ---------- */
+  .band-dark {
+    background: linear-gradient(135deg, var(--hero-dark-from) 0%, var(--hero-dark-to) 100%);
+    color: var(--on-dark);
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .band-dark::after {
+    content: "";
+    position: absolute;
+    right: -60px; top: -40px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(0,212,164,.25), transparent 70%);
+    pointer-events: none;
+  }
+  .band-dark .wrap { position: relative; display: grid; grid-template-columns: 1fr auto; gap: var(--sp-xxl); align-items: center; }
+  .band-dark h2 { font-size: 48px; font-weight: 600; letter-spacing: -1px; line-height: 1.1; margin: 0 0 var(--sp-md); }
+  .band-dark p { font-size: 18px; color: rgba(255,255,255,.8); margin: 0 0 var(--sp-lg); max-width: 460px; }
+  .rocket {
+    width: 180px; height: 180px;
+    display: grid; place-items: center;
+  }
+
+  /* ---------- FAQ ---------- */
+  .faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--sp-md); }
+  .faq-item {
+    background: var(--canvas);
+    border: 1px solid var(--hairline-soft);
+    border-radius: var(--r-md);
+    padding: var(--sp-xl);
+  }
+  .faq-q { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 600; }
+  .faq-a { font-size: 16px; color: var(--steel); margin: var(--sp-sm) 0 0; }
+
+  /* ---------- Form ---------- */
+  .waitlist { max-width: 440px; margin: var(--sp-xl) auto 0; display: flex; gap: var(--sp-sm); }
+  .text-input {
+    flex: 1;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    height: 40px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-sm) var(--sp-md);
+  }
+  .text-input:focus { outline: none; border: 2px solid var(--brand-green); }
+
+  /* ---------- Footer ---------- */
+  .footer {
+    background: var(--canvas);
+    border-top: 1px solid var(--hairline);
+    padding: var(--sp-section) 0;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--sp-xl); }
+  .footer-col h4 { font-size: 14px; font-weight: 500; color: var(--ink); margin: 0 0 var(--sp-md); }
+  .footer-col a { display: block; font-size: 14px; color: var(--steel); padding: var(--sp-xxs) 0; }
+  .footer-col a:hover { color: var(--ink); }
+  .footer-brand p { font-size: 14px; color: var(--steel); max-width: 240px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .mockup-body { grid-template-columns: 1fr; }
+    .mockup-sidebar, .mockup-toc { display: none; }
+    .docs-grid { grid-template-columns: 1fr; }
+    .docs-sidebar, .docs-toc { display: none; }
+    .grid-3, .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .logo-wall { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .wrap { padding: 0 var(--sp-md); }
+    .nav-links { display: none; }
+    .grid-3, .pricing-grid, .footer-grid { grid-template-columns: 1fr; }
+    .logo-wall { grid-template-columns: repeat(2, 1fr); }
+    .testimonial, .band-dark .wrap { grid-template-columns: 1fr; }
+    .testimonial-photo { width: 100%; height: 120px; }
+    .hero-display { font-size: clamp(36px, 11vw, 44px); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Promo banner -->
+  <div class="promo-banner">
+    Introducing AI-native docs analytics — <span class="mint">read the changelog &rarr;</span>
+  </div>
+
+  <!-- Top nav -->
+  <header class="topnav">
+    <div class="wrap topnav-inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Mintlify home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M4 18V8l8 5 8-5v10" stroke="var(--brand-green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        Mintlify
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Customers</a>
+        <a href="./DESIGN.md">Documentation</a>
+        <a href="./DESIGN.md">Changelog</a>
+      </nav>
+      <div class="nav-right">
+        <a class="btn btn-ghost" href="./DESIGN.md">Talk to sales</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero: sky-gradient marketing band -->
+  <section class="hero-sky">
+    <div class="wrap">
+      <h1 class="hero-display">The intelligent Knowledge Platform</h1>
+      <p class="hero-sub">Beautiful, AI-native documentation that your users and your team will love — from marketing site to API reference.</p>
+      <div class="hero-actions">
+        <a class="btn btn-accent" href="./DESIGN.md">Get started</a>
+        <a class="btn btn-secondary" href="./DESIGN.md">Talk to us</a>
+      </div>
+
+      <!-- Product mockup -->
+      <div class="mockup" role="img" aria-label="Documentation product interface preview">
+        <div class="mockup-topbar">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 18V8l8 5 8-5v10" stroke="var(--brand-green)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="mockup-search">Search or ask AI&hellip;</span>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-sidebar">
+            <div class="side-head">Get Started</div>
+            <div class="side-item">Introduction</div>
+            <div class="side-item">Quickstart</div>
+            <div class="side-head">Components</div>
+            <div class="side-item active"><span class="dot"></span>Tabs</div>
+            <div class="side-item">Accordions</div>
+            <div class="side-item">Code Blocks</div>
+          </div>
+          <div class="mockup-prose">
+            <h4>Tabs</h4>
+            <p>Use tabs to toggle content within a single container. Ideal for showing platform-specific instructions.</p>
+            <div class="code-block">
+              <div class="code-head"><span>docs.mdx</span><button class="copy-btn" type="button">Copy</button></div>
+<pre class="code-body"><span class="tok-com">&lt;!-- component usage --&gt;</span>
+<span class="tok-key">&lt;Tabs&gt;</span>
+  <span class="tok-key">&lt;Tab</span> <span class="tok-fn">title</span>=<span class="tok-str">"First"</span><span class="tok-key">&gt;</span>Content
+<span class="tok-key">&lt;/Tabs&gt;</span></pre>
+            </div>
+          </div>
+          <div class="mockup-toc">
+            <div class="side-head">On this page</div>
+            <div class="toc-item active">Overview</div>
+            <div class="toc-item">Properties</div>
+            <div class="toc-item">Examples</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Logo wall -->
+  <section style="padding-top:var(--sp-section); padding-bottom:var(--sp-section);">
+    <div class="wrap">
+      <p class="eyebrow center">Trusted by teams building for the intelligence age</p>
+      <div class="logo-wall">
+        <div class="logo-item">Anthropic</div>
+        <div class="logo-item">Cognition</div>
+        <div class="logo-item">Vercel</div>
+        <div class="logo-item">react</div>
+        <div class="logo-item">Lovable</div>
+        <div class="logo-item">Stripe</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature cards -->
+  <section style="background:var(--surface-soft);">
+    <div class="wrap center">
+      <p class="eyebrow">Why Mintlify</p>
+      <h2 class="section-title">Built for the intelligence age</h2>
+      <p class="section-lead">Everything you need to write, publish, and maintain documentation that keeps pace with your product.</p>
+      <div class="grid-3" style="text-align:left;">
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 4v6c0 4-3 6-7 8-4-2-7-4-7-8V7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Web editor</h3>
+          <p>Write in a live WYSIWYG editor with instant preview. No local setup required to ship a change.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 6l-4 6 4 6M16 6l4 6-4 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>API playground</h3>
+          <p>Generate interactive API references from an OpenAPI spec, complete with a live request runner.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>AI assistant</h3>
+          <p>Let users ask questions in natural language and get grounded answers directly from your docs.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Documentation 3-column surface -->
+  <section>
+    <div class="wrap">
+      <p class="eyebrow center">Developer experience</p>
+      <h2 class="section-title center">Documentation that reads like a product</h2>
+      <p class="section-lead center">Dense, three-column layouts with a sidebar, prose, and table of contents — engineered for long-form technical reading.</p>
+
+      <div class="docs-grid">
+        <aside class="docs-sidebar" aria-label="Documentation navigation">
+          <div class="side-head">Components</div>
+          <div class="side-item active"><span class="dot"></span>Tabs</div>
+          <div class="side-item">Accordions</div>
+          <div class="side-item">Callouts</div>
+          <div class="side-head">Primitives</div>
+          <div class="side-item">Frame</div>
+          <div class="side-item">Card</div>
+        </aside>
+
+        <article class="docs-prose">
+          <h3>Tabs</h3>
+          <p>The <code class="inline">&lt;Tabs&gt;</code> component lets you organize content into switchable panels within a single container.</p>
+
+          <div class="seg-tabs" role="tablist">
+            <span class="seg-tab active" role="tab" aria-selected="true">First tab</span>
+            <span class="seg-tab" role="tab" aria-selected="false">Second tab</span>
+            <span class="seg-tab" role="tab" aria-selected="false">Third tab</span>
+          </div>
+
+          <div class="code-block">
+            <div class="code-head"><span>Geist Mono &middot; jsx</span><button class="copy-btn" type="button">Copy code</button></div>
+<pre class="code-body"><span class="tok-key">&lt;Tabs</span> <span class="tok-fn">defaultIndex</span>=<span class="tok-str">{0}</span><span class="tok-key">&gt;</span>
+  <span class="tok-key">&lt;Tab</span> <span class="tok-fn">title</span>=<span class="tok-str">"First tab"</span><span class="tok-key">&gt;</span>
+    <span class="tok-com">// panel content</span>
+  <span class="tok-key">&lt;/Tab&gt;</span>
+<span class="tok-key">&lt;/Tabs&gt;</span></pre>
+          </div>
+
+          <h3 style="font-size:22px;margin-top:var(--sp-xxl);">Properties</h3>
+          <div class="property-row">
+            <div class="property-head">
+              <code class="inline">defaultIndex</code>
+              <span class="badge badge-type">number</span>
+            </div>
+            <p class="property-desc">Zero-based index of the tab that is open on first render.</p>
+          </div>
+          <div class="property-row">
+            <div class="property-head">
+              <code class="inline">items</code>
+              <span class="badge badge-type">Tab[]</span>
+              <span class="badge badge-required">Required</span>
+            </div>
+            <p class="property-desc">Array of tab definitions rendered as the switchable panels.</p>
+          </div>
+        </article>
+
+        <aside class="docs-toc" aria-label="On this page">
+          <div class="side-head">On this page</div>
+          <div class="toc-item active">Overview</div>
+          <div class="toc-item">Properties</div>
+          <div class="toc-item">Examples</div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonial (breaks color rhythm) -->
+  <section style="background:var(--surface-soft);">
+    <div class="wrap">
+      <div class="testimonial">
+        <div>
+          <span class="badge badge-tag" style="margin-bottom:var(--sp-md);">Cursor</span>
+          <blockquote>Every YC batch we consistently see the top performing startups use Mintlify to build their docs.</blockquote>
+          <cite>&mdash; Founder, Cursor</cite>
+        </div>
+        <div class="testimonial-photo" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section>
+    <div class="wrap center">
+      <p class="eyebrow">Pricing</p>
+      <h2 class="section-title">Pricing on your terms</h2>
+      <p class="section-lead">Start free, scale as you grow. No credit card required to publish your first docs.</p>
+
+      <div class="price-toggle" role="group" aria-label="Billing period">
+        <span class="toggle-opt">Monthly</span>
+        <span class="toggle-opt active">Annual <span class="badge-discount">Save 20%</span></span>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3 class="tier-name">Free</h3>
+          <div class="tier-price">$0<span> /mo</span></div>
+          <ul class="tier-features">
+            <li><span class="check" aria-hidden="true">&#10003;</span> 1 editor</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Community support</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Custom domain</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Get started</a>
+        </div>
+        <div class="pricing-card featured">
+          <span class="badge badge-discount" style="margin-bottom:var(--sp-sm);">Featured</span>
+          <h3 class="tier-name">Lift Off</h3>
+          <div class="tier-price">$150<span> /mo</span></div>
+          <ul class="tier-features">
+            <li><span class="check" aria-hidden="true">&#10003;</span> 5 editors</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> AI assistant</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Advanced analytics</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Priority support</li>
+          </ul>
+          <a class="btn btn-accent" href="./DESIGN.md">Get started</a>
+        </div>
+        <div class="pricing-card">
+          <h3 class="tier-name">Custom</h3>
+          <div class="tier-price" style="font-size:40px;">Let's talk</div>
+          <ul class="tier-features">
+            <li><span class="check" aria-hidden="true">&#10003;</span> Unlimited editors</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> SSO &amp; SAML</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Dedicated success manager</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Talk to sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Startups dark band -->
+  <section class="band-dark">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow" style="color:var(--brand-green-soft);">Mintlify for Startups</p>
+        <h2>Apply to the Mintlify startup program</h2>
+        <p>Eligible startups get discounts, credits, and priority support to launch world-class docs from day one.</p>
+        <div class="hero-actions" style="justify-content:flex-start;">
+          <a class="btn btn-on-dark" href="./DESIGN.md">Get started</a>
+          <a class="btn btn-secondary on-dark" href="./DESIGN.md">Learn more</a>
+        </div>
+      </div>
+      <div class="rocket" aria-hidden="true">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+          <path d="M60 12c18 12 26 30 24 54l-12 10H48l-12-10c-2-24 6-42 24-54z" fill="rgba(0,212,164,.25)" stroke="var(--brand-green)" stroke-width="2.5"/>
+          <circle cx="60" cy="50" r="9" fill="none" stroke="var(--brand-green-soft)" stroke-width="2.5"/>
+          <path d="M48 80l-10 20 14-6M72 80l10 20-14-6" stroke="var(--brand-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="wrap">
+      <h2 class="section-title center">Frequently asked questions</h2>
+      <div class="faq-list" style="margin-top:var(--sp-xxl);">
+        <div class="faq-item">
+          <div class="faq-q">Can I use my own domain? <span aria-hidden="true">+</span></div>
+          <p class="faq-a">Yes. Every plan, including Free, supports connecting a custom domain with automatic SSL.</p>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Do you support OpenAPI? <span aria-hidden="true">+</span></div>
+          <p class="faq-a">Point Mintlify at an OpenAPI spec and we generate an interactive API reference automatically.</p>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">How does billing work? <span aria-hidden="true">+</span></div>
+          <p class="faq-a">Plans are billed monthly or annually. Annual billing saves 20% across all paid tiers.</p>
+        </div>
+      </div>
+
+      <form class="waitlist" onsubmit="return false;" aria-label="Get product updates">
+        <label for="email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Email address</label>
+        <input class="text-input" id="email" type="email" placeholder="you@company.com" />
+        <button class="btn btn-primary" type="submit">Notify me</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-col footer-brand">
+          <a class="brand" href="./DESIGN.md" style="margin-bottom:var(--sp-md);">
+            <span class="brand-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 18V8l8 5 8-5v10" stroke="var(--brand-green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            Mintlify
+          </a>
+          <p>The intelligent knowledge platform for modern documentation.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <a href="./DESIGN.md">Features</a>
+          <a href="./DESIGN.md">Pricing</a>
+          <a href="./DESIGN.md">Changelog</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="./DESIGN.md">Documentation</a>
+          <a href="./DESIGN.md">Guides</a>
+          <a href="./DESIGN.md">API Reference</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Customers</a>
+          <a href="./DESIGN.md">Careers</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="./DESIGN.md">Privacy</a>
+          <a href="./DESIGN.md">Terms</a>
+          <a href="./DESIGN.md">Security</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

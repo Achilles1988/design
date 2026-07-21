@@ -1,0 +1,363 @@
+<!-- source_content_hash: a5d47dddacf5a04577cec0be6fe0fc53b7402254c7686874af3e59bcc7588cb4 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Framer — Component Preview</title>
+<style>
+  /* ============================================================
+     Framer design tokens — mapped from DESIGN.md
+     Near-pure-black artboard · white display type · one blue accent ·
+     gradient spotlight cards as atmosphere · aggressive negative tracking
+     ============================================================ */
+  :root {
+    /* Brand & accent */
+    --primary: #ffffff;        /* white — every primary CTA pill, every headline */
+    --on-primary: #000000;
+    --accent-blue: #0099ff;    /* single chromatic accent — links, focus, selection ONLY */
+    --ink: #ffffff;
+    --ink-muted: #999999;      /* binary hierarchy: ink or ink-muted, nothing between */
+    /* Surfaces — dark ladder */
+    --canvas: #090909;         /* near-black artboard; the canvas IS the whitespace */
+    --surface-1: #141414;
+    --surface-2: #1c1c1c;
+    --hairline: #262626;
+    --hairline-soft: #1a1a1a;
+    --inverse-canvas: #ffffff;
+    /* Brand gradient family (signature atmosphere tiles) */
+    --gradient-magenta: #d44df0;
+    --gradient-violet: #6a4cf5;
+    --gradient-orange: #ff7a3d;
+    --gradient-coral: #ff5577;
+    --semantic-success: #22c55e;
+    /* Radius */
+    --r-xs: 4px; --r-sm: 6px; --r-md: 10px; --r-lg: 15px;
+    --r-xl: 20px; --r-xxl: 30px; --r-pill: 100px; --r-full: 9999px;
+    /* Spacing (Framer's 5px base: 5/10/15/20/30) */
+    --sp-hair: 1px; --sp-xxs: 4px; --sp-xs: 8px; --sp-sm: 12px;
+    --sp-md: 15px; --sp-lg: 20px; --sp-xl: 30px; --sp-xxl: 40px; --sp-section: 96px;
+    /* Type */
+    --font-display: "Mona Sans", "Geist", Inter, system-ui, sans-serif;
+    --font-body: "Inter Variable", Inter, system-ui, sans-serif;
+    --feat: "cv01" 1, "cv05" 1, "cv09" 1, "cv11" 1, "ss03" 1, "ss07" 1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-feature-settings: var(--feat);
+    font-size: 15px;
+    line-height: 1.30;
+    letter-spacing: -0.15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-blue); color: #fff; }
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--sp-xl); }
+
+  /* ---- nav ---- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    height: 56px; display: flex; align-items: center; gap: var(--sp-xl);
+    background: rgba(9,9,9,0.72);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .nav .wrap { display: flex; align-items: center; gap: var(--sp-xl); width: 100%; }
+  .wordmark { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.8px; }
+  .nav-links { display: flex; gap: var(--sp-lg); margin-left: var(--sp-lg); flex: 1; }
+  .nav-links a { color: var(--ink-muted); font-size: 14px; font-weight: 500; }
+  .nav-links a:hover { color: var(--ink); text-decoration: none; }
+  .nav-cta { display: flex; gap: var(--sp-sm); }
+
+  /* ---- buttons ---- */
+  .btn { font-family: var(--font-body); font-size: 14px; font-weight: 500; letter-spacing: -0.14px;
+    line-height: 1; border: 0; cursor: pointer; display: inline-flex; align-items: center;
+    justify-content: center; gap: 8px; transition: transform .12s ease, background .15s ease; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--primary); color: var(--on-primary); padding: 10px 15px; border-radius: var(--r-pill); }
+  .btn-secondary { background: var(--surface-1); color: var(--ink); padding: 10px 15px; border-radius: var(--r-pill); }
+  .btn-translucent { background: var(--surface-2); color: var(--ink); padding: 8px 14px; border-radius: var(--r-xxl); }
+  .btn-icon { width: 40px; height: 40px; border-radius: var(--r-full); background: var(--surface-1); color: var(--ink); padding: 0; }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,153,255,0.45); }
+
+  /* ---- hero ---- */
+  .hero { padding: var(--sp-section) 0 60px; text-align: center; }
+  .eyebrow { font-size: 13px; font-weight: 500; letter-spacing: -0.13px; color: var(--ink-muted);
+    text-transform: none; margin-bottom: var(--sp-lg); }
+  .display-xxl { font-family: var(--font-display); font-weight: 600; font-size: clamp(48px, 10vw, 110px);
+    line-height: 0.85; letter-spacing: -5.5px; margin: 0 auto var(--sp-lg); max-width: 14ch; }
+  .lead { font-size: 18px; line-height: 1.30; letter-spacing: -0.18px; color: var(--ink-muted);
+    max-width: 46ch; margin: 0 auto var(--sp-xl); }
+  .hero-cta { display: flex; gap: var(--sp-sm); justify-content: center; }
+
+  /* ---- product mockup tile ---- */
+  .mockup { margin-top: 60px; background: var(--surface-1); border: 1px solid var(--hairline);
+    border-radius: var(--r-xl); padding: var(--sp-md);
+    box-shadow: rgba(255,255,255,0.10) 0 1px 0 inset, rgba(0,0,0,0.25) 0 10px 30px; }
+  .browser-bar { display: flex; align-items: center; gap: 6px; padding: 6px 4px var(--sp-sm); }
+  .browser-bar i { width: 10px; height: 10px; border-radius: var(--r-full); background: var(--hairline); display: inline-block; }
+  .canvas-preview { border-radius: var(--r-lg); overflow: hidden; height: 320px; position: relative;
+    background:
+      radial-gradient(120% 90% at 20% 10%, rgba(106,76,245,0.55), transparent 60%),
+      radial-gradient(100% 80% at 90% 100%, rgba(212,77,240,0.5), transparent 55%),
+      var(--surface-2);
+    display: flex; align-items: center; justify-content: center; }
+  .canvas-preview .frame { width: 60%; height: 62%; border-radius: var(--r-md); background: rgba(9,9,9,0.55);
+    border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(6px); }
+
+  /* ---- section scaffold ---- */
+  section { padding: var(--sp-section) 0; }
+  .section-head { max-width: 40ch; margin-bottom: var(--sp-xxl); }
+  .display-lg { font-family: var(--font-display); font-weight: 600; font-size: clamp(38px, 6vw, 62px);
+    line-height: 1.0; letter-spacing: -3.1px; }
+  .display-md { font-family: var(--font-display); font-weight: 600; font-size: 32px;
+    line-height: 1.13; letter-spacing: -1px; }
+  .sub { color: var(--ink-muted); margin-top: var(--sp-md); font-size: 18px; letter-spacing: -0.18px; }
+
+  /* ---- gradient spotlight card grid (signature) ---- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-lg); }
+  .spotlight { border-radius: var(--r-xxl); padding: 32px; min-height: 220px;
+    display: flex; flex-direction: column; justify-content: flex-end; color: #fff; }
+  .spotlight h3 { font-size: 24px; line-height: 1.30; letter-spacing: -0.01px; font-weight: 400; }
+  .spotlight.violet { background: linear-gradient(150deg, #6a4cf5, #8b6df8 55%, #d44df0); }
+  .spotlight.magenta { background: linear-gradient(150deg, #d44df0, #ff5577); }
+  .spotlight.orange { background: linear-gradient(150deg, #ff7a3d, #ff5577); }
+  .tmpl { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--r-lg);
+    padding: 12px; }
+  .tmpl .thumb { border-radius: var(--r-md); height: 130px; background: var(--surface-2); margin-bottom: var(--sp-sm); }
+  .tmpl .thumb.a { background: linear-gradient(135deg, #6a4cf5, #d44df0); }
+  .tmpl .thumb.b { background: linear-gradient(135deg, #ff7a3d, #ff5577); }
+  .tmpl small { color: var(--ink-muted); font-size: 14px; font-weight: 500; }
+
+  /* ---- pricing ---- */
+  .price-tabs { display: inline-flex; gap: 4px; background: var(--canvas); border: 1px solid var(--hairline);
+    padding: 4px; border-radius: var(--r-pill); margin-bottom: var(--sp-xxl); }
+  .price-tabs button { border: 0; background: transparent; color: var(--ink-muted); font-family: var(--font-body);
+    font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: var(--r-pill); cursor: pointer; }
+  .price-tabs button.on { background: var(--surface-2); color: var(--ink); }
+  .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-lg); }
+  .pcard { background: var(--surface-1); border-radius: var(--r-xl); padding: 24px; border: 1px solid var(--hairline-soft); }
+  .pcard.featured { background: var(--surface-2); }
+  .pcard .tier { font-family: var(--font-body); font-weight: 700; font-size: 22px; letter-spacing: -0.8px; }
+  .pcard .amt { font-family: var(--font-display); font-weight: 600; font-size: 44px; letter-spacing: -2px; margin: var(--sp-sm) 0; }
+  .pcard .amt span { font-size: 15px; color: var(--ink-muted); font-family: var(--font-body); letter-spacing: -0.15px; }
+  .plist { list-style: none; margin: var(--sp-lg) 0; display: grid; gap: 10px; }
+  .plist li { font-size: 14px; color: var(--ink-muted); display: flex; gap: 8px; align-items: flex-start; }
+  .plist svg { flex: none; margin-top: 2px; }
+  .pcard .btn { width: 100%; }
+
+  /* ---- form ---- */
+  .form { max-width: 440px; }
+  .field { margin-bottom: var(--sp-md); }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-muted); margin-bottom: var(--sp-xs); }
+  .input { width: 100%; background: var(--surface-1); border: 1px solid var(--hairline); color: var(--ink);
+    font-family: var(--font-body); font-size: 15px; border-radius: var(--r-md); padding: 10px 14px; }
+  .input::placeholder { color: var(--ink-muted); }
+  .input:focus { outline: none; border-color: transparent; box-shadow: 0 0 0 1px rgba(0,153,255,0.15), 0 0 0 3px rgba(0,153,255,0.25); }
+
+  /* ---- comparison rows ---- */
+  .cmp { border-top: 1px solid var(--hairline-soft); }
+  .cmp .row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--sp-md); padding: var(--sp-md) 0;
+    border-bottom: 1px solid var(--hairline-soft); font-size: 14px; align-items: center; }
+  .cmp .row span:first-child { color: var(--ink); }
+  .cmp .row span { color: var(--ink-muted); }
+  .cmp svg.ok { color: var(--semantic-success); }
+
+  /* ---- faq ---- */
+  .faq details { border-bottom: 1px solid var(--hairline-soft); padding: 24px 0; }
+  .faq summary { cursor: pointer; list-style: none; font-size: 18px; letter-spacing: -0.18px;
+    display: flex; justify-content: space-between; align-items: center; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq p { color: var(--ink-muted); margin-top: var(--sp-md); max-width: 60ch; }
+
+  /* ---- footer ---- */
+  footer { background: var(--canvas); border-top: 1px solid var(--hairline-soft); padding: 64px 0; }
+  .fcols { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: var(--sp-xl); }
+  .fcols h5 { font-size: 13px; font-weight: 500; letter-spacing: -0.13px; color: var(--ink); margin-bottom: var(--sp-md); }
+  .fcols a { display: block; color: var(--ink-muted); font-size: 13px; padding: 3px 0; }
+  .fcols a:hover { color: var(--ink); text-decoration: none; }
+
+  h2.display-lg + .sub { margin-bottom: var(--sp-xxl); }
+  @media (max-width: 720px) {
+    .fcols { grid-template-columns: 1fr 1fr; }
+    .cmp .row { grid-template-columns: 1.6fr .7fr .7fr; }
+    .display-xxl { letter-spacing: -2.5px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap">
+      <span class="wordmark">Framer</span>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="nav-cta">
+        <button class="btn btn-secondary">Sign in</button>
+        <button class="btn btn-primary">Get started for free</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">The design tool for the web</p>
+        <h1 class="display-xxl">Ship your dream site</h1>
+        <p class="lead">Design and publish stunning sites on a canvas that thinks like a designer — no code required.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary">Start for free</button>
+          <button class="btn btn-secondary">Watch the demo</button>
+        </div>
+
+        <div class="mockup" aria-hidden="true">
+          <div class="browser-bar"><i></i><i></i><i></i></div>
+          <div class="canvas-preview"><div class="frame"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display-lg">Built with Framer</h2>
+          <p class="sub">Atmosphere tiles show what the canvas can produce — colour against black is the depth.</p>
+        </div>
+        <div class="grid">
+          <article class="spotlight violet"><h3>Animate anything, no timeline math.</h3></article>
+          <article class="spotlight magenta"><h3>Effects that feel alive on scroll.</h3></article>
+          <article class="spotlight orange"><h3>Publish to a global CDN in one click.</h3></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display-md">Start from a template</h2>
+        </div>
+        <div class="grid">
+          <article class="tmpl"><div class="thumb a"></div><small>Nudge — SaaS landing</small></article>
+          <article class="tmpl"><div class="thumb"></div><small>Studio — Agency</small></article>
+          <article class="tmpl"><div class="thumb b"></div><small>Speedrun — Portfolio</small></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="wrap" style="text-align:center;">
+        <h2 class="display-lg">Pricing</h2>
+        <p class="sub" style="margin-bottom:var(--sp-xxl);">Start free. Upgrade when you publish.</p>
+        <div class="price-tabs" role="tablist" aria-label="Billing period">
+          <button role="tab" class="on" aria-selected="true">Monthly</button>
+          <button role="tab" aria-selected="false">Yearly</button>
+        </div>
+        <div class="pricing" style="text-align:left;">
+          <article class="pcard">
+            <div class="tier">Basic</div>
+            <div class="amt">$5<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>1 published site</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Framer subdomain</li>
+            </ul>
+            <button class="btn btn-secondary">Choose Basic</button>
+          </article>
+          <article class="pcard featured">
+            <div class="tier">Pro</div>
+            <div class="amt">$20<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Custom domain</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>10,000 pages</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>CMS included</li>
+            </ul>
+            <button class="btn btn-primary">Choose Pro</button>
+          </article>
+          <article class="pcard">
+            <div class="tier">Business</div>
+            <div class="amt">$40<span>/mo</span></div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Unlimited pages</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Staging environments</li>
+            </ul>
+            <button class="btn btn-secondary">Choose Business</button>
+          </article>
+          <article class="pcard">
+            <div class="tier">Enterprise</div>
+            <div class="amt" style="font-size:32px;">Custom</div>
+            <ul class="plist">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>SSO &amp; SAML</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Dedicated support</li>
+            </ul>
+            <button class="btn btn-translucent">Talk to sales</button>
+          </article>
+        </div>
+
+        <div class="cmp" style="text-align:left; margin-top:var(--sp-xxl);">
+          <div class="row"><span>Custom domain</span><span><svg class="ok" width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span><span><svg class="ok" width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span></div>
+          <div class="row"><span>CMS collections</span><span>—</span><span><svg class="ok" width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span></div>
+          <div class="row"><span>Staging environments</span><span>—</span><span><svg class="ok" width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display-md">Stay in the loop</h2>
+          <p class="sub">Product updates, no spam.</p>
+        </div>
+        <form class="form" onsubmit="return false">
+          <div class="field">
+            <label for="email">Work email</label>
+            <input class="input" id="email" type="email" placeholder="you@studio.com">
+          </div>
+          <button class="btn btn-primary" type="submit">Subscribe</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="wrap">
+        <div class="section-head"><h2 class="display-md">Questions</h2></div>
+        <div class="faq">
+          <details open>
+            <summary>Do I need to know how to code?
+              <svg width="18" height="18" viewBox="0 0 18 18"><path d="M4 7l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></summary>
+            <p>No. Framer is a visual canvas — you design and publish without writing a line of code.</p>
+          </details>
+          <details>
+            <summary>Can I use my own domain?
+              <svg width="18" height="18" viewBox="0 0 18 18"><path d="M4 7l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></summary>
+            <p>Yes — custom domains are available from the Pro plan and up.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap fcols">
+      <div>
+        <span class="wordmark">Framer</span>
+        <p style="color:var(--ink-muted); font-size:13px; margin-top:var(--sp-sm);">The design tool for the web.</p>
+      </div>
+      <div><h5>Product</h5><a href="./DESIGN.md">Features</a><a href="./DESIGN.md">Templates</a><a href="./DESIGN.md">Pricing</a></div>
+      <div><h5>Resources</h5><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">Academy</a><a href="./DESIGN.md">Blog</a></div>
+      <div><h5>Company</h5><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Contact</a></div>
+      <div><h5>Legal</h5><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a></div>
+    </div>
+  </footer>
+
+</body>
+</html>

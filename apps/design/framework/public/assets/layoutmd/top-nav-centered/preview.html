@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Top-nav + Centered Container — preview</title>
+    <style>
+      /* ============================================================
+         Top-nav + Centered · Flowbite-inspired · WYSIWYG · Light/Dark
+         ============================================================ */
+      :root{ --header-h:60px; --read:720px; }
+      [data-theme="light"]{
+        --primary:#1a56db; --primary-weak:#eff6ff; --on-primary:#ffffff;
+        --bg:#ffffff; --surface:#ffffff; --surface-2:#f3f4f6;
+        --border:#e5e7eb; --border-strong:#d1d5db;
+        --text:#111827; --text-2:#374151; --muted:#6b7280; --muted-2:#9ca3af;
+        --shadow:0 1px 2px rgba(0,0,0,.05);
+      }
+      [data-theme="dark"]{
+        --primary:#3f83f8; --primary-weak:#1e293b; --on-primary:#ffffff;
+        --bg:#0f151f; --surface:#141b26; --surface-2:#1f2937;
+        --border:#374151; --border-strong:#4b5563;
+        --text:#f3f4f6; --text-2:#d1d5db; --muted:#9ca3af; --muted-2:#6b7280;
+        --shadow:0 1px 2px rgba(0,0,0,.3);
+      }
+      *,*::before,*::after{box-sizing:border-box;}html,body{margin:0;padding:0;height:100%;}
+      body{width:100vw;height:100vh;height:100dvh;overflow:hidden;background:var(--bg);color:var(--text);
+        font:17px/1.75 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;
+        transition:background .2s ease,color .2s ease;}
+      .scroll{overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent;}
+      .scroll::-webkit-scrollbar{width:10px;}
+      .scroll::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:6px;border:2px solid transparent;background-clip:padding-box;}
+      .icon{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+      .icon-sm{width:16px;height:16px;}
+
+      /* Header + progress bar */
+      .nav{position:sticky;top:0;z-index:20;height:var(--header-h);display:flex;align-items:center;gap:16px;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;}
+      .progress{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--primary);transition:width .1s linear;}
+      .nav-brand{display:flex;align-items:center;gap:10px;}
+      .nav-logo{width:30px;height:30px;border-radius:8px;background:var(--primary);display:grid;place-items:center;color:#fff;}
+      .nav-title{font-size:18px;font-weight:800;letter-spacing:-.02em;}
+      .nav-links{display:flex;gap:4px;margin-left:14px;}
+      .nav-links a{padding:7px 11px;border-radius:8px;color:var(--text-2);font-weight:600;font-size:14px;cursor:pointer;}
+      .nav-links a:hover{background:var(--surface-2);}
+      .nav-spacer{flex:1;}
+      .nav-ico{width:38px;height:38px;border-radius:8px;display:grid;place-items:center;cursor:pointer;color:var(--muted);}
+      .nav-ico:hover{background:var(--surface-2);color:var(--text-2);}
+
+      .article{max-width:var(--read);margin:0 auto;padding:44px 24px 90px;}
+      .kicker{color:var(--primary);font-weight:700;font-size:14px;letter-spacing:.02em;text-transform:uppercase;margin-bottom:12px;}
+      .article h1{font-size:42px;line-height:1.15;font-weight:800;letter-spacing:-.02em;margin:0 0 20px;}
+      .byline{display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:30px;color:var(--muted);font-size:14px;}
+      .byline .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#1a56db);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;}
+      .byline .nm{font-weight:700;color:var(--text);font-size:15px;}
+      .byline .spacer{flex:1;}
+      .article p{margin:0 0 22px;color:var(--text-2);}
+      .article h2{font-size:26px;font-weight:800;letter-spacing:-.01em;margin:38px 0 14px;color:var(--text);}
+      .lead{font-size:20px;color:var(--muted);}
+      .article figure{margin:8px 0 26px;}
+      .article .img{width:100%;height:300px;border-radius:14px;background:linear-gradient(135deg,var(--surface-2),var(--primary-weak));border:1px solid var(--border);display:grid;place-items:center;color:var(--muted);}
+      .article figcaption{text-align:center;color:var(--muted-2);font-size:13px;margin-top:10px;}
+      .article blockquote{margin:0 0 26px;padding:6px 0 6px 22px;border-left:3px solid var(--primary);font-size:21px;font-weight:500;color:var(--text);font-style:italic;}
+      .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:34px;}
+      .tag{font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--surface-2);color:var(--text-2);border:1px solid var(--border);}
+    </style>
+  </head>
+  <body>
+    <div class="scroll" id="reader" style="height:100%">
+      <nav class="nav">
+        <div class="nav-brand"><div class="nav-logo"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><span class="nav-title">The Journal</span></div>
+        <div class="nav-links"><a>Design</a><a>Engineering</a><a>Culture</a><a>Research</a></div>
+        <div class="nav-spacer"></div>
+        <div class="nav-ico" title="Share"><svg class="icon" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div>
+        <div class="nav-ico" id="themeToggle" title="Toggle theme">
+          <svg class="icon" id="iconMoon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+          <svg class="icon" id="iconSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </div>
+        <div class="progress" id="progress"></div>
+      </nav>
+
+      <article class="article">
+        <div class="kicker">Design Systems</div>
+        <h1>Designing for dark mode without doubling your work</h1>
+        <div class="byline">
+          <div class="av">EN</div>
+          <div><div class="nm">Emma Nguyen</div><div>Principal Designer</div></div>
+          <div class="spacer"></div>
+          <span>Jul 8, 2026 · 9 min read</span>
+        </div>
+        <p class="lead">Dark mode is no longer a nice-to-have. Yet too many teams treat it as a second design pass — a costly mistake that a token-first approach quietly eliminates.</p>
+        <p>When we first shipped a dark theme, we did it the hard way: a parallel set of screens, hand-tuned for every surface. It looked great on launch day and became a maintenance nightmare within a month. Every new component meant designing it twice, and the two themes drifted apart with every release.</p>
+        <figure><div class="img">Semantic color tokens mapped across two themes</div><figcaption>A single token layer feeds both light and dark surfaces.</figcaption></figure>
+        <h2>Start with semantic tokens</h2>
+        <p>The breakthrough came when we stopped thinking in raw colors and started thinking in roles. Instead of <code>gray-100</code>, we defined <code>surface</code>. Instead of <code>gray-900</code>, we defined <code>text</code>. Each role resolves to a different value per theme, but every component references the role, never the raw value.</p>
+        <blockquote>Design the meaning once, and let the theme decide the pixels.</blockquote>
+        <p>This inversion is deceptively powerful. A new card component automatically works in both themes because it consumes <code>surface</code>, <code>border</code> and <code>text</code> — roles that already know how to behave everywhere.</p>
+        <h2>Mind contrast, not just color</h2>
+        <p>Dark mode is where contrast bugs hide. A border that reads perfectly on white can vanish on a near-black surface. We built a contrast check into the token pipeline so any pair falling below the threshold fails the build before it ever reaches a screen.</p>
+        <p>The same discipline applies to data visualisation. Grid lines follow the border token, series colors keep their brand hue but lower their fill opacity, and everything stays legible regardless of the active theme.</p>
+        <h2>Ship it as a switch, not a rewrite</h2>
+        <p>Because the whole system pivots on a single <code>data-theme</code> attribute, toggling themes is a one-line change at runtime. There is no duplicated markup, no conditional components, and — crucially — no second design surface to keep in sync.</p>
+        <p>Six months on, adding dark support to a new feature costs us nothing extra. That is the real payoff: not the dark theme itself, but a system where the theme is simply a property of the design, not a project of its own.</p>
+        <div class="tags"><span class="tag">dark mode</span><span class="tag">design tokens</span><span class="tag">accessibility</span><span class="tag">theming</span></div>
+      </article>
+    </div>
+
+    <script>
+      (function(){
+        var reader=document.getElementById('reader'), bar=document.getElementById('progress');
+        function upd(){var max=reader.scrollHeight-reader.clientHeight;bar.style.width=(max>0?(reader.scrollTop/max*100):0)+'%';}
+        reader.addEventListener('scroll',upd); upd();
+        var root=document.documentElement, moon=document.getElementById('iconMoon'), sun=document.getElementById('iconSun');
+        function apply(t){root.setAttribute('data-theme',t);moon.style.display=t==='dark'?'none':'';sun.style.display=t==='dark'?'':'none';}
+        document.getElementById('themeToggle').addEventListener('click',function(){apply(root.getAttribute('data-theme')==='dark'?'light':'dark');});
+      })();
+    </script>
+  </body>
+</html>

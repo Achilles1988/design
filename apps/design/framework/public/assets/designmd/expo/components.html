@@ -1,0 +1,715 @@
+<!-- source_content_hash: 1be7e129b6f75afaa12318a7c51ab22f6f74a214dec22c4827cecc519f112363 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Expo — Component Preview</title>
+<style>
+  /* ============================================================
+     Expo — inspired design tokens
+     Quietly-confident React-Native platform. Pure white canvas +
+     sky-blue gradient wash in the hero only. Pure black CTA (the
+     single voltage), blue text-links inline-only. Inter (display 600
+     / body 400) + JetBrains Mono on every code surface. The device-
+     mockup composite is the page chrome.
+     Source of truth: ./DESIGN.md
+     ============================================================ */
+  :root {
+    /* ── Brand + accent ───────────────────────────────────── */
+    --primary: #000000;             /* pure black — the ONLY CTA fill */
+    --primary-active: #1a1a1a;      /* press state                    */
+    --text-link: #0d74ce;           /* inline body links ONLY         */
+    --text-link-secondary: #476cff; /* legal-copy links               */
+    --accent-link-bright: #47c2ff;  /* docs widget links (rare)       */
+
+    /* ── Ink ladder ───────────────────────────────────────── */
+    --ink: #171717;                 /* display + emphasis             */
+    --body: #60646c;                /* running text (slightly cool)   */
+    --muted: #999999;
+    --muted-soft: #cccccc;
+
+    /* ── Hairlines ────────────────────────────────────────── */
+    --hairline: #f0f0f3;
+    --hairline-soft: #f5f5f7;
+    --hairline-strong: #dcdee0;
+
+    /* ── Surfaces ─────────────────────────────────────────── */
+    --canvas: #ffffff;
+    --canvas-soft: #fafafa;
+    --surface-card: #ffffff;
+    --surface-strong: #f0f0f3;      /* badges, tiles, secondary btn   */
+    --surface-dark: #171717;        /* dark cards, code, featured tier */
+    --surface-dark-elevated: #1a1a1a;
+
+    /* ── On-color text ────────────────────────────────────── */
+    --on-primary: #ffffff;
+    --on-dark: #ffffff;
+    --on-dark-soft: #b0b4ba;
+
+    /* ── Atmospheric sky wash (hero only, not a brand color) ─ */
+    --sky-light: #cfe7ff;
+    --sky-mid: #a8c8e8;
+
+    /* ── Semantic ─────────────────────────────────────────── */
+    --accent-warning: #ab6400;
+    --accent-preview: #8145b5;
+    --success: #16a34a;
+    --error: #eb8e90;
+
+    /* ── Type ─────────────────────────────────────────────── */
+    --font-sans: "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+    /* ── Radius (compact developer dialect) ───────────────── */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;    /* CTAs, inputs, ecosystem tiles */
+    --r-lg: 12px;   /* feature cards, code, pricing   */
+    --r-xl: 16px;   /* device mockup                  */
+    --r-xxl: 24px;
+    --r-pill: 9999px; /* badges only */
+
+    /* ── Spacing (4px base) ───────────────────────────────── */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-base: 16px;
+    --sp-md: 20px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+    --sp-section: 96px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--body);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--ink); color: #fff; }
+
+  h1, h2, h3, h4 { margin: 0; color: var(--ink); font-weight: 600; }
+  p { margin: 0; }
+
+  a { color: var(--text-link); text-decoration: none; }
+  a.inline { text-decoration: underline; text-underline-offset: 2px; }
+
+  :focus-visible {
+    outline: 2px solid var(--text-link);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-inline: var(--sp-lg);
+  }
+
+  section { padding-block: var(--sp-section); }
+  .band-soft { background: var(--canvas-soft); }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.88px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: var(--sp-base);
+  }
+
+  .section-head { max-width: 620px; margin: 0 auto var(--sp-xxl); text-align: center; }
+  .section-head h2 {
+    font-size: 36px;
+    line-height: 1.15;
+    letter-spacing: -1.08px;
+  }
+  .section-head p { margin-top: var(--sp-base); font-size: 16px; color: var(--body); }
+
+  /* ── Buttons ────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-xs);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .12s ease, border-color .12s ease, transform .12s ease;
+  }
+  .btn--primary { background: var(--primary); color: var(--on-primary); }
+  .btn--primary:hover { background: var(--primary-active); }
+  .btn--secondary { background: var(--surface-card); color: var(--ink); border-color: var(--hairline-strong); }
+  .btn--secondary:hover { border-color: var(--ink); }
+  .btn--on-dark { background: var(--on-dark); color: var(--ink); }
+  .btn--on-dark:hover { background: var(--on-dark-soft); }
+  .btn--text { background: transparent; color: var(--text-link); height: auto; padding: 0; }
+  .btn--text:hover { text-decoration: underline; }
+
+  /* ── Badge pill ─────────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-strong);
+    color: var(--ink);
+    font-size: 11px; font-weight: 600; letter-spacing: 0.88px; text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+  }
+  .badge--preview { color: var(--accent-preview); }
+
+  /* ============================================================
+     NAV
+     ============================================================ */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    height: 64px;
+    background: color-mix(in srgb, var(--canvas) 85%, transparent);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav__inner { display: flex; align-items: center; gap: var(--sp-lg); height: 100%; }
+  .brand {
+    display: inline-flex; align-items: center; gap: var(--sp-xs);
+    font-size: 20px; font-weight: 600; color: var(--ink);
+  }
+  .brand__mark { width: 26px; height: 26px; border-radius: var(--r-md); background: var(--ink); display: grid; place-items: center; color: #fff; }
+  .nav__links { display: flex; gap: var(--sp-md); margin-left: var(--sp-sm); }
+  .nav__links a { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .nav__links a:hover { color: var(--body); }
+  .nav__actions { display: flex; align-items: center; gap: var(--sp-sm); margin-left: auto; }
+  @media (max-width: 900px) { .nav__links { display: none; } }
+
+  /* ============================================================
+     HERO — sky-blue gradient wash + device mockup chrome
+     ============================================================ */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding-block: var(--sp-section) var(--sp-xxl);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(1200px 520px at 50% -10%, var(--sky-light) 0%, rgba(207,231,255,.4) 40%, transparent 72%),
+      radial-gradient(760px 320px at 50% 8%, var(--sky-mid) 0%, transparent 60%);
+    opacity: .9;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero > .container { position: relative; z-index: 1; }
+  .hero h1 {
+    font-size: 64px;
+    line-height: 1.05;
+    letter-spacing: -1.92px;
+    max-width: 16ch;
+    margin: var(--sp-base) auto 0;
+  }
+  .hero .lead {
+    margin: var(--sp-md) auto 0;
+    font-size: 18px;
+    color: var(--body);
+    max-width: 52ch;
+  }
+  .hero__cta { display: inline-flex; gap: var(--sp-sm); margin-top: var(--sp-lg); flex-wrap: wrap; justify-content: center; }
+
+  /* Device mockup composite (page chrome) */
+  .mockup {
+    position: relative;
+    max-width: 880px;
+    margin: var(--sp-xxl) auto 0;
+  }
+  .mockup__laptop {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-xl);
+    box-shadow: 0 24px 60px rgba(0,0,0,.10);
+    overflow: hidden;
+  }
+  .mockup__bar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 12px var(--sp-base);
+    border-bottom: 1px solid var(--hairline);
+    background: var(--canvas-soft);
+  }
+  .mockup__bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--muted-soft); }
+  .mockup__screen {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    min-height: 300px;
+  }
+  .mockup__sidebar { background: var(--surface-dark); padding: var(--sp-base); }
+  .mockup__sidebar .row { height: 10px; border-radius: 3px; background: rgba(255,255,255,.12); margin-bottom: 10px; }
+  .mockup__sidebar .row.active { background: rgba(71,194,255,.5); width: 70%; }
+  .mockup__main { padding: var(--sp-md); background: var(--canvas); }
+  .mockup__main .block { height: 14px; border-radius: 4px; background: var(--surface-strong); margin-bottom: 10px; }
+  .mockup__main .block.short { width: 45%; }
+  .mockup__main .card-row { display: flex; gap: var(--sp-sm); margin-top: var(--sp-base); }
+  .mockup__main .card-row div { flex: 1; height: 64px; border-radius: var(--r-md); background: var(--surface-strong); }
+  .mockup__phone {
+    position: absolute;
+    right: -8px; bottom: -28px;
+    width: 130px; height: 260px;
+    background: var(--surface-dark);
+    border: 4px solid #2a2a2a;
+    border-radius: 26px;
+    box-shadow: 0 20px 44px rgba(0,0,0,.22);
+    padding: 10px;
+  }
+  .mockup__phone .app { height: 100%; border-radius: 16px; background: linear-gradient(160deg, var(--sky-light), var(--sky-mid)); position: relative; overflow: hidden; }
+  .mockup__phone .app::after { content: ""; position: absolute; inset: auto 12px 14px 12px; height: 30px; border-radius: var(--r-md); background: rgba(0,0,0,.82); }
+  @media (max-width: 640px) {
+    .mockup__phone { display: none; }
+    .mockup__screen { grid-template-columns: 1fr; }
+    .mockup__sidebar { display: none; }
+  }
+
+  /* ── ecosystem strip ────────────────────────────────────── */
+  .eco { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-sm); margin-top: var(--sp-xl); }
+  .eco__tile {
+    width: 64px; height: 64px;
+    display: grid; place-items: center;
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    font-family: var(--font-mono);
+    font-size: 12px; color: var(--body);
+  }
+
+  /* ============================================================
+     FEATURES
+     ============================================================ */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+  .feature {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-lg);
+    padding: var(--sp-lg);
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  .feature:hover { box-shadow: 0 4px 12px rgba(0,0,0,.04); transform: translateY(-2px); }
+  .feature--dark { background: var(--surface-dark); border-color: var(--surface-dark); color: var(--on-dark); }
+  .feature--dark p { color: var(--on-dark-soft); }
+  .feature--dark h3 { color: var(--on-dark); }
+  .feature__icon {
+    width: 40px; height: 40px; border-radius: var(--r-md);
+    background: var(--surface-strong);
+    display: grid; place-items: center; color: var(--ink);
+    margin-bottom: var(--sp-base);
+  }
+  .feature--dark .feature__icon { background: var(--surface-dark-elevated); color: var(--accent-link-bright); }
+  .feature h3 { font-size: 18px; margin-bottom: var(--sp-xs); }
+  .feature p { font-size: 16px; color: var(--body); }
+
+  /* ============================================================
+     WORKFLOW + CODE (split)
+     ============================================================ */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-xxl); align-items: center; }
+  .workflow-step {
+    display: flex; gap: var(--sp-base);
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-md);
+    margin-bottom: var(--sp-sm);
+  }
+  .workflow-step__icon {
+    width: 32px; height: 32px; flex: none;
+    border-radius: var(--r-md);
+    background: var(--surface-strong);
+    display: grid; place-items: center;
+    font-weight: 600; color: var(--ink); font-size: 14px;
+  }
+  .workflow-step h4 { font-size: 16px; margin-bottom: 2px; }
+  .workflow-step p { font-size: 14px; color: var(--body); }
+
+  .code-block {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    border-radius: var(--r-lg);
+    padding: var(--sp-md);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+  .code-block .c-key { color: #47c2ff; }
+  .code-block .c-str { color: #7ee787; }
+  .code-block .c-com { color: var(--on-dark-soft); }
+  .code-block .prompt { color: var(--on-dark-soft); }
+
+  /* ============================================================
+     PRICING
+     ============================================================ */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); align-items: stretch; }
+  .price {
+    display: flex; flex-direction: column;
+    background: var(--surface-card);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xl);
+  }
+  .price--featured { background: var(--surface-dark); border-color: var(--surface-dark); color: var(--on-dark); }
+  .price--featured p, .price--featured li { color: var(--on-dark-soft); }
+  .price--featured h3 { color: var(--on-dark); }
+  .price h3 { font-size: 18px; margin-bottom: var(--sp-xs); }
+  .price__amount { font-size: 44px; font-weight: 600; letter-spacing: -1.44px; color: inherit; margin-block: var(--sp-xs); }
+  .price__amount small { font-size: 14px; font-weight: 400; color: var(--body); }
+  .price--featured .price__amount small { color: var(--on-dark-soft); }
+  .price ul { list-style: none; margin: var(--sp-base) 0 var(--sp-lg); padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .price li { display: flex; gap: var(--sp-xs); font-size: 14px; color: var(--body); }
+  .price li svg { flex: none; margin-top: 2px; color: var(--success); }
+  .price .btn { width: 100%; justify-content: center; margin-top: auto; }
+
+  /* ============================================================
+     SIGNUP FORM
+     ============================================================ */
+  .signup { max-width: 520px; margin: 0 auto; text-align: center; }
+  .form-row { display: flex; gap: var(--sp-sm); margin-top: var(--sp-lg); }
+  .input {
+    flex: 1;
+    height: 44px;
+    font-family: var(--font-sans);
+    font-size: 16px; color: var(--ink);
+    background: var(--surface-card);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-md);
+    padding: 12px 16px;
+  }
+  .input::placeholder { color: var(--muted); }
+  .input:focus-visible { outline: none; border: 2px solid var(--ink); }
+  .form-hint { margin-top: var(--sp-sm); font-size: 13px; color: var(--muted); }
+
+  /* ============================================================
+     CTA BAND
+     ============================================================ */
+  .cta-band { text-align: center; }
+  .cta-band h2 { font-size: 36px; letter-spacing: -1.08px; margin-bottom: var(--sp-base); }
+  .cta-band p { color: var(--body); margin-bottom: var(--sp-lg); }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  .footer { background: var(--canvas); border-top: 1px solid var(--hairline); padding-block: var(--sp-section) var(--sp-xl); }
+  .footer__grid { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: var(--sp-lg); }
+  .footer h4 { font-size: 11px; font-weight: 600; letter-spacing: 0.88px; text-transform: uppercase; color: var(--ink); margin-bottom: var(--sp-sm); }
+  .footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-xs); }
+  .footer ul a { color: var(--body); font-size: 14px; }
+  .footer ul a:hover { color: var(--ink); }
+  .footer__brand p { color: var(--body); font-size: 14px; margin-top: var(--sp-sm); max-width: 34ch; }
+  .footer__bottom {
+    margin-top: var(--sp-xxl); padding-top: var(--sp-base);
+    border-top: 1px solid var(--hairline);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-sm);
+    font-size: 13px; color: var(--muted);
+  }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 1024px) {
+    .grid-3, .price-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer__grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 40px; letter-spacing: -1px; }
+    .split { grid-template-columns: 1fr; }
+    .grid-3, .price-grid { grid-template-columns: 1fr; }
+    .form-row { flex-direction: column; }
+    .footer__grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Expo home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 18h6l3-5 3 5h6L12 3Z" fill="currentColor"/></svg>
+        </span>
+        Expo
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="./DESIGN.md">Tools</a>
+        <a href="./DESIGN.md">Workflows</a>
+        <a href="./DESIGN.md">EAS</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Docs</a>
+      </nav>
+      <div class="nav__actions">
+        <a class="btn btn--text" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn--primary" href="./DESIGN.md">Get started</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <div class="container">
+        <span class="badge">React Native · New in SDK 53</span>
+        <h1>Make any app.<br />Run it everywhere.</h1>
+        <p class="lead">Expo is the fastest way to build universal native apps with React. Write once, ship to iOS, Android, and web — with builds, updates, and submissions handled for you.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="./DESIGN.md">Get started</a>
+          <a class="btn btn--secondary" href="./DESIGN.md">Read the docs</a>
+        </div>
+
+        <!-- Device mockup composite — the page chrome -->
+        <div class="mockup" aria-label="Expo development surfaces">
+          <div class="mockup__laptop">
+            <div class="mockup__bar" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="mockup__screen">
+              <div class="mockup__sidebar" aria-hidden="true">
+                <div class="row active"></div>
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row"></div>
+              </div>
+              <div class="mockup__main" aria-hidden="true">
+                <div class="block"></div>
+                <div class="block short"></div>
+                <div class="card-row"><div></div><div></div><div></div></div>
+                <div class="card-row"><div></div><div></div><div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="mockup__phone" aria-hidden="true"><div class="app"></div></div>
+        </div>
+
+        <!-- ecosystem tiles -->
+        <div class="eco" aria-label="Works with">
+          <div class="eco__tile">TS</div>
+          <div class="eco__tile">React</div>
+          <div class="eco__tile">Metro</div>
+          <div class="eco__tile">Sentry</div>
+          <div class="eco__tile">Jest</div>
+          <div class="eco__tile">EAS</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURES ===================== -->
+    <section class="band-soft">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Everything included</span>
+          <h2>A complete toolchain for React Native</h2>
+          <p>From the first <code style="font-family:var(--font-mono);font-size:13px;color:var(--ink)">npx create-expo-app</code> to production, Expo carries the whole loop.</p>
+        </div>
+        <div class="grid-3">
+          <article class="feature">
+            <div class="feature__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 18h6l3-5 3 5h6L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Universal apps</h3>
+            <p>One React codebase renders truly native UI on iOS and Android — plus the web. Write once, run everywhere.</p>
+          </article>
+          <article class="feature feature--dark">
+            <div class="feature__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <h3>EAS Build &amp; Submit</h3>
+            <p>Cloud builds for both platforms and one-command submission to the App Store and Play Store — no local Xcode required.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Over-the-air updates</h3>
+            <p>Ship JS and asset fixes instantly with EAS Update — your users get the latest without an app-store review.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WORKFLOW + CODE ===================== -->
+    <section>
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">From zero to device</span>
+            <h2 style="font-size:36px;letter-spacing:-1.08px;margin-bottom:var(--sp-base)">Get your app running in three steps</h2>
+            <div class="workflow-step">
+              <div class="workflow-step__icon" aria-hidden="true">1</div>
+              <div><h4>Create the project</h4><p>Scaffold a typed, universal app with a single command.</p></div>
+            </div>
+            <div class="workflow-step">
+              <div class="workflow-step__icon" aria-hidden="true">2</div>
+              <div><h4>Preview in Expo Go</h4><p>Scan the QR code and see it live on your own device — instantly.</p></div>
+            </div>
+            <div class="workflow-step">
+              <div class="workflow-step__icon" aria-hidden="true">3</div>
+              <div><h4>Build &amp; ship with EAS</h4><p>Cloud-build binaries and roll out over-the-air updates.</p></div>
+            </div>
+          </div>
+          <div class="code-block" role="img" aria-label="Terminal creating and running an Expo app">
+            <div><span class="prompt">$</span> npx create-expo-app my-app</div>
+            <div><span class="c-com"># scaffolding a universal React Native app…</span></div>
+            <div>&nbsp;</div>
+            <div><span class="prompt">$</span> cd my-app &amp;&amp; npx expo start</div>
+            <div><span class="c-com"># › Metro waiting on exp://192.168.1.5:8081</span></div>
+            <div><span class="c-com"># › Scan the QR code with Expo Go</span></div>
+            <div>&nbsp;</div>
+            <div><span class="c-key">import</span> { Text, View } <span class="c-key">from</span> <span class="c-str">'react-native'</span>;</div>
+            <div><span class="c-key">export default function</span> App() {</div>
+            <div>&nbsp;&nbsp;<span class="c-key">return</span> &lt;View&gt;&lt;Text&gt;<span class="c-str">Hello, Expo</span>&lt;/Text&gt;&lt;/View&gt;;</div>
+            <div>}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING ===================== -->
+    <section class="band-soft">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Pricing</span>
+          <h2>Start free. Pay as you scale.</h2>
+          <p>Every tier includes the full open-source SDK. EAS billing scales with your build and update volume.</p>
+        </div>
+        <div class="price-grid">
+          <div class="price">
+            <h3>Free</h3>
+            <div class="price__amount">$0<small> / mo</small></div>
+            <ul>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 30 builds / month</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 1,000 update users</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Community support</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Get started</a>
+          </div>
+
+          <div class="price price--featured">
+            <span class="badge" style="background:var(--surface-dark-elevated);color:var(--accent-link-bright);margin-bottom:var(--sp-sm)">Most popular</span>
+            <h3>Production</h3>
+            <div class="price__amount">$99<small> / mo</small></div>
+            <ul>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Priority cloud builds</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 50,000 update users</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Concurrent build queue</li>
+            </ul>
+            <a class="btn btn--on-dark" href="./DESIGN.md">Start free trial</a>
+          </div>
+
+          <div class="price">
+            <h3>Enterprise</h3>
+            <div class="price__amount">Custom</div>
+            <ul>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlimited builds</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> SSO &amp; audit logs</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Dedicated support</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Contact sales</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SIGNUP ===================== -->
+    <section>
+      <div class="container signup">
+        <span class="eyebrow">Stay in the loop</span>
+        <h2 style="font-size:28px;letter-spacing:-0.84px">Get SDK release notes in your inbox</h2>
+        <p style="margin-top:var(--sp-xs)">One email per release. No noise. Read our <a class="inline" href="./DESIGN.md">changelog policy</a>.</p>
+        <form class="form-row" onsubmit="return false">
+          <label for="email" class="sr-only" style="position:absolute;left:-9999px">Work email</label>
+          <input class="input" id="email" type="email" placeholder="you@company.com" autocomplete="email" />
+          <button class="btn btn--primary" type="submit">Subscribe</button>
+        </form>
+        <p class="form-hint">We respect your inbox. Unsubscribe anytime.</p>
+      </div>
+    </section>
+
+    <!-- ===================== CTA BAND ===================== -->
+    <section class="band-soft cta-band">
+      <div class="container">
+        <h2>Ship your first build today</h2>
+        <p>Join the developers building universal apps with Expo and EAS.</p>
+        <a class="btn btn--primary" href="./DESIGN.md">Get started for free</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a class="brand" href="./DESIGN.md">
+            <span class="brand__mark" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 18h6l3-5 3 5h6L12 3Z" fill="currentColor"/></svg></span>
+            Expo
+          </a>
+          <p>An open-source platform for making universal native apps with React. Build, deploy, and iterate quickly.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Expo SDK</a></li>
+            <li><a href="./DESIGN.md">EAS Build</a></li>
+            <li><a href="./DESIGN.md">EAS Update</a></li>
+            <li><a href="./DESIGN.md">Expo Router</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Documentation</a></li>
+            <li><a href="./DESIGN.md">Tutorials</a></li>
+            <li><a href="./DESIGN.md">Changelog</a></li>
+            <li><a href="./DESIGN.md">Showcase</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Community</h4>
+          <ul>
+            <li><a href="./DESIGN.md">GitHub</a></li>
+            <li><a href="./DESIGN.md">Discord</a></li>
+            <li><a href="./DESIGN.md">Forums</a></li>
+            <li><a href="./DESIGN.md">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="./DESIGN.md">About</a></li>
+            <li><a href="./DESIGN.md">Careers</a></li>
+            <li><a href="./DESIGN.md">Brand</a></li>
+            <li><a href="./DESIGN.md">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Expo. Inspired design preview.</span>
+        <span>Tokens sourced from <a class="inline" href="./DESIGN.md">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

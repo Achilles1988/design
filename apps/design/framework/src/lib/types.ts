@@ -16,5 +16,13 @@ export type CanvasesFile = {
   canvases: CanvasEntry[]
 }
 
+export type AssetKind = 'designmd' | 'layoutmd'
+
+export type AssetEntry = {
+  id: string
+  name: string
+  previewUrl: string
+}
+
 export const DEFAULT_STYLE = 'dashboard'
 export const DEFAULT_LAYOUT = 'sidebar-shell'

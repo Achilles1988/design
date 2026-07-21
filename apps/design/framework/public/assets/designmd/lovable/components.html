@@ -1,0 +1,443 @@
+<!-- source_content_hash: 92790895c833104072643929ba56ebbf42c8f88ffb7bff1926462545d0ace6c7 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lovable — Component Preview</title>
+<style>
+  /* ============================================================
+     Lovable design tokens — mapped from DESIGN.md.
+     Warmth through restraint: a parchment-cream canvas (#f7f4ed,
+     never white), near-black charcoal (#1c1c1c, never pure black),
+     Camera Plain Variable humanist type, an opacity-driven gray
+     system (every gray is #1c1c1c at a transparency), warm #eceae4
+     borders instead of shadows, and a signature multi-layer inset
+     shadow on dark buttons. Full pills only for action/icon buttons.
+     ============================================================ */
+  :root {
+    /* Primary */
+    --cream: #f7f4ed;
+    --charcoal: #1c1c1c;
+    --off-white: #fcfbf8;
+
+    /* Opacity-derived neutral scale — all from charcoal */
+    --charcoal-83: rgba(28, 28, 28, 0.83);
+    --charcoal-82: rgba(28, 28, 28, 0.82);
+    --muted-gray: #5f5f5d;
+    --charcoal-40: rgba(28, 28, 28, 0.4);
+    --charcoal-04: rgba(28, 28, 28, 0.04);
+    --charcoal-03: rgba(28, 28, 28, 0.03);
+
+    /* Surface & border */
+    --border-light: #eceae4;
+    --border-interactive: rgba(28, 28, 28, 0.4);
+
+    /* Interactive */
+    --ring: rgba(59, 130, 246, 0.5);
+    --focus-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    --inset-shadow:
+      rgba(255, 255, 255, 0.2) 0px 0.5px 0px 0px inset,
+      rgba(0, 0, 0, 0.2) 0px 0px 0px 0.5px inset,
+      rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+
+    /* Type — Camera Plain Variable, humanist warmth */
+    --font: "Camera Plain Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+    /* Radius */
+    --r-micro: 4px;
+    --r-std: 6px;
+    --r-comfort: 8px;
+    --r-card: 12px;
+    --r-container: 16px;
+    --r-pill: 9999px;
+
+    /* Spacing */
+    --s-1: 8px;
+    --s-2: 12px;
+    --s-3: 16px;
+    --s-4: 24px;
+    --s-5: 32px;
+    --s-6: 40px;
+    --s-7: 56px;
+    --s-8: 80px;
+    --s-9: 128px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 400;
+    color: var(--charcoal-82);
+    background: var(--cream);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 { color: var(--charcoal); font-weight: 600; }
+
+  a { color: var(--charcoal); text-decoration: underline; }
+  a:hover { text-decoration: underline; }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--focus-shadow), 0 0 0 2px var(--ring);
+    border-radius: var(--r-std);
+  }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--s-4); }
+  section { padding: var(--s-8) 0; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 8px 16px;
+    border-radius: var(--r-std);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .btn:active { opacity: 0.8; }
+  .btn-primary { background: var(--charcoal); color: var(--off-white); box-shadow: var(--inset-shadow); }
+  .btn-ghost { background: transparent; color: var(--charcoal); border-color: var(--border-interactive); }
+  .btn-cream { background: var(--cream); color: var(--charcoal); }
+  .btn-sm { font-size: 14px; }
+  /* Full pill ONLY for action / icon buttons */
+  .btn-pill {
+    background: var(--cream);
+    color: var(--charcoal);
+    border-radius: var(--r-pill);
+    box-shadow: var(--inset-shadow);
+    opacity: 0.85;
+  }
+  .icon-pill {
+    width: 40px; height: 40px; padding: 0;
+    border-radius: var(--r-pill);
+    background: var(--cream);
+    color: var(--charcoal);
+    box-shadow: var(--inset-shadow);
+    display: inline-flex; align-items: center; justify-content: center;
+    border: none; cursor: pointer;
+  }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    display: flex; align-items: center; gap: var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    background: var(--cream);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .brand { font-weight: 600; font-size: 20px; letter-spacing: -0.5px; color: var(--charcoal); display: flex; align-items: center; gap: var(--s-1); }
+  .brand .heart { color: var(--charcoal); }
+  .nav-links { display: flex; gap: var(--s-4); margin-left: var(--s-3); }
+  .nav-links a { font-size: 16px; color: var(--charcoal); text-decoration: none; }
+  .nav-right { margin-left: auto; display: flex; gap: var(--s-2); align-items: center; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: var(--s-9) var(--s-4);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 50% at 30% 20%, rgba(244, 168, 160, 0.25), transparent 70%),
+      radial-gradient(50% 40% at 75% 30%, rgba(255, 197, 51, 0.18), transparent 70%),
+      radial-gradient(60% 60% at 60% 90%, rgba(87, 193, 255, 0.15), transparent 70%);
+    pointer-events: none;
+  }
+  .hero .inner { position: relative; z-index: 1; }
+  .hero h1 {
+    font-size: clamp(36px, 7vw, 60px);
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    max-width: 16ch;
+    margin: 0 auto;
+  }
+  .hero p { font-size: 18px; line-height: 1.38; color: var(--muted-gray); max-width: 48ch; margin: var(--s-3) auto 0; }
+
+  /* ---------- AI chat input ---------- */
+  .chat-input {
+    max-width: 640px;
+    margin: var(--s-6) auto 0;
+    background: var(--cream);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-container);
+    padding: var(--s-4);
+    text-align: left;
+  }
+  .chat-input .field {
+    font-size: 18px; color: var(--muted-gray);
+    padding-bottom: var(--s-3);
+  }
+  .chat-input .controls { display: flex; align-items: center; gap: var(--s-1); }
+  .suggest-pills { display: flex; gap: var(--s-1); flex-wrap: wrap; margin-right: auto; }
+  .suggest {
+    font-size: 14px;
+    color: var(--charcoal);
+    background: transparent;
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-pill);
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+
+  /* ---------- Section headings ---------- */
+  .sec-head { text-align: center; margin-bottom: var(--s-6); }
+  .sec-head h2 { font-size: clamp(32px, 5vw, 48px); line-height: 1.0; letter-spacing: -1.2px; }
+  .sec-head p { font-size: 18px; color: var(--muted-gray); margin-top: var(--s-2); }
+
+  /* ---------- Template gallery ---------- */
+  .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  .tpl {
+    background: var(--cream);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .tpl .thumb { aspect-ratio: 16 / 10; border-bottom: 1px solid var(--border-light); }
+  .tpl-a { background: linear-gradient(135deg, #f4a8a0, #ffc533); }
+  .tpl-b { background: linear-gradient(135deg, #57c1ff, #59d499); }
+  .tpl-c { background: linear-gradient(135deg, #c9c0ad, #f7f4ed); }
+  .tpl .body { padding: var(--s-3); }
+  .tpl .title { font-size: 20px; font-weight: 400; color: var(--charcoal); line-height: 1.25; }
+  .tpl .cat { font-size: 14px; color: var(--muted-gray); margin-top: 4px; }
+
+  /* ---------- Stats bar ---------- */
+  .stats { display: flex; justify-content: center; gap: var(--s-8); flex-wrap: wrap; text-align: center; }
+  .stat .num { font-size: 48px; font-weight: 600; letter-spacing: -1.2px; color: var(--charcoal); line-height: 1; }
+  .stat .lbl { font-size: 16px; color: var(--muted-gray); margin-top: var(--s-1); }
+
+  /* ---------- Feature cards ---------- */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  .card {
+    background: var(--cream);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-card);
+    padding: var(--s-4);
+  }
+  .card .badge {
+    width: 40px; height: 40px; border-radius: var(--r-comfort);
+    background: var(--charcoal-04);
+    display: grid; place-items: center; color: var(--charcoal);
+    margin-bottom: var(--s-3);
+  }
+  .card h3 { font-size: 20px; font-weight: 400; margin-bottom: var(--s-1); }
+  .card p { font-size: 14px; color: var(--muted-gray); line-height: 1.5; }
+
+  /* ---------- Pricing ---------- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  .tier {
+    background: var(--cream);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-container);
+    padding: var(--s-5);
+  }
+  .tier.featured { border-color: var(--border-interactive); }
+  .tier .tname { font-size: 20px; font-weight: 400; color: var(--charcoal); }
+  .tier .tprice { font-size: 48px; font-weight: 600; letter-spacing: -1.2px; color: var(--charcoal); margin: var(--s-2) 0; }
+  .tier .tprice span { font-size: 16px; font-weight: 400; color: var(--muted-gray); }
+  .tier ul { list-style: none; margin: var(--s-3) 0; }
+  .tier li { font-size: 14px; padding: 6px 0; color: var(--charcoal-82); display: flex; gap: var(--s-1); }
+  .tier li::before { content: "✓"; color: var(--charcoal); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: var(--cream);
+    border: 1px solid var(--border-light);
+    border-radius: var(--r-container);
+    max-width: 1200px;
+    margin: 0 auto var(--s-6);
+    padding: var(--s-6) var(--s-5);
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--s-4); }
+  .footer-grid h4 { font-size: 14px; font-weight: 600; color: var(--charcoal); margin-bottom: var(--s-2); }
+  .footer-grid a { display: block; padding: 4px 0; font-size: 14px; color: var(--muted-gray); text-decoration: none; }
+  .footer-grid a:hover { color: var(--charcoal); text-decoration: underline; }
+  .footer-bottom { margin-top: var(--s-5); padding-top: var(--s-3); border-top: 1px solid var(--border-light); font-size: 14px; color: var(--muted-gray); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .gallery, .cards, .pricing { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 767px) {
+    .gallery, .cards, .pricing { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .stats { gap: var(--s-6); }
+    section { padding: var(--s-7) 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <header class="nav">
+    <div class="brand">
+      <svg class="heart" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.9-10-9.2C.3 8.6 1.6 5 5 5c2 0 3.2 1.2 4 2.3C9.8 6.2 11 5 13 5c3.4 0 4.7 3.6 3 6.8C19.5 16.1 12 21 12 21z"/></svg>
+      Lovable
+    </div>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="./DESIGN.md">Product</a>
+      <a href="./DESIGN.md">Templates</a>
+      <a href="./DESIGN.md">Pricing</a>
+      <a href="./DESIGN.md">Docs</a>
+    </nav>
+    <div class="nav-right">
+      <a class="btn btn-ghost btn-sm" href="./DESIGN.md">Log in</a>
+      <a class="btn btn-primary btn-sm" href="./DESIGN.md">Get Started</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="inner">
+      <h1>Build software products, using only a chat</h1>
+      <p>Lovable is your superhuman full-stack engineer. Describe what you want, and watch it come to life.</p>
+
+      <div class="chat-input">
+        <div class="field">Ask Lovable to build a landing page for…</div>
+        <div class="controls">
+          <div class="suggest-pills">
+            <button class="suggest">SaaS dashboard</button>
+            <button class="suggest">Portfolio</button>
+            <button class="suggest">Marketplace</button>
+          </div>
+          <button class="icon-pill" aria-label="Voice input">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <button class="btn btn-primary btn-sm">Build →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section>
+    <div class="wrap">
+      <div class="stats">
+        <div class="stat"><div class="num">2M+</div><div class="lbl">Products built</div></div>
+        <div class="stat"><div class="num">140+</div><div class="lbl">Countries</div></div>
+        <div class="stat"><div class="num">30s</div><div class="lbl">To first preview</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Template gallery -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Start from a template</h2>
+        <p>Fork a project and make it your own in minutes.</p>
+      </div>
+      <div class="gallery">
+        <article class="tpl">
+          <div class="thumb tpl-a" aria-hidden="true"></div>
+          <div class="body"><div class="title">SaaS Starter</div><div class="cat">Dashboard · Auth</div></div>
+        </article>
+        <article class="tpl">
+          <div class="thumb tpl-b" aria-hidden="true"></div>
+          <div class="body"><div class="title">Marketplace</div><div class="cat">Listings · Payments</div></div>
+        </article>
+        <article class="tpl">
+          <div class="thumb tpl-c" aria-hidden="true"></div>
+          <div class="body"><div class="title">Personal Site</div><div class="cat">Portfolio · Blog</div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Everything you need to ship</h2>
+        <p>From idea to deployed product, all in one warm workspace.</p>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <div class="badge" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Chat to build</h3>
+          <p>Describe features in plain language and Lovable writes the code for you.</p>
+        </article>
+        <article class="card">
+          <div class="badge" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 20h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Live preview</h3>
+          <p>See your product update instantly as you iterate on the design.</p>
+        </article>
+        <article class="card">
+          <div class="badge" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>One-click deploy</h3>
+          <p>Publish to a live URL with a single click when you're ready to launch.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <h2>Pricing that scales with you</h2>
+      </div>
+      <div class="pricing">
+        <div class="tier">
+          <div class="tname">Free</div>
+          <div class="tprice">$0<span> /mo</span></div>
+          <ul><li>Public projects</li><li>Community support</li><li>Daily message limit</li></ul>
+          <a class="btn btn-ghost" href="./DESIGN.md" style="width:100%;justify-content:center;">Start free</a>
+        </div>
+        <div class="tier featured">
+          <div class="tname">Pro</div>
+          <div class="tprice">$25<span> /mo</span></div>
+          <ul><li>Private projects</li><li>Custom domains</li><li>Unlimited messages</li></ul>
+          <a class="btn btn-primary" href="./DESIGN.md" style="width:100%;justify-content:center;">Go Pro</a>
+        </div>
+        <div class="tier">
+          <div class="tname">Teams</div>
+          <div class="tprice">$50<span> /mo</span></div>
+          <ul><li>Shared workspace</li><li>Roles &amp; permissions</li><li>Priority support</li></ul>
+          <a class="btn btn-ghost" href="./DESIGN.md" style="width:100%;justify-content:center;">Contact us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="brand">
+          <svg class="heart" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.9-10-9.2C.3 8.6 1.6 5 5 5c2 0 3.2 1.2 4 2.3C9.8 6.2 11 5 13 5c3.4 0 4.7 3.6 3 6.8C19.5 16.1 12 21 12 21z"/></svg>
+          Lovable
+        </div>
+        <p style="font-size:14px;color:var(--muted-gray);margin-top:var(--s-2);max-width:30ch;">Build software products, using only a chat.</p>
+      </div>
+      <div><h4>Product</h4><a href="./DESIGN.md">Features</a><a href="./DESIGN.md">Templates</a><a href="./DESIGN.md">Pricing</a></div>
+      <div><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Blog</a></div>
+      <div><h4>Resources</h4><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">Community</a><a href="./DESIGN.md">Support</a></div>
+      <div><h4>Legal</h4><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a></div>
+    </div>
+    <div class="footer-bottom">© 2026 Lovable. Made with warmth.</div>
+  </footer>
+
+</body>
+</html>

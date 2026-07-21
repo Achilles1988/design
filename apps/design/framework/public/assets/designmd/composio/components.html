@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<!-- source_content_hash: e7db886dabecca61f29b83e8f46d7a1e8a43889d30b81bc6e48162ccaafcbb2f -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Composio — Component Preview</title>
+<style>
+  /* ============================================================
+     Composio design tokens — mapped from DESIGN.md
+     Dark monolithic near-black canvas, single deep-electric-blue
+     voltage (#0007cd) for CTAs / wordmark / spotlight glow.
+     abcDiatype single sans (→Inter 500), JetBrains Mono on code.
+     Brightness-step elevation, 2×2 terminal-mockup hero, 8px CTAs.
+     ============================================================ */
+  :root {
+    /* Brand & accent — single blue voltage */
+    --primary: #0007cd;
+    --primary-active: #0005a3;
+    --primary-glow: #1a26ff;
+    /* Text */
+    --ink: #ffffff;
+    --body: #a8a8a8;
+    --body-strong: #ffffff;
+    --muted: #888888;
+    --muted-soft: #666666;
+    /* Hairlines */
+    --hairline: #222222;
+    --hairline-soft: #1a1a1a;
+    --hairline-strong: #333333;
+    /* Surface — brightness-step ladder */
+    --canvas: #0f0f0f;
+    --canvas-deep: #000000;
+    --surface-card: #181818;
+    --surface-card-elevated: #222222;
+    --surface-strong: #2a2a2a;
+    --on-primary: #ffffff;
+    /* Illustrative only */
+    --accent-cyan: #00d4ff;
+    --accent-violet: #7b3aed;
+    /* Semantic */
+    --semantic-error: #ff4d4d;
+    --semantic-success: #33d17a;
+    --focus-ring: rgba(26, 38, 255, 0.6);
+
+    --font-sans: 'abcDiatype', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-pill: 9999px;
+
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-base: 16px;
+    --s-md: 20px;
+    --s-lg: 24px;
+    --s-xl: 32px;
+    --s-xxl: 48px;
+    --s-section: 96px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--canvas);
+    color: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--s-lg); }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
+    border-radius: var(--r-md);
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.88px;
+    text-transform: uppercase;
+    color: var(--body-strong);
+    background: var(--surface-card-elevated);
+    border-radius: var(--r-pill);
+    padding: 4px 10px;
+  }
+
+  h1, h2, h3 { color: var(--body-strong); letter-spacing: -0.02em; }
+
+  /* ---- Nav ---- */
+  .nav {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--hairline);
+    position: sticky; top: 0;
+    background: rgba(15,15,15,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 20;
+  }
+  .nav .wrap { display: flex; align-items: center; gap: var(--s-lg); width: 100%; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 18px; font-weight: 600; color: var(--body-strong); }
+  .brand .glyph { width: 22px; height: 22px; border-radius: var(--r-sm); background: var(--primary); display: flex; align-items: center; justify-content: center; }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-xl); }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--body); }
+  .nav-links a:hover { color: var(--body-strong); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-base); }
+  .gh-stars { font-size: 13px; color: var(--body); display: flex; align-items: center; gap: 6px; }
+
+  /* ---- Buttons ---- */
+  .btn {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--r-md);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 10px 18px;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-active); }
+  .btn-secondary { background: var(--surface-card-elevated); color: var(--body-strong); }
+  .btn-secondary:hover { background: var(--surface-strong); }
+  .btn-outline { background: transparent; color: var(--body-strong); border: 1px solid var(--hairline-strong); padding: 9px 17px; }
+  .btn-outline:hover { border-color: var(--muted); }
+  .btn-text { background: transparent; color: var(--body); padding: 10px 4px; }
+  .btn-text:hover { color: var(--body-strong); }
+
+  /* ---- Hero + spotlight ---- */
+  .hero { position: relative; padding: var(--s-section) 0 var(--s-xxl); text-align: center; overflow: hidden; }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px; height: 700px;
+    background: radial-gradient(circle at center, rgba(26,38,255,0.34), rgba(0,7,205,0.10) 38%, transparent 66%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero > .wrap { position: relative; z-index: 1; }
+  .hero h1 { font-size: 72px; font-weight: 500; line-height: 1.05; letter-spacing: -2.16px; max-width: 16ch; margin: var(--s-base) auto var(--s-md); }
+  .hero p.lead { font-size: 18px; color: var(--body); max-width: 56ch; margin: 0 auto var(--s-xl); }
+  .hero-cta { display: flex; gap: var(--s-sm); justify-content: center; flex-wrap: wrap; }
+
+  /* ---- Terminal mockup grid (signature) ---- */
+  .terminal-grid-shell {
+    position: relative;
+    margin: var(--s-xxl) auto 0;
+    max-width: 940px;
+    background: var(--canvas-deep);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    padding: var(--s-xl);
+  }
+  .terminal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-base);
+    position: relative;
+    z-index: 1;
+  }
+  .term-pane {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-md);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--body);
+    text-align: left;
+    min-height: 150px;
+  }
+  .term-pane .prompt { color: var(--accent-cyan); }
+  .term-pane .kw { color: var(--primary-glow); }
+  .term-pane .ok { color: var(--semantic-success); }
+  .term-pane .cm { color: var(--muted-soft); }
+  .term-head { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.88px; margin-bottom: var(--s-sm); }
+
+  /* ---- Section scaffold ---- */
+  section.band { padding: var(--s-section) 0; border-top: 1px solid var(--hairline); }
+  .section-head { max-width: 60ch; margin: 0 auto var(--s-xxl); text-align: center; }
+  .section-head h2 { font-size: 44px; font-weight: 500; line-height: 1.1; letter-spacing: -1.32px; margin: var(--s-sm) 0 var(--s-base); }
+  .section-head p { color: var(--body); font-size: 17px; }
+
+  /* ---- Feature grid ---- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .feature-card {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    padding: 28px;
+  }
+  .feature-card .ficon { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--surface-card-elevated); display: flex; align-items: center; justify-content: center; color: var(--primary-glow); margin-bottom: var(--s-base); }
+  .feature-card h3 { font-size: 18px; font-weight: 600; margin-bottom: var(--s-xs); }
+  .feature-card p { font-size: 15px; color: var(--body); }
+
+  /* ---- Toolkit grid ---- */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-base); }
+  .toolkit-card {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-md);
+  }
+  .toolkit-icon { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--surface-card-elevated); display: flex; align-items: center; justify-content: center; color: var(--body-strong); font-weight: 600; margin-bottom: var(--s-sm); }
+  .toolkit-card h4 { font-size: 16px; font-weight: 600; color: var(--body-strong); margin-bottom: 4px; }
+  .toolkit-card p { font-size: 13px; color: var(--muted); }
+
+  /* ---- Spotlight glow card ---- */
+  .spotlight-card {
+    position: relative;
+    background: var(--surface-card);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    padding: 48px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .spotlight-card::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(26,38,255,0.22), transparent 60%);
+    pointer-events: none;
+  }
+  .spotlight-card > * { position: relative; z-index: 1; }
+  .spotlight-card h3 { font-size: 32px; font-weight: 500; letter-spacing: -0.96px; margin-bottom: var(--s-base); }
+  .spotlight-card p { color: var(--body); max-width: 48ch; margin: 0 auto var(--s-lg); }
+
+  /* ---- Code block ---- */
+  .code-block {
+    background: var(--canvas-deep);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-md);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--body);
+    overflow-x: auto;
+  }
+  .code-block .prompt { color: var(--accent-cyan); }
+  .code-block .kw { color: var(--primary-glow); }
+  .code-block .st { color: var(--semantic-success); }
+  .code-block .cm { color: var(--muted-soft); }
+
+  /* ---- Form ---- */
+  .signup { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-xl); padding: var(--s-xl); max-width: 520px; margin: 0 auto; }
+  .field { margin-bottom: var(--s-base); }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--body-strong); margin-bottom: 6px; }
+  .text-input, .search-input {
+    width: 100%;
+    background: var(--surface-card);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-md);
+    color: var(--body-strong);
+    font-family: var(--font-sans);
+    font-size: 16px;
+  }
+  .text-input { height: 44px; padding: 12px 16px; }
+  .search-input { height: 40px; padding: 10px 16px; }
+  .text-input::placeholder, .search-input::placeholder { color: var(--muted-soft); }
+  .text-input:focus, .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--focus-ring); }
+
+  /* ---- Testimonial ---- */
+  .quote-card { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-lg); }
+  .quote-card p { color: var(--body); margin-bottom: var(--s-base); }
+  .quote-meta { display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 36px; height: 36px; border-radius: var(--r-pill); background: linear-gradient(135deg, var(--primary), var(--accent-violet)); }
+  .quote-meta b { display: block; color: var(--body-strong); font-size: 14px; }
+  .quote-meta span { color: var(--muted); font-size: 13px; }
+
+  /* ---- CTA band ---- */
+  .cta-band { position: relative; text-align: center; padding: var(--s-section) 0; border-top: 1px solid var(--hairline); overflow: hidden; }
+  .cta-band::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, rgba(26,38,255,0.22), transparent 60%); pointer-events: none; }
+  .cta-band > .wrap { position: relative; z-index: 1; }
+  .cta-band h2 { font-size: 44px; font-weight: 500; letter-spacing: -1.32px; margin-bottom: var(--s-lg); }
+
+  /* ---- Footer ---- */
+  footer { border-top: 1px solid var(--hairline); padding: 64px 0 48px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--s-lg); }
+  .footer-grid h5 { font-size: 11px; font-weight: 600; letter-spacing: 0.88px; text-transform: uppercase; color: var(--muted); margin-bottom: var(--s-base); }
+  .footer-grid a { display: block; font-size: 14px; color: var(--body); padding: 5px 0; }
+  .footer-grid a:hover { color: var(--body-strong); }
+  .footer-legal { margin-top: var(--s-xxl); padding-top: var(--s-lg); border-top: 1px solid var(--hairline); font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 1024px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 56px; letter-spacing: -1.6px; }
+  }
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .terminal-grid { grid-template-columns: 1fr; }
+    .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .hero h1 { font-size: 36px; letter-spacing: -1px; }
+    .section-head h2, .cta-band h2 { font-size: 32px; letter-spacing: -0.96px; }
+  }
+</style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap">
+      <div class="brand">
+        <span class="glyph" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+        Composio
+      </div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">Toolkits</a>
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Customers</a>
+        <a href="./DESIGN.md">Blog</a>
+      </nav>
+      <div class="nav-right">
+        <span class="gh-stars" aria-hidden="true">★ 24.1k</span>
+        <a class="btn btn-text" href="./DESIGN.md">Sign In</a>
+        <button class="btn btn-primary">Get started</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Tooling for AI agents</span>
+        <h1>Give your agents 250+ tools in one line.</h1>
+        <p class="lead">Composio is the integration layer for AI agents — authenticated, production-grade tool calling for Slack, GitHub, Stripe, Notion, and hundreds more.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary">Start building</button>
+          <button class="btn btn-outline">Read the docs</button>
+        </div>
+
+        <div class="terminal-grid-shell" aria-label="Terminal preview">
+          <div class="terminal-grid">
+            <div class="term-pane">
+              <div class="term-head">install</div>
+              <div><span class="prompt">$</span> pip install composio</div>
+              <div class="ok">✓ resolved 12 packages</div>
+              <div class="cm"># ready in 1.4s</div>
+            </div>
+            <div class="term-pane">
+              <div class="term-head">connect</div>
+              <div><span class="prompt">$</span> composio add github</div>
+              <div class="kw">→ opening oauth flow…</div>
+              <div class="ok">✓ github connected</div>
+            </div>
+            <div class="term-pane">
+              <div class="term-head">agent.py</div>
+              <div><span class="kw">from</span> composio <span class="kw">import</span> Toolset</div>
+              <div>tools = Toolset(<span class="ok">"github"</span>)</div>
+              <div>agent.run(tools=tools)</div>
+            </div>
+            <div class="term-pane">
+              <div class="term-head">output</div>
+              <div class="cm"># agent calling tool…</div>
+              <div><span class="kw">create_issue</span>(repo="app")</div>
+              <div class="ok">✓ issue #482 created</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Why Composio</span>
+          <h2>Production tool calling, handled.</h2>
+          <p>Authentication, rate limits, and schemas — abstracted behind one clean interface.</p>
+        </div>
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="ficon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2 2 7l10 5 10-5-10-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>
+            <h3>Managed auth</h3>
+            <p>OAuth, API keys, and token refresh handled for every connected toolkit.</p>
+          </div>
+          <div class="feature-card">
+            <div class="ficon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <h3>250+ toolkits</h3>
+            <p>Slack, GitHub, Stripe, Notion, Linear, Gmail — plus a growing catalog.</p>
+          </div>
+          <div class="feature-card">
+            <div class="ficon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>
+            <h3>Framework native</h3>
+            <p>Drop into LangChain, CrewAI, or the OpenAI SDK with a single import.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Toolkits</span>
+          <h2>Connect the tools you already use.</h2>
+        </div>
+        <div class="grid-4">
+          <div class="toolkit-card"><div class="toolkit-icon">Sl</div><h4>Slack</h4><p>Post & read messages</p></div>
+          <div class="toolkit-card"><div class="toolkit-icon">GH</div><h4>GitHub</h4><p>Issues, PRs, repos</p></div>
+          <div class="toolkit-card"><div class="toolkit-icon">St</div><h4>Stripe</h4><p>Payments & invoices</p></div>
+          <div class="toolkit-card"><div class="toolkit-icon">No</div><h4>Notion</h4><p>Pages & databases</p></div>
+          <div class="toolkit-card"><div class="toolkit-icon">Li</div><h4>Linear</h4><p>Tickets & cycles</p></div>
+          <div class="toolkit-card"><div class="toolkit-icon">Gm</div><h4>Gmail</h4><p>Send & search mail</p></div>
+          <div class="toolkit-card"><div class="toolkit-icon">Ji</div><h4>Jira</h4><p>Track work items</p></div>
+          <div class="toolkit-card"><div class="toolkit-icon">Dr</div><h4>Drive</h4><p>Files & folders</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="spotlight-card">
+          <h3>One SDK. Every integration.</h3>
+          <p>Stop maintaining brittle API glue. Composio keeps every toolkit authenticated and up to date so your agents just work.</p>
+          <div class="code-block" style="text-align:left;max-width:560px;margin:0 auto;"><span class="cm"># three lines to production</span>
+<span class="prompt">$</span> pip install composio
+<span class="prompt">$</span> composio add slack github stripe
+<span class="prompt">$</span> python agent.py <span class="st"># tools live</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Get in touch</span>
+          <h2>Talk to our team.</h2>
+        </div>
+        <form class="signup" onsubmit="return false">
+          <div class="field">
+            <label for="email">Work email</label>
+            <input class="text-input" id="email" type="email" placeholder="you@company.com">
+          </div>
+          <div class="field">
+            <label for="usecase">What are you building?</label>
+            <input class="text-input" id="usecase" type="text" placeholder="An agent that triages support tickets">
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;height:44px;">Request access</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Loved by builders</span>
+          <h2>Shipping agents in production.</h2>
+        </div>
+        <div class="grid-3">
+          <div class="quote-card">
+            <p>"Composio saved us months of integration work. Auth just disappeared as a problem."</p>
+            <div class="quote-meta"><span class="avatar" aria-hidden="true"></span><span><b>Marco Diaz</b><span>Founding Engineer</span></span></div>
+          </div>
+          <div class="quote-card">
+            <p>"The toolkit catalog is enormous and every integration is production-grade."</p>
+            <div class="quote-meta"><span class="avatar" aria-hidden="true"></span><span><b>Lena Fischer</b><span>ML Platform Lead</span></span></div>
+          </div>
+          <div class="quote-card">
+            <p>"Dropped it into our LangChain stack in an afternoon. It just worked."</p>
+            <div class="quote-meta"><span class="avatar" aria-hidden="true"></span><span><b>Ravi Menon</b><span>Staff Engineer</span></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <div class="wrap">
+        <h2>Start building with Composio.</h2>
+        <button class="btn btn-primary" style="height:44px;padding:12px 24px;">Get started free</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <div class="brand" style="margin-bottom:var(--s-sm);"><span class="glyph" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span>Composio</div>
+          <p style="font-size:14px;color:var(--muted);max-width:26ch;">The integration layer for AI agents. Authenticated tool calling at scale.</p>
+        </div>
+        <div><h5>Product</h5><a href="./DESIGN.md">Toolkits</a><a href="./DESIGN.md">Pricing</a><a href="./DESIGN.md">Changelog</a></div>
+        <div><h5>Developers</h5><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">API</a><a href="./DESIGN.md">Examples</a></div>
+        <div><h5>Company</h5><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Customers</a><a href="./DESIGN.md">Careers</a></div>
+        <div><h5>Legal</h5><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a><a href="./DESIGN.md">Security</a></div>
+      </div>
+      <div class="footer-legal">© 2026 Composio — Design tokens sourced from <a href="./DESIGN.md" style="color:var(--primary-glow);">DESIGN.md</a>.</div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!-- source_content_hash: 5da2c3116e6845826b043ac115a80896a399efda2cebc0188981fba2ef9bb526 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Verge — Component Preview</title>
+<style>
+  /* ============================================================
+     The Verge (2024) tokens — mapped from DESIGN.md.
+     A Condé Nast magazine wired to a chiptune soundboard:
+     near-black canvas, brutally heavy Manuka display, acid-mint
+     + ultraviolet hazard-tape accents, and a StoryStream timeline
+     of saturated pill-cornered color-block tiles.
+     Color-as-elevation — 1px borders do the work of shadows.
+     ============================================================ */
+  :root {
+    /* Brand hazards */
+    --mint: #3cffd0;              /* Jelly Mint — signature acid accent */
+    --ultraviolet: #5200ff;       /* Verge Ultraviolet — complementary hazard */
+    --mint-border: #309875;
+    --purple-rule: #3d00bf;
+    --link-hover: #3860be;        /* deep link blue — the only hover color */
+    --focus-cyan: #1eaedb;
+
+    /* Surfaces */
+    --canvas: #131313;            /* Canvas Black — no light mode */
+    --slate: #2d2d2d;
+    --image-frame: #313131;
+    --white: #ffffff;
+    --black: #000000;
+
+    /* Text */
+    --text: #ffffff;
+    --text-2: #949494;
+    --text-muted: #e9e9e9;
+    --text-inverted: #131313;
+    --dim-gray: #8c8c8c;
+
+    /* Radius — eight-step nested scale */
+    --r-2: 2px;
+    --r-3: 3px;
+    --r-4: 4px;
+    --r-20: 20px;
+    --r-24: 24px;
+    --r-30: 30px;
+    --r-40: 40px;
+    --r-full: 50%;
+
+    /* Spacing — 8px base */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+    --sp-12: 48px;
+    --sp-16: 64px;
+
+    /* Type — Manuka display (Anton fallback, +0.12 line-height),
+       PolySans workhorse (Space Grotesk), PolySans Mono (Space Mono),
+       FK Roman serif (Newsreader). */
+    --font-display: "Manuka", "Anton", "Archivo Black", Impact, Helvetica, sans-serif;
+    --font-sans: "PolySans", "Space Grotesk", "Hanken Grotesk", Helvetica, Arial, sans-serif;
+    --font-mono: "PolySans Mono", "Space Mono", "JetBrains Mono", "Courier New", monospace;
+    --font-serif: "FK Roman Standard", "Newsreader", Georgia, serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; transition: color 150ms ease; }
+  a:hover { color: var(--link-hover); }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-cyan);
+    outline-offset: 2px;
+    border-radius: var(--r-2);
+  }
+
+  /* ---- Type roles ---- */
+  .manuka-hero { font-family: var(--font-display); font-size: 92px; font-weight: 900; line-height: 0.92; letter-spacing: 1.07px; margin: 0; }
+  .manuka-2 { font-family: var(--font-display); font-size: 72px; font-weight: 900; line-height: 0.92; margin: 0; }
+  .manuka-3 { font-family: var(--font-display); font-size: 56px; font-weight: 900; line-height: 0.92; margin: 0; }
+  .headline-lg { font-family: var(--font-sans); font-size: 34px; font-weight: 700; line-height: 1.05; margin: 0; }
+  .headline-md { font-family: var(--font-sans); font-size: 24px; font-weight: 700; line-height: 1.05; margin: 0; }
+  .headline-sm { font-family: var(--font-sans); font-size: 20px; font-weight: 700; line-height: 1.1; margin: 0; }
+  .whisper { font-family: var(--font-sans); font-size: 20px; font-weight: 300; line-height: 1.2; letter-spacing: 1.9px; text-transform: capitalize; }
+  .kicker { font-family: var(--font-sans); font-size: 12px; font-weight: 400; line-height: 1.3; letter-spacing: 1.8px; text-transform: uppercase; }
+  .kicker-mint { color: var(--mint); }
+  .kicker-uv { color: var(--ultraviolet); }
+  .mono-ts { font-family: var(--font-mono); font-size: 11px; font-weight: 600; line-height: 1.2; letter-spacing: 1.1px; text-transform: uppercase; color: var(--text-2); }
+  .body-relaxed { font-family: var(--font-sans); font-size: 16px; font-weight: 500; line-height: 1.6; }
+  .serif-deck { font-family: var(--font-serif); font-size: 16px; font-weight: 400; line-height: 1.3; letter-spacing: -0.16px; color: var(--text-muted); }
+  .tag {
+    display: inline-block; font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 1.8px; text-transform: uppercase; padding: 4px 10px; border-radius: var(--r-20);
+    color: var(--black);
+  }
+  .tag-mint { background: var(--mint); }
+  .tag-uv { background: var(--ultraviolet); color: var(--white); }
+
+  /* ---- Buttons ---- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 600; line-height: 2;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 10px 24px; border: 0; border-radius: var(--r-24);
+    transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  }
+  .btn-primary { background: var(--mint); color: var(--black); }
+  .btn-primary:hover { background: rgba(255,255,255,0.2); color: var(--black); box-shadow: 0 0 0 1px #c2c2c2; }
+  .btn-primary:active { background: rgba(140,140,140,0.87); opacity: 0.5; box-shadow: 0 0 0 1px var(--dim-gray); }
+  .btn-secondary { background: var(--slate); color: var(--text-muted); font-family: var(--font-sans); font-weight: 700; text-transform: none; letter-spacing: 0; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.2); color: var(--black); box-shadow: 0 0 0 1px #c2c2c2; }
+  .btn-outline-mint { background: transparent; color: var(--mint); border: 1px solid var(--mint); border-radius: var(--r-40); }
+  .btn-outline-mint:hover { background: var(--mint); color: var(--black); }
+  .btn-outline-uv { background: transparent; color: var(--ultraviolet); border: 1px solid var(--ultraviolet); border-radius: var(--r-30); }
+  .btn-outline-uv:hover { background: var(--ultraviolet); color: var(--white); }
+
+  /* ---- Nav ---- */
+  header { border-bottom: 1px solid var(--image-frame); background: var(--canvas); position: sticky; top: 0; z-index: 20; }
+  .topnav { display: flex; align-items: center; gap: var(--sp-6); padding: var(--sp-4) var(--sp-12); max-width: 1300px; margin: 0 auto; }
+  .brand { font-family: var(--font-display); font-size: 28px; font-weight: 900; letter-spacing: 0.5px; }
+  .nav-links { display: flex; gap: var(--sp-5); list-style: none; margin: 0; padding: 0; flex: 1; }
+  .nav-links a { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); padding-bottom: 4px; }
+  .nav-links a[aria-current="true"] { box-shadow: 0 -1px 0 0 inset var(--mint); }
+
+  .wrap { max-width: 1300px; margin: 0 auto; padding: 0 var(--sp-12); }
+  section { padding: var(--sp-16) 0; }
+
+  /* ---- Masthead hero ---- */
+  .masthead { text-align: left; padding-top: var(--sp-12); }
+  .masthead .whisper { display: block; margin-bottom: var(--sp-4); color: var(--white); }
+  .masthead .manuka-hero { margin-bottom: var(--sp-6); }
+  .masthead .cta-row { display: flex; gap: var(--sp-3); flex-wrap: wrap; margin-top: var(--sp-6); }
+
+  /* ---- StoryStream timeline ---- */
+  .stream-h { display: flex; align-items: baseline; gap: var(--sp-4); margin-bottom: var(--sp-6); }
+  .stream {
+    display: flex; flex-direction: column; gap: var(--sp-4);
+    border-left: 1px solid var(--purple-rule); padding-left: var(--sp-6);
+  }
+  .story {
+    position: relative; border-radius: var(--r-20); padding: var(--sp-6);
+    background: var(--canvas); border: 1px solid var(--white);
+  }
+  .story::before {
+    content: ""; position: absolute; left: calc(-1 * var(--sp-6) - 5px); top: 22px;
+    width: 8px; height: 8px; border-radius: var(--r-full); background: var(--mint);
+  }
+  .story .mono-ts { display: block; margin-bottom: var(--sp-2); }
+  .story .headline-md { margin-bottom: var(--sp-2); }
+  .story:hover .headline-md { color: var(--link-hover); }
+  /* Saturated color-block tiles that break the rhythm */
+  .story--mint { background: var(--mint); border: 0; color: var(--text-inverted); }
+  .story--mint .mono-ts, .story--mint .kicker { color: rgba(0,0,0,0.7); }
+  .story--mint .headline-md { color: var(--black); }
+  .story--uv { background: rgba(82,0,255,0.9); border: 0; color: var(--white); }
+  .story--uv .mono-ts { color: rgba(255,255,255,0.7); }
+  .story--yellow { background: #ffe14d; border: 0; color: var(--text-inverted); }
+  .story--yellow .mono-ts, .story--yellow .headline-md { color: var(--black); }
+  .story-img { aspect-ratio: 16/9; border-radius: var(--r-4); border: 1px solid var(--image-frame); margin-top: var(--sp-4); background: linear-gradient(135deg,#2a2a2a,#0d0d0d); }
+  .story--mint .story-img { border-color: var(--mint-border); background: linear-gradient(135deg,#2bbf9a,#0d7a5c); }
+
+  /* ---- Feature grid ---- */
+  .feature-grid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-6); }
+  .feature-card { border: 1px solid var(--white); border-radius: var(--r-24); padding: var(--sp-8); }
+  .feature-card .feature-img { aspect-ratio: 16/9; border-radius: var(--r-4); background: linear-gradient(135deg,#3a1d6e,#131313); margin-bottom: var(--sp-4); }
+  .side-stack { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+  /* ---- Input / form ---- */
+  .signup { border: 1px solid var(--ultraviolet); border-radius: var(--r-24); padding: var(--sp-8); }
+  .field { margin-bottom: var(--sp-4); max-width: 420px; }
+  .field label { display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-2); margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 10px 14px; border-radius: var(--r-2);
+    background: var(--canvas); border: 1px solid var(--white); color: var(--white);
+    font-family: var(--font-sans); font-size: 15px;
+  }
+  .field input::placeholder { color: var(--text-2); }
+  .field input:focus { outline: none; border-color: var(--mint); }
+  .field.error input { border-color: var(--ultraviolet); }
+
+  /* ---- Footer ---- */
+  footer { border-top: 1px solid var(--image-frame); background: var(--canvas); padding: var(--sp-12) 0; }
+  .footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--sp-8); flex-wrap: wrap; }
+  .footer-word { font-family: var(--font-display); font-size: 56px; font-weight: 900; }
+  .footer-cols { display: flex; gap: var(--sp-12); flex-wrap: wrap; }
+  .footer-cols nav { display: flex; flex-direction: column; gap: var(--sp-2); }
+  .footer-cols a { font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-2); }
+  .legal { margin-top: var(--sp-8); font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.1px; text-transform: uppercase; color: var(--text-2); }
+  .legal a { color: var(--mint); }
+
+  @media (max-width: 1023px) {
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767px) {
+    .wrap, .topnav { padding-left: var(--sp-6); padding-right: var(--sp-6); }
+    .manuka-hero { font-size: 54px; }
+    .nav-links { display: none; }
+    .footer-word { font-size: 40px; }
+  }
+  @media (max-width: 400px) {
+    .manuka-hero { font-size: 48px; }
+    section { padding: var(--sp-8) 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="topnav" aria-label="Primary">
+    <a class="brand" href="./DESIGN.md">The Verge</a>
+    <ul class="nav-links">
+      <li><a href="./DESIGN.md" aria-current="true">Tech</a></li>
+      <li><a href="./DESIGN.md">Reviews</a></li>
+      <li><a href="./DESIGN.md">Science</a></li>
+      <li><a href="./DESIGN.md">Entertainment</a></li>
+      <li><a href="./DESIGN.md">AI</a></li>
+    </ul>
+    <button class="btn btn-primary">Subscribe</button>
+  </nav>
+</header>
+
+<main class="wrap">
+  <!-- Masthead hero -->
+  <section class="masthead" aria-labelledby="hero-h">
+    <span class="whisper">The signal in the noise</span>
+    <h1 id="hero-h" class="manuka-hero">The future, reviewed at full volume.</h1>
+    <p class="serif-deck" style="max-width:60ch">Congressional hearings and synthesizer reviews on the same feed — serious enough for the record, loud enough for the club.</p>
+    <div class="cta-row">
+      <button class="btn btn-primary">Join the Stream</button>
+      <button class="btn btn-outline-uv">Subscribe</button>
+    </div>
+  </section>
+
+  <!-- StoryStream timeline -->
+  <section aria-labelledby="stream-h">
+    <div class="stream-h">
+      <span class="tag tag-mint">StoryStream</span>
+      <h2 id="stream-h" class="headline-lg">The latest</h2>
+    </div>
+    <div class="stream">
+      <article class="story">
+        <span class="mono-ts">Jul 06 · 14:02</span>
+        <p class="kicker kicker-mint">Hardware</p>
+        <h3 class="headline-md">A new handheld enters the arena — and it runs everything</h3>
+        <p class="serif-deck">Our hands-on with the console that wants to replace your bag of gadgets.</p>
+        <div class="story-img" role="img" aria-label="Story image"></div>
+      </article>
+
+      <article class="story story--mint">
+        <span class="mono-ts">Jul 06 · 12:30</span>
+        <p class="kicker">Breaking</p>
+        <h3 class="headline-md">The chip war just found a new front line</h3>
+      </article>
+
+      <article class="story">
+        <span class="mono-ts">Jul 06 · 11:15</span>
+        <p class="kicker kicker-uv">Policy</p>
+        <h3 class="headline-md">Inside the hearing that could rewrite platform liability</h3>
+        <p class="serif-deck">Five hours of testimony, condensed into what actually matters.</p>
+      </article>
+
+      <article class="story story--uv">
+        <span class="mono-ts">Jul 06 · 09:48</span>
+        <p class="kicker">Review</p>
+        <h3 class="headline-md">This synth is a time machine with a USB-C port</h3>
+      </article>
+
+      <article class="story story--yellow">
+        <span class="mono-ts">Jul 06 · 08:20</span>
+        <p class="kicker">Science</p>
+        <h3 class="headline-md">The telescope found something it wasn't looking for</h3>
+      </article>
+    </div>
+  </section>
+
+  <!-- Feature grid -->
+  <section aria-labelledby="feature-h">
+    <div class="stream-h">
+      <span class="tag tag-uv">Feature</span>
+      <h2 id="feature-h" class="headline-lg">Top story</h2>
+    </div>
+    <div class="feature-grid">
+      <article class="feature-card">
+        <div class="feature-img" role="img" aria-label="Feature image"></div>
+        <p class="kicker kicker-mint">The big read</p>
+        <h3 class="manuka-3">The company betting the whole grid on batteries</h3>
+        <p class="body-relaxed">Inside the gigafactory rewriting how a country keeps its lights on.</p>
+        <p style="margin-top:var(--sp-4)"><button class="btn btn-outline-mint">Read the story</button></p>
+      </article>
+      <div class="side-stack">
+        <article class="feature-card" style="padding:var(--sp-6)">
+          <p class="kicker">Explainer</p>
+          <h4 class="headline-sm">What a "reasoning" model actually does</h4>
+        </article>
+        <article class="feature-card" style="padding:var(--sp-6)">
+          <p class="kicker">Verge Deals</p>
+          <h4 class="headline-sm">The gear our editors actually bought this week</h4>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signup form -->
+  <section aria-labelledby="signup-h">
+    <div class="signup">
+      <p class="kicker kicker-uv">Newsletter</p>
+      <h2 id="signup-h" class="headline-lg" style="margin-bottom:var(--sp-4)">Get the Stream in your inbox</h2>
+      <form novalidate>
+        <div class="field">
+          <label for="verge-email">Email address</label>
+          <input id="verge-email" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <button class="btn btn-primary" type="submit">Sign me up</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer aria-label="Site footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <p class="footer-word">The Verge</p>
+      <div class="footer-cols">
+        <nav aria-label="Sections">
+          <a href="./DESIGN.md">Tech</a><a href="./DESIGN.md">Reviews</a><a href="./DESIGN.md">Science</a>
+        </nav>
+        <nav aria-label="More">
+          <a href="./DESIGN.md">Newsletters</a><a href="./DESIGN.md">Podcasts</a><a href="./DESIGN.md">Video</a>
+        </nav>
+        <nav aria-label="About">
+          <a href="./DESIGN.md">About</a><a href="./DESIGN.md">Ethics</a><a href="./DESIGN.md">Contact</a>
+        </nav>
+      </div>
+    </div>
+    <p class="legal">© 2026 Vox Media · Design tokens sourced from <a href="./DESIGN.md">DESIGN.md</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!-- source_content_hash: 716ce8431f47eb8b8135552710e3c4d538bccccf1202e4ceac5428c9aada9972 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Figma — Component Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     Figma — Design tokens (from DESIGN.md front matter)
+     Monochrome editorial chrome interrupted by oversized pastel color blocks.
+     figmaSans -> Inter (fine weights) / figmaMono -> JetBrains Mono.
+     Pill is the only button shape. Weight, not opacity, carries hierarchy.
+     ============================================================ */
+  :root {
+    /* --- Colors: brand & accent --- */
+    --primary: #000000;
+    --on-primary: #ffffff;
+    --ink: #000000;
+    --canvas: #ffffff;
+    --inverse-canvas: #000000;
+    --inverse-ink: #ffffff;
+    --hairline: #e6e6e6;
+    --hairline-soft: #f1f1f1;
+    --surface-soft: #f7f7f5;
+    /* pastel color blocks — sticky-note vocabulary */
+    --block-lime: #dceeb1;
+    --block-lilac: #c5b0f4;
+    --block-cream: #f4ecd6;
+    --block-pink: #efd4d4;
+    --block-mint: #c8e6cd;
+    --block-coral: #f3c9b6;
+    --block-navy: #1f1d3d;
+    --accent-magenta: #ff3d8b;  /* single promo pink — one shot per page */
+    --semantic-success: #1ea64a;
+
+    /* --- Typography --- */
+    --font-sans: 'Inter', 'SF Pro Display', system-ui, helvetica, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', menlo, monospace;
+
+    /* --- Rounded --- */
+    --r-xs: 2px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 24px;
+    --r-xl: 32px;
+    --r-pill: 50px;
+    --r-full: 9999px;
+
+    /* --- Spacing (base 8) --- */
+    --sp-hair: 1px;
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+    --sp-section: 96px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-weight: 320;
+    font-size: 18px;
+    line-height: 1.45;
+    letter-spacing: -0.26px;
+    font-feature-settings: "kern";
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--block-lilac); color: var(--ink); }
+  a { color: inherit; }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-xl); }
+
+  /* --- Type scale (figmaSans fine weights) --- */
+  .display-xl { font-size: clamp(48px, 9vw, 86px); font-weight: 340; line-height: 1; letter-spacing: -1.72px; }
+  .display-lg { font-size: clamp(40px, 6vw, 64px); font-weight: 340; line-height: 1.1; letter-spacing: -0.96px; }
+  .headline   { font-size: 26px; font-weight: 540; line-height: 1.35; letter-spacing: -0.26px; }
+  .subhead    { font-size: 26px; font-weight: 340; line-height: 1.35; letter-spacing: -0.26px; }
+  .card-title { font-size: 24px; font-weight: 700; line-height: 1.45; letter-spacing: 0; }
+  .body-lg    { font-size: 20px; font-weight: 330; line-height: 1.4; letter-spacing: -0.14px; }
+  .body-sm    { font-size: 16px; font-weight: 330; line-height: 1.45; letter-spacing: -0.14px; }
+  .eyebrow    { font-family: var(--font-mono); font-size: 15px; font-weight: 400; line-height: 1.3; letter-spacing: 0.54px; text-transform: uppercase; }
+  .caption    { font-family: var(--font-mono); font-size: 12px; font-weight: 400; line-height: 1.2; letter-spacing: 0.6px; text-transform: uppercase; }
+
+  /* --- Buttons (pill only) --- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-xs);
+    font-family: inherit; font-size: 20px; font-weight: 480; line-height: 1.4; letter-spacing: -0.1px;
+    padding: 10px 20px; border-radius: var(--r-pill);
+    border: 1px solid transparent; cursor: pointer; text-decoration: none;
+    transition: transform .15s ease, background .15s ease, opacity .15s ease;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { opacity: .88; }
+  .btn-secondary { background: var(--canvas); color: var(--ink); padding: 8px 18px 10px; border-color: var(--hairline); }
+  .btn-secondary:hover { background: var(--surface-soft); }
+  .btn-magenta { background: var(--accent-magenta); color: var(--on-primary); padding: 10px 18px; }
+  .btn-magenta:hover { opacity: .9; }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,.25); }
+  .on-dark .btn-secondary { background: transparent; color: var(--inverse-ink); border-color: rgba(255,255,255,.3); }
+
+  .icon-btn { width: 40px; height: 40px; border-radius: var(--r-full); background: var(--surface-soft); border: none; display: grid; place-items: center; cursor: pointer; }
+  .icon-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,.25); }
+
+  /* --- Nav --- */
+  .nav { position: sticky; top: 0; z-index: 30; background: rgba(255,255,255,.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline); }
+  .nav .wrap { display: flex; align-items: center; gap: var(--sp-lg); height: 64px; }
+  .brand { display: flex; align-items: center; gap: var(--sp-xs); font-weight: 540; font-size: 20px; letter-spacing: -0.4px; text-decoration: none; color: var(--ink); }
+  .nav-links { display: flex; gap: var(--sp-lg); margin-left: var(--sp-sm); }
+  .nav-links a { text-decoration: none; font-size: 16px; font-weight: 330; color: var(--ink); }
+  .nav-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .nav-spacer { flex: 1; }
+  .nav-right { display: flex; align-items: center; gap: var(--sp-sm); }
+  .nav a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,.2); border-radius: var(--r-xs); }
+
+  /* --- Marquee strip (black) --- */
+  .marquee { background: var(--inverse-canvas); color: var(--inverse-ink); height: 36px; display: flex; align-items: center; overflow: hidden; }
+  .marquee .wrap { display: flex; gap: var(--sp-xl); align-items: center; }
+  .marquee span { font-size: 14px; font-weight: 330; opacity: .8; white-space: nowrap; }
+
+  /* --- Sections --- */
+  section { padding: var(--sp-section) 0; }
+  .hero { text-align: center; padding: var(--sp-section) 0; }
+  .hero .eyebrow { display: inline-block; margin-bottom: var(--sp-lg); }
+  .hero h1 { margin: 0 auto var(--sp-lg); max-width: 16ch; }
+  .hero .lead { margin: 0 auto var(--sp-xl); max-width: 40ch; }
+  .hero-actions { display: flex; gap: var(--sp-sm); justify-content: center; flex-wrap: wrap; }
+
+  /* --- Product mock frame --- */
+  .mock-frame { margin-top: var(--sp-xxl); border: 1px solid var(--hairline); border-radius: var(--r-md); overflow: hidden; background: var(--surface-soft); }
+  .mock-bar { display: flex; align-items: center; gap: var(--sp-xs); padding: var(--sp-sm) var(--sp-md); border-bottom: 1px solid var(--hairline); background: var(--canvas); }
+  .mock-bar .d { width: 10px; height: 10px; border-radius: var(--r-full); }
+  .mock-canvas { position: relative; height: 360px; background:
+      repeating-linear-gradient(0deg, transparent, transparent 31px, var(--hairline-soft) 31px, var(--hairline-soft) 32px),
+      repeating-linear-gradient(90deg, transparent, transparent 31px, var(--hairline-soft) 31px, var(--hairline-soft) 32px),
+      var(--canvas); }
+  .sticky { position: absolute; padding: var(--sp-md); border-radius: var(--r-sm); font-size: 14px; font-weight: 400; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+
+  /* --- Color-block sections (signature) --- */
+  .color-block { border-radius: var(--r-lg); padding: var(--sp-xxl); }
+  .cb-lime { background: var(--block-lime); }
+  .cb-lilac { background: var(--block-lilac); }
+  .cb-cream { background: var(--block-cream); }
+  .cb-coral { background: var(--block-coral); }
+  .cb-navy { background: var(--block-navy); color: var(--inverse-ink); }
+  .color-block .inner { max-width: 60%; }
+  .color-block .eyebrow { display: inline-block; margin-bottom: var(--sp-md); }
+  .color-block h2 { margin: 0 0 var(--sp-md); }
+  .color-block p { margin: 0 0 var(--sp-lg); }
+
+  /* --- Template grid --- */
+  .tpl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-md); }
+  .tpl-card { background: var(--surface-soft); border-radius: var(--r-md); padding: var(--sp-md); }
+  .tpl-thumb { height: 120px; border-radius: var(--r-sm); margin-bottom: var(--sp-sm); }
+  .tpl-card .caption { color: var(--ink); }
+
+  /* --- Pricing --- */
+  .pricing-tabs { display: flex; gap: var(--sp-xs); justify-content: center; margin-bottom: var(--sp-xl); flex-wrap: wrap; }
+  .p-tab { background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline); border-radius: var(--r-pill); padding: 8px 18px; font-size: 20px; font-weight: 480; cursor: pointer; }
+  .p-tab[aria-selected="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .p-tab:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,.25); }
+  .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-md); }
+  .price-card { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--sp-lg); display: flex; flex-direction: column; }
+  .price-amt { font-size: 40px; font-weight: 340; letter-spacing: -0.96px; line-height: 1; margin: var(--sp-sm) 0 var(--sp-xxs); }
+  .price-amt span { font-size: 16px; font-weight: 330; }
+  .plist { list-style: none; margin: var(--sp-md) 0 var(--sp-lg); padding: 0; display: grid; gap: var(--sp-sm); flex: 1; }
+  .plist li { display: flex; gap: var(--sp-xs); align-items: flex-start; font-size: 16px; font-weight: 330; }
+  .check { color: var(--semantic-success); flex: none; }
+
+  /* --- Promo banner (lilac) --- */
+  .promo { background: var(--block-lilac); border-radius: var(--r-md); padding: var(--sp-md) var(--sp-lg); display: flex; align-items: center; justify-content: space-between; gap: var(--sp-md); flex-wrap: wrap; }
+  .promo p { margin: 0; font-size: 16px; font-weight: 330; }
+
+  /* --- Contact form on lime block --- */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-md); max-width: 640px; }
+  .field { display: flex; flex-direction: column; gap: var(--sp-xs); }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 16px; font-weight: 480; }
+  .text-input { font-family: inherit; font-size: 18px; font-weight: 320; color: var(--ink); background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-md); padding: 12px 14px; }
+  .text-input:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,.2); border-color: var(--ink); }
+
+  /* --- Footer --- */
+  footer.site { border-top: 1px solid var(--hairline); }
+  footer.site .wrap { padding: var(--sp-section) var(--sp-xl); }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: var(--sp-lg); }
+  .foot-col h4 { margin: 0 0 var(--sp-sm); }
+  .foot-col a { display: block; text-decoration: none; color: var(--ink); font-size: 16px; font-weight: 330; padding: var(--sp-xxs) 0; }
+  .foot-col a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .foot-col a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,.2); border-radius: var(--r-xs); }
+  .foot-legal { margin-top: var(--sp-xl); padding-top: var(--sp-lg); border-top: 1px solid var(--hairline-soft); display: flex; justify-content: space-between; gap: var(--sp-md); flex-wrap: wrap; }
+
+  /* --- Responsive --- */
+  @media (max-width: 960px) {
+    .tpl-grid { grid-template-columns: repeat(2, 1fr); }
+    .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .color-block .inner { max-width: 100%; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 767px) {
+    .nav-links { display: none; }
+    .color-block { border-radius: 0; margin: 0 calc(-1 * var(--sp-xl)); }
+    .form-grid { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .pricing-grid, .tpl-grid { grid-template-columns: 1fr; }
+    .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav">
+    <div class="wrap">
+      <a href="./DESIGN.md" class="brand" aria-label="Figma home">
+        <svg width="20" height="30" viewBox="0 0 20 30" fill="none" aria-hidden="true"><circle cx="15" cy="15" r="5" fill="#1abcfe"/><path d="M0 5a5 5 0 0 1 5-5h5v10H5A5 5 0 0 1 0 5Z" fill="#f24e1e"/><path d="M5 10h5v10H5A5 5 0 0 1 5 10Z" fill="#a259ff"/><path d="M10 0h5a5 5 0 0 1 0 10h-5V0Z" fill="#ff7262"/><path d="M5 20h5v5a5 5 0 1 1-5-5Z" fill="#0acf83"/></svg>
+        Figma
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Design</a>
+        <a href="./DESIGN.md">FigJam</a>
+        <a href="./DESIGN.md">Dev Mode</a>
+        <a href="./DESIGN.md">Pricing</a>
+      </nav>
+      <span class="nav-spacer"></span>
+      <div class="nav-right">
+        <a href="./DESIGN.md" class="btn btn-secondary">Contact sales</a>
+        <a href="./DESIGN.md" class="btn btn-primary">Get started for free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== MARQUEE ===================== -->
+  <div class="marquee" aria-hidden="true">
+    <div class="wrap">
+      <span>Google</span><span>Netflix</span><span>Airbnb</span><span>Spotify</span><span>Stripe</span><span>GitHub</span><span>Notion</span><span>Uber</span>
+    </div>
+  </div>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow">Think bigger · Build faster</span>
+      <h1 class="display-xl">Where teams design together.</h1>
+      <p class="lead body-lg">Figma is the collaborative interface design tool — from first idea to final handoff, all in the browser.</p>
+      <div class="hero-actions">
+        <a href="./DESIGN.md" class="btn btn-primary">Get started for free</a>
+        <a href="./DESIGN.md" class="btn btn-secondary">Contact sales</a>
+      </div>
+
+      <div class="mock-frame" role="img" aria-label="A Figma canvas with layered sticky notes and design frames">
+        <div class="mock-bar">
+          <span class="d" style="background:#ff5f56"></span><span class="d" style="background:#ffbd2e"></span><span class="d" style="background:#27c93f"></span>
+          <span class="caption" style="margin-left:8px">Untitled — Figma</span>
+        </div>
+        <div class="mock-canvas">
+          <div class="sticky" style="left:8%;top:14%;background:var(--block-lime);transform:rotate(-4deg)">Research</div>
+          <div class="sticky" style="left:32%;top:24%;background:var(--block-lilac);transform:rotate(3deg)">Wireframe</div>
+          <div class="sticky" style="left:58%;top:12%;background:var(--block-pink);transform:rotate(-2deg)">Prototype</div>
+          <div class="sticky" style="left:20%;top:52%;background:var(--block-cream);transform:rotate(2deg)">Design system</div>
+          <div class="sticky" style="left:52%;top:54%;background:var(--block-mint);transform:rotate(-3deg)">Handoff</div>
+          <div class="sticky" style="left:74%;top:42%;background:var(--block-coral);transform:rotate(4deg)">Ship it</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COLOR BLOCK: LIME (systems) ===================== -->
+  <section>
+    <div class="wrap">
+      <div class="color-block cb-lime">
+        <div class="inner">
+          <span class="eyebrow">Design systems</span>
+          <h2 class="display-lg">One source of truth, shared by everyone.</h2>
+          <p class="subhead">Build components once, reuse them everywhere. Styles, variables, and libraries keep every team in sync.</p>
+          <a href="./DESIGN.md" class="btn btn-primary">Explore libraries</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COLOR BLOCK: NAVY (ship products) ===================== -->
+  <section class="on-dark" style="padding-top:0">
+    <div class="wrap">
+      <div class="color-block cb-navy">
+        <div class="inner">
+          <span class="eyebrow">Dev Mode</span>
+          <h2 class="display-lg">From design to shipped, without the guesswork.</h2>
+          <p class="subhead">Dev Mode turns designs into a developer-ready workspace — specs, code snippets, and status, all in one place.</p>
+          <a href="./DESIGN.md" class="btn btn-secondary">See Dev Mode</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COLOR BLOCK: CORAL (developer) ===================== -->
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="color-block cb-coral">
+        <div class="inner">
+          <span class="eyebrow">FigJam</span>
+          <h2 class="display-lg">Brainstorm together, on an infinite canvas.</h2>
+          <p class="subhead">Sticky notes, diagrams, and widgets — FigJam is where ideas take shape before they become designs.</p>
+          <a href="./DESIGN.md" class="btn btn-primary">Try FigJam</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TEMPLATE GRID ===================== -->
+  <section>
+    <div class="wrap">
+      <span class="eyebrow" style="display:block;margin-bottom:var(--sp-md)">Explore what people are making</span>
+      <h2 class="display-lg" style="margin:0 0 var(--sp-xl);max-width:20ch">Kickstart your next file with a community template.</h2>
+      <div class="tpl-grid">
+        <article class="tpl-card"><div class="tpl-thumb" style="background:var(--block-lilac)"></div><p class="caption">Mobile UI kit</p></article>
+        <article class="tpl-card"><div class="tpl-thumb" style="background:var(--block-mint)"></div><p class="caption">Brainstorm board</p></article>
+        <article class="tpl-card"><div class="tpl-thumb" style="background:var(--block-cream)"></div><p class="caption">Design system</p></article>
+        <article class="tpl-card"><div class="tpl-thumb" style="background:var(--block-pink)"></div><p class="caption">Slide deck</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRICING ===================== -->
+  <section>
+    <div class="wrap">
+      <span class="eyebrow" style="display:block;text-align:center;margin-bottom:var(--sp-md)">Pricing</span>
+      <h2 class="display-lg" style="text-align:center;margin:0 0 var(--sp-xl)">Plans for every team.</h2>
+      <div class="pricing-tabs" role="tablist" aria-label="Plans">
+        <button class="p-tab" role="tab" aria-selected="true">Starter</button>
+        <button class="p-tab" role="tab" aria-selected="false">Professional</button>
+        <button class="p-tab" role="tab" aria-selected="false">Organization</button>
+        <button class="p-tab" role="tab" aria-selected="false">Enterprise</button>
+      </div>
+      <div class="pricing-grid">
+        <article class="price-card">
+          <span class="card-title">Starter</span>
+          <div class="price-amt">Free</div>
+          <p class="body-sm">For individuals getting started.</p>
+          <ul class="plist">
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> 3 Figma files</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlimited collaborators</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-secondary">Get started</a>
+        </article>
+        <article class="price-card">
+          <span class="card-title">Professional</span>
+          <div class="price-amt">$16 <span>/ editor / mo</span></div>
+          <p class="body-sm">For growing teams.</p>
+          <ul class="plist">
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlimited files</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Shared libraries</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-primary">Buy now</a>
+        </article>
+        <article class="price-card">
+          <span class="card-title">Organization</span>
+          <div class="price-amt">$45 <span>/ editor / mo</span></div>
+          <p class="body-sm">For scaling design orgs.</p>
+          <ul class="plist">
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Org-wide libraries</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Design system analytics</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-secondary">Buy now</a>
+        </article>
+        <article class="price-card">
+          <span class="card-title">Enterprise</span>
+          <div class="price-amt">$75 <span>/ editor / mo</span></div>
+          <p class="body-sm">For the largest companies.</p>
+          <ul class="plist">
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Advanced security</li>
+            <li><svg class="check" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 6.5 12 13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Dedicated support</li>
+          </ul>
+          <a href="./DESIGN.md" class="btn btn-secondary">Contact sales</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACT (lime block + promo banner) ===================== -->
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="promo" style="margin-bottom:var(--sp-md)">
+        <p><strong style="font-weight:480">Config 2026</strong> — Figma's flagship conference. Save your spot before tickets sell out.</p>
+        <a href="./DESIGN.md" class="btn btn-magenta">Save your spot</a>
+      </div>
+      <div class="color-block cb-lime">
+        <span class="eyebrow" style="display:block;margin-bottom:var(--sp-md)">Talk to us</span>
+        <h2 class="display-lg" style="margin:0 0 var(--sp-lg);max-width:18ch">Let's find the right plan for your team.</h2>
+        <form class="form-grid" onsubmit="return false">
+          <div class="field"><label for="fname">First name</label><input id="fname" class="text-input" type="text" autocomplete="given-name" /></div>
+          <div class="field"><label for="lname">Last name</label><input id="lname" class="text-input" type="text" autocomplete="family-name" /></div>
+          <div class="field full"><label for="wemail">Work email</label><input id="wemail" class="text-input" type="email" autocomplete="email" /></div>
+          <div class="field full"><a href="./DESIGN.md" class="btn btn-primary" style="justify-self:start">Contact sales</a></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-col">
+          <a href="./DESIGN.md" class="brand" style="margin-bottom:var(--sp-sm)">Figma</a>
+          <p class="body-sm">The collaborative interface design tool.</p>
+        </div>
+        <div class="foot-col">
+          <h4 class="caption">Product</h4>
+          <a href="./DESIGN.md">Design</a><a href="./DESIGN.md">FigJam</a><a href="./DESIGN.md">Dev Mode</a><a href="./DESIGN.md">Slides</a>
+        </div>
+        <div class="foot-col">
+          <h4 class="caption">Resources</h4>
+          <a href="./DESIGN.md">Community</a><a href="./DESIGN.md">Templates</a><a href="./DESIGN.md">Learn</a><a href="./DESIGN.md">Blog</a>
+        </div>
+        <div class="foot-col">
+          <h4 class="caption">Company</h4>
+          <a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Contact</a><a href="./DESIGN.md">Press</a>
+        </div>
+        <div class="foot-col">
+          <h4 class="caption">Legal</h4>
+          <a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a><a href="./DESIGN.md">Security</a>
+        </div>
+      </div>
+      <div class="foot-legal">
+        <span class="caption">© 2026 Figma, Inc.</span>
+        <span class="caption">Tokens from <a href="./DESIGN.md" style="text-decoration:underline">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

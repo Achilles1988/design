@@ -1,0 +1,478 @@
+<!-- source_content_hash: ea1c442de2b23443f79af46524a81f33951606c8ff043ea9c25ba886264fbdd8 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sanity — Component Preview</title>
+<style>
+  /* ============================================================
+     SANITY design tokens — mapped from DESIGN.md
+     A nocturnal command center: near-black canvas, pure achromatic
+     gray ramp, extreme negative-tracked display type, vivid accent
+     punctuation (coral CTA + electric-blue universal hover),
+     pill CTAs vs 3-6px rects, colorimetric depth (no drop shadows).
+     ============================================================ */
+  :root {
+    /* Brand & accent */
+    --sanity-red: #f36458;      /* primary CTA / brand accent (warm coral) */
+    --blue: #0052ef;            /* universal hover/active + focus ring */
+    --blue-light: #55beff;
+    --blue-dim: #afe3ff;
+    --green: #19d600;           /* neon green (sRGB fallback of p3) */
+    --magenta: #f500ff;
+
+    /* Surface (achromatic ladder) */
+    --canvas: #0b0b0b;          /* near-black default */
+    --black: #000000;           /* max contrast */
+    --surface: #212121;         /* elevated cards / inputs */
+    --surface-2: #353535;       /* prominent surface / border */
+    --light: #ededed;           /* inverted light surface */
+    --white: #ffffff;
+
+    /* Borders (pure achromatic) */
+    --border-dark: #0b0b0b;
+    --border-subtle: #212121;
+    --border-medium: #353535;
+
+    /* Text */
+    --ink: #ffffff;             /* primary on dark */
+    --silver: #b9b9b9;          /* secondary/body on dark */
+    --gray: #797979;            /* tertiary/meta */
+    --charcoal: #212121;        /* text on light */
+
+    /* Semantic */
+    --error: #dd0000;
+    --success: #19d600;
+
+    /* Radius — jumps 12px → pill, nothing in between */
+    --r-xs: 3px;
+    --r-sm: 5px;
+    --r-md: 6px;
+    --r-lg: 12px;
+    --r-pill: 99999px;
+
+    /* Spacing (8px base) */
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-5: 24px;
+    --s-6: 32px;
+    --s-7: 48px;
+    --s-8: 64px;
+    --s-9: 96px;
+
+    /* Type — waldenburgNormal → Space Grotesk/Inter; IBM Plex Mono */
+    --font-sans: "Space Grotesk", Inter, "waldenburgNormal Fallback", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", "ibmPlexMono Fallback", ui-monospace, Menlo, monospace;
+
+    --maxw: 1200px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; transition: color .15s; }
+  a:hover { color: var(--blue); }
+
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s-6); }
+
+  /* ---------- Type helpers (extreme negative tracking at scale) ---------- */
+  .display  { font-size: clamp(48px, 9vw, 112px); font-weight: 400; line-height: 1.0; letter-spacing: -4.48px; }
+  .h-hero   { font-size: clamp(40px, 6vw, 72px); font-weight: 400; line-height: 1.05; letter-spacing: -2.88px; }
+  .h-sec    { font-size: clamp(32px, 4vw, 48px); font-weight: 400; line-height: 1.08; letter-spacing: -1.68px; }
+  .h-lg     { font-size: 38px; font-weight: 400; line-height: 1.10; letter-spacing: -1.14px; }
+  .h-md     { font-size: 24px; font-weight: 425; line-height: 1.24; letter-spacing: -0.24px; }
+  .body-lg  { font-size: 18px; line-height: 1.5; letter-spacing: -0.18px; color: var(--silver); }
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 12px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0; color: var(--gray);
+  }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,11,11,0.8); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .nav .wrap { display: flex; align-items: center; gap: var(--s-5); height: 60px; }
+  .brand { display: flex; align-items: center; gap: var(--s-2); font-size: 18px; font-weight: 400; letter-spacing: -0.4px; }
+  .brand svg { display: block; }
+  .nav-links { display: flex; gap: var(--s-5); margin-left: var(--s-4); }
+  .nav-links a { font-size: 16px; color: var(--silver); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-4); }
+  .nav-right .signin { font-size: 16px; color: var(--silver); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: var(--font-sans); font-size: 16px; font-weight: 400;
+    cursor: pointer; border: none; transition: background .15s, color .15s;
+  }
+  .btn-primary { background: var(--sanity-red); color: var(--white); padding: 8px 16px; border-radius: var(--r-pill); }
+  .btn-primary:hover { background: var(--blue); color: var(--white); }
+  .btn-dark { background: var(--canvas); color: var(--silver); padding: 8px 12px; border-radius: var(--r-pill); }
+  .btn-dark:hover { background: var(--blue); color: var(--white); }
+  .btn-outline { background: var(--white); color: var(--canvas); padding: 8px 16px; border-radius: var(--r-pill); border: 1px solid var(--canvas); }
+  .btn-outline:hover { background: var(--blue); color: var(--white); }
+  .btn-ghost { background: var(--surface); color: var(--silver); padding: 6px 12px; border-radius: var(--r-sm); border: 1px solid var(--surface); }
+  .btn-ghost:hover { background: var(--blue); color: var(--white); }
+
+  /* ---------- Sections ---------- */
+  section { padding: var(--s-9) 0; }
+  .section-head { max-width: 760px; margin-bottom: var(--s-7); }
+  .section-head .h-sec { margin: var(--s-3) 0 var(--s-4); }
+  .section-head p { color: var(--silver); font-size: 18px; margin: 0; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: var(--s-9) 0 var(--s-8); }
+  .hero .display { margin: var(--s-4) 0 var(--s-5); max-width: 14ch; }
+  .hero p { max-width: 52ch; margin: 0 0 var(--s-6); }
+  .hero-cta { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+
+  /* ---------- Card grid ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--surface-2);
+    border-radius: var(--r-md);
+    padding: var(--s-5);
+  }
+  .card .mono-label { display: block; margin-bottom: var(--s-3); }
+  .card h3 { margin: 0 0 var(--s-2); }
+  .card p { margin: 0; color: var(--silver); font-size: 15px; }
+  .card .ico {
+    width: 36px; height: 36px; display: grid; place-items: center;
+    border: 1px solid var(--surface-2); border-radius: var(--r-sm);
+    margin-bottom: var(--s-4);
+  }
+
+  /* ---------- Code / structured content showcase ---------- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-7); align-items: center; }
+  .code-well {
+    background: var(--black);
+    border: 1px solid var(--surface-2);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 14px; line-height: 1.6;
+  }
+  .code-well .cw-head {
+    display: flex; align-items: center; gap: var(--s-2);
+    padding: 10px var(--s-4); border-bottom: 1px solid var(--border-subtle);
+  }
+  .cw-head .mono-label { margin: 0; }
+  .code-well pre { margin: 0; padding: var(--s-5); overflow-x: auto; white-space: pre; color: var(--silver); }
+  .t-key { color: var(--blue-light); }
+  .t-str { color: var(--green); }
+  .t-fn  { color: var(--sanity-red); }
+  .t-com { color: var(--gray); }
+
+  /* ---------- Pricing ---------- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); align-items: stretch; }
+  .tier {
+    background: var(--surface); border: 1px solid var(--surface-2);
+    border-radius: var(--r-md); padding: var(--s-5);
+    display: flex; flex-direction: column;
+  }
+  .tier.featured { border-color: var(--sanity-red); }
+  .tier .mono-label { margin-bottom: var(--s-3); }
+  .tier .price { font-size: 48px; font-weight: 400; letter-spacing: -1.68px; line-height: 1; margin: 0 0 var(--s-4); }
+  .tier .price span { font-size: 14px; color: var(--gray); letter-spacing: 0; }
+  .tier ul { list-style: none; padding: 0; margin: 0 0 var(--s-5); flex: 1; }
+  .tier li { display: flex; gap: 10px; padding: 8px 0; font-size: 14px; color: var(--silver); border-top: 1px solid var(--border-subtle); }
+  .tier li:first-child { border-top: 0; }
+  .tier li svg { flex: none; margin-top: 2px; }
+
+  /* ---------- Form ---------- */
+  .form-band { max-width: 560px; margin: 0 auto; }
+  .field { margin-bottom: var(--s-4); }
+  .field label { display: block; font-size: 13px; color: var(--silver); margin-bottom: var(--s-2); }
+  .field .help { font-size: 13px; color: var(--gray); margin-top: 6px; }
+  .text-input {
+    width: 100%; background: var(--canvas); color: var(--silver);
+    border: 1px solid var(--border-subtle); border-radius: var(--r-xs);
+    padding: 8px 12px; font-family: var(--font-sans); font-size: 15px;
+  }
+  .text-input::placeholder { color: var(--gray); }
+  .text-input:focus { outline: 2px solid var(--blue); outline-offset: 0; background: #072227; }
+
+  /* ---------- Badges ---------- */
+  .badge { display: inline-flex; align-items: center; font-size: 13px; padding: 6px 12px; border-radius: var(--r-pill); }
+  .badge-filled { background: var(--canvas); color: var(--white); border: 1px solid var(--surface-2); }
+  .badge-subtle { background: var(--white); color: var(--canvas); }
+
+  /* ---------- Logo strip ---------- */
+  .logostrip { display: flex; flex-wrap: wrap; gap: var(--s-6); justify-content: center; align-items: center; }
+  .logostrip span { font-size: 18px; font-weight: 400; letter-spacing: -0.5px; color: var(--gray); }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--canvas); border-top: 1px solid var(--border-subtle); padding: var(--s-8) 0 var(--s-6); }
+  .foot-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--s-5); }
+  .foot-col h5 { font-family: var(--font-mono); font-size: 13px; text-transform: uppercase; color: var(--white); margin: 0 0 var(--s-3); font-weight: 500; }
+  .foot-col a { display: block; font-size: 14px; color: var(--silver); padding: 5px 0; }
+  .foot-brand p { color: var(--gray); font-size: 14px; max-width: 30ch; margin: var(--s-3) 0 0; }
+  .foot-bottom { display: flex; justify-content: space-between; margin-top: var(--s-7); padding-top: var(--s-5); border-top: 1px solid var(--border-subtle); }
+  .foot-bottom span { font-size: 12px; color: var(--gray); }
+
+  hr.divider { border: 0; height: 1px; background: var(--border-subtle); margin: 0; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 960px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .split { grid-template-columns: 1fr; }
+    .pricing { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .wrap { padding: 0 var(--s-4); }
+    section { padding: var(--s-8) 0; }
+    .nav-links { display: none; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr; }
+    .foot-bottom { flex-direction: column; gap: var(--s-3); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./DESIGN.md" aria-label="Sanity home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6h8a4 4 0 0 1 0 8h-4a3 3 0 0 0 0 6h8" stroke="var(--sanity-red)" stroke-width="2" stroke-linecap="round"/></svg>
+        Sanity
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Pricing</a>
+      </nav>
+      <div class="nav-right">
+        <a class="signin" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="mono-label">The Composable Content Cloud</span>
+      <h1 class="display">Structured content, engineered.</h1>
+      <p class="body-lg">A platform for people who live in terminals. Model your content once, deliver it anywhere — with a real-time API and a customizable editing environment.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+        <a class="btn btn-dark" href="./DESIGN.md">Read the docs</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LOGO STRIP ============ -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <p class="mono-label" style="text-align:center; margin-bottom:var(--s-5);">Trusted by structured teams</p>
+      <div class="logostrip">
+        <span>Nike</span><span>Figma</span><span>Sonos</span><span>Cloudflare</span><span>Linear</span><span>Riot</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STRUCTURED CONTENT SPLIT ============ -->
+  <section>
+    <div class="wrap split">
+      <div>
+        <span class="mono-label">GROQ // Query Language</span>
+        <h2 class="h-sec" style="margin:var(--s-3) 0 var(--s-4);">Query content like a control room</h2>
+        <p class="body-lg" style="margin-bottom:var(--s-5);">Fetch exactly the shape you need with GROQ — a precise, expressive query language built for structured content. No overfetching, no ceremony.</p>
+        <a class="btn btn-outline" href="./DESIGN.md">Explore GROQ</a>
+      </div>
+      <div class="code-well" role="group" aria-label="GROQ query example">
+        <div class="cw-head">
+          <span class="mono-label">query.groq</span>
+        </div>
+<pre><span class="t-com">// latest published articles with author</span>
+<span class="t-fn">*</span>[_type == <span class="t-str">"article"</span> &amp;&amp; published]{
+  title,
+  <span class="t-str">"slug"</span>: slug.current,
+  <span class="t-str">"author"</span>: author-&gt;{name, role},
+  publishedAt
+} | <span class="t-key">order</span>(publishedAt <span class="t-key">desc</span>)[0...10]</pre>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ============ FEATURE CARDS ============ -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="mono-label">Platform</span>
+        <h2 class="h-sec">A structured stage for your content</h2>
+        <p>Everything a content-first team needs — modelled, versioned, and delivered in real time.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <div class="ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="7" stroke="var(--blue-light)" stroke-width="1.6"/><rect x="4" y="14" width="16" height="6" stroke="var(--blue-light)" stroke-width="1.6"/></svg></div>
+          <span class="mono-label">STUDIO</span>
+          <h3 class="h-md">Customizable editor</h3>
+          <p>An open-source editing environment you configure in code and deploy anywhere.</p>
+        </article>
+        <article class="card">
+          <div class="ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12h16M12 4v16" stroke="var(--green)" stroke-width="1.6"/></svg></div>
+          <span class="mono-label">CONTENT LAKE</span>
+          <h3 class="h-md">Real-time datastore</h3>
+          <p>A hosted, queryable backend with live updates and a global CDN out of the box.</p>
+        </article>
+        <article class="card">
+          <div class="ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 18V9m6 9V5m6 13v-6" stroke="var(--sanity-red)" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <span class="mono-label">INSIGHTS</span>
+          <h3 class="h-md">Versioned history</h3>
+          <p>Every change tracked. Roll back, diff, and audit content like source code.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ============ PRICING ============ -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="mono-label">Pricing</span>
+        <h2 class="h-sec">Start free, scale precisely</h2>
+        <p>Achromatic and transparent. Only pay for what your content graph demands.</p>
+      </div>
+      <div class="pricing">
+        <article class="tier">
+          <span class="mono-label">FREE</span>
+          <div class="price">$0<span> /mo</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>3 users included</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>10k documents</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>Community support</li>
+          </ul>
+          <a class="btn btn-dark" href="./DESIGN.md">Start free</a>
+        </article>
+        <article class="tier featured">
+          <span class="mono-label" style="color:var(--sanity-red)">GROWTH</span>
+          <div class="price">$15<span> /user</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>Unlimited documents</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>Scheduled publishing</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>Priority support</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>Custom roles</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+        </article>
+        <article class="tier">
+          <span class="mono-label">ENTERPRISE</span>
+          <div class="price">Custom</div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>SSO &amp; SCIM</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>SLA &amp; SOC 2</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--green)" stroke-width="2"/></svg>Dedicated support</li>
+          </ul>
+          <a class="btn btn-ghost" href="./DESIGN.md">Contact sales</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ============ FORM ============ -->
+  <section>
+    <div class="wrap form-band">
+      <div class="section-head" style="text-align:center; margin:0 auto var(--s-6);">
+        <span class="mono-label">Get in touch</span>
+        <h2 class="h-sec">Talk to our team</h2>
+      </div>
+      <form onsubmit="return false">
+        <div class="field">
+          <label for="name">Full name</label>
+          <input class="text-input" id="name" type="text" placeholder="Ada Lovelace" />
+        </div>
+        <div class="field">
+          <label for="email">Work email</label>
+          <input class="text-input" id="email" type="email" placeholder="you@company.com" />
+          <p class="help">We'll only use this to reply to your request.</p>
+        </div>
+        <div class="field">
+          <label for="msg">Message</label>
+          <textarea class="text-input" id="msg" rows="4" placeholder="Tell us about your content model…"></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%;">Send message</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-col foot-brand">
+          <a class="brand" href="./DESIGN.md">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6h8a4 4 0 0 1 0 8h-4a3 3 0 0 0 0 6h8" stroke="var(--sanity-red)" stroke-width="2" stroke-linecap="round"/></svg>
+            Sanity
+          </a>
+          <p>The Composable Content Cloud. Structured content, engineered for people who live in terminals.</p>
+        </div>
+        <div class="foot-col">
+          <h5>Product</h5>
+          <a href="./DESIGN.md">Studio</a>
+          <a href="./DESIGN.md">Content Lake</a>
+          <a href="./DESIGN.md">GROQ</a>
+          <a href="./DESIGN.md">Pricing</a>
+        </div>
+        <div class="foot-col">
+          <h5>Developers</h5>
+          <a href="./DESIGN.md">Docs</a>
+          <a href="./DESIGN.md">API Reference</a>
+          <a href="./DESIGN.md">CLI</a>
+          <a href="./DESIGN.md">Status</a>
+        </div>
+        <div class="foot-col">
+          <h5>Company</h5>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Customers</a>
+          <a href="./DESIGN.md">Blog</a>
+          <a href="./DESIGN.md">Careers</a>
+        </div>
+        <div class="foot-col">
+          <h5>Legal</h5>
+          <a href="./DESIGN.md">Privacy</a>
+          <a href="./DESIGN.md">Terms</a>
+          <a href="./DESIGN.md">Security</a>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 Sanity, Inc.</span>
+        <span>Design tokens · <a href="./DESIGN.md" style="color:var(--blue-light);">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

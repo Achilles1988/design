@@ -1,0 +1,374 @@
+<!-- source_content_hash: 442df0ad7380efd8712f5574bdca34a73cfb41a2a43454ff459863a6258af547 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wise — Component Preview</title>
+<style>
+  /* ============================================================
+     WISE — Design tokens
+     Global money transfer that reads like a Scandinavian magazine.
+     Vivid lime-green CTA (single accent, no second colour) on a
+     sage-tinted canvas. Unusually heavy display sans (weight 900,
+     Wise Sans → Inter 900) paired with Inter 600 sub-displays.
+     Universal 24px pill radius on buttons + cards. Polarity-flip
+     dark cards render green text on near-black ink.
+     ============================================================ */
+  :root {
+    /* Brand — the sole accent */
+    --primary:        #9fe870;  /* lime-green — every CTA */
+    --on-primary:     #0e0f0c;
+    --primary-active: #cdffad;
+    --primary-neutral:#c5edab;
+    --primary-pale:   #e2f6d5;  /* soft green surface / badge bg */
+
+    /* Text */
+    --ink:            #0e0f0c;  /* near-black w/ olive warmth */
+    --ink-deep:       #163300;  /* forest green ink on positive */
+    --body:           #454745;
+    --mute:           #868685;
+
+    /* Surface */
+    --canvas:         #ffffff;  /* card interiors */
+    --canvas-soft:    #e8ebe6;  /* sage-tinted page background */
+
+    /* Semantic */
+    --positive:       #2ead4b;
+    --positive-deep:  #054d28;
+    --warning:        #ffd11a;
+    --warning-deep:   #b86700;
+    --negative:       #d03238;
+    --negative-bg:    #320707;
+    --accent-orange:  #ffc091;
+    --accent-cyan:    #38c8ff;
+
+    /* Type — Wise Sans substitute: Inter (900 display) + Inter (600/400) */
+    --font: "Inter", system-ui, -apple-system, sans-serif;
+
+    /* Radius */
+    --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px; --r-pill:9999px;
+
+    /* Spacing — base 4 */
+    --s-xxs:2px; --s-xs:4px; --s-sm:8px; --s-md:12px; --s-lg:16px;
+    --s-xl:24px; --s-2xl:32px; --s-3xl:48px; --s-huge:80px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font); font-weight: 400;
+    font-size: 16px; line-height: 1.5; color: var(--ink);
+    background: var(--canvas-soft);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--primary); color: var(--on-primary); }
+  a { color: var(--ink-deep); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: var(--r-md); }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--s-xl); }
+
+  /* ---------- Buttons — 24px pill-rectangle ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+    font-family: var(--font); font-size: 16px; font-weight: 600; line-height: 1.5;
+    border: 1px solid transparent; border-radius: var(--r-xl);
+    padding: 12px 24px; cursor: pointer;
+    transition: background .15s ease, transform .06s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn--primary { background: var(--primary); color: var(--on-primary); }
+  .btn--primary:hover { background: var(--primary-active); }
+  .btn--secondary { background: var(--canvas-soft); color: var(--ink); }
+  .btn--tertiary { background: var(--canvas); color: var(--ink); border-color: var(--ink); }
+  .btn--on-dark { background: var(--primary); color: var(--on-primary); }
+
+  /* ---------- Nav ---------- */
+  .nav { position: sticky; top: 0; z-index: 20; background: var(--canvas); border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .nav__inner { display: flex; align-items: center; gap: var(--s-xl); padding: var(--s-md) var(--s-xl); max-width: 1200px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 22px; letter-spacing: -0.5px; color: var(--ink); }
+  .brand .dot { width: 26px; height: 26px; border-radius: 50%; background: var(--primary); display: grid; place-items: center; font-size: 15px; }
+  .nav__links { display: flex; gap: var(--s-xl); margin-left: var(--s-lg); }
+  .nav__links a { color: var(--ink); font-size: 14px; font-weight: 600; }
+  .nav__right { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+
+  /* ---------- Hero (sage band) ---------- */
+  .hero { padding: var(--s-3xl) 0 var(--s-huge); }
+  .hero__grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--s-3xl); align-items: center; }
+  .hero h1 { font-weight: 900; font-size: 96px; line-height: 0.85; letter-spacing: -2px; margin-bottom: var(--s-xl); }
+  .hero p.lead { font-size: 20px; line-height: 1.5; color: var(--body); max-width: 34ch; margin-bottom: var(--s-xl); }
+  .hero__actions { display: flex; gap: var(--s-md); flex-wrap: wrap; }
+
+  /* Currency converter card — signature widget */
+  .converter { background: var(--canvas); border: 1px solid var(--ink); border-radius: var(--r-xl); padding: var(--s-xl); }
+  .converter h3 { font-weight: 900; font-size: 24px; margin-bottom: var(--s-lg); }
+  .conv-row { display: flex; align-items: center; border: 1px solid var(--ink); border-radius: var(--r-md); padding: 14px 16px; margin-bottom: var(--s-md); gap: var(--s-md); }
+  .conv-row input { flex: 1; border: 0; font-family: var(--font); font-size: 22px; font-weight: 600; color: var(--ink); background: transparent; min-width: 0; }
+  .conv-row input:focus { outline: none; }
+  .cur { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; white-space: nowrap; }
+  .flag { width: 26px; height: 26px; border-radius: 50%; flex: none; }
+  .conv-meta { display: flex; justify-content: space-between; font-size: 14px; color: var(--mute); margin: var(--s-md) 0 var(--s-lg); }
+  .conv-meta b { color: var(--ink); }
+  .converter .btn { width: 100%; }
+
+  /* ---------- Section ---------- */
+  .band-white { background: var(--canvas); }
+  section.block { padding: var(--s-huge) 0; }
+  .section-head { max-width: 60ch; margin-bottom: var(--s-3xl); }
+  .section-head h2 { font-weight: 900; font-size: 40px; line-height: 1.0; }
+  .section-head p { color: var(--body); margin-top: var(--s-md); font-size: 18px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .feature { border-radius: var(--r-xl); padding: var(--s-xl); }
+  .feature--sage { background: var(--canvas-soft); }
+  .feature--green { background: var(--primary-pale); }
+  .feature--dark { background: var(--ink); color: var(--primary); } /* polarity flip */
+  .feature__ico { width: 48px; height: 48px; border-radius: var(--r-md); background: var(--primary); color: var(--on-primary); display: grid; place-items: center; margin-bottom: var(--s-lg); }
+  .feature--dark .feature__ico { background: var(--primary); color: var(--on-primary); }
+  .feature h3 { font-weight: 900; font-size: 24px; margin-bottom: var(--s-sm); }
+  .feature p { color: var(--body); }
+  .feature--dark p { color: rgba(159,232,112,0.85); }
+
+  /* ---------- Rates table w/ semantic badges ---------- */
+  .rate-card { background: var(--canvas); border: 1px solid var(--ink); border-radius: var(--r-xl); overflow: hidden; }
+  .rate-row { display: grid; grid-template-columns: 40px 1fr auto auto; align-items: center; gap: var(--s-md); padding: var(--s-lg) var(--s-xl); border-top: 1px solid var(--canvas-soft); font-variant-numeric: tabular-nums; }
+  .rate-row:first-child { border-top: 0; }
+  .rate-name { font-weight: 600; }
+  .rate-name small { display: block; color: var(--mute); font-weight: 400; font-size: 13px; }
+  .badge { font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: var(--r-pill); }
+  .badge--pos { background: var(--primary-pale); color: var(--positive-deep); }
+  .badge--neg { background: var(--negative-bg); color: #fff; }
+
+  /* ---------- Pricing (polarity featured) ---------- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .tier { background: var(--canvas-soft); border: 1px solid var(--mute); border-radius: var(--r-xl); padding: var(--s-xl); display: flex; flex-direction: column; }
+  .tier--featured { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .tier__name { font-weight: 900; font-size: 24px; }
+  .tier__price { font-weight: 900; font-size: 40px; margin: var(--s-md) 0; font-variant-numeric: tabular-nums; }
+  .tier__price span { font-size: 15px; font-weight: 400; color: var(--mute); }
+  .tier--featured .tier__price span { color: rgba(255,255,255,0.6); }
+  .tier ul { list-style: none; display: grid; gap: 10px; margin-bottom: var(--s-xl); }
+  .tier li { display: flex; gap: 10px; font-size: 15px; color: var(--body); }
+  .tier--featured li { color: rgba(255,255,255,0.85); }
+  .tier li svg { flex: none; color: var(--positive); margin-top: 2px; }
+  .tier--featured li svg { color: var(--primary); }
+  .tier .btn { margin-top: auto; width: 100%; }
+
+  /* ---------- Dark hero band (polarity flip) ---------- */
+  .dark-band { background: var(--ink); color: var(--primary); border-radius: var(--r-xl); padding: var(--s-huge) var(--s-3xl); text-align: center; }
+  .dark-band h2 { font-weight: 900; font-size: 64px; line-height: 0.9; margin-bottom: var(--s-lg); }
+  .dark-band p { color: rgba(255,255,255,0.75); max-width: 46ch; margin: 0 auto var(--s-xl); }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--ink); color: var(--canvas-soft); padding: var(--s-3xl) 0; }
+  .foot__grid { display: grid; grid-template-columns: 1.4fr repeat(4,1fr); gap: var(--s-xl); }
+  .foot__col h4 { color: #fff; font-size: 13px; font-weight: 600; margin-bottom: var(--s-md); }
+  .foot__col a { display: block; color: var(--canvas-soft); font-size: 14px; padding: 6px 0; opacity: .8; }
+  .foot__col a:hover { opacity: 1; color: var(--primary); text-decoration: none; }
+  .foot__bottom { margin-top: var(--s-3xl); padding-top: var(--s-lg); border-top: 1px solid rgba(255,255,255,0.12); display: flex; justify-content: space-between; font-size: 13px; color: var(--mute); flex-wrap: wrap; gap: var(--s-sm); }
+
+  @media (max-width: 1024px) {
+    .hero__grid { grid-template-columns: 1fr; }
+    .features, .pricing { grid-template-columns: 1fr; }
+    .foot__grid { grid-template-columns: 1fr 1fr 1fr; }
+    .hero h1 { font-size: 64px; letter-spacing: -1.4px; }
+  }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 48px; line-height: 0.95; }
+    .dark-band h2 { font-size: 40px; }
+    .nav__links { display: none; }
+    .foot__grid { grid-template-columns: 1fr 1fr; }
+    .foot__bottom { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Wise home">
+        <span class="dot" aria-hidden="true">✦</span> Wise
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="./DESIGN.md">Personal</a>
+        <a href="./DESIGN.md">Business</a>
+        <a href="./DESIGN.md">Send money</a>
+        <a href="./DESIGN.md">Help</a>
+      </nav>
+      <div class="nav__right">
+        <a href="./DESIGN.md" style="font-size:14px;font-weight:600;color:var(--ink)">Log in</a>
+        <a class="btn btn--primary" href="./DESIGN.md" style="padding:8px 20px">Register</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO (sage) ===================== -->
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div>
+          <h1>Money without borders</h1>
+          <p class="lead">Send, spend, and receive money internationally at the real exchange rate.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="./DESIGN.md">Send money</a>
+            <a class="btn btn--tertiary" href="./DESIGN.md">Open account</a>
+          </div>
+        </div>
+
+        <!-- Currency converter — signature interactive widget -->
+        <div class="converter" role="group" aria-label="Currency converter">
+          <h3>Convert with the mid-market rate</h3>
+          <div class="conv-row">
+            <label for="w-send" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">You send</label>
+            <input id="w-send" type="text" value="1,000" inputmode="decimal" />
+            <span class="cur"><span class="flag" style="background:linear-gradient(180deg,#012169 33%,#fff 33% 66%,#c8102e 66%)"></span> GBP</span>
+          </div>
+          <div class="conv-row">
+            <label for="w-get" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Recipient gets</label>
+            <input id="w-get" type="text" value="1,187.40" inputmode="decimal" />
+            <span class="cur"><span class="flag" style="background:linear-gradient(90deg,#0055a4 33%,#fff 33% 66%,#ef4135 66%)"></span> EUR</span>
+          </div>
+          <div class="conv-meta">
+            <span>Rate <b>1.1912</b></span>
+            <span>Fee <b>3.42 GBP</b></span>
+          </div>
+          <a class="btn btn--primary" href="./DESIGN.md">Get started</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURES ===================== -->
+    <section class="block band-white">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>The account for the world</h2>
+          <p>Hold 40+ currencies, get local account details, and manage money the way it should be.</p>
+        </div>
+        <div class="features">
+          <article class="feature feature--sage">
+            <div class="feature__ico" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></div>
+            <h3>Send worldwide</h3>
+            <p>Transfer to 160+ countries at the mid-market rate — no markups, no surprises.</p>
+          </article>
+          <article class="feature feature--green">
+            <div class="feature__ico" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></div>
+            <h3>Spend abroad</h3>
+            <p>Use the Wise card in 150+ countries and always get the best possible rate.</p>
+          </article>
+          <article class="feature feature--dark">
+            <div class="feature__ico" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+            <h3>Hold &amp; convert</h3>
+            <p>Keep 40+ currencies in one account and convert instantly when the rate is right.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== RATES (semantic badges) ===================== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Today's rates</h2>
+          <p>Real mid-market rates, updated live. Positive and negative movement use the full semantic palette — never the brand green.</p>
+        </div>
+        <div class="rate-card">
+          <div class="rate-row">
+            <span class="flag" style="background:linear-gradient(90deg,#0055a4 33%,#fff 33% 66%,#ef4135 66%)"></span>
+            <span class="rate-name">Euro <small>GBP → EUR</small></span>
+            <b>1.1912</b>
+            <span class="badge badge--pos">+0.34%</span>
+          </div>
+          <div class="rate-row">
+            <span class="flag" style="background:linear-gradient(180deg,#b22234 8%,#fff 8% 16%,#b22234 16% 24%,#fff 24% 32%,#3c3b6e 32%)"></span>
+            <span class="rate-name">US Dollar <small>GBP → USD</small></span>
+            <b>1.2684</b>
+            <span class="badge badge--neg">−0.18%</span>
+          </div>
+          <div class="rate-row">
+            <span class="flag" style="background:#bc002d;position:relative;overflow:hidden"></span>
+            <span class="rate-name">Japanese Yen <small>GBP → JPY</small></span>
+            <b>189.40</b>
+            <span class="badge badge--pos">+0.52%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING ===================== -->
+    <section class="block band-white">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Simple, upfront pricing</h2>
+          <p>No subscription tricks. Just one clear fee per transfer.</p>
+        </div>
+        <div class="pricing">
+          <div class="tier">
+            <div class="tier__name">Personal</div>
+            <div class="tier__price">Free<span> account</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Hold 40+ currencies</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Mid-market rate</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Open account</a>
+          </div>
+          <div class="tier tier--featured">
+            <div class="tier__name">Card</div>
+            <div class="tier__price">£7<span> one-off</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Spend in 150+ countries</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Free ATM withdrawals</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Auto-convert</li>
+            </ul>
+            <a class="btn btn--on-dark" href="./DESIGN.md">Get the card</a>
+          </div>
+          <div class="tier">
+            <div class="tier__name">Business</div>
+            <div class="tier__price">£45<span> one-off</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Batch payments</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Accounting tools</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Open business</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DARK BAND (polarity flip) ===================== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="dark-band">
+          <h2>Join 16 million people</h2>
+          <p>Moving money the fair, fast, and transparent way — across borders and currencies.</p>
+          <a class="btn btn--on-dark" href="./DESIGN.md">Get started</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="wrap">
+      <div class="foot__grid">
+        <div class="foot__col">
+          <a class="brand" href="./DESIGN.md" aria-label="Wise home" style="margin-bottom:var(--s-md);color:#fff">
+            <span class="dot" aria-hidden="true">✦</span> Wise
+          </a>
+          <p style="max-width:30ch;font-size:14px;opacity:.75">The smart, fair way to manage money internationally.</p>
+        </div>
+        <div class="foot__col"><h4>Personal</h4><a href="./DESIGN.md">Send money</a><a href="./DESIGN.md">Multi-currency</a><a href="./DESIGN.md">Card</a><a href="./DESIGN.md">App</a></div>
+        <div class="foot__col"><h4>Business</h4><a href="./DESIGN.md">Accounts</a><a href="./DESIGN.md">Batch pay</a><a href="./DESIGN.md">API</a></div>
+        <div class="foot__col"><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Mission</a></div>
+        <div class="foot__col"><h4>Legal</h4><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a><a href="./DESIGN.md">Cookies</a></div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Wise Payments Ltd.</span>
+        <span>Design tokens sourced from <a href="./DESIGN.md" style="color:var(--primary)">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

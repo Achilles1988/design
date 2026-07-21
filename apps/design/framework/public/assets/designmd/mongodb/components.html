@@ -1,0 +1,482 @@
+<!-- source_content_hash: 4523f10efd5ccd46f9aeac3b98626e24bcf907bc0c1e46500cb0e3920f932e71 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MongoDB — Component Preview</title>
+<style>
+  /* ============================================================
+     MongoDB design tokens — mapped from DESIGN.md frontmatter.
+     Dual-mode identity: deep teal-navy hero bands (#001e2b) with the
+     unmistakable bright MongoDB green (#00ed64) pill CTA, paired with
+     stark white documentation / pricing surfaces. Euclid Circular A
+     (→ open fallback) weight 500 display; pill buttons (rounded.full)
+     universally; 12px cards. Category accent colors (purple/orange)
+     ONLY on course tags. Terminal-aesthetic code mockup cards.
+     ============================================================ */
+  :root {
+    /* Brand green */
+    --primary: #00ed64;
+    --primary-deep: #00b545;
+    --primary-pressed: #008c34;
+    --on-primary: #001e2b;
+    --green: #00ed64;
+    --green-dark: #00684a;
+    --green-mid: #00a35c;
+    --green-soft: #c3f0d2;
+
+    /* Brand teal family */
+    --teal-deep: #001e2b;
+    --teal: #003d4f;
+    --teal-mid: #00684a;
+
+    /* Category accents — course tags only */
+    --accent-purple: #7b3ff2;
+    --accent-orange: #fa6e39;
+    --accent-pink: #f06bb8;
+    --accent-blue: #3d4f9f;
+
+    /* Semantic */
+    --warn-bg: #fff8e0;
+    --warn-text: #946f3f;
+
+    /* Surface */
+    --canvas: #ffffff;
+    --canvas-dark: #001e2b;
+    --surface: #f9fbfa;
+    --surface-soft: #f4f7f6;
+    --surface-feature: #e3fcef;
+    --hairline: #e1e5e8;
+    --hairline-soft: #eceff1;
+    --hairline-strong: #c1ccd6;
+    --hairline-dark: #1c2d38;
+
+    /* Text */
+    --ink: #001e2b;
+    --charcoal: #1c2d38;
+    --slate: #3d4f5b;
+    --steel: #5c6c7a;
+    --stone: #7c8c9a;
+    --muted: #a8b3bc;
+    --on-dark: #ffffff;
+    --on-dark-muted: #a8b3bc;
+
+    /* Type */
+    --font: "Euclid Circular A", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mono: "Source Code Pro", "SF Mono", Menlo, Consolas, monospace;
+
+    /* Radius */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-xxl: 24px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 16px;
+    --s-lg: 20px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-3xl: 40px;
+    --s-section-sm: 48px;
+    --s-section: 64px;
+    --s-section-lg: 96px;
+    --s-hero: 120px;
+
+    /* Elevation */
+    --e2: rgba(0,30,43,0.08) 0px 4px 12px 0px;
+    --e3: rgba(0,30,43,0.12) 0px 12px 24px -4px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--canvas); color: var(--ink); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: var(--green-dark); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--green-dark); outline-offset: 2px; border-radius: var(--r-xs); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-xxl); }
+  .section { padding: var(--s-section-lg) 0; }
+
+  h1,h2,h3,h4 { color: var(--ink); font-weight: 500; letter-spacing: -0.5px; }
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--green-dark); display: inline-block; margin-bottom: var(--s-md); }
+
+  /* ---------- Promo banner ---------- */
+  .promo { background: var(--teal-deep); color: var(--on-dark); font-size: 14px; font-weight: 500; text-align: center; padding: var(--s-sm) var(--s-md); }
+  .promo a { color: var(--green); }
+
+  /* ---------- Nav ---------- */
+  .nav { background: var(--canvas); border-bottom: 1px solid var(--hairline); height: 64px; display: flex; align-items: center; position: sticky; top: 0; z-index: 20; }
+  .nav .wrap { display: flex; align-items: center; gap: var(--s-xl); width: 100%; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--ink); font-size: 20px; }
+  .brand .leaf { width: 26px; height: 26px; }
+  .nav-links { display: flex; gap: var(--s-xl); margin-left: var(--s-md); }
+  .nav-links a { color: var(--slate); font-size: 15px; font-weight: 400; }
+  .nav-links a:hover { color: var(--ink); text-decoration: none; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-md); }
+  .nav-right .signin { color: var(--ink); font-size: 15px; }
+
+  /* ---------- Buttons — pills everywhere ---------- */
+  .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-size: 14px; font-weight: 600; line-height: 1.3; border: none; cursor: pointer; padding: 10px 22px; border-radius: var(--r-full); text-decoration: none; transition: background .15s ease; }
+  .btn-primary { background: var(--green); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-deep); text-decoration: none; }
+  .btn-secondary { background: transparent; color: var(--ink); border: 1px solid var(--hairline-strong); }
+  .btn-secondary:hover { border-color: var(--ink); text-decoration: none; }
+  .btn-on-dark { background: var(--green); color: var(--on-primary); }
+  .btn-on-dark:hover { background: var(--primary-deep); text-decoration: none; }
+  .btn-secondary-dark { background: transparent; color: var(--on-dark); border: 1px solid var(--hairline-dark); }
+  .btn-secondary-dark:hover { border-color: var(--on-dark); text-decoration: none; }
+
+  /* ---------- Hero (dark teal band) ---------- */
+  .hero { background: var(--teal-deep); color: var(--on-dark); padding: var(--s-hero) 0; position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 80% at 70% 20%, rgba(0,237,100,0.10), transparent 60%); pointer-events: none; }
+  .hero .wrap { position: relative; }
+  .hero-inner { max-width: 760px; }
+  .hero h1 { color: var(--on-dark); font-size: clamp(40px, 6vw, 72px); line-height: 1.1; letter-spacing: -1.5px; }
+  .hero p.lead { margin: var(--s-xl) 0; font-size: 18px; color: var(--on-dark-muted); max-width: 52ch; line-height: 1.5; }
+  .hero-cta { display: flex; gap: var(--s-sm); flex-wrap: wrap; }
+
+  .code-mockup { margin-top: var(--s-3xl); background: var(--canvas-dark); border: 1px solid var(--hairline-dark); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--e3); max-width: 720px; }
+  .code-mockup .bar { display: flex; align-items: center; gap: 7px; padding: 12px var(--s-md); border-bottom: 1px solid var(--hairline-dark); }
+  .code-mockup .bar .dot { width: 11px; height: 11px; border-radius: var(--r-full); background: #33454f; }
+  .code-mockup .bar .t { margin-left: 6px; font-family: var(--mono); font-size: 12px; color: var(--on-dark-muted); }
+  .code-mockup pre { font-family: var(--mono); font-size: 14px; line-height: 1.7; color: var(--on-dark); padding: var(--s-lg); overflow-x: auto; }
+  .code-mockup .k { color: var(--green); }
+  .code-mockup .s { color: #8fd6ff; }
+  .code-mockup .c { color: var(--stone); }
+
+  /* ---------- Logo wall ---------- */
+  .logos { border-bottom: 1px solid var(--hairline); }
+  .logos .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-3xl); }
+  .logos .lg { color: var(--steel); font-weight: 500; font-size: 18px; padding: var(--s-lg); }
+
+  /* ---------- Section head ---------- */
+  .sec-head { max-width: 62ch; margin-bottom: var(--s-3xl); }
+  .sec-head h2 { font-size: clamp(30px, 4vw, 48px); line-height: 1.2; }
+  .sec-head p { margin-top: var(--s-md); color: var(--slate); font-size: 18px; }
+
+  /* ---------- Feature cards ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .card { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-xxl); }
+  .card .fi { width: 44px; height: 44px; border-radius: var(--r-md); background: var(--surface-feature); display: grid; place-items: center; margin-bottom: var(--s-md); }
+  .card h3 { font-size: 22px; margin-bottom: var(--s-xs); }
+  .card p { font-size: 15px; color: var(--slate); }
+  .card .link { margin-top: var(--s-md); display: inline-block; font-weight: 500; font-size: 14px; }
+
+  /* ---------- Course catalog (category tags) ---------- */
+  .search-pill { display: flex; align-items: center; gap: 10px; background: var(--canvas); border: 1px solid var(--hairline-strong); border-radius: var(--r-md); padding: var(--s-md); height: 56px; max-width: 520px; margin-bottom: var(--s-xl); color: var(--steel); }
+  .catalog { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .course { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-xl); }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--on-dark); padding: 2px 8px; border-radius: var(--r-xs); margin-bottom: var(--s-md); }
+  .tag.purple { background: var(--accent-purple); }
+  .tag.orange { background: var(--accent-orange); }
+  .tag.pink { background: var(--accent-pink); }
+  .course h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .course p { font-size: 14px; color: var(--slate); margin-bottom: var(--s-md); }
+
+  /* ---------- Pill tabs ---------- */
+  .pill-tabs { display: flex; gap: var(--s-sm); margin-bottom: var(--s-xl); flex-wrap: wrap; }
+  .pill-tab { background: transparent; color: var(--steel); font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: var(--r-full); border: 1px solid var(--hairline); cursor: pointer; }
+  .pill-tab.active { background: var(--ink); color: var(--on-dark); border-color: var(--ink); }
+
+  /* ---------- Pricing ---------- */
+  .grid-price { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); align-items: stretch; }
+  .price { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-xxl); display: flex; flex-direction: column; }
+  .price.featured { background: var(--surface-feature); border: 2px solid var(--green); }
+  .badge-popular { display: inline-block; background: var(--teal-deep); color: var(--green); font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: var(--r-full); margin-bottom: var(--s-md); }
+  .price h3 { font-size: 22px; margin-bottom: 6px; }
+  .price .amt { font-size: 36px; font-weight: 500; letter-spacing: -1px; margin: var(--s-sm) 0; }
+  .price .amt span { font-size: 15px; color: var(--steel); font-weight: 400; }
+  .price ul { list-style: none; margin: var(--s-md) 0 var(--s-xl); display: grid; gap: 10px; }
+  .price li { font-size: 14px; color: var(--slate); display: flex; gap: 8px; }
+  .price li::before { content: "✓"; color: var(--green-dark); font-weight: 700; }
+  .price .btn { margin-top: auto; width: 100%; justify-content: center; }
+
+  /* ---------- Comparison table ---------- */
+  .cmp { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-md); overflow: hidden; }
+  .cmp table { width: 100%; border-collapse: collapse; }
+  .cmp th, .cmp td { text-align: left; padding: var(--s-md) var(--s-lg); font-size: 14px; border-bottom: 1px solid var(--hairline-soft); }
+  .cmp th { font-weight: 600; color: var(--ink); background: var(--surface); }
+  .cmp td { color: var(--slate); }
+  .cmp .y { color: var(--green-dark); font-weight: 700; }
+
+  /* ---------- Testimonial ---------- */
+  .testi { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-xxl); box-shadow: var(--e2); }
+  .testi blockquote { font-size: 22px; line-height: 1.4; color: var(--ink); font-weight: 500; letter-spacing: -0.3px; }
+  .testi .who { margin-top: var(--s-lg); display: flex; align-items: center; gap: 12px; }
+  .testi .av { width: 44px; height: 44px; border-radius: var(--r-full); background: linear-gradient(135deg, var(--green-mid), var(--teal)); }
+  .testi .who .n { font-weight: 600; font-size: 15px; }
+  .testi .who .r { color: var(--steel); font-size: 13px; }
+
+  /* ---------- CTA banner (dark) ---------- */
+  .cta { background: var(--teal-deep); color: var(--on-dark); border-radius: var(--r-lg); padding: var(--s-section); text-align: center; }
+  .cta h2 { color: var(--on-dark); font-size: clamp(28px, 4vw, 48px); line-height: 1.2; }
+  .cta p { color: var(--on-dark-muted); margin: var(--s-md) 0 var(--s-xl); font-size: 18px; }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--teal-deep); color: var(--on-dark); padding: var(--s-section) 0; }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: var(--s-xl); }
+  .foot-brand .brand { color: var(--on-dark); margin-bottom: var(--s-md); }
+  .foot-brand p { color: var(--on-dark-muted); font-size: 14px; max-width: 30ch; }
+  .foot-col h4 { color: var(--on-dark); font-size: 14px; font-weight: 500; margin-bottom: var(--s-md); }
+  .foot-col a { display: block; color: var(--on-dark-muted); font-size: 14px; padding: 4px 0; }
+  .foot-col a:hover { color: var(--on-dark); text-decoration: none; }
+  .foot-bottom { border-top: 1px solid var(--hairline-dark); margin-top: var(--s-xl); padding-top: var(--s-lg); font-size: 13px; color: var(--on-dark-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s-sm); }
+
+  @media (max-width: 960px) {
+    .grid-3, .catalog, .grid-price { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .hero { padding: var(--s-section) 0; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="promo">New: Vector search is generally available in Atlas. <a href="./DESIGN.md">Learn more →</a></div>
+
+  <!-- ===== Nav ===== -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./DESIGN.md" aria-label="MongoDB home">
+        <svg class="leaf" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2c2.5 4 4 7 4 11 0 4-2.5 7-4 9-1.5-2-4-5-4-9 0-4 1.5-7 4-11z" fill="#00684a"/><path d="M12 2c2.5 4 4 7 4 11 0 4-2.5 7-4 9V2z" fill="#00ed64"/></svg>
+        MongoDB
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Products</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Resources</a>
+        <a href="./DESIGN.md">Company</a>
+        <a href="./DESIGN.md">Pricing</a>
+      </nav>
+      <div class="nav-right">
+        <a class="signin" href="./DESIGN.md">Sign In</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Try Free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-inner">
+        <h1>One data platform.<br />Unlimited AI potential.</h1>
+        <p class="lead">Build faster with the document database that developers love. MongoDB Atlas unifies operational, analytical, and vector search workloads in one place.</p>
+        <div class="hero-cta">
+          <a class="btn btn-on-dark" href="./DESIGN.md">Start Free</a>
+          <a class="btn btn-secondary-dark" href="./DESIGN.md">Talk to Sales</a>
+        </div>
+      </div>
+      <div class="code-mockup" role="img" aria-label="MongoDB query example">
+        <div class="bar">
+          <span class="dot" aria-hidden="true"></span><span class="dot" aria-hidden="true"></span><span class="dot" aria-hidden="true"></span>
+          <span class="t">mongosh</span>
+        </div>
+        <pre><span class="c">// Find similar documents with vector search</span>
+db.movies.<span class="k">aggregate</span>([
+  { <span class="k">$vectorSearch</span>: {
+      index: <span class="s">"embedding_index"</span>,
+      path:  <span class="s">"plot_embedding"</span>,
+      queryVector: embedding,
+      numCandidates: 150,
+      limit: 10
+  } }
+])</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Logo wall ===== -->
+  <div class="logos section" style="padding:var(--s-section) 0;">
+    <div class="wrap row">
+      <span class="lg">Coinbase</span>
+      <span class="lg">Adobe</span>
+      <span class="lg">eBay</span>
+      <span class="lg">Toyota</span>
+      <span class="lg">Verizon</span>
+      <span class="lg">Cisco</span>
+    </div>
+  </div>
+
+  <!-- ===== Features ===== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Why MongoDB</span>
+        <h2>Loved by builders, trusted in production</h2>
+        <p>A flexible document model, distributed by default, with the tooling to ship AI-native applications fast.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <div class="fi" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00684a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          <h3>Document model</h3>
+          <p>Store data the way your code uses it. Rich, nested documents map naturally to objects.</p>
+          <a class="link" href="./DESIGN.md">Explore the model →</a>
+        </article>
+        <article class="card">
+          <div class="fi" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00684a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg></div>
+          <h3>Global scale</h3>
+          <p>Distribute data across regions with automatic sharding and zero-downtime scaling.</p>
+          <a class="link" href="./DESIGN.md">See Atlas →</a>
+        </article>
+        <article class="card">
+          <div class="fi" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00684a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></div>
+          <h3>Built for AI</h3>
+          <p>Native vector search, embeddings, and semantic retrieval — no separate database required.</p>
+          <a class="link" href="./DESIGN.md">Build with AI →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MongoDB University catalog ===== -->
+  <section class="section" style="background:var(--surface); padding-top:var(--s-section);">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">MongoDB University</span>
+        <h2>Learn MongoDB, free</h2>
+      </div>
+      <div class="search-pill" role="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5c6c7a" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search courses…</span>
+      </div>
+      <div class="catalog">
+        <article class="course">
+          <span class="tag purple">Database &amp; Security</span>
+          <h3>Data Modeling Fundamentals</h3>
+          <p>Design schemas that scale with the document model.</p>
+          <a class="link" href="./DESIGN.md">Get Started →</a>
+        </article>
+        <article class="course">
+          <span class="tag orange">Search</span>
+          <h3>Atlas Search &amp; Vectors</h3>
+          <p>Build full-text and semantic search into your app.</p>
+          <a class="link" href="./DESIGN.md">Get Started →</a>
+        </article>
+        <article class="course">
+          <span class="tag pink">Developer</span>
+          <h3>Aggregation Pipelines</h3>
+          <p>Transform and analyze data with powerful pipelines.</p>
+          <a class="link" href="./DESIGN.md">Get Started →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Pricing ===== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="pill-tabs" role="tablist" aria-label="Pricing product">
+        <button class="pill-tab active" role="tab" aria-selected="true">MongoDB Atlas</button>
+        <button class="pill-tab" role="tab" aria-selected="false">Enterprise Advanced</button>
+      </div>
+      <div class="sec-head">
+        <h2>Pricing that scales with you</h2>
+        <p>Start free forever, then pay only for what you use.</p>
+      </div>
+      <div class="grid-price">
+        <div class="price">
+          <h3>Free</h3>
+          <div class="amt">$0<span> / forever</span></div>
+          <ul>
+            <li>512 MB storage</li>
+            <li>Shared RAM</li>
+            <li>Community support</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Start Free</a>
+        </div>
+        <div class="price featured">
+          <span class="badge-popular">Most Popular</span>
+          <h3>Flex</h3>
+          <div class="amt">$0.011<span> / hour</span></div>
+          <ul>
+            <li>Auto-scaling storage</li>
+            <li>Dedicated resources</li>
+            <li>Standard support</li>
+            <li>Atlas Search included</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Choose Flex</a>
+        </div>
+        <div class="price">
+          <h3>Dedicated</h3>
+          <div class="amt">$57<span> / month</span></div>
+          <ul>
+            <li>Isolated clusters</li>
+            <li>Advanced security</li>
+            <li>24/7 priority support</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Go Dedicated</a>
+        </div>
+      </div>
+
+      <div style="margin-top:var(--s-3xl);">
+        <div class="cmp">
+          <table>
+            <thead><tr><th>Feature</th><th>Free</th><th>Flex</th><th>Dedicated</th></tr></thead>
+            <tbody>
+              <tr><td>Storage</td><td>512 MB</td><td>Auto</td><td>Custom</td></tr>
+              <tr><td>Atlas Search</td><td>—</td><td class="y">✓</td><td class="y">✓</td></tr>
+              <tr><td>Vector Search</td><td>—</td><td class="y">✓</td><td class="y">✓</td></tr>
+              <tr><td>Dedicated compute</td><td>—</td><td>—</td><td class="y">✓</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Testimonial ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="wrap">
+      <div class="testi">
+        <blockquote>“MongoDB let us ship our AI features in weeks, not quarters. Vector search in the same database we already trusted was the unlock.”</blockquote>
+        <div class="who">
+          <span class="av" aria-hidden="true"></span>
+          <div><div class="n">Priya Menon</div><div class="r">Staff Engineer, Northwind AI</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA banner ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="wrap">
+      <div class="cta">
+        <h2>Ready to build?</h2>
+        <p>Deploy your first cluster in minutes — free forever.</p>
+        <a class="btn btn-on-dark" href="./DESIGN.md">Start Free</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <a class="brand" href="./DESIGN.md">
+            <svg class="leaf" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2c2.5 4 4 7 4 11 0 4-2.5 7-4 9-1.5-2-4-5-4-9 0-4 1.5-7 4-11z" fill="#00ed64"/></svg>
+            MongoDB
+          </a>
+          <p>The developer data platform for modern, AI-powered applications.</p>
+        </div>
+        <div class="foot-col"><h4>Products</h4><a href="./DESIGN.md">Atlas</a><a href="./DESIGN.md">Community</a><a href="./DESIGN.md">Enterprise</a></div>
+        <div class="foot-col"><h4>Resources</h4><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">University</a><a href="./DESIGN.md">Blog</a></div>
+        <div class="foot-col"><h4>Solutions</h4><a href="./DESIGN.md">AI</a><a href="./DESIGN.md">Search</a><a href="./DESIGN.md">Mobile</a></div>
+        <div class="foot-col"><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Contact</a></div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 MongoDB, Inc.</span>
+        <span>Design tokens from <a href="./DESIGN.md" style="color:var(--green);">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!-- source_content_hash: 40e2c692d72c54bae1e43446e2d059b71d773668d39d71ccb7ededa9fa07d145 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mistral AI — Component Preview</title>
+<style>
+  /* ============================================================
+     MISTRAL AI design tokens — mapped from DESIGN.md
+     Singular cinematic signature: atmospheric sunset gradients
+     (mustard / orange / deep red) + a horizontal "sunset stripe"
+     band that closes every page. Cream-yellow surfaces, saturated
+     orange CTA, PP Editorial Old near-serif display + Inter body.
+     Sober editorial geometry — 8px buttons, 12px cards, NOT pills.
+     ============================================================ */
+  :root {
+    /* Brand — orange primary */
+    --primary: #fa520f;
+    --primary-deep: #cc3a05;
+    --on-primary: #ffffff;
+
+    /* Sunset spectrum (for the signature stripe/hero) */
+    --sunshine-300: #ffd06a;
+    --sunshine-500: #ffb83e;
+    --sunshine-700: #ffa110;
+    --sunshine-800: #ff8105;
+    --sunshine-900: #ff8a00;
+    --yellow-saturated: #ffd900;
+
+    /* Cream / warm neutrals */
+    --cream: #fff8e0;
+    --cream-light: #fffaeb;
+    --cream-deeper: #fff0c2;
+    --beige-deep: #e6d5a8;
+
+    /* Text */
+    --ink: #1f1f1f;
+    --ink-tint: #3d3d3d;
+    --charcoal: #2c2c2c;
+    --slate: #4a4a4a;
+    --steel: #6a6a6a;
+    --stone: #8a8a8a;
+    --muted: #a8a8a8;
+
+    /* Surface */
+    --canvas: #ffffff;
+    --surface: #fafafa;
+    --surface-code: #1c1c1e;
+    --hairline: #e5e5e5;
+    --hairline-soft: #ededed;
+    --hairline-strong: #c7c7c7;
+
+    --on-dark: #ffffff;
+    --on-dark-muted: #a8a8a8;
+    --link: #fa520f;
+
+    /* Type — PP Editorial Old (display) / Inter (UI) / JetBrains Mono */
+    --font-display: "PP Editorial Old", "Times New Roman", Georgia, serif;
+    --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+    /* Radius — sober/editorial */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;   /* buttons */
+    --r-lg: 12px;  /* cards */
+    --r-xl: 16px;
+    --r-full: 9999px; /* badges only */
+
+    /* Spacing */
+    --s-xxs: 4px; --s-xs: 8px; --s-sm: 12px; --s-md: 16px; --s-lg: 20px;
+    --s-xl: 24px; --s-xxl: 32px; --s-xxxl: 40px;
+    --s-section-sm: 48px; --s-section: 64px; --s-section-lg: 96px; --s-hero: 120px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-ui);
+    color: var(--ink);
+    background: var(--canvas);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px var(--primary);
+    border-radius: var(--r-md);
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-xxl); }
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--steel); margin-bottom: var(--s-sm); }
+
+  /* ---- Promo banner (dark) ---- */
+  .promo { background: var(--ink); color: var(--on-dark); font-size: 14px; font-weight: 500; text-align: center; padding: 12px 16px; }
+  .promo a { color: var(--sunshine-500); text-decoration: underline; text-underline-offset: 2px; }
+
+  /* ---- Nav ---- */
+  .nav { position: sticky; top: 0; z-index: 50; background: var(--canvas); border-bottom: 1px solid var(--hairline-soft); }
+  .nav-inner { display: flex; align-items: center; gap: var(--s-xl); height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; letter-spacing: 1px; }
+  .logo .m { width: 26px; height: 26px; display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); gap: 1px; }
+  .logo .m span { display: block; }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-md); }
+  .nav-links a { font-size: 14px; color: var(--slate); font-weight: 500; }
+  .nav-cta { margin-left: auto; display: flex; align-items: center; gap: var(--s-md); }
+
+  /* ---- Buttons (8px, sober) ---- */
+  .btn { font-family: var(--font-ui); font-size: 14px; font-weight: 500; line-height: 1.3; border-radius: var(--r-md); padding: 10px 20px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background .15s ease; }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-deep); }
+  .btn-dark { background: var(--ink); color: var(--on-dark); }
+  .btn-cream { background: var(--cream); color: var(--ink); border-color: var(--beige-deep); }
+  .btn-secondary { background: transparent; color: var(--ink); border-color: var(--hairline-strong); }
+  .btn-on-cream { background: var(--canvas); color: var(--ink); border-color: var(--beige-deep); }
+  .btn-link { background: transparent; color: var(--primary); padding: 0; font-weight: 500; }
+  .btn-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---- Hero (sunset) ---- */
+  .hero { position: relative; overflow: hidden; }
+  .hero-inner { display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--s-xxl); align-items: center; padding: var(--s-hero) 0; }
+  .hero h1 { font-family: var(--font-display); font-size: 84px; font-weight: 400; line-height: 1.05; letter-spacing: -1.5px; margin: 0 0 var(--s-lg); }
+  .hero p { font-size: 18px; color: var(--ink-tint); margin: 0 0 var(--s-xl); max-width: 44ch; }
+  .hero .cta-row { display: flex; gap: var(--s-sm); }
+  .sunset-photo {
+    aspect-ratio: 16/11; border-radius: var(--r-lg);
+    background:
+      radial-gradient(120% 80% at 50% 120%, #2a1a0a 0%, transparent 55%),
+      linear-gradient(180deg, var(--sunshine-300) 0%, var(--sunshine-700) 38%, var(--sunshine-900) 62%, var(--primary) 100%);
+    position: relative; overflow: hidden;
+    box-shadow: rgba(0,0,0,0.12) 0px 16px 48px -8px;
+  }
+  .sunset-photo::after { /* mountain silhouette */
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 42%;
+    background: #1a0f06;
+    clip-path: polygon(0 100%, 0 55%, 14% 30%, 26% 52%, 40% 18%, 55% 48%, 68% 22%, 82% 46%, 100% 20%, 100% 100%);
+  }
+
+  .section { padding: var(--s-section-lg) 0; }
+  .section-head { margin-bottom: var(--s-xxl); }
+  .section-head h2 { font-family: var(--font-display); font-size: 52px; font-weight: 400; line-height: 1.15; letter-spacing: -0.5px; margin: 0 0 var(--s-sm); }
+  .section-head p { font-size: 18px; color: var(--steel); margin: 0; max-width: 58ch; }
+
+  /* ---- Cards ---- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .card { background: var(--canvas); border: 1px solid var(--hairline-soft); border-radius: var(--r-lg); padding: var(--s-xxl); }
+  .card-cream { background: var(--cream); border: 1px solid var(--beige-deep); border-radius: var(--r-lg); padding: var(--s-xxl); }
+  .card .ico { width: 44px; height: 44px; border-radius: var(--r-md); background: var(--cream); border: 1px solid var(--beige-deep); display: grid; place-items: center; margin-bottom: var(--s-md); color: var(--primary); }
+  .card h3 { font-size: 22px; font-weight: 500; margin: 0 0 8px; }
+  .card p { font-size: 15px; color: var(--slate); margin: 0; }
+
+  /* ---- Code block ---- */
+  .code { background: var(--surface-code); border-radius: var(--r-md); overflow: hidden; box-shadow: rgba(0,0,0,0.08) 0px 12px 24px -4px; }
+  .code-head { color: var(--on-dark-muted); font-size: 13px; padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: var(--font-mono); }
+  .code pre { margin: 0; padding: 16px; color: var(--on-dark); font-family: var(--font-mono); font-size: 14px; line-height: 1.5; overflow-x: auto; }
+  .code .k { color: var(--sunshine-500); }
+  .code .s { color: #7ec699; }
+  .code .c { color: var(--stone); }
+
+  /* ---- Stats ---- */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .stat .num { font-family: var(--font-display); font-size: 56px; font-weight: 400; letter-spacing: -1px; line-height: 1.1; }
+  .stat .lbl { font-size: 15px; color: var(--steel); margin-top: 4px; }
+
+  /* ---- Badges ---- */
+  .badge { font-size: 13px; font-weight: 600; border-radius: var(--r-full); padding: 4px 10px; display: inline-block; }
+  .badge-orange { background: var(--primary); color: var(--on-primary); }
+  .badge-cream { background: var(--cream-deeper); color: var(--ink); }
+  .badge-dark { background: var(--ink); color: var(--on-dark); }
+
+  /* ---- Pricing ---- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); align-items: start; }
+  .tier { background: var(--canvas); border: 1px solid var(--hairline-soft); border-radius: var(--r-lg); padding: var(--s-xxl); }
+  .tier.featured { background: var(--cream); border: 2px solid var(--primary); }
+  .tier h3 { font-size: 18px; font-weight: 500; margin: 0 0 var(--s-xs); }
+  .tier .price { font-family: var(--font-display); font-size: 44px; font-weight: 400; letter-spacing: -0.5px; }
+  .tier ul { list-style: none; padding: 0; margin: var(--s-md) 0; }
+  .tier li { font-size: 14px; color: var(--slate); padding: 6px 0; display: flex; gap: 8px; }
+  .tier li svg { color: var(--primary); flex: none; margin-top: 3px; }
+
+  /* ---- Contact form (cream panel) ---- */
+  .contact { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-xxl); align-items: start; }
+  .form-panel { background: var(--cream); border: 1px solid var(--beige-deep); border-radius: var(--r-lg); padding: var(--s-xxl); }
+  .field { margin-bottom: var(--s-md); }
+  label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  input, textarea { width: 100%; font-family: var(--font-ui); font-size: 16px; background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline-strong); border-radius: var(--r-md); padding: 12px 16px; height: 44px; }
+  textarea { height: auto; min-height: 110px; resize: vertical; }
+  input:focus, textarea:focus { outline: none; border: 2px solid var(--primary); padding: 11px 15px; }
+
+  /* ---- CTA banner cream ---- */
+  .cta-cream { background: var(--cream); border-radius: var(--r-lg); padding: var(--s-section); text-align: center; }
+  .cta-cream h2 { font-family: var(--font-display); font-size: 52px; font-weight: 400; letter-spacing: -0.5px; margin: 0 0 var(--s-lg); }
+  .cta-cream .cta-row { display: flex; gap: var(--s-sm); justify-content: center; }
+
+  /* ---- Signature sunset stripe band ---- */
+  .sunset-stripe {
+    height: 56px;
+    background: linear-gradient(90deg,
+      var(--primary) 0%,
+      var(--sunshine-800) 28%,
+      var(--sunshine-500) 55%,
+      var(--yellow-saturated) 78%,
+      var(--cream) 100%);
+  }
+
+  /* ---- Footer (cream) ---- */
+  .footer { background: var(--cream); color: var(--ink); padding: var(--s-section) 0; }
+  .footer-cols { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: var(--s-xl); }
+  .footer .brand { font-family: var(--font-display); font-size: 24px; }
+  .footer h4 { font-size: 13px; font-weight: 600; margin: 0 0 var(--s-sm); }
+  .footer a { display: block; font-size: 14px; color: var(--primary); padding: 4px 0; }
+  .footer-bottom { border-top: 1px solid var(--beige-deep); margin-top: var(--s-xxl); padding-top: var(--s-lg); font-size: 13px; color: var(--steel); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s-md); }
+
+  @media (max-width: 1023px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 64px; }
+    .grid-3, .stats, .pricing { grid-template-columns: 1fr; }
+    .contact { grid-template-columns: 1fr; }
+    .footer-cols { grid-template-columns: repeat(2, 1fr); }
+    .section-head h2, .cta-cream h2 { font-size: 40px; }
+  }
+  @media (max-width: 767px) {
+    .nav-links { display: none; }
+    .hero h1 { font-size: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="promo">Introducing Mistral Medium 3.5 — now in Le Studio. <a href="./DESIGN.md">Read the announcement →</a></div>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="./DESIGN.md" aria-label="Mistral AI home">
+      <span class="m" aria-hidden="true">
+        <span style="background:var(--yellow-saturated)"></span><span style="background:var(--sunshine-500)"></span><span style="background:var(--sunshine-800)"></span>
+        <span style="background:var(--sunshine-500)"></span><span style="background:var(--sunshine-800)"></span><span style="background:var(--primary)"></span>
+        <span style="background:var(--sunshine-800)"></span><span style="background:var(--primary)"></span><span style="background:var(--primary-deep)"></span>
+      </span>
+      MISTRAL AI_
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="./DESIGN.md">Products</a>
+      <a href="./DESIGN.md">Solutions</a>
+      <a href="./DESIGN.md">Research</a>
+      <a href="./DESIGN.md">Customers</a>
+      <a href="./DESIGN.md">Company</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn-link" href="./DESIGN.md">Contact sales</a>
+      <a class="btn btn-dark" href="./DESIGN.md">Try Studio</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div>
+        <h1>Frontier AI.<br>In your hands.</h1>
+        <p>Open, portable, and customisable AI built for developers and enterprises who want control over their models.</p>
+        <div class="cta-row">
+          <a class="btn btn-dark" href="./DESIGN.md">Get started</a>
+          <a class="btn btn-secondary" href="./DESIGN.md">Talk to sales</a>
+        </div>
+      </div>
+      <div class="sunset-photo" role="img" aria-label="Atmospheric mountain sunset"></div>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="feat-h">
+    <div class="section-head">
+      <div class="eyebrow">Le Studio</div>
+      <h2 id="feat-h">Build with frontier models</h2>
+      <p>A complete platform for prototyping, fine-tuning, and deploying — from open weights to hosted inference.</p>
+    </div>
+    <div class="grid-3">
+      <article class="card">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" fill="none"/></svg></div>
+        <h3>Chat &amp; Completions</h3>
+        <p>State-of-the-art reasoning across text, code, and multilingual tasks.</p>
+      </article>
+      <article class="card">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v18M16 3v18M3 8h18M3 16h18" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></div>
+        <h3>Fine-tuning</h3>
+        <p>Adapt models to your domain with your own data, fully portable.</p>
+      </article>
+      <article class="card">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></div>
+        <h3>Agents &amp; Tools</h3>
+        <p>Function calling, retrieval, and multi-step orchestration built in.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--surface)" aria-labelledby="code-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Coding</div>
+        <h2 id="code-h">Ship faster with Codestral</h2>
+      </div>
+      <div class="grid-3" style="grid-template-columns: 1fr 1.2fr; align-items:center">
+        <div>
+          <p style="font-size:18px;color:var(--slate)">Fill-in-the-middle, 80+ languages, and low-latency completions that fit right into your editor.</p>
+          <div style="display:flex;gap:8px;margin-top:var(--s-md)">
+            <span class="badge badge-cream">80+ languages</span>
+            <span class="badge badge-orange">New</span>
+          </div>
+        </div>
+        <div class="code" role="img" aria-label="Code example">
+          <div class="code-head">agent.py</div>
+          <pre><span class="c"># call the Mistral client</span>
+<span class="k">from</span> mistralai <span class="k">import</span> Mistral
+
+client = Mistral(api_key=<span class="s">"…"</span>)
+resp = client.chat.complete(
+    model=<span class="s">"mistral-medium-3.5"</span>,
+    messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>,
+               <span class="s">"content"</span>: <span class="s">"Refactor this."</span>}],
+)</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="stats-h">
+    <h2 id="stats-h" class="sr-only" style="position:absolute;left:-9999px">By the numbers</h2>
+    <div class="stats">
+      <div class="stat"><div class="num">75%</div><div class="lbl">Faster time to production</div></div>
+      <div class="stat"><div class="num">80%</div><div class="lbl">Lower inference cost</div></div>
+      <div class="stat"><div class="num">100%</div><div class="lbl">Portable, open weights</div></div>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--surface)" aria-labelledby="price-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Services</div>
+        <h2 id="price-h">Plans that scale</h2>
+      </div>
+      <div class="pricing">
+        <article class="tier">
+          <h3>Free</h3>
+          <div class="price">$0</div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>API playground</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>Community support</li>
+          </ul>
+          <a class="btn btn-on-cream" href="./DESIGN.md">Start free</a>
+        </article>
+        <article class="tier featured">
+          <span class="badge badge-orange">Most popular</span>
+          <h3 style="margin-top:8px">Pro</h3>
+          <div class="price">$29</div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>Higher rate limits</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>Fine-tuning credits</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>Priority inference</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Choose Pro</a>
+        </article>
+        <article class="tier">
+          <h3>Enterprise</h3>
+          <div class="price">Custom</div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>On-prem deployment</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" fill="none"/></svg>Dedicated support</li>
+          </ul>
+          <a class="btn btn-dark" href="./DESIGN.md">Contact us</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="contact-h">
+    <div class="contact">
+      <div>
+        <div class="eyebrow">Contact</div>
+        <h2 style="font-family:var(--font-display);font-size:52px;font-weight:400;letter-spacing:-0.5px;margin:0 0 var(--s-md)" id="contact-h">Get in touch with the team.</h2>
+        <p style="font-size:18px;color:var(--steel)">Tell us about your project and we'll help you find the right plan.</p>
+      </div>
+      <form class="form-panel" onsubmit="return false">
+        <div class="field"><label for="name">Full name</label><input id="name" type="text" placeholder="Ada Lovelace" /></div>
+        <div class="field"><label for="email">Work email</label><input id="email" type="email" placeholder="you@company.com" /></div>
+        <div class="field"><label for="msg">How can we help?</label><textarea id="msg" placeholder="Your message…"></textarea></div>
+        <button class="btn btn-dark" type="submit">Send message</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="cta-cream">
+      <h2>The next chapter of AI is yours.</h2>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="./DESIGN.md">Start building</a>
+        <a class="btn btn-on-cream" href="./DESIGN.md">Read the docs</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Signature sunset stripe band — closes every page -->
+<div class="sunset-stripe" role="presentation" aria-hidden="true"></div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div class="brand">MISTRAL AI_</div>
+      <div><h4>Why Mistral</h4><a href="./DESIGN.md">Models</a><a href="./DESIGN.md">Open weights</a><a href="./DESIGN.md">Security</a></div>
+      <div><h4>Explore</h4><a href="./DESIGN.md">Le Studio</a><a href="./DESIGN.md">Coding</a><a href="./DESIGN.md">Agents</a></div>
+      <div><h4>Build</h4><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">API</a><a href="./DESIGN.md">Pricing</a></div>
+      <div><h4>Legal</h4><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Mistral AI. Design tokens from <a href="./DESIGN.md" style="text-decoration:underline;display:inline;padding:0">DESIGN.md</a></span>
+      <span>English · Français</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

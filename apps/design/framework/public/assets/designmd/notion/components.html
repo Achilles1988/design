@@ -1,0 +1,591 @@
+<!-- source_content_hash: fa9d6e78216d8f3e5d3990709ca2de6bc2e268e945bb94f255fd1bfb15455266 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion — Component Preview</title>
+<style>
+  /* ============================================================
+     Notion design tokens — mapped from DESIGN.md frontmatter.
+     Illustration-rich all-in-one workspace voice: deep navy hero
+     band with scattered sticky-note dots, a signature purple pill
+     primary CTA, and a rich palette of pastel-tinted feature cards
+     echoing the live product's colorful database properties.
+     Buttons are 8px rectangles (NOT pills) — sober editorial.
+     ============================================================ */
+  :root {
+    /* Brand & primary */
+    --primary: #5645d4;          /* Notion purple — dominant CTA */
+    --primary-pressed: #4534b3;
+    --primary-deep: #3a2a99;
+    --on-primary: #ffffff;
+
+    /* Navy hero band */
+    --brand-navy: #0a1530;
+    --brand-navy-deep: #070f24;
+    --brand-navy-mid: #1a2a52;
+
+    /* Link blue — distinct from primary CTA */
+    --link-blue: #0075de;
+    --link-blue-pressed: #005bab;
+
+    /* Brand spectrum (echoes DB properties) */
+    --brand-pink: #ff64c8;
+    --brand-orange: #dd5b00;
+    --brand-orange-deep: #793400;
+    --brand-purple: #7b3ff2;
+    --brand-purple-800: #391c57;
+    --brand-teal: #2a9d99;
+    --brand-green: #1aae39;
+    --brand-yellow: #f5d75e;
+
+    /* Pastel card tints */
+    --tint-peach: #ffe8d4;
+    --tint-rose: #fde0ec;
+    --tint-mint: #d9f3e1;
+    --tint-lavender: #e6e0f5;
+    --tint-sky: #dcecfa;
+    --tint-yellow: #fef7d6;
+    --tint-yellow-bold: #f9e79f;
+    --tint-cream: #f8f5e8;
+    --tint-gray: #f0eeec;
+
+    /* Surface */
+    --canvas: #ffffff;
+    --surface: #f6f5f4;
+    --surface-soft: #fafaf9;
+    --hairline: #e5e3df;
+    --hairline-soft: #ede9e4;
+    --hairline-strong: #c8c4be;
+
+    /* Text — Notion's warm charcoal signature */
+    --ink-deep: #000000;
+    --ink: #1a1a1a;
+    --charcoal: #37352f;
+    --slate: #5d5b54;
+    --steel: #787671;
+    --stone: #a4a097;
+    --muted: #bbb8b1;
+    --on-dark: #ffffff;
+    --on-dark-muted: #a4a097;
+
+    /* Semantic */
+    --success: #1aae39;
+    --warning: #dd5b00;
+    --error: #e03131;
+
+    /* Radius — buttons 8px rectangles, cards 12px */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-xxl: 20px;
+    --r-xxxl: 24px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 20px;
+    --sp-xl: 24px;
+    --sp-xxl: 32px;
+    --sp-xxxl: 40px;
+    --sp-section-sm: 48px;
+    --sp-section: 64px;
+    --sp-section-lg: 96px;
+    --sp-hero: 120px;
+
+    /* Type — Notion Sans (Inter-based) */
+    --font-sans: "Notion Sans", "Inter", -apple-system, system-ui, "Segoe UI", Helvetica, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--r-xs); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-xxl); }
+  section { padding: var(--sp-section-lg) 0; }
+  .center { text-align: center; }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 600; line-height: 1.4;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--steel); margin: 0 0 var(--sp-md);
+  }
+  .section-title { font-size: 36px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; margin: 0 0 var(--sp-md); }
+  .section-lead { font-size: 18px; line-height: 1.5; color: var(--slate); margin: 0 auto var(--sp-xxl); max-width: 620px; }
+
+  /* ---------- Buttons — 8px rectangles ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-xs);
+    font-family: var(--font-sans); font-size: 14px; font-weight: 500; line-height: 1.3;
+    padding: 10px 18px; border-radius: var(--r-md);
+    border: 1px solid transparent; cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-pressed); }
+  .btn-dark { background: var(--ink-deep); color: var(--on-dark); }
+  .btn-secondary { background: transparent; color: var(--ink); border-color: var(--hairline-strong); }
+  .btn-secondary:hover { border-color: var(--steel); }
+  .btn-on-dark { background: var(--on-dark); color: var(--ink); }
+  .btn-secondary-on-dark { background: transparent; color: var(--on-dark); border-color: var(--on-dark-muted); }
+  .btn-link { background: transparent; color: var(--link-blue); padding: 0; font-weight: 500; }
+
+  /* ---------- Promo banner ---------- */
+  .promo-banner { background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 500; padding: var(--sp-sm) var(--sp-md); text-align: center; }
+  .promo-banner a { color: var(--link-blue); }
+
+  /* ---------- Top nav ---------- */
+  .topnav { position: sticky; top: 0; z-index: 20; background: var(--canvas); border-bottom: 1px solid var(--hairline); }
+  .topnav-inner { display: flex; align-items: center; gap: var(--sp-xl); height: 64px; }
+  .brand { display: flex; align-items: center; gap: var(--sp-xs); font-weight: 600; font-size: 18px; }
+  .brand-mark { width: 26px; height: 26px; display: grid; place-items: center; background: var(--ink-deep); color: var(--on-dark); border-radius: var(--r-sm); font-weight: 700; font-size: 16px; }
+  .nav-links { display: flex; gap: var(--sp-lg); margin-left: var(--sp-md); }
+  .nav-links a { font-size: 14px; color: var(--slate); padding: var(--sp-xs) 0; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--sp-md); }
+
+  /* ---------- Hero navy band ---------- */
+  .hero {
+    background: var(--brand-navy);
+    color: var(--on-dark);
+    padding: var(--sp-hero) 0 var(--sp-section-lg);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  /* scattered sticky-note dots + mesh wires */
+  .dot { position: absolute; width: 14px; height: 14px; border-radius: var(--r-xs); opacity: .9; }
+  .mesh { position: absolute; opacity: .4; }
+  .hero .wrap { position: relative; z-index: 1; }
+  .hero h1 { font-size: clamp(44px, 8vw, 80px); font-weight: 600; line-height: 1.05; letter-spacing: -2px; margin: 0 auto var(--sp-lg); max-width: 780px; }
+  .hero p { font-size: 18px; line-height: 1.5; color: rgba(255,255,255,.82); margin: 0 auto var(--sp-xl); max-width: 520px; }
+  .hero-actions { display: flex; gap: var(--sp-sm); justify-content: center; flex-wrap: wrap; }
+
+  /* ---------- Workspace mockup ---------- */
+  .mockup {
+    margin: var(--sp-xxxl) auto 0;
+    max-width: 940px;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    box-shadow: rgba(15, 15, 15, 0.2) 0px 24px 48px -8px;
+    overflow: hidden;
+    text-align: left;
+    color: var(--ink);
+  }
+  .mockup-top { display: flex; align-items: center; gap: var(--sp-xs); padding: var(--sp-sm) var(--sp-md); border-bottom: 1px solid var(--hairline-soft); }
+  .mockup-top .tab { font-size: 13px; color: var(--steel); padding: var(--sp-xxs) var(--sp-xs); }
+  .mockup-top .tab.active { color: var(--ink); font-weight: 500; }
+  .kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-md); padding: var(--sp-lg); }
+  .kanban-col-head { font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: var(--sp-sm); display: flex; align-items: center; gap: 6px; }
+  .kanban-card { background: var(--surface-soft); border: 1px solid var(--hairline-soft); border-radius: var(--r-md); padding: var(--sp-sm); margin-bottom: var(--sp-xs); font-size: 13px; }
+  .prop-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: var(--r-sm); padding: 2px 8px; margin-top: 6px; }
+
+  /* ---------- Logo wall ---------- */
+  .logo-wall { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-md); align-items: center; }
+  .logo-item { color: var(--steel); font-size: 16px; font-weight: 500; text-align: center; padding: var(--sp-lg); opacity: .8; }
+
+  /* ---------- Feature grid (pastel tints) ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); }
+  .feature-card { border-radius: var(--r-lg); padding: var(--sp-xxl); color: var(--charcoal); }
+  .feature-card h3 { font-size: 22px; font-weight: 600; line-height: 1.3; margin: 0 0 var(--sp-xs); }
+  .feature-card p { font-size: 14px; line-height: 1.5; margin: 0; color: var(--slate); }
+  .feature-card .fc-icon { width: 44px; height: 44px; border-radius: var(--r-md); background: rgba(255,255,255,.6); display: grid; place-items: center; margin-bottom: var(--sp-md); color: var(--charcoal); }
+  .t-peach { background: var(--tint-peach); }
+  .t-rose { background: var(--tint-rose); }
+  .t-mint { background: var(--tint-mint); }
+  .t-sky { background: var(--tint-sky); }
+  .t-lavender { background: var(--tint-lavender); }
+  .t-yellow { background: var(--tint-yellow); }
+
+  /* ---------- Bold yellow banner ---------- */
+  .banner-yellow {
+    background: var(--tint-yellow-bold);
+    color: var(--charcoal);
+    border-radius: var(--r-lg);
+    padding: var(--sp-section);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--sp-xxl);
+    align-items: center;
+  }
+  .banner-yellow h2 { font-size: 36px; font-weight: 600; letter-spacing: -0.5px; margin: 0 0 var(--sp-sm); }
+  .banner-yellow p { font-size: 16px; color: var(--charcoal); margin: 0 0 var(--sp-md); max-width: 420px; }
+  .assistant-mock { width: 220px; background: var(--canvas); border: 1px solid rgba(0,0,0,.08); border-radius: var(--r-md); padding: var(--sp-md); }
+  .assistant-mock .line { height: 8px; border-radius: var(--r-full); background: var(--hairline); margin: var(--sp-xs) 0; }
+  .assistant-mock .line.short { width: 60%; }
+
+  /* ---------- Stat row ---------- */
+  .stat-row { background: var(--surface); border-radius: var(--r-lg); padding: var(--sp-section-sm); display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); text-align: center; }
+  .stat-num { font-size: 48px; font-weight: 600; letter-spacing: -1px; color: var(--primary); }
+  .stat-label { font-size: 14px; color: var(--slate); }
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-md); align-items: start; }
+  .pricing-card { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--sp-xxl); }
+  .pricing-card.featured { background: var(--surface); border: 2px solid var(--primary); }
+  .tier-name { font-size: 22px; font-weight: 600; margin: 0 0 var(--sp-xs); }
+  .tier-price { font-size: 40px; font-weight: 600; letter-spacing: -0.5px; line-height: 1.15; margin: 0 0 var(--sp-md); }
+  .tier-price span { font-size: 14px; font-weight: 400; color: var(--steel); }
+  .tier-features { list-style: none; padding: 0; margin: var(--sp-md) 0 var(--sp-lg); }
+  .tier-features li { display: flex; gap: var(--sp-xs); font-size: 14px; color: var(--slate); padding: 6px 0; }
+  .check { color: var(--success); flex-shrink: 0; }
+  .pricing-card .btn { width: 100%; }
+  .badge-popular { display: inline-block; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 600; border-radius: var(--r-full); padding: 4px 10px; margin-bottom: var(--sp-sm); }
+
+  /* ---------- Comparison table ---------- */
+  .comparison { border: 1px solid var(--hairline); border-radius: var(--r-md); overflow: hidden; max-width: 860px; margin: var(--sp-xxl) auto 0; }
+  .comparison-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: var(--sp-md) var(--sp-lg); border-bottom: 1px solid var(--hairline-soft); font-size: 14px; align-items: center; }
+  .comparison-row.head { background: var(--surface); font-weight: 600; }
+  .comparison-row:last-child { border-bottom: none; }
+  .cmp-check { color: var(--success); }
+  .cmp-dash { color: var(--muted); }
+
+  /* ---------- FAQ ---------- */
+  .faq-list { max-width: 760px; margin: var(--sp-xxl) auto 0; }
+  .faq-item { background: var(--canvas); border-bottom: 1px solid var(--hairline); border-radius: var(--r-md); padding: var(--sp-xl); }
+  .faq-q { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 600; }
+  .faq-a { font-size: 16px; color: var(--slate); margin: var(--sp-sm) 0 0; }
+
+  /* ---------- CTA banner ---------- */
+  .cta-banner { background: var(--surface); border-radius: var(--r-lg); padding: var(--sp-section); text-align: center; }
+  .cta-banner h2 { font-size: 36px; font-weight: 600; letter-spacing: -0.5px; margin: 0 0 var(--sp-lg); }
+
+  /* ---------- Form ---------- */
+  .signup { max-width: 440px; margin: var(--sp-lg) auto 0; display: flex; gap: var(--sp-sm); }
+  .text-input {
+    flex: 1; background: var(--canvas); color: var(--ink);
+    font-family: var(--font-sans); font-size: 16px; height: 44px;
+    border: 1px solid var(--hairline-strong); border-radius: var(--r-md);
+    padding: var(--sp-sm) var(--sp-md);
+  }
+  .text-input:focus { outline: none; border: 2px solid var(--primary); }
+
+  /* ---------- Footer ---------- */
+  .footer { background: var(--canvas); border-top: 1px solid var(--hairline); padding: var(--sp-section) 0; }
+  .footer-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--sp-xl); }
+  .footer-col h4 { font-size: 14px; font-weight: 600; color: var(--ink); margin: 0 0 var(--sp-md); }
+  .footer-col a { display: block; font-size: 14px; color: var(--steel); padding: var(--sp-xxs) 0; }
+  .footer-col a:hover { color: var(--ink); }
+  .footer-brand p { font-size: 14px; color: var(--steel); max-width: 240px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .logo-wall { grid-template-columns: repeat(3, 1fr); }
+    .kanban { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767px) {
+    .wrap { padding: 0 var(--sp-md); }
+    .nav-links { display: none; }
+    .grid-3, .pricing-grid, .footer-grid, .stat-row { grid-template-columns: 1fr; }
+    .logo-wall { grid-template-columns: repeat(2, 1fr); }
+    .banner-yellow { grid-template-columns: 1fr; }
+    .assistant-mock { width: 100%; }
+    .comparison-row { grid-template-columns: 2fr 1fr; }
+    .hero h1 { font-size: clamp(36px, 11vw, 48px); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Promo banner -->
+  <div class="promo-banner">
+    Developers: Get a first look at our new Developer Platform on May 13. <a href="./DESIGN.md">Learn more &rarr;</a>
+  </div>
+
+  <!-- Top nav -->
+  <header class="topnav">
+    <div class="wrap topnav-inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Notion home">
+        <span class="brand-mark" aria-hidden="true">N</span> Notion
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">AI</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Resources</a>
+        <a href="./DESIGN.md">Pricing</a>
+      </nav>
+      <div class="nav-right">
+        <a class="btn-link" href="./DESIGN.md">Log in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Get Notion free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero navy band -->
+  <section class="hero">
+    <span class="dot t-peach" style="left:8%;top:22%;background:var(--brand-pink);"></span>
+    <span class="dot" style="left:16%;top:60%;background:var(--brand-yellow);"></span>
+    <span class="dot" style="right:12%;top:30%;background:var(--brand-teal);"></span>
+    <span class="dot" style="right:20%;top:66%;background:var(--brand-orange);"></span>
+    <span class="dot" style="left:30%;top:16%;background:var(--brand-green);"></span>
+    <svg class="mesh" style="left:4%;bottom:10%;" width="120" height="80" viewBox="0 0 120 80" fill="none" aria-hidden="true"><path d="M0 40h120M0 20h120M0 60h120" stroke="rgba(255,255,255,.3)"/></svg>
+    <svg class="mesh" style="right:6%;top:12%;" width="100" height="100" viewBox="0 0 100 100" fill="none" aria-hidden="true"><circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,.25)"/><circle cx="50" cy="50" r="24" stroke="rgba(255,255,255,.25)"/></svg>
+    <div class="wrap">
+      <h1>Meet the night shift.</h1>
+      <p>The all-in-one workspace where your notes, docs, and projects come together — now with AI that works while you sleep.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="./DESIGN.md">Get Notion free</a>
+        <a class="btn btn-secondary-on-dark" href="./DESIGN.md">Request a demo</a>
+      </div>
+
+      <!-- Workspace mockup card -->
+      <div class="mockup" role="img" aria-label="Notion workspace kanban board preview">
+        <div class="mockup-top">
+          <span class="brand-mark" style="width:20px;height:20px;font-size:12px;" aria-hidden="true">N</span>
+          <span class="tab active">Board</span>
+          <span class="tab">Table</span>
+          <span class="tab">Calendar</span>
+        </div>
+        <div class="kanban">
+          <div>
+            <div class="kanban-col-head"><span class="prop-dot" style="background:var(--brand-orange)"></span> To do</div>
+            <div class="kanban-card">Draft Q3 roadmap<br><span class="tag" style="background:var(--tint-peach);color:var(--brand-orange-deep)">Planning</span></div>
+            <div class="kanban-card">User interviews<br><span class="tag" style="background:var(--tint-sky);color:var(--link-blue)">Research</span></div>
+          </div>
+          <div>
+            <div class="kanban-col-head"><span class="prop-dot" style="background:var(--brand-purple)"></span> In progress</div>
+            <div class="kanban-card">Design system audit<br><span class="tag" style="background:var(--tint-lavender);color:var(--brand-purple-800)">Design</span></div>
+          </div>
+          <div>
+            <div class="kanban-col-head"><span class="prop-dot" style="background:var(--brand-green)"></span> Done</div>
+            <div class="kanban-card">Launch changelog<br><span class="tag" style="background:var(--tint-mint);color:var(--brand-green)">Shipped</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Logo wall -->
+  <section style="padding-top:var(--sp-section); padding-bottom:var(--sp-section);">
+    <div class="wrap">
+      <p class="eyebrow center">Trusted by teams at</p>
+      <div class="logo-wall">
+        <div class="logo-item">OpenAI</div>
+        <div class="logo-item">Figma</div>
+        <div class="logo-item">Ramp</div>
+        <div class="logo-item">Vercel</div>
+        <div class="logo-item">Headspace</div>
+        <div class="logo-item">Toyota</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature grid (pastel tints) -->
+  <section style="background:var(--surface-soft);">
+    <div class="wrap center">
+      <p class="eyebrow">Keep work moving 24/7</p>
+      <h2 class="section-title">One workspace. Every team.</h2>
+      <p class="section-lead">Replace a dozen disconnected tools with a single, flexible surface your whole company can shape.</p>
+      <div class="grid-3" style="text-align:left;">
+        <article class="feature-card t-peach">
+          <div class="fc-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4z" stroke="currentColor" stroke-width="2"/><path d="M4 9h16" stroke="currentColor" stroke-width="2"/></svg></div>
+          <h3>Docs</h3>
+          <p>Beautiful docs, wikis, and notes — build a knowledge base your team actually wants to read.</p>
+        </article>
+        <article class="feature-card t-sky">
+          <div class="fc-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="13" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/><rect x="4" y="13" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/></svg></div>
+          <h3>Projects</h3>
+          <p>Plan, track, and ship with databases that flex from a simple list to a full project system.</p>
+        </article>
+        <article class="feature-card t-mint">
+          <div class="fc-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Calendar</h3>
+          <p>See every deadline, meeting, and task in one connected calendar synced to your workspace.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bold yellow banner -->
+  <section>
+    <div class="wrap">
+      <div class="banner-yellow">
+        <div>
+          <span class="badge-popular" style="background:var(--brand-orange);">Notion AI</span>
+          <h2>Ask your on-demand assistants</h2>
+          <p>Draft, summarize, and search across everything in your workspace — Notion AI turns a question into an answer instantly.</p>
+          <a class="btn btn-dark" href="./DESIGN.md">Try Notion AI</a>
+        </div>
+        <div class="assistant-mock" aria-hidden="true">
+          <div style="font-size:13px;font-weight:600;color:var(--brand-purple-800);margin-bottom:var(--sp-xs);">Ask AI</div>
+          <div class="line"></div>
+          <div class="line short"></div>
+          <div class="line" style="background:var(--tint-lavender);"></div>
+          <div class="line short" style="background:var(--tint-lavender);"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section>
+    <div class="wrap center">
+      <h2 class="section-title">More productivity. Fewer tools.</h2>
+      <div class="stat-row" style="margin-top:var(--sp-xxl);">
+        <div><div class="stat-num">100M+</div><div class="stat-label">Users worldwide</div></div>
+        <div><div class="stat-num">62%</div><div class="stat-label">Fewer tools per team</div></div>
+        <div><div class="stat-num">4.8&#9733;</div><div class="stat-label">Average rating</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section style="background:var(--surface-soft);">
+    <div class="wrap center">
+      <p class="eyebrow">Pricing</p>
+      <h2 class="section-title">Find a plan that fits</h2>
+      <p class="section-lead">Free to start. Upgrade for AI, more members, and advanced controls.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3 class="tier-name">Free</h3>
+          <div class="tier-price">$0<span> /mo</span></div>
+          <ul class="tier-features">
+            <li><span class="check" aria-hidden="true">&#10003;</span> Unlimited pages</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Sync across devices</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Get started</a>
+        </div>
+        <div class="pricing-card featured">
+          <span class="badge-popular">Most popular</span>
+          <h3 class="tier-name">Plus</h3>
+          <div class="tier-price">$10<span> /mo</span></div>
+          <ul class="tier-features">
+            <li><span class="check" aria-hidden="true">&#10003;</span> Unlimited members</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Unlimited file uploads</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> 30-day page history</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+        </div>
+        <div class="pricing-card">
+          <h3 class="tier-name">Business</h3>
+          <div class="tier-price">$18<span> /mo</span></div>
+          <ul class="tier-features">
+            <li><span class="check" aria-hidden="true">&#10003;</span> SAML SSO</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Private team spaces</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Get started</a>
+        </div>
+        <div class="pricing-card">
+          <h3 class="tier-name">Enterprise</h3>
+          <div class="tier-price" style="font-size:28px;">Contact</div>
+          <ul class="tier-features">
+            <li><span class="check" aria-hidden="true">&#10003;</span> Advanced security</li>
+            <li><span class="check" aria-hidden="true">&#10003;</span> Audit log</li>
+          </ul>
+          <a class="btn btn-secondary" href="./DESIGN.md">Contact sales</a>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="comparison">
+        <div class="comparison-row head">
+          <span>Feature</span><span>Free</span><span>Plus</span><span>Business</span>
+        </div>
+        <div class="comparison-row">
+          <span>Collaborative workspace</span><span class="cmp-check">&#10003;</span><span class="cmp-check">&#10003;</span><span class="cmp-check">&#10003;</span>
+        </div>
+        <div class="comparison-row">
+          <span>Page history</span><span class="cmp-dash">&mdash;</span><span>30 days</span><span>90 days</span>
+        </div>
+        <div class="comparison-row">
+          <span>SAML SSO</span><span class="cmp-dash">&mdash;</span><span class="cmp-dash">&mdash;</span><span class="cmp-check">&#10003;</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="wrap">
+      <h2 class="section-title center">Frequently asked questions</h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q">Is Notion free to use? <span aria-hidden="true">+</span></div>
+          <p class="faq-a">Yes. The Free plan supports unlimited pages and blocks for individuals, forever.</p>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What is Notion AI? <span aria-hidden="true">+</span></div>
+          <p class="faq-a">Notion AI is a connected assistant that can write, summarize, and search across your workspace.</p>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Can I import from other tools? <span aria-hidden="true">+</span></div>
+          <p class="faq-a">Import from Evernote, Confluence, Google Docs, and more with a single click.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA banner -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="cta-banner">
+        <h2>Get started for free</h2>
+        <form class="signup" onsubmit="return false;" aria-label="Sign up">
+          <label for="email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Email</label>
+          <input class="text-input" id="email" type="email" placeholder="you@work.com" />
+          <button class="btn btn-primary" type="submit">Get Notion free</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-col footer-brand">
+          <a class="brand" href="./DESIGN.md" style="margin-bottom:var(--sp-md);">
+            <span class="brand-mark" aria-hidden="true">N</span> Notion
+          </a>
+          <p>The all-in-one workspace for your notes, docs, and projects.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="./DESIGN.md">AI</a>
+          <a href="./DESIGN.md">Docs</a>
+          <a href="./DESIGN.md">Projects</a>
+        </div>
+        <div class="footer-col">
+          <h4>Download</h4>
+          <a href="./DESIGN.md">iOS &amp; Android</a>
+          <a href="./DESIGN.md">Mac &amp; Windows</a>
+          <a href="./DESIGN.md">Web Clipper</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="./DESIGN.md">Help center</a>
+          <a href="./DESIGN.md">Templates</a>
+          <a href="./DESIGN.md">Community</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Security</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

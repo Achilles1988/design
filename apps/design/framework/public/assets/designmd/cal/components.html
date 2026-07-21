@@ -1,0 +1,746 @@
+<!-- source_content_hash: 8cd21b7d67e94c899843d517f4b426e4fee33d47354a433d6a63ebcf79d5a654 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cal.com — Design System Component Preview</title>
+<style>
+  /* ============================================================
+     Cal.com design tokens — mapped verbatim from DESIGN.md
+     Brand voltage: custom Cal Sans display face (600, negative
+     tracking) + product UI fragments shown in-card. Near-monochrome
+     — black CTAs on white canvas; the dark footer is the only dark
+     surface that closes every page.
+     ============================================================ */
+  :root {
+    /* Brand & action (near-monochrome — black, not blue) */
+    --primary: #111111;
+    --primary-active: #242424;
+    --primary-disabled: #e5e7eb;
+
+    /* Text */
+    --ink: #111111;
+    --body: #374151;
+    --muted: #6b7280;
+    --muted-soft: #898989;
+    --on-primary: #ffffff;
+    --on-dark: #ffffff;
+    --on-dark-soft: #a1a1aa;
+
+    /* Surface */
+    --canvas: #ffffff;
+    --surface-soft: #f8f9fa;    /* nav-pill-group bg */
+    --surface-card: #f5f5f5;    /* feature / testimonial / badge cards */
+    --surface-strong: #e5e7eb;
+    --surface-dark: #101010;    /* footer + featured pricing tier — scarce */
+    --surface-dark-elevated: #1a1a1a;
+
+    /* Hairlines */
+    --hairline: #e5e7eb;
+    --hairline-soft: #f3f4f6;
+
+    /* Accent — appears rarely (inline links, "customer story") */
+    --brand-accent: #3b82f6;
+
+    /* Semantic */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+
+    /* Badge pastels — only on avatar fills + tag pills, never CTAs */
+    --badge-orange: #fb923c;
+    --badge-pink: #ec4899;
+    --badge-violet: #8b5cf6;
+    --badge-emerald: #34d399;
+
+    /* Type — Cal Sans (display) substituted by Inter 600 / -0.04em;
+       Inter for everything else; JetBrains Mono for code */
+    --font-display: "Cal Sans", Inter, "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Radius scale */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;    /* buttons + inputs + tabs */
+    --r-lg: 12px;   /* content cards */
+    --r-xl: 16px;   /* hero app-mockup card */
+    --r-pill: 9999px;
+    --r-full: 9999px;
+
+    /* Spacing (base 4px) */
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 16px;
+    --s-lg: 24px;
+    --s-xl: 32px;
+    --s-xxl: 48px;
+    --s-section: 96px;
+
+    /* Elevation — soft, modern */
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+    --maxw: 1200px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--body);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--ink); color: var(--on-primary); }
+
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s-lg); }
+
+  /* Display type — Cal Sans signature: 600 + negative tracking */
+  .display-xl,
+  .display-lg,
+  .display-md,
+  .display-sm {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+  }
+  .display-xl { font-size: 64px; line-height: 1.05; letter-spacing: -2px; }
+  .display-lg { font-size: 48px; line-height: 1.1; letter-spacing: -1.5px; }
+  .display-md { font-size: 36px; line-height: 1.15; letter-spacing: -1px; }
+  .display-sm { font-size: 28px; line-height: 1.2; letter-spacing: -0.5px; }
+
+  .title-lg { font-size: 22px; font-weight: 600; line-height: 1.3; letter-spacing: -0.3px; color: var(--ink); margin: 0; }
+  .title-md { font-size: 18px; font-weight: 600; line-height: 1.4; color: var(--ink); margin: 0; }
+  .title-sm { font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--ink); margin: 0; }
+  .body-md { font-size: 16px; line-height: 1.5; color: var(--body); }
+  .body-sm { font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .caption { font-size: 13px; font-weight: 500; line-height: 1.4; color: var(--muted); }
+  .mono { font-family: var(--font-mono); font-size: 14px; }
+
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 var(--s-sm);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-xs);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    height: 40px;
+    padding: 0 20px;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:active { background: var(--primary-active); }
+  .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--hairline); }
+  .btn-secondary:active { background: var(--surface-soft); }
+  .btn-disabled { background: var(--primary-disabled); color: var(--muted); cursor: not-allowed; }
+  .btn-text { background: transparent; color: var(--ink); padding: 0 var(--s-xs); }
+  .btn-icon-circular {
+    width: 36px; height: 36px; padding: 0;
+    border-radius: var(--r-full);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    color: var(--ink);
+  }
+
+  /* ---------- Top nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    height: 64px;
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .nav-inner { display: flex; align-items: center; gap: var(--s-lg); height: 64px; }
+  .brand { display: flex; align-items: center; gap: var(--s-xs); font-family: var(--font-display); font-weight: 600; font-size: 20px; letter-spacing: -0.5px; color: var(--ink); }
+  .brand .dot { width: 22px; height: 22px; border-radius: var(--r-full); background: var(--primary); display: inline-flex; align-items: center; justify-content: center; }
+  .nav-links { display: flex; gap: var(--s-md); margin-left: var(--s-md); }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--body); padding: var(--s-xs); }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta { margin-left: auto; display: flex; align-items: center; gap: var(--s-sm); }
+
+  /* ---------- Nav-pill-group (signature pill-in-pill) ---------- */
+  .pill-group {
+    display: inline-flex;
+    gap: var(--s-xxs);
+    padding: 6px;
+    background: var(--surface-soft);
+    border-radius: var(--r-pill);
+  }
+  .pill-tab {
+    font-size: 14px; font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: none; cursor: pointer;
+    padding: 8px 14px;
+    border-radius: var(--r-md);
+  }
+  .pill-tab[aria-selected="true"] {
+    background: var(--canvas);
+    color: var(--ink);
+    box-shadow: var(--shadow-1);
+  }
+
+  /* ---------- Sections ---------- */
+  section { padding: var(--s-section) 0; border-bottom: 1px solid var(--hairline-soft); }
+  .sec-head { max-width: 640px; margin: 0 0 var(--s-xl); }
+  .sec-head .body-md { margin-top: var(--s-md); }
+
+  /* ---------- Hero ---------- */
+  .hero { display: grid; grid-template-columns: 7fr 5fr; gap: var(--s-xxl); align-items: center; }
+  .hero .lede { margin: var(--s-md) 0 var(--s-lg); font-size: 18px; color: var(--muted); max-width: 42ch; }
+  .hero-actions { display: flex; gap: var(--s-sm); flex-wrap: wrap; }
+
+  /* Hero app-mockup card — real product chrome shown in-card */
+  .app-mock {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-2);
+    overflow: hidden;
+  }
+  .app-mock__chrome { display: flex; gap: 6px; padding: var(--s-sm) var(--s-md); border-bottom: 1px solid var(--hairline-soft); }
+  .app-mock__chrome span { width: 10px; height: 10px; border-radius: var(--r-full); background: var(--surface-strong); }
+  .app-mock__body { padding: var(--s-lg); display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--s-lg); }
+  .cal-widget__month { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: -0.3px; color: var(--ink); margin-bottom: var(--s-sm); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-grid .d {
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--body);
+    border-radius: var(--r-sm);
+  }
+  .cal-grid .d.muted { color: var(--surface-strong); }
+  .cal-grid .d.sel { background: var(--primary); color: var(--on-primary); font-weight: 600; }
+  .slots { display: flex; flex-direction: column; gap: var(--s-xs); }
+  .slots .caption { margin-bottom: 2px; }
+  .slot {
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: 9px 12px;
+    font-size: 13px; font-weight: 500;
+    color: var(--ink);
+    text-align: center;
+  }
+  .slot.active { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+  /* ---------- Feature cards (light gray = abstract claim) ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .feature-card {
+    background: var(--surface-card);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .feat-icon {
+    width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--canvas);
+    border-radius: var(--r-md);
+    color: var(--ink);
+    margin-bottom: var(--s-md);
+  }
+  .feature-card .title-md { margin-bottom: var(--s-xs); }
+  .feature-card p { margin: 0; color: var(--body); font-size: 15px; }
+
+  /* ---------- Product mockup card (white = show the product) ---------- */
+  .product-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+  }
+  .wf-row { display: flex; align-items: center; gap: var(--s-sm); padding: var(--s-sm) 0; border-bottom: 1px solid var(--hairline-soft); }
+  .wf-row:last-child { border-bottom: none; }
+  .wf-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: var(--r-pill); color: #fff; }
+  .integration-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-sm); margin-top: var(--s-md); }
+  .integ {
+    aspect-ratio: 1;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--ink);
+  }
+
+  /* ---------- Testimonials ---------- */
+  .testimonial-card {
+    background: var(--surface-card);
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+  }
+  .t-head { display: flex; align-items: center; gap: var(--s-sm); margin-bottom: var(--s-sm); }
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: var(--r-full);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #fff;
+  }
+  .stars { color: var(--badge-orange); font-size: 13px; letter-spacing: 1px; }
+  .testimonial-card p { margin: var(--s-xs) 0 0; color: var(--body); font-size: 15px; }
+
+  /* ---------- Pricing ---------- */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-lg); }
+  .price-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+    display: flex; flex-direction: column; gap: var(--s-md);
+    box-shadow: var(--shadow-1);
+  }
+  .price-card--featured {
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    border-color: var(--surface-dark);
+  }
+  .price-card--featured .title-lg,
+  .price-card--featured .price { color: var(--on-dark); }
+  .price-card--featured .plan-feat { color: var(--on-dark-soft); }
+  .price { font-family: var(--font-display); font-weight: 600; font-size: 28px; letter-spacing: -0.5px; color: var(--ink); }
+  .price small { font-family: var(--font-body); font-size: 14px; font-weight: 400; color: var(--muted); letter-spacing: 0; }
+  .plan-feats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-xs); }
+  .plan-feat { display: flex; align-items: center; gap: var(--s-xs); font-size: 14px; color: var(--body); }
+  .plan-feat svg { flex: none; color: var(--success); }
+  .price-card--featured .btn-primary { background: var(--canvas); color: var(--ink); }
+
+  /* ---------- Form ---------- */
+  .form-card {
+    max-width: 460px;
+    background: var(--surface-card);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .field { display: flex; flex-direction: column; gap: var(--s-xs); margin-bottom: var(--s-md); }
+  .field label { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .input {
+    height: 40px;
+    padding: 10px 14px;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .input::placeholder { color: var(--muted-soft); }
+  .input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08); }
+
+  /* ---------- Badges swatches ---------- */
+  .row { display: flex; flex-wrap: wrap; gap: var(--s-sm); align-items: center; }
+  .badge { font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: var(--r-pill); background: var(--surface-card); color: var(--ink); }
+  .badge--accent { color: #fff; }
+  .swatch { display: flex; flex-direction: column; gap: var(--s-xs); }
+  .swatch .chip { height: 56px; border-radius: var(--r-md); border: 1px solid var(--hairline); }
+
+  /* ---------- CTA band (light) ---------- */
+  .cta-band {
+    background: var(--surface-card);
+    border-radius: var(--r-lg);
+    padding: var(--s-xxl);
+    text-align: center;
+  }
+  .cta-band .lede { color: var(--muted); margin: var(--s-md) 0 var(--s-lg); }
+
+  /* ---------- Footer (only dark surface) ---------- */
+  .footer {
+    background: var(--surface-dark);
+    color: var(--on-dark-soft);
+    padding: 64px 0 var(--s-xl);
+    border-bottom: none;
+  }
+  .footer .brand { color: var(--on-dark); }
+  .footer .brand .dot { background: var(--canvas); }
+  .footer .brand .dot svg { color: var(--ink); }
+  .footer-grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: var(--s-lg); margin: var(--s-xl) 0; }
+  .footer h4 { color: var(--on-dark); font-size: 14px; font-weight: 600; margin: 0 0 var(--s-sm); }
+  .footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-xs); }
+  .footer ul a { font-size: 14px; color: var(--on-dark-soft); }
+  .footer ul a:hover { color: var(--on-dark); }
+  .footer-bottom { display: flex; justify-content: space-between; gap: var(--s-md); padding-top: var(--s-lg); border-top: 1px solid var(--surface-dark-elevated); font-size: 13px; color: var(--on-dark-soft); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .display-xl { font-size: 40px; letter-spacing: -1px; }
+    .display-lg { font-size: 34px; }
+    section { padding: 56px 0; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; gap: var(--s-xl); }
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: 1fr; }
+    .app-mock__body { grid-template-columns: 1fr; }
+    .integration-grid { grid-template-columns: repeat(3, 1fr); }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top navigation -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Cal.com home">
+        <span class="dot" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+        </span>
+        Cal.com
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Resources</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Enterprise</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-text" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Sign up free</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section aria-labelledby="hero-h">
+      <div class="wrap hero">
+        <div>
+          <div class="pill-group" role="tablist" aria-label="Audience switcher">
+            <button class="pill-tab" role="tab" aria-selected="false">Personal</button>
+            <button class="pill-tab" role="tab" aria-selected="true">Teams</button>
+            <button class="pill-tab" role="tab" aria-selected="false">Enterprise</button>
+          </div>
+          <h1 class="display-xl" id="hero-h" style="margin-top:var(--s-lg)">The better way<br/>to schedule your<br/>meetings</h1>
+          <p class="lede">A fully customizable scheduling experience for individuals, businesses taking calls, and everything in between.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="./DESIGN.md">Sign up with email</a>
+            <a class="btn btn-secondary" href="./DESIGN.md">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.35 11.1h-9.17v2.98h5.27c-.23 1.4-1.6 4.1-5.27 4.1-3.17 0-5.76-2.62-5.76-5.85s2.59-5.85 5.76-5.85c1.8 0 3.02.77 3.71 1.43l2.53-2.44C17.06 3.87 14.86 3 12.18 3 7.02 3 2.85 7.16 2.85 12.33s4.17 9.33 9.33 9.33c5.39 0 8.96-3.79 8.96-9.13 0-.61-.07-1.08-.19-1.43z"/></svg>
+              Sign up with Google
+            </a>
+          </div>
+        </div>
+
+        <!-- Hero app-mockup card: real Cal.com booking widget chrome -->
+        <div class="app-mock" aria-label="Cal.com booking widget preview">
+          <div class="app-mock__chrome" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="app-mock__body">
+            <div>
+              <div class="cal-widget__month">March 2026</div>
+              <div class="cal-grid" aria-hidden="true">
+                <div class="d muted">24</div><div class="d muted">25</div><div class="d muted">26</div><div class="d muted">27</div><div class="d">1</div><div class="d">2</div><div class="d">3</div>
+                <div class="d">4</div><div class="d">5</div><div class="d">6</div><div class="d">7</div><div class="d">8</div><div class="d">9</div><div class="d">10</div>
+                <div class="d">11</div><div class="d">12</div><div class="d sel">13</div><div class="d">14</div><div class="d">15</div><div class="d">16</div><div class="d">17</div>
+                <div class="d">18</div><div class="d">19</div><div class="d">20</div><div class="d">21</div><div class="d">22</div><div class="d">23</div><div class="d">24</div>
+              </div>
+            </div>
+            <div class="slots">
+              <span class="caption">Fri, 13 Mar</span>
+              <div class="slot">9:00 am</div>
+              <div class="slot active">9:30 am</div>
+              <div class="slot">10:00 am</div>
+              <div class="slot">2:00 pm</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features (light-gray cards = abstract claim) -->
+    <section aria-labelledby="feat-h">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="eyebrow">Why Cal.com</p>
+          <h2 class="display-lg" id="feat-h">Your all-purpose scheduling app</h2>
+          <p class="body-md">Connect your calendar, share your link, and let people book time with you. No back-and-forth, no double-bookings.</p>
+        </div>
+        <div class="grid-3">
+          <article class="feature-card">
+            <span class="feat-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></span>
+            <h3 class="title-md">Effortless scheduling</h3>
+            <p>Share one link, sync every calendar, and let availability update itself in real time.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feat-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <h3 class="title-md">Built for teams</h3>
+            <p>Round-robin, collective, and managed event types keep the whole team booked without conflicts.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feat-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></span>
+            <h3 class="title-md">Open source</h3>
+            <p>Self-host, extend, and audit the code. Cal.com is scheduling infrastructure you fully control.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product mockup (white card = show the actual product) -->
+    <section aria-labelledby="prod-h">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="eyebrow">Workflows</p>
+          <h2 class="display-md" id="prod-h">Automate everything around the meeting</h2>
+        </div>
+        <div class="grid-3" style="grid-template-columns: 1.3fr 1fr;">
+          <div class="product-card" aria-label="Workflow automation preview">
+            <div class="wf-row">
+              <span class="wf-badge" style="background:var(--badge-violet)">Trigger</span>
+              <span class="body-sm" style="color:var(--ink)">When a booking is created</span>
+            </div>
+            <div class="wf-row">
+              <span class="wf-badge" style="background:var(--badge-emerald)">Action</span>
+              <span class="body-sm" style="color:var(--ink)">Send confirmation email + SMS reminder</span>
+            </div>
+            <div class="wf-row">
+              <span class="wf-badge" style="background:var(--badge-orange)">Action</span>
+              <span class="body-sm" style="color:var(--ink)">Add to CRM &amp; notify #sales channel</span>
+            </div>
+            <div class="integration-grid" aria-hidden="true">
+              <div class="integ">Z</div><div class="integ">S</div><div class="integ">G</div><div class="integ">N</div>
+            </div>
+          </div>
+          <div class="product-card">
+            <h3 class="title-md" style="margin-bottom:var(--s-sm)">API-first</h3>
+            <p class="body-sm" style="margin:0 0 var(--s-md)">Book, reschedule and cancel programmatically.</p>
+            <pre class="mono" style="margin:0;background:var(--surface-card);border-radius:var(--r-md);padding:var(--s-md);overflow:auto;color:var(--ink)"><code>POST /v2/bookings
+{
+  "eventTypeId": 42,
+  "start": "2026-03-13T09:30Z",
+  "attendee": { "name": "Ada" }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section aria-labelledby="test-h">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="eyebrow">Loved by teams</p>
+          <h2 class="display-md" id="test-h">Trusted by scheduling-heavy teams</h2>
+        </div>
+        <div class="grid-3">
+          <article class="testimonial-card">
+            <div class="t-head">
+              <span class="avatar" style="background:var(--badge-pink)">MR</span>
+              <div>
+                <div class="title-sm">Maya Rao</div>
+                <div class="caption">Head of Sales, Northwind</div>
+              </div>
+            </div>
+            <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <p>We cut our meeting-scheduling time in half. The round-robin routing alone paid for itself.</p>
+          </article>
+          <article class="testimonial-card">
+            <div class="t-head">
+              <span class="avatar" style="background:var(--badge-violet)">JL</span>
+              <div>
+                <div class="title-sm">Jonas Lind</div>
+                <div class="caption">Founder, Loopwork</div>
+              </div>
+            </div>
+            <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <p>Self-hosting was a dealbreaker requirement for us — Cal.com was the only serious option.</p>
+          </article>
+          <article class="testimonial-card">
+            <div class="t-head">
+              <span class="avatar" style="background:var(--badge-emerald)">SC</span>
+              <div>
+                <div class="title-sm">Sara Chen</div>
+                <div class="caption">Ops Lead, Bright Labs</div>
+              </div>
+            </div>
+            <div class="stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <p>The product feels engineered, not decorated. Every booking flow just works.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing (featured tier = the only dark card on the page) -->
+    <section aria-labelledby="price-h">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="eyebrow">Pricing</p>
+          <h2 class="display-lg" id="price-h">Simple, transparent pricing</h2>
+        </div>
+        <div class="grid-4">
+          <article class="price-card">
+            <h3 class="title-lg">Free</h3>
+            <div class="price">$0<small>/mo</small></div>
+            <ul class="plan-feats">
+              <li class="plan-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Unlimited event types</li>
+              <li class="plan-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Calendar sync</li>
+            </ul>
+            <a class="btn btn-secondary" href="./DESIGN.md">Get started</a>
+          </article>
+          <article class="price-card">
+            <h3 class="title-lg">Pro</h3>
+            <div class="price">$15<small>/mo</small></div>
+            <ul class="plan-feats">
+              <li class="plan-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Everything in Free</li>
+              <li class="plan-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Workflows &amp; routing</li>
+            </ul>
+            <a class="btn btn-primary" href="./DESIGN.md">Start free trial</a>
+          </article>
+          <article class="price-card price-card--featured">
+            <h3 class="title-lg">Teams</h3>
+            <div class="price">$37<small>/mo</small></div>
+            <ul class="plan-feats">
+              <li class="plan-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Round-robin &amp; collective</li>
+              <li class="plan-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Managed event types</li>
+            </ul>
+            <a class="btn btn-primary" href="./DESIGN.md">Start free trial</a>
+          </article>
+          <article class="price-card">
+            <h3 class="title-lg">Enterprise</h3>
+            <div class="price">Custom</div>
+            <ul class="plan-feats">
+              <li class="plan-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>SSO &amp; SAML</li>
+              <li class="plan-feat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>SLA &amp; dedicated support</li>
+            </ul>
+            <a class="btn btn-secondary" href="./DESIGN.md">Contact sales</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Form + tokens reference -->
+    <section aria-labelledby="form-h">
+      <div class="wrap grid-3" style="grid-template-columns: 1fr 1fr; align-items:start;">
+        <div>
+          <div class="sec-head">
+            <p class="eyebrow">Get started</p>
+            <h2 class="display-md" id="form-h">Create your free account</h2>
+          </div>
+          <form class="form-card" aria-label="Sign up">
+            <div class="field">
+              <label for="name">Full name</label>
+              <input class="input" id="name" type="text" placeholder="Ada Lovelace" />
+            </div>
+            <div class="field">
+              <label for="email">Work email</label>
+              <input class="input" id="email" type="email" placeholder="ada@company.com" />
+            </div>
+            <div class="field">
+              <label for="url">cal.com/</label>
+              <input class="input" id="url" type="text" placeholder="ada" />
+            </div>
+            <button class="btn btn-primary" type="submit" style="width:100%">Sign up free</button>
+          </form>
+        </div>
+
+        <div>
+          <div class="sec-head">
+            <p class="eyebrow">Design tokens</p>
+            <h2 class="display-md">Badges, buttons &amp; palette</h2>
+          </div>
+          <div class="row" style="margin-bottom:var(--s-lg)">
+            <a class="btn btn-primary" href="./DESIGN.md">Primary</a>
+            <a class="btn btn-secondary" href="./DESIGN.md">Secondary</a>
+            <button class="btn btn-disabled" disabled>Disabled</button>
+            <button class="btn-icon-circular" aria-label="Share">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+            </button>
+          </div>
+          <div class="row" style="margin-bottom:var(--s-lg)">
+            <span class="badge">New</span>
+            <span class="badge">Product</span>
+            <span class="badge badge--accent" style="background:var(--badge-orange)">Article</span>
+            <span class="badge badge--accent" style="background:var(--badge-pink)">Guide</span>
+            <span class="badge badge--accent" style="background:var(--badge-violet)">Beta</span>
+            <span class="badge badge--accent" style="background:var(--badge-emerald)">Live</span>
+          </div>
+          <div class="grid-4" style="grid-template-columns:repeat(4,1fr)">
+            <div class="swatch"><span class="chip" style="background:var(--primary)"></span><span class="caption">Primary</span></div>
+            <div class="swatch"><span class="chip" style="background:var(--surface-card)"></span><span class="caption">Surface</span></div>
+            <div class="swatch"><span class="chip" style="background:var(--surface-dark)"></span><span class="caption">Dark</span></div>
+            <div class="swatch"><span class="chip" style="background:var(--brand-accent)"></span><span class="caption">Accent</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pre-footer CTA band (light) -->
+    <section aria-labelledby="cta-h" style="border-bottom:none">
+      <div class="wrap">
+        <div class="cta-band">
+          <h2 class="display-sm" id="cta-h">Smarter, simpler scheduling</h2>
+          <p class="lede">Join thousands of teams who book meetings the better way.</p>
+          <a class="btn btn-primary" href="./DESIGN.md">Get started for free</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer: the only dark surface, closes the page -->
+  <footer class="footer">
+    <div class="wrap">
+      <a class="brand" href="./DESIGN.md" aria-label="Cal.com home">
+        <span class="dot" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+        </span>
+        Cal.com
+      </a>
+      <div class="footer-grid">
+        <p class="body-sm" style="max-width:32ch">The scheduling infrastructure for absolutely everyone. Open source and self-hostable.</p>
+        <div>
+          <h4>Product</h4>
+          <ul><li><a href="./DESIGN.md">Enterprise</a></li><li><a href="./DESIGN.md">Teams</a></li><li><a href="./DESIGN.md">Workflows</a></li><li><a href="./DESIGN.md">Routing</a></li></ul>
+        </div>
+        <div>
+          <h4>Solutions</h4>
+          <ul><li><a href="./DESIGN.md">Sales</a></li><li><a href="./DESIGN.md">Recruiting</a></li><li><a href="./DESIGN.md">Support</a></li></ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul><li><a href="./DESIGN.md">About</a></li><li><a href="./DESIGN.md">Careers</a></li><li><a href="./DESIGN.md">Blog</a></li></ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul><li><a href="./DESIGN.md">Docs</a></li><li><a href="./DESIGN.md">API</a></li><li><a href="./DESIGN.md">Community</a></li></ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Cal.com, Inc.</span>
+        <span>This is a design-system preview built from <a href="./DESIGN.md" style="color:var(--on-dark)">DESIGN.md</a>.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!-- source_content_hash: 26a202fd244e9213d5e2475d81581828da1dd97e089e44639d9783d04f96e4a8 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pinterest — Design System Component Preview</title>
+<style>
+  /* ============================================================
+     Pinterest design tokens — mapped verbatim from DESIGN.md
+     Get out of the photograph's way. Warm-cream neutral chrome,
+     Pin Sans typography, a single saturated Pinterest Red reserved
+     for the Sign-up CTA, and a masonry pin grid where the image IS
+     the card. Two-radius shape system: 16px, 32px, and pill.
+     ============================================================ */
+  :root {
+    /* Brand — the only saturated color */
+    --primary: #e60023;
+    --primary-pressed: #cc001f;
+    --on-primary: #ffffff;
+
+    /* Text ladder */
+    --ink: #000000;
+    --ink-soft: #211922;    /* inline body-link tint only */
+    --body: #33332e;
+    --charcoal: #262622;
+    --mute: #62625b;
+    --ash: #91918c;
+    --stone: #c8c8c1;
+
+    /* Hairlines */
+    --hairline: #dadad3;
+    --hairline-soft: #e5e5e0;
+
+    /* Secondary button (gray-cream) */
+    --secondary-bg: #e5e5e0;
+    --secondary-pressed: #c8c8c1;
+
+    /* Surfaces — warm-cream neutrals */
+    --canvas: #ffffff;
+    --surface-soft: #fbfbf9;
+    --surface-card: #f6f6f3;
+    --surface-dark: #262622;
+
+    /* On-dark */
+    --on-dark: #ffffff;
+    --on-dark-mute: rgba(255,255,255,0.7);
+
+    /* Focus double-ring */
+    --focus-outer: #435ee5;
+    --focus-inner: #ffffff;
+
+    /* Editorial accents (inside imagery / badges only) */
+    --accent-blue: #617bff;
+    --accent-purple: #7e238b;
+    --accent-purple-deep: #6845ab;
+
+    /* Semantic */
+    --success-deep: #103c25;
+    --success-pale: #c7f0da;
+    --error: #9e0a0a;
+
+    /* Type — Pin Sans (proprietary) → Inter/Manrope */
+    --font: "Pin Sans", Inter, Manrope, -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Radius — three values only */
+    --r-sm: 8px;
+    --r-md: 16px;
+    --r-lg: 32px;
+    --r-full: 9999px;
+
+    /* Spacing (8px base) */
+    --s-xxs: 4px;
+    --s-xs: 6px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-section: 64px;
+
+    --maxw: 1280px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--surface-soft);
+    color: var(--body);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--primary); color: var(--on-primary); }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible { outline: 3px solid var(--focus-outer); outline-offset: 2px; }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s-xl); }
+
+  .display { font-size: 70px; font-weight: 600; line-height: 1.1; letter-spacing: -1.2px; color: var(--ink); margin: 0; }
+  .h-xl { font-size: 28px; font-weight: 700; line-height: 1.2; letter-spacing: -1.2px; color: var(--ink); margin: 0; }
+  .h-lg { font-size: 22px; font-weight: 600; line-height: 1.25; color: var(--ink); margin: 0; }
+  .h-md { font-size: 18px; font-weight: 600; line-height: 1.3; color: var(--ink); margin: 0; }
+  .body-md { font-size: 16px; line-height: 1.4; color: var(--body); }
+  .body-strong { font-size: 16px; font-weight: 600; }
+  .body-sm { font-size: 14px; color: var(--mute); }
+  .caption { font-size: 12px; color: var(--mute); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s-sm);
+    font-family: var(--font);
+    font-size: 14px; font-weight: 700; line-height: 1;
+    height: 40px; padding: 0 14px;
+    border-radius: var(--r-md);
+    border: none; cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:active { background: var(--primary-pressed); }
+  .btn-secondary { background: var(--secondary-bg); color: var(--ink); }
+  .btn-secondary:active { background: var(--secondary-pressed); }
+  .btn-tertiary { background: transparent; color: var(--ink); }
+  .btn-icon {
+    width: 40px; height: 40px; padding: 0;
+    border-radius: var(--r-full);
+    background: var(--surface-card);
+    color: var(--ink);
+  }
+  .btn-pill-on-image {
+    background: var(--canvas); color: var(--ink);
+    font-size: 12px; font-weight: 700;
+    border-radius: var(--r-full);
+    height: auto; padding: 6px 12px;
+  }
+
+  /* ---------- Primary nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 30;
+    background: var(--canvas);
+    height: 64px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav-inner { display: flex; align-items: center; gap: var(--s-lg); height: 64px; }
+  .brand { display: inline-flex; align-items: center; gap: var(--s-sm); color: var(--primary); font-weight: 700; font-size: 20px; }
+  .brand svg { display: block; }
+  .nav-explore { font-weight: 700; color: var(--ink); font-size: 16px; }
+  .search {
+    flex: 1;
+    display: flex; align-items: center; gap: var(--s-sm);
+    background: var(--surface-card);
+    border-radius: var(--r-full);
+    height: 48px; padding: 0 16px;
+    border: 1px solid transparent;
+    max-width: 620px;
+  }
+  .search:focus-within { background: var(--canvas); border-color: var(--ash); }
+  .search input { border: none; outline: none; background: transparent; font-family: var(--font); font-size: 16px; width: 100%; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-md); }
+  .nav-right a.txt { font-weight: 700; font-size: 16px; color: var(--ink); }
+
+  /* ---------- Sections ---------- */
+  section { padding: var(--s-section) 0; }
+  .sec-head { max-width: 720px; margin: 0 auto var(--s-xl); text-align: center; }
+  .sec-head .body-md { margin-top: var(--s-md); color: var(--mute); }
+
+  /* ---------- Hero ---------- */
+  .hero { text-align: center; padding: var(--s-section) 0; }
+  .hero .display { max-width: 12ch; margin: 0 auto; }
+  .hero p { max-width: 46ch; margin: var(--s-xl) auto var(--s-xl); font-size: 18px; color: var(--mute); }
+
+  /* ---------- Feature rows (alternating) ---------- */
+  .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-section); align-items: center; margin-bottom: var(--s-section); }
+  .feature-row:nth-child(even) .feature-media { order: -1; }
+  .feature-copy .h-xl { margin-bottom: var(--s-lg); }
+  .feature-copy p { color: var(--mute); margin: 0 0 var(--s-xl); font-size: 17px; }
+  .feature-media {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--r-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .fm1 { background: radial-gradient(70% 70% at 40% 30%, #ffd9c2, #e88a5c 70%); }
+  .fm2 { background: radial-gradient(70% 70% at 60% 30%, #d6d1ff, #7e238b 80%); }
+  .feature-media .pill-tag { position: absolute; bottom: var(--s-lg); left: var(--s-lg); }
+
+  /* ---------- Masonry pin grid ---------- */
+  .masonry { columns: 4; column-gap: var(--s-sm); }
+  .pin {
+    break-inside: avoid;
+    margin-bottom: var(--s-sm);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    position: relative;
+    background: var(--surface-card);
+  }
+  .pin .img { display: block; width: 100%; }
+  .pin .p1 { aspect-ratio: 3 / 4; background: radial-gradient(80% 80% at 30% 20%, #f7c9b8, #c15d43); }
+  .pin .p2 { aspect-ratio: 1 / 1; background: radial-gradient(80% 80% at 60% 30%, #cfe6dc, #4f8f74); }
+  .pin .p3 { aspect-ratio: 2 / 3; background: radial-gradient(80% 80% at 40% 30%, #d6d1ff, #6845ab); }
+  .pin .p4 { aspect-ratio: 4 / 5; background: radial-gradient(80% 80% at 50% 20%, #ffe1ee, #e60023); }
+  .pin .p5 { aspect-ratio: 1 / 1; background: radial-gradient(80% 80% at 40% 40%, #f4dcae, #b07f4a); }
+  .pin .p6 { aspect-ratio: 3 / 4; background: radial-gradient(80% 80% at 50% 30%, #c7f0da, #103c25); }
+  .pin .p7 { aspect-ratio: 2 / 3; background: radial-gradient(80% 80% at 30% 30%, #cbe0ff, #435ee5); }
+  .pin .p8 { aspect-ratio: 4 / 5; background: radial-gradient(80% 80% at 60% 20%, #ffd0d0, #9e0a0a); }
+  .pin .overlay { position: absolute; top: var(--s-sm); left: var(--s-sm); }
+  .pin .attribution { position: absolute; bottom: var(--s-sm); left: var(--s-sm); display: flex; align-items: center; gap: 6px; }
+  .pin .attribution .av { width: 28px; height: 28px; border-radius: var(--r-full); background: var(--canvas); }
+  .pin .attribution .nm { color: var(--on-dark); font-size: 14px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+
+  /* ---------- Filter chips ---------- */
+  .chips { display: flex; flex-wrap: wrap; gap: var(--s-sm); justify-content: center; margin-bottom: var(--s-xl); }
+  .chip {
+    background: var(--surface-card); color: var(--ink);
+    font-size: 14px; font-weight: 700;
+    padding: 8px 16px;
+    border-radius: var(--r-full);
+    border: none; cursor: pointer;
+  }
+  .chip.active { background: var(--ink); color: var(--on-dark); }
+
+  /* ---------- Category tiles ---------- */
+  .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-lg); }
+  .cat-tile {
+    background: var(--surface-card);
+    border-radius: var(--r-md);
+    padding: var(--s-lg);
+    text-align: center;
+  }
+  .cat-tile .thumb { aspect-ratio: 1 / 1; border-radius: var(--r-md); margin-bottom: var(--s-md); }
+  .cat-tile:nth-child(1) .thumb { background: radial-gradient(70% 70% at 40% 30%, #ffd9c2, #e88a5c); }
+  .cat-tile:nth-child(2) .thumb { background: radial-gradient(70% 70% at 50% 30%, #cfe6dc, #4f8f74); }
+  .cat-tile:nth-child(3) .thumb { background: radial-gradient(70% 70% at 40% 30%, #d6d1ff, #6845ab); }
+  .cat-tile:nth-child(4) .thumb { background: radial-gradient(70% 70% at 50% 30%, #f4dcae, #b07f4a); }
+  .cat-tile .label { font-weight: 600; color: var(--ink); }
+
+  /* ---------- Modal (login/signup on scrim) ---------- */
+  .modal-demo { display: flex; justify-content: center; }
+  .scrim {
+    background: rgba(0,0,0,0.5);
+    border-radius: var(--r-lg);
+    padding: var(--s-section) var(--s-xl);
+    width: 100%;
+    display: flex; justify-content: center;
+  }
+  .modal-card {
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    padding: var(--s-xxl);
+    width: 100%; max-width: 420px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+    text-align: center;
+  }
+  .modal-card h3 { margin: 0 0 var(--s-sm); }
+  .modal-card .sub { color: var(--mute); font-size: 16px; margin: 0 0 var(--s-xl); }
+  .field { text-align: left; margin-bottom: var(--s-md); }
+  .field label { display: block; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .input {
+    width: 100%; height: 44px;
+    padding: 11px 15px;
+    background: var(--canvas);
+    border: 1px solid var(--ash);
+    border-radius: var(--r-md);
+    font-family: var(--font); font-size: 16px; color: var(--ink);
+  }
+  .input:focus { outline: none; border: 2px solid var(--ink); box-shadow: 0 0 0 4px var(--focus-outer); }
+  .modal-card .btn-primary { width: 100%; margin-top: var(--s-sm); }
+  .modal-card .altline { margin-top: var(--s-lg); font-size: 14px; color: var(--mute); }
+  .modal-card .altline a { color: var(--ink-soft); font-weight: 600; }
+
+  /* ---------- Footer ---------- */
+  .footer { background: var(--canvas); border-top: 1px solid var(--hairline); padding: var(--s-xxl) 0; }
+  .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-xl); margin-bottom: var(--s-xl); }
+  .footer h4 { font-size: 14px; font-weight: 700; color: var(--ink); margin: 0 0 var(--s-md); }
+  .footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-sm); }
+  .footer ul a { font-size: 14px; color: var(--mute); }
+  .footer ul a:hover { color: var(--ink); }
+  .footer-bottom { display: flex; align-items: center; gap: var(--s-sm); padding-top: var(--s-lg); border-top: 1px solid var(--hairline); }
+  .footer-bottom .brand { font-size: 16px; }
+  .footer-bottom span { font-size: 12px; color: var(--mute); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    .masonry { columns: 3; }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .display { font-size: 44px; }
+    .masonry { columns: 2; }
+    .feature-row { grid-template-columns: 1fr; gap: var(--s-xl); }
+    .feature-row:nth-child(even) .feature-media { order: 0; }
+    .nav-explore, .nav-right a.txt { display: none; }
+    section { padding: 48px 0; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .display { font-size: 36px; }
+    .masonry { columns: 1; }
+    .cat-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Primary nav (always-red Sign up anchored upper-right) -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Pinterest home">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.6 19.3c-.1-.8-.2-2 0-2.9l1.2-5s-.3-.6-.3-1.5c0-1.4.8-2.4 1.8-2.4.9 0 1.3.6 1.3 1.4 0 .9-.5 2.1-.8 3.3-.2 1 .5 1.8 1.5 1.8 1.8 0 3.1-2.3 3.1-5 0-2.1-1.4-3.6-3.9-3.6-2.8 0-4.5 2.1-4.5 4.3 0 .8.3 1.4.7 1.8.2.2.2.3.1.5l-.2.9c-.1.3-.2.4-.5.2-1.3-.5-1.9-2-1.9-3.6 0-2.7 2.3-5.9 6.8-5.9 3.6 0 6 2.6 6 5.4 0 3.7-2 6.5-5.1 6.5-1 0-2-.6-2.3-1.2l-.6 2.5c-.2.8-.7 1.7-1.1 2.4A10 10 0 1 0 12 2z"/></svg>
+        Pinterest
+      </a>
+      <a class="nav-explore" href="./DESIGN.md">Explore</a>
+      <label class="search" aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--mute)" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input type="search" placeholder="Search for ideas, fashion, recipes…" />
+      </label>
+      <div class="nav-right">
+        <a class="txt" href="./DESIGN.md">About</a>
+        <a class="txt" href="./DESIGN.md">Log in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Sign up</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="hero-h">
+      <div class="wrap">
+        <h1 class="display" id="hero-h">Create the life you love</h1>
+        <p>Discover recipes, home ideas, style inspiration and other ideas to try — all in one place.</p>
+        <a class="btn btn-primary" href="./DESIGN.md" style="height:48px;padding:0 24px;font-size:16px">Sign up — it's free</a>
+      </div>
+    </section>
+
+    <!-- Feature rows (alternating) -->
+    <section aria-labelledby="feat-h">
+      <div class="wrap">
+        <h2 class="h-xl" id="feat-h" style="text-align:center;margin-bottom:var(--s-section)">Bring your favorite ideas to life</h2>
+        <div class="feature-row">
+          <div class="feature-copy">
+            <h3 class="h-xl">Search to discover</h3>
+            <p>Explore billions of ideas and find just the right one. Type it, snap it, or say it.</p>
+            <a class="btn btn-primary" href="./DESIGN.md">Explore</a>
+          </div>
+          <div class="feature-media fm1" aria-hidden="true">
+            <span class="btn btn-pill-on-image pill-tag">Cherry red</span>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-copy">
+            <h3 class="h-xl">Save what inspires you</h3>
+            <p>Collect your favorites into boards, so your ideas are organized and easy to find.</p>
+            <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+          </div>
+          <div class="feature-media fm2" aria-hidden="true">
+            <span class="btn btn-pill-on-image pill-tag">Earthy space inspo</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search results: filter chips + masonry -->
+    <section style="background:var(--surface-soft)" aria-labelledby="grid-h">
+      <div class="wrap">
+        <h2 class="h-lg" id="grid-h" style="text-align:center;margin-bottom:var(--s-lg)">Ideas for "bold lip"</h2>
+        <div class="chips">
+          <button class="chip active">All</button>
+          <button class="chip">Beauty makeup</button>
+          <button class="chip">Lipstick</button>
+          <button class="chip">Editorial makeup</button>
+          <button class="chip">Cherry red</button>
+        </div>
+        <div class="masonry" aria-label="Pin grid">
+          <div class="pin"><span class="img p1" aria-hidden="true"></span><span class="btn btn-pill-on-image overlay">Cherry red</span></div>
+          <div class="pin"><span class="img p2" aria-hidden="true"></span><div class="attribution"><span class="av" aria-hidden="true"></span><span class="nm">studio.mel</span></div></div>
+          <div class="pin"><span class="img p3" aria-hidden="true"></span></div>
+          <div class="pin"><span class="img p4" aria-hidden="true"></span><span class="btn btn-pill-on-image overlay">Preppy look</span></div>
+          <div class="pin"><span class="img p5" aria-hidden="true"></span></div>
+          <div class="pin"><span class="img p6" aria-hidden="true"></span><div class="attribution"><span class="av" aria-hidden="true"></span><span class="nm">green.days</span></div></div>
+          <div class="pin"><span class="img p7" aria-hidden="true"></span></div>
+          <div class="pin"><span class="img p8" aria-hidden="true"></span><span class="btn btn-pill-on-image overlay">Editorial</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category tiles -->
+    <section aria-labelledby="cat-h">
+      <div class="wrap">
+        <div class="sec-head"><h2 class="h-xl" id="cat-h">Popular on Pinterest</h2></div>
+        <div class="cat-grid">
+          <div class="cat-tile"><div class="thumb" aria-hidden="true"></div><div class="label">Recipes</div></div>
+          <div class="cat-tile"><div class="thumb" aria-hidden="true"></div><div class="label">Home decor</div></div>
+          <div class="cat-tile"><div class="thumb" aria-hidden="true"></div><div class="label">Style</div></div>
+          <div class="cat-tile"><div class="thumb" aria-hidden="true"></div><div class="label">Travel</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Login/signup modal on scrim -->
+    <section style="background:var(--surface-card)" aria-labelledby="modal-h">
+      <div class="wrap">
+        <div class="sec-head"><h2 class="h-xl" id="modal-h">Sign up to get your ideas</h2></div>
+        <div class="modal-demo">
+          <div class="scrim">
+            <div class="modal-card">
+              <h3 class="h-lg">Welcome to Pinterest</h3>
+              <p class="sub">Find new ideas to try</p>
+              <form aria-label="Sign up">
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input class="input" id="email" type="email" placeholder="Email" />
+                </div>
+                <div class="field">
+                  <label for="password">Password</label>
+                  <input class="input" id="password" type="password" placeholder="Create a password" />
+                </div>
+                <button class="btn btn-primary" type="submit">Continue</button>
+              </form>
+              <p class="altline">Already a member? <a href="./DESIGN.md">Log in</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <h4>Get the app</h4>
+          <ul><li><a href="./DESIGN.md">iOS</a></li><li><a href="./DESIGN.md">Android</a></li></ul>
+        </div>
+        <div>
+          <h4>Quick links</h4>
+          <ul><li><a href="./DESIGN.md">Explore</a></li><li><a href="./DESIGN.md">Shop</a></li><li><a href="./DESIGN.md">Collections</a></li></ul>
+        </div>
+        <div>
+          <h4>Pinterest for</h4>
+          <ul><li><a href="./DESIGN.md">Business</a></li><li><a href="./DESIGN.md">Creators</a></li><li><a href="./DESIGN.md">Newsroom</a></li></ul>
+        </div>
+        <div>
+          <h4>About</h4>
+          <ul><li><a href="./DESIGN.md">Privacy</a></li><li><a href="./DESIGN.md">Terms</a></li><li><a href="./DESIGN.md">Help Center</a></li></ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="brand" style="color:var(--primary);font-weight:700">Pinterest</span>
+        <span>© 2026 Pinterest · Preview built from DESIGN.md.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!-- source_content_hash: 4c9a248046684bdde5311a0c9881814f50e2381c2b0f3c75b02a35fc64bc8bb8 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HP — Component Preview</title>
+<style>
+  /* ============================================================
+     HP — token map
+     White-paper enterprise-consumer catalog. HP Electric Blue
+     (#024ad8) is the lone signal. Forma DJR Micro (weight 500
+     display), soft 16px card corners vs sharp 4px buttons,
+     angular blue chevrons echoing the wordmark, dark-navy closing
+     slabs. Manrope substitutes for Forma DJR Micro.
+     ============================================================ */
+  :root {
+    /* Brand & accent — HP Electric Blue is the only CTA fill */
+    --primary: #024ad8;
+    --primary-bright: #296ef9;   /* variant inside dark slabs */
+    --primary-deep: #0e3191;     /* pressed / visited */
+    --primary-soft: #c9e0fc;
+    --on-primary: #ffffff;
+
+    /* Ink */
+    --ink: #1a1a1a;              /* near-black — universal text */
+    --ink-deep: #000000;
+    --ink-soft: #292929;
+    --on-ink: #ffffff;
+    --charcoal: #3d3d3d;
+    --graphite: #636363;
+
+    /* Surface */
+    --canvas: #ffffff;
+    --cloud: #f7f7f7;           /* lightest section band */
+    --fog: #e8e8e8;
+    --steel: #c2c2c2;
+    --hairline: #e8e8e8;
+    --hairline-strong: #c2c2c2;
+
+    /* Signal / semantic */
+    --link: #024ad8;
+    --link-pressed: #0e3191;
+    --bloom-coral: #ff5050;      /* sale tag */
+    --bloom-deep: #b3262b;
+    --error: #b3262b;
+    --storm-deep: #356373;
+
+    /* Type — single family */
+    --font: "Manrope", "Inter", Arial, sans-serif;
+
+    /* Radius — two-tier: sharp buttons, soft cards */
+    --r-none: 0px;
+    --r-sm: 3px;
+    --r-md: 4px;    /* buttons, inputs */
+    --r-lg: 8px;    /* badges, category icon, faq row */
+    --r-xl: 16px;   /* cards, photo frames */
+    --r-pill: 9999px;
+
+    /* Spacing — 8px base */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 20px;
+    --sp-xl: 24px;
+    --sp-xxl: 32px;
+    --sp-section: 80px;
+
+    --shadow-lift: 0 2px 8px rgba(26,26,26,0.08);
+    --shadow-float: 0 8px 24px rgba(26,26,26,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.38;
+    color: var(--ink);
+    background: var(--canvas);
+  }
+  a { color: var(--link); text-decoration: none; font-weight: 500; }
+  a:hover { text-decoration: underline; }
+  a:active { color: var(--link-pressed); }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .wrap { max-width: 1366px; margin: 0 auto; padding: 0 var(--sp-xxl); }
+
+  /* Display — weight 500 at every size, line-height 1.0 */
+  .d-xxl { font-size: 72px; font-weight: 500; line-height: 1.0; margin: 0; }
+  .d-xl  { font-size: 56px; font-weight: 500; line-height: 1.0; margin: 0; }
+  .d-lg  { font-size: 44px; font-weight: 500; line-height: 1.0; margin: 0; }
+  .d-md  { font-size: 32px; font-weight: 500; line-height: 1.0; margin: 0; }
+  .d-sm  { font-size: 24px; font-weight: 500; line-height: 1.17; margin: 0; }
+  .d-xs  { font-size: 20px; font-weight: 500; line-height: 1.0; margin: 0; }
+  .lead  { font-size: 18px; font-weight: 400; line-height: 1.33; color: var(--charcoal); }
+  .cap   { font-size: 14px; color: var(--graphite); line-height: 1.5; }
+  .price { font-size: 24px; font-weight: 500; }
+
+  /* Utility strip */
+  .utility {
+    background: var(--ink);
+    color: var(--on-primary);
+    height: 36px;
+    display: flex; align-items: center;
+    font-size: 14px;
+  }
+  .utility .wrap { display: flex; align-items: center; gap: var(--sp-lg); width: 100%; }
+  .utility a { color: var(--on-primary); font-weight: 400; }
+  .utility .spacer { flex: 1; }
+
+  /* Top nav */
+  .nav {
+    background: var(--canvas);
+    height: 64px;
+    border-bottom: 1px solid var(--hairline);
+    display: flex; align-items: center;
+    position: sticky; top: 0; z-index: 20;
+  }
+  .nav .wrap { display: flex; align-items: center; gap: var(--sp-xl); width: 100%; }
+  .logo {
+    width: 44px; height: 44px; border-radius: var(--r-pill);
+    border: 3px solid var(--primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--primary); font-weight: 800; font-size: 15px; letter-spacing: -0.5px;
+    font-style: italic;
+  }
+  .nav-links { display: flex; gap: var(--sp-md); }
+  .nav-links a { color: var(--ink); padding: 8px 16px; }
+  .nav-links a:hover { text-decoration: none; color: var(--primary); }
+  .nav .spacer { flex: 1; }
+  .search-pill {
+    background: var(--canvas);
+    border: 1px solid var(--steel);
+    border-radius: var(--r-md);
+    height: 40px;
+    display: flex; align-items: center; gap: var(--sp-xs);
+    padding: 0 var(--sp-md);
+    color: var(--graphite);
+    font-size: 14px;
+    min-width: 200px;
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: var(--font);
+    font-size: 14px; font-weight: 600;
+    letter-spacing: 0.7px; text-transform: uppercase;
+    line-height: 1.4;
+    height: 44px;
+    padding: 12px 24px;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-deep); }
+  .btn-ink { background: var(--ink); color: var(--on-primary); }
+  .btn-outline { background: var(--canvas); color: var(--primary); border-color: var(--primary); }
+  .btn-outline:hover { background: var(--primary-soft); }
+  .btn-outline-ink { background: var(--canvas); color: var(--ink); border-color: var(--ink); }
+  .btn-row { display: flex; gap: var(--sp-md); flex-wrap: wrap; }
+  .link-inline { font-weight: 500; }
+
+  section { padding: var(--sp-section) 0; }
+  .eyebrow { font-size: 14px; font-weight: 700; color: var(--primary); letter-spacing: 0.7px; text-transform: uppercase; margin: 0 0 var(--sp-sm); }
+
+  /* Hero with chevrons */
+  .hero { position: relative; }
+  .hero-card {
+    background: var(--canvas);
+    border-radius: var(--r-xl);
+    padding: var(--sp-xxl);
+    box-shadow: var(--shadow-lift);
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-xxl);
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .chevron {
+    position: absolute; top: 0; bottom: 0; width: 90px;
+    background: var(--primary);
+    clip-path: polygon(0 0, 60% 0, 100% 50%, 60% 100%, 0 100%, 40% 50%);
+  }
+  .chevron.left { left: -30px; }
+  .chevron.right { right: -30px; transform: scaleX(-1); }
+  .hero-copy .price { color: var(--ink); margin: var(--sp-md) 0; display: block; }
+  .hero-photo {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--r-xl);
+    background: linear-gradient(135deg, #d7e3fb 0%, #eef3fd 60%, #ffffff 100%);
+    border: 1px solid var(--hairline);
+  }
+  .sale-tag {
+    display: inline-block;
+    background: var(--bloom-coral);
+    color: var(--on-primary);
+    font-size: 14px; font-weight: 700;
+    border-radius: var(--r-sm);
+    padding: 4px 8px;
+    margin-bottom: var(--sp-md);
+  }
+
+  /* Category icons */
+  .cat-band { background: var(--cloud); }
+  .cat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-md); }
+  .cat-card {
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    padding: var(--sp-md);
+    text-align: center;
+    box-shadow: var(--shadow-lift);
+  }
+  .cat-ico { width: 48px; height: 48px; margin: 0 auto var(--sp-xs); color: var(--primary); }
+  .cat-card .lbl { font-size: 16px; font-weight: 500; }
+
+  /* Product grid */
+  .prod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-xl); }
+  .prod-card {
+    background: var(--canvas);
+    border-radius: var(--r-xl);
+    padding: var(--sp-xl);
+    box-shadow: var(--shadow-lift);
+    display: flex; flex-direction: column;
+  }
+  .prod-photo {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--r-lg);
+    background: linear-gradient(135deg, #f2f5fb, #ffffff);
+    border: 1px solid var(--hairline);
+    margin-bottom: var(--sp-md);
+  }
+  .prod-card h3 { margin: 0 0 var(--sp-xs); font-size: 20px; font-weight: 500; }
+  .prod-card .cap { flex: 1; }
+  .prod-card .price { color: var(--ink); margin: var(--sp-sm) 0; }
+  .badge-ink { display: inline-block; background: var(--ink); color: var(--on-primary); border-radius: var(--r-lg); padding: 6px 12px; font-size: 14px; }
+
+  /* Feature card */
+  .feat-card {
+    background: var(--cloud);
+    border-radius: var(--r-xl);
+    padding: var(--sp-xxl);
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-xxl);
+    align-items: center;
+  }
+  .feat-photo { aspect-ratio: 16 / 10; border-radius: var(--r-xl); background: linear-gradient(120deg,#cfe0fb,#eef4fd); }
+
+  /* Pricing tiers */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); }
+  .tier {
+    background: var(--canvas);
+    border-radius: var(--r-xl);
+    padding: var(--sp-xl);
+    box-shadow: var(--shadow-lift);
+  }
+  .tier.featured { border-top: 4px solid var(--primary); }
+  .tier .tprice { color: var(--ink); }
+  .tier.featured .tprice { color: var(--primary); }
+  .tier ul { list-style: none; padding: 0; margin: var(--sp-md) 0; }
+  .tier li { padding: var(--sp-xs) 0; border-bottom: 1px solid var(--hairline); font-size: 14px; color: var(--charcoal); }
+
+  /* FAQ */
+  .faq-band { background: var(--fog); }
+  .faq-row {
+    background: var(--canvas);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+    font-weight: 500;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: var(--sp-sm);
+    border: 1px solid var(--hairline);
+  }
+  .faq-row .chev { color: var(--primary); }
+
+  /* Customer stories */
+  .story-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); }
+  .story-card { background: var(--canvas); border-radius: var(--r-xl); padding: var(--sp-md); box-shadow: var(--shadow-lift); }
+  .story-photo { aspect-ratio: 16 / 9; border-radius: var(--r-xl); background: linear-gradient(120deg,#e6eefb,#f7f7f7); margin-bottom: var(--sp-md); }
+  .story-card blockquote { margin: 0; font-size: 16px; }
+  .attr { display: flex; align-items: center; gap: var(--sp-sm); margin-top: var(--sp-md); }
+  .avatar { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--primary-soft); }
+
+  /* Dark help band */
+  .help-band {
+    background: var(--ink);
+    color: var(--on-primary);
+    text-align: center;
+    padding: 64px var(--sp-xl);
+  }
+  .help-band h2 { color: var(--on-primary); }
+  .chips { display: flex; gap: var(--sp-sm); justify-content: center; flex-wrap: wrap; margin-top: var(--sp-lg); }
+  .chip {
+    background: transparent;
+    color: var(--on-primary);
+    border: 1px solid var(--steel);
+    border-radius: var(--r-pill);
+    padding: 8px 20px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .chip.active { background: var(--on-primary); color: var(--ink); border-color: var(--on-primary); }
+
+  /* Footer */
+  footer { background: var(--ink); color: var(--on-primary); padding: 64px var(--sp-xl) var(--sp-xxl); }
+  footer .wrap { padding: 0 var(--sp-xxl); }
+  .foot-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--sp-xl); }
+  footer h4 { font-size: 16px; font-weight: 500; margin: 0 0 var(--sp-md); }
+  footer ul { list-style: none; padding: 0; margin: 0; }
+  footer li { margin-bottom: var(--sp-xs); }
+  footer a { color: var(--steel); font-size: 14px; font-weight: 400; }
+  footer a:hover { color: var(--on-primary); }
+  .foot-legal { color: var(--steel); font-size: 12px; margin-top: var(--sp-xl); border-top: 1px solid var(--ink-soft); padding-top: var(--sp-md); }
+
+  @media (max-width: 1023px) {
+    .prod-grid { grid-template-columns: repeat(2, 1fr); }
+    .cat-grid { grid-template-columns: repeat(3, 1fr); }
+    .tiers, .story-grid { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .wrap { padding: 0 var(--sp-md); }
+    .nav-links, .utility { display: none; }
+    .d-xxl { font-size: 40px; }
+    .d-xl { font-size: 32px; }
+    .hero-card, .feat-card { grid-template-columns: 1fr; }
+    .chevron { display: none; }
+    .prod-grid, .cat-grid { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr; }
+    section { padding: 48px 0; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="utility">
+    <div class="wrap">
+      <span>United States</span>
+      <a href="./DESIGN.md">For Business</a>
+      <a href="./DESIGN.md">For Home</a>
+      <span class="spacer"></span>
+      <a href="./DESIGN.md">Sign in</a>
+      <a href="./DESIGN.md">Cart</a>
+    </div>
+  </div>
+
+  <header class="nav">
+    <div class="wrap">
+      <span class="logo" aria-label="HP">hp</span>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Laptops</a>
+        <a href="./DESIGN.md">Desktops</a>
+        <a href="./DESIGN.md">Printers</a>
+        <a href="./DESIGN.md">Accessories</a>
+        <a href="./DESIGN.md">Support</a>
+      </nav>
+      <span class="spacer"></span>
+      <label class="search-pill">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/></svg>
+        <span>Search</span>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-card">
+          <span class="chevron left" aria-hidden="true"></span>
+          <span class="chevron right" aria-hidden="true"></span>
+          <div class="hero-copy">
+            <span class="sale-tag">Save $200</span>
+            <p class="eyebrow">Spectre x360</p>
+            <h1 class="d-xxl">Power to<br>create more</h1>
+            <span class="price">From $1,149.99</span>
+            <div class="btn-row">
+              <button class="btn btn-primary">Shop now</button>
+              <button class="btn btn-outline">Customize</button>
+            </div>
+          </div>
+          <div class="hero-photo" role="img" aria-label="HP laptop hero photography"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-band">
+      <div class="wrap">
+        <p class="eyebrow">Our products</p>
+        <h2 class="d-lg" style="margin-bottom:var(--sp-xl);">Shop by category</h2>
+        <div class="cat-grid">
+          <a class="cat-card" href="./DESIGN.md">
+            <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="12" rx="1"/><path d="M2 20h20"/></svg>
+            <div class="lbl">Laptops</div>
+          </a>
+          <a class="cat-card" href="./DESIGN.md">
+            <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="12" rx="1"/><path d="M9 20h6"/></svg>
+            <div class="lbl">Desktops</div>
+          </a>
+          <a class="cat-card" href="./DESIGN.md">
+            <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="9" width="14" height="8" rx="1"/><path d="M7 9V5h10v4M7 17v2h10v-2"/></svg>
+            <div class="lbl">Printers</div>
+          </a>
+          <a class="cat-card" href="./DESIGN.md">
+            <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/></svg>
+            <div class="lbl">Tools</div>
+          </a>
+          <a class="cat-card" href="./DESIGN.md">
+            <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h16v10H4z"/><path d="M8 7V5h8v2"/></svg>
+            <div class="lbl">Accessories</div>
+          </a>
+          <a class="cat-card" href="./DESIGN.md">
+            <svg class="cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20V8l8-4 8 4v12"/><path d="M9 20v-6h6v6"/></svg>
+            <div class="lbl">Enterprise</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <p class="eyebrow">Trending laptops</p>
+        <h2 class="d-lg" style="margin-bottom:var(--sp-xl);">Shop these must-haves</h2>
+        <div class="prod-grid">
+          <article class="prod-card">
+            <div class="prod-photo"></div>
+            <span class="badge-ink">New</span>
+            <h3>Pavilion 15</h3>
+            <p class="cap">14" OLED · Intel Core Ultra 7 · 16GB · 1TB SSD</p>
+            <span class="price">$899.99</span>
+            <button class="btn btn-outline-ink">View</button>
+          </article>
+          <article class="prod-card">
+            <div class="prod-photo"></div>
+            <h3>Envy x360</h3>
+            <p class="cap">2-in-1 · Ryzen 7 · 16GB · touch display</p>
+            <span class="price">$1,049.99</span>
+            <button class="btn btn-outline-ink">View</button>
+          </article>
+          <article class="prod-card">
+            <div class="prod-photo"></div>
+            <h3>OMEN 16</h3>
+            <p class="cap">Gaming · RTX 4070 · 165Hz · RGB keyboard</p>
+            <span class="price">$1,499.99</span>
+            <button class="btn btn-outline-ink">View</button>
+          </article>
+          <article class="prod-card">
+            <div class="prod-photo"></div>
+            <span class="badge-ink">Deal</span>
+            <h3>EliteBook 840</h3>
+            <p class="cap">Business · vPro · security suite · lightweight</p>
+            <span class="price">$1,299.99</span>
+            <button class="btn btn-outline-ink">View</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cat-band">
+      <div class="wrap">
+        <div class="feat-card">
+          <div>
+            <p class="eyebrow">HP Instant Ink</p>
+            <h2 class="d-md">Never run out of ink again</h2>
+            <p class="lead">Plans that deliver ink before you need it. Cancel anytime.</p>
+            <div class="btn-row"><button class="btn btn-primary">Get a printer</button><a class="link-inline" href="./DESIGN.md">See details &rsaquo;</a></div>
+          </div>
+          <div class="feat-photo" role="img" aria-label="HP printer feature photography"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <p class="eyebrow">Instant Ink plans</p>
+        <h2 class="d-lg" style="margin-bottom:var(--sp-xl);">Pick your monthly plan</h2>
+        <div class="tiers">
+          <div class="tier">
+            <h3 class="d-sm">Occasional</h3>
+            <p class="d-md tprice">$0.99<span class="cap">/mo</span></p>
+            <p class="cap">10 pages / month</p>
+            <ul><li>Rollover pages</li><li>Free shipping</li><li>Recycling included</li></ul>
+            <button class="btn btn-outline">Choose plan</button>
+          </div>
+          <div class="tier featured">
+            <span class="badge-ink">Most popular</span>
+            <h3 class="d-sm">Frequent</h3>
+            <p class="d-md tprice">$5.99<span class="cap">/mo</span></p>
+            <p class="cap">100 pages / month</p>
+            <ul><li>Rollover pages</li><li>Free shipping</li><li>Recycling included</li></ul>
+            <button class="btn btn-primary">Choose plan</button>
+          </div>
+          <div class="tier">
+            <h3 class="d-sm">Business</h3>
+            <p class="d-md tprice">$11.99<span class="cap">/mo</span></p>
+            <p class="cap">300 pages / month</p>
+            <ul><li>Rollover pages</li><li>Priority support</li><li>Recycling included</li></ul>
+            <button class="btn btn-outline">Choose plan</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <p class="eyebrow">Customer stories</p>
+        <h2 class="d-lg" style="margin-bottom:var(--sp-xl);">See what our customers say</h2>
+        <div class="story-grid">
+          <article class="story-card">
+            <div class="story-photo"></div>
+            <blockquote>"The setup was effortless and the print quality is outstanding for our studio."</blockquote>
+            <div class="attr"><span class="avatar"></span><span class="cap">Maria L. · Designer</span></div>
+          </article>
+          <article class="story-card">
+            <div class="story-photo"></div>
+            <blockquote>"OMEN handles everything I throw at it. Best gaming laptop I've owned."</blockquote>
+            <div class="attr"><span class="avatar"></span><span class="cap">Devon R. · Streamer</span></div>
+          </article>
+          <article class="story-card">
+            <div class="story-photo"></div>
+            <blockquote>"Fleet management with EliteBook saved our IT team countless hours."</blockquote>
+            <div class="attr"><span class="avatar"></span><span class="cap">Priya S. · IT Lead</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq-band">
+      <div class="wrap" style="max-width:900px;">
+        <h2 class="d-md" style="margin-bottom:var(--sp-xl);">Frequently asked questions</h2>
+        <div class="faq-row">How do I track my order? <span class="chev">&#9660;</span></div>
+        <div class="faq-row">What is the return policy? <span class="chev">&#9660;</span></div>
+        <div class="faq-row">Do laptops include a warranty? <span class="chev">&#9660;</span></div>
+        <div class="faq-row">How does Instant Ink billing work? <span class="chev">&#9660;</span></div>
+      </div>
+    </section>
+
+    <section class="help-band">
+      <h2 class="d-md">How can we help?</h2>
+      <div class="chips" role="tablist" aria-label="Help topics">
+        <button class="chip active" role="tab" aria-selected="true">Browse topics</button>
+        <button class="chip" role="tab" aria-selected="false">Live chat</button>
+        <button class="chip" role="tab" aria-selected="false">Contact</button>
+        <button class="chip" role="tab" aria-selected="false">Diagnose</button>
+        <button class="chip" role="tab" aria-selected="false">Order status</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <h4>Company</h4>
+          <ul><li><a href="./DESIGN.md">About HP</a></li><li><a href="./DESIGN.md">Careers</a></li><li><a href="./DESIGN.md">Investors</a></li></ul>
+        </div>
+        <div>
+          <h4>Shop</h4>
+          <ul><li><a href="./DESIGN.md">Laptops</a></li><li><a href="./DESIGN.md">Printers</a></li><li><a href="./DESIGN.md">Deals</a></li></ul>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <ul><li><a href="./DESIGN.md">Drivers</a></li><li><a href="./DESIGN.md">Diagnostics</a></li><li><a href="./DESIGN.md">Contact</a></li></ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul><li><a href="./DESIGN.md">Blog</a></li><li><a href="./DESIGN.md">Guides</a></li><li><a href="./DESIGN.md">Sustainability</a></li></ul>
+        </div>
+        <div>
+          <h4>Connect</h4>
+          <ul><li><a href="./DESIGN.md">Newsletter</a></li><li><a href="./DESIGN.md">Community</a></li><li><a href="./DESIGN.md">Social</a></li></ul>
+        </div>
+      </div>
+      <p class="foot-legal">© HP Development Company. Component preview built from DESIGN.md tokens.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Full-screen Canvas — preview</title>
+    <style>
+      /* ============================================================
+         Full-screen Canvas · Flowbite-inspired · WYSIWYG · Light/Dark
+         ============================================================ */
+      :root{ --radius:12px; --radius-sm:8px; }
+      [data-theme="light"]{
+        --primary:#1a56db; --primary-weak:#eff6ff; --primary-soft:#e1effe; --on-primary:#fff;
+        --canvas:#eef1f6; --canvas-dot:#d1d5db;
+        --surface:#ffffff; --surface-2:#f3f4f6;
+        --border:#e5e7eb; --border-strong:#d1d5db;
+        --text:#111827; --text-2:#374151; --muted:#6b7280; --muted-2:#9ca3af;
+        --green:#0e9f6e; --red:#e02424; --amber:#c27803;
+        --float:rgba(255,255,255,.82); --shadow:0 8px 30px rgba(17,24,39,.14),0 2px 8px rgba(17,24,39,.08);
+      }
+      [data-theme="dark"]{
+        --primary:#3f83f8; --primary-weak:#1e293b; --primary-soft:#233150; --on-primary:#fff;
+        --canvas:#0b1220; --canvas-dot:#1f2937;
+        --surface:#1f2937; --surface-2:#111827;
+        --border:#374151; --border-strong:#4b5563;
+        --text:#f9fafb; --text-2:#e5e7eb; --muted:#9ca3af; --muted-2:#6b7280;
+        --green:#31c48d; --red:#f98080; --amber:#e3a008;
+        --float:rgba(31,41,55,.8); --shadow:0 10px 34px rgba(0,0,0,.6),0 2px 8px rgba(0,0,0,.5);
+      }
+      *,*::before,*::after{box-sizing:border-box;}html,body{margin:0;padding:0;height:100%;}
+      body{width:100vw;height:100vh;height:100dvh;overflow:hidden;background:var(--canvas);color:var(--text);
+        font:13px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;
+        transition:background .2s ease,color .2s ease;}
+      .icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+      .icon-sm{width:16px;height:16px;}
+      .scroll{overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent;}
+      .scroll::-webkit-scrollbar{width:8px;}.scroll::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:5px;}
+
+      /* Canvas — fixed full viewport */
+      .canvas{position:absolute;inset:0;background:
+        radial-gradient(var(--canvas-dot) 1.4px,transparent 1.4px);background-size:26px 26px;background-position:-13px -13px;}
+      .art{position:absolute;border-radius:12px;box-shadow:0 6px 24px rgba(17,24,39,.12);}
+      .frame{position:absolute;top:120px;left:340px;width:520px;height:360px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;}
+      .frame .fh{height:44px;background:var(--surface-2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;padding:0 14px;color:var(--muted);}
+      .frame .fdot{width:10px;height:10px;border-radius:50%;background:var(--border-strong);}
+      .frame .fb{padding:20px;}
+      .card-shape{width:60%;height:22px;border-radius:6px;background:var(--primary-soft);margin-bottom:14px;}
+      .card-shape.sm{width:40%;height:14px;background:var(--surface-2);}
+      .chip-row{display:flex;gap:10px;margin-top:8px;}
+      .chip-shape{width:80px;height:56px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
+      .chip-shape.on{background:var(--primary-soft);border-color:var(--primary);}
+      .sel{position:absolute;top:120px;left:340px;width:520px;height:360px;border:2px solid var(--primary);border-radius:14px;pointer-events:none;}
+      .handle{position:absolute;width:9px;height:9px;background:var(--surface);border:2px solid var(--primary);border-radius:2px;}
+      .badge-dim{position:absolute;top:-26px;left:0;background:var(--primary);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;}
+
+      /* Floating toolbar (top) */
+      .toolbar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:4px;
+        background:var(--float);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:6px;}
+      .tool{width:40px;height:40px;border-radius:9px;display:grid;place-items:center;cursor:pointer;color:var(--text-2);transition:background .15s,color .15s;}
+      .tool:hover{background:var(--surface-2);}
+      .tool.on{background:var(--primary);color:#fff;}
+      .tsep{width:1px;height:24px;background:var(--border);margin:0 4px;}
+
+      /* Top-right cluster: share + theme + avatars */
+      .topright{position:fixed;top:14px;right:16px;z-index:30;display:flex;align-items:center;gap:8px;
+        background:var(--float);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:6px 8px;}
+      .avs{display:flex;}
+      .avs .av{width:30px;height:30px;border-radius:50%;border:2px solid var(--surface);margin-left:-8px;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700;}
+      .avs .av:first-child{margin-left:0;}
+      .btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:0;font-family:inherit;background:var(--primary);color:#fff;}
+      .btn:hover{filter:brightness(.94);}
+      .ico-btn{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;cursor:pointer;color:var(--muted);}
+      .ico-btn:hover{background:var(--surface-2);color:var(--text-2);}
+
+      /* Floating panels */
+      .panel{position:fixed;top:70px;bottom:16px;z-index:20;width:250px;background:var(--float);backdrop-filter:blur(14px);
+        border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .25s ease,opacity .2s;}
+      .panel.left{left:16px;}
+      .panel.right{right:16px;width:270px;}
+      .panel.hide.left{transform:translateX(-300px);opacity:0;pointer-events:none;}
+      .panel.hide.right{transform:translateX(320px);opacity:0;pointer-events:none;}
+      .p-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-bottom:1px solid var(--border);}
+      .p-hd h3{margin:0;font-size:13px;font-weight:700;}
+      .p-tabs{display:flex;gap:2px;padding:8px 10px 4px;}
+      .p-tab{flex:1;text-align:center;padding:6px;border-radius:7px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;}
+      .p-tab.on{background:var(--surface-2);color:var(--text);}
+      .p-body{padding:8px 10px 14px;overflow-y:auto;}
+      /* layers list */
+      .layer{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;color:var(--text-2);cursor:pointer;font-weight:500;}
+      .layer:hover{background:var(--surface-2);}
+      .layer.on{background:var(--primary-weak);color:var(--primary);}
+      .layer.child{margin-left:18px;}
+      .layer .txt{flex:1;}
+      .layer .eye{color:var(--muted-2);}
+      /* right props */
+      .p-sec{padding:12px 12px;border-bottom:1px solid var(--border);}
+      .p-sec h4{margin:0 0 10px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);}
+      .prop{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+      .prop .k{color:var(--muted);font-size:12px;}
+      .field-mini{display:flex;align-items:center;gap:6px;height:30px;padding:0 9px;border:1px solid var(--border-strong);border-radius:7px;background:var(--surface);font-size:12px;color:var(--text);min-width:74px;}
+      .swatch{width:16px;height:16px;border-radius:4px;border:1px solid var(--border-strong);}
+      .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    </style>
+  </head>
+  <body>
+    <!-- Canvas -->
+    <div class="canvas">
+      <div class="frame">
+        <div class="fh"><span class="fdot"></span><span class="fdot"></span><span class="fdot"></span><span style="margin-left:6px;font-weight:600;color:var(--text-2);">Dashboard / Frame 1</span></div>
+        <div class="fb">
+          <div class="card-shape"></div><div class="card-shape sm"></div>
+          <div class="chip-row"><div class="chip-shape on"></div><div class="chip-shape"></div><div class="chip-shape"></div><div class="chip-shape"></div></div>
+          <div style="height:90px;margin-top:16px;border-radius:10px;background:linear-gradient(180deg,var(--primary-soft),transparent);border:1px solid var(--border);"></div>
+        </div>
+      </div>
+      <div class="sel"><div class="badge-dim">Frame 1 · 520 × 360</div>
+        <div class="handle" style="top:-5px;left:-5px;"></div><div class="handle" style="top:-5px;right:-5px;"></div>
+        <div class="handle" style="bottom:-5px;left:-5px;"></div><div class="handle" style="bottom:-5px;right:-5px;"></div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="tool on" title="Move"><svg class="icon" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1-2 6z"/></svg></div>
+      <div class="tool" title="Frame"><svg class="icon" viewBox="0 0 24 24"><path d="M8 2v20M16 2v20M2 8h20M2 16h20"/></svg></div>
+      <div class="tool" title="Shape"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+      <div class="tool" title="Pen"><svg class="icon" viewBox="0 0 24 24"><path d="M12 19l7-7-4-4-7 7-3 7z"/></svg></div>
+      <div class="tool" title="Text"><svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M12 6v14"/></svg></div>
+      <div class="tsep"></div>
+      <div class="tool" title="Comment"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+      <div class="tool" title="Zoom"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4M11 8v6M8 11h6"/></svg></div>
+    </div>
+
+    <!-- Top-right cluster -->
+    <div class="topright">
+      <div class="ico-btn" id="toggleLeft" title="Toggle layers"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="16" rx="1"/><path d="M13 6h8M13 12h8M13 18h8"/></svg></div>
+      <div class="ico-btn" id="toggleRight" title="Toggle properties"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="14" y="4" width="7" height="16" rx="1"/><path d="M3 6h8M3 12h8M3 18h8"/></svg></div>
+      <div class="ico-btn" id="themeToggle" title="Toggle theme">
+        <svg class="icon icon-sm" id="iconMoon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+        <svg class="icon icon-sm" id="iconSun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </div>
+      <div class="avs"><div class="av" style="background:#1a56db">OB</div><div class="av" style="background:#0e9f6e">LC</div><div class="av" style="background:#e74694">EN</div></div>
+      <button class="btn"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v14"/></svg>Share</button>
+    </div>
+
+    <!-- Left panel: Layers -->
+    <aside class="panel left" id="panelLeft">
+      <div class="p-tabs"><div class="p-tab on">Layers</div><div class="p-tab">Assets</div></div>
+      <div class="p-body scroll">
+        <div class="layer"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M8 2v20M16 2v20M2 8h20M2 16h20"/></svg><span class="txt">Page 1</span></div>
+        <div class="layer on child"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span class="txt">Frame 1</span><svg class="icon icon-sm eye" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="layer child" style="margin-left:34px;"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10"/></svg><span class="txt">Heading</span></div>
+        <div class="layer child" style="margin-left:34px;"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span class="txt">Card group</span></div>
+        <div class="layer child" style="margin-left:34px;"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg><span class="txt">Chart</span></div>
+        <div class="layer child"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><span class="txt">Frame 2</span></div>
+        <div class="layer child"><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg><span class="txt">Ellipse</span></div>
+      </div>
+    </aside>
+
+    <!-- Right panel: Properties -->
+    <aside class="panel right" id="panelRight">
+      <div class="p-hd"><h3>Frame 1</h3><span style="color:var(--muted);font-size:12px;">Frame</span></div>
+      <div class="p-body scroll" style="padding:0;">
+        <div class="p-sec"><h4>Position</h4>
+          <div class="grid2"><div class="field-mini">X&nbsp;<b style="margin-left:auto">340</b></div><div class="field-mini">Y&nbsp;<b style="margin-left:auto">120</b></div>
+          <div class="field-mini">W&nbsp;<b style="margin-left:auto">520</b></div><div class="field-mini">H&nbsp;<b style="margin-left:auto">360</b></div></div>
+        </div>
+        <div class="p-sec"><h4>Appearance</h4>
+          <div class="prop"><span class="k">Opacity</span><div class="field-mini" style="min-width:66px;">100%</div></div>
+          <div class="prop"><span class="k">Corner</span><div class="field-mini" style="min-width:66px;">14</div></div>
+        </div>
+        <div class="p-sec"><h4>Fill</h4>
+          <div class="prop"><div style="display:flex;align-items:center;gap:8px;"><span class="swatch" style="background:var(--surface)"></span><span class="k">#FFFFFF</span></div><span class="k">100%</span></div>
+        </div>
+        <div class="p-sec"><h4>Stroke</h4>
+          <div class="prop"><div style="display:flex;align-items:center;gap:8px;"><span class="swatch" style="background:#e5e7eb"></span><span class="k">#E5E7EB</span></div><span class="k">1px</span></div>
+        </div>
+        <div class="p-sec" style="border-bottom:0;"><h4>Effects</h4>
+          <div class="prop"><span class="k">Drop shadow</span><span class="k">0 8 30</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <script>
+      (function(){
+        document.getElementById('toggleLeft').addEventListener('click',function(){document.getElementById('panelLeft').classList.toggle('hide');});
+        document.getElementById('toggleRight').addEventListener('click',function(){document.getElementById('panelRight').classList.toggle('hide');});
+        document.querySelectorAll('.tool').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('.tool').forEach(function(x){x.classList.remove('on');});t.classList.add('on');});});
+        var root=document.documentElement, moon=document.getElementById('iconMoon'), sun=document.getElementById('iconSun');
+        function apply(t){root.setAttribute('data-theme',t);moon.style.display=t==='dark'?'none':'';sun.style.display=t==='dark'?'':'none';}
+        document.getElementById('themeToggle').addEventListener('click',function(){
+          apply(root.getAttribute('data-theme')==='dark'?'light':'dark');
+        });
+      })();
+    </script>
+  </body>
+</html>

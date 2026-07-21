@@ -1,0 +1,411 @@
+<!-- source_content_hash: 378ff97d568ccbc316519b9d45a29d6649ed8961c9c486c3ed4cea7501d72371 -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Binance — reference components</title>
+    <meta
+      name="description"
+      content="Reference fixture for design-md/binance. A deep near-black trading canvas where a
+        single Binance Yellow (#FCD535) carries every primary CTA and value claim, BinanceNova /
+        BinancePlex dual type, trading green/red price semantics, and a deliberate light footer
+        that closes the dark page."
+    />
+
+    <style>
+      /* ─── Tokens — mapped 1:1 from DESIGN.md ───────────────────
+         Binance trusts a single yellow voltage over a dark near-black canvas. One accent does
+         all brand work: primary CTAs, claim headlines, the wordmark. Numbers always render in
+         BinancePlex (tabular voice); copy in BinanceNova. Green up / red down are semantic
+         price signals — expressed as TEXT color, never as card fills. Flat surfaces, color-block
+         separation, no atmospheric gradients. A light footer closes the dark page. */
+      :root {
+        /* Brand — the single accent, black text on yellow is the signature */
+        --primary: #fcd535;            /* Binance Yellow */
+        --primary-active: #f0b90b;     /* press / darker */
+        --primary-disabled: #3a3a1f;   /* desaturated on dark */
+        --on-primary: #181a20;         /* black on yellow — never invert */
+        --accent-turquoise: #2dbdb6;   /* single-product accent, use sparingly */
+
+        /* Text */
+        --ink: #181a20;                /* strongest text on light */
+        --body: #eaecef;               /* body on dark — cooler than pure white */
+        --body-on-light: #181a20;
+        --muted: #707a8a;
+        --muted-strong: #929aa5;
+        --on-dark: #ffffff;
+
+        /* Surface — dark marketing default + light transactional */
+        --canvas-dark: #0b0e11;        /* near-black page floor */
+        --canvas-light: #ffffff;
+        --surface-card-dark: #1e2329;  /* elevated cards on dark */
+        --surface-elevated-dark: #2b3139;
+        --surface-soft-light: #fafafa; /* the light footer */
+        --surface-strong-light: #f5f5f5;
+
+        /* Hairlines */
+        --hairline-on-light: #eaecef;
+        --hairline-on-dark: #2b3139;   /* borders feel like surface steps */
+        --border-strong: #cdd1d6;
+
+        /* Trading semantics — TEXT color only, never a card fill */
+        --trading-up: #0ecb81;
+        --trading-down: #f6465d;
+
+        /* Info / focus */
+        --info: #3b82f6;
+        --info-ring: #3b82f6;
+
+        /* Type — BinanceNova (copy) + BinancePlex (numbers).
+           Inter ≈ Nova; IBM Plex Sans / JetBrains Mono ≈ Plex. */
+        --font-nova: "BinanceNova", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --font-plex: "BinancePlex", "IBM Plex Sans", "JetBrains Mono", var(--font-nova);
+
+        --hero-display: 64px;
+        --display-lg: 48px;
+        --display-md: 40px;
+        --display-sm: 32px;
+        --title-lg: 24px;
+        --title-md: 20px;
+        --title-sm: 16px;
+        --number-display: 40px;
+        --number-md: 16px;
+        --number-sm: 14px;
+        --body-md: 14px;
+        --body-sm: 13px;
+        --caption: 12px;
+        --button: 14px;
+        --nav-link: 14px;
+
+        /* Rounded — tight; pill signals a top-of-page action */
+        --r-xs: 2px;
+        --r-sm: 4px;
+        --r-md: 6px;   /* primary buttons + inputs */
+        --r-lg: 8px;   /* search input, content cards */
+        --r-xl: 12px;  /* elevated card containers */
+        --r-pill: 9999px;
+        --r-full: 9999px;
+
+        /* Spacing — 4px base, 80px section (denser than airy marketing) */
+        --sp-xxs: 4px;
+        --sp-xs: 8px;
+        --sp-sm: 12px;
+        --sp-md: 16px;
+        --sp-lg: 24px;
+        --sp-xl: 32px;
+        --sp-xxl: 48px;
+        --sp-section: 80px;
+
+        --focus-ring: 0 0 0 2px color-mix(in srgb, var(--info-ring) 50%, transparent);
+        --container-max: 1280px;
+        --motion: 150ms ease;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--canvas-dark); color: var(--body);
+        font-family: var(--font-nova); font-size: var(--body-md); line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .band { padding-block: var(--sp-section); }
+      .band-inner { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--sp-lg); }
+      .band-light { background: var(--canvas-light); color: var(--body-on-light); }
+
+      /* Typography — display weight 700, numbers in BinancePlex */
+      h1, h2, h3 { margin: 0; font-family: var(--font-nova); }
+      h1 { font-size: var(--hero-display); font-weight: 700; line-height: 1.1; letter-spacing: -1px; }
+      h2 { font-size: var(--display-sm); font-weight: 600; line-height: 1.2; }
+      h3 { font-size: var(--title-md); font-weight: 600; line-height: 1.35; }
+      p { margin: 0; }
+      .display-lg { font-size: var(--display-lg); font-weight: 700; line-height: 1.1; letter-spacing: -0.5px; }
+      .muted { color: var(--muted); }
+      .muted-strong { color: var(--muted-strong); }
+      .num { font-family: var(--font-plex); }
+      .stack-3 > * + * { margin-block-start: var(--sp-sm); }
+      .stack-4 > * + * { margin-block-start: var(--sp-md); }
+      .stack-6 > * + * { margin-block-start: var(--sp-lg); }
+
+      /* Buttons — yellow + black is the universal primary across both themes */
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-xs);
+        font-family: var(--font-nova); font-size: var(--button); font-weight: 600; line-height: 1;
+        border: 1px solid transparent; border-radius: var(--r-md); cursor: pointer;
+        text-decoration: none; transition: background-color var(--motion), filter var(--motion);
+      }
+      .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .btn-primary { background: var(--primary); color: var(--on-primary); padding: 12px 24px; height: 40px; }
+      .btn-primary:hover { background: var(--primary-active); }
+      .btn-primary:active { background: var(--primary-active); }
+      .btn-primary[disabled] { background: var(--primary-disabled); color: var(--muted); cursor: not-allowed; }
+      .btn-pill { border-radius: var(--r-pill); padding: 14px 32px; height: auto; }
+      .btn-secondary-dark { background: var(--surface-card-dark); color: var(--on-dark); padding: 12px 24px; }
+      .btn-secondary-light { background: var(--canvas-light); color: var(--ink); border-color: var(--hairline-on-light); padding: 12px 24px; }
+      .btn-tertiary { background: transparent; color: var(--body); padding: 12px 8px; }
+      .btn-up { background: var(--trading-up); color: var(--on-dark); border-radius: var(--r-sm); padding: 8px 20px; }
+      .btn-down { background: var(--trading-down); color: var(--on-dark); border-radius: var(--r-sm); padding: 8px 20px; }
+      .btn-subscribe { background: var(--primary); color: var(--on-primary); border-radius: var(--r-sm); padding: 6px 16px; height: 28px; }
+      .text-link { color: var(--primary); text-decoration: none; }
+      .text-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+      /* Top nav — 64px, yellow wordmark, sign-up pill */
+      .top-nav {
+        display: flex; align-items: center; gap: var(--sp-lg); height: 64px;
+        background: var(--canvas-dark); padding-inline: var(--sp-lg);
+        border-bottom: 1px solid var(--hairline-on-dark);
+      }
+      .wordmark { font-weight: 700; font-size: var(--title-md); color: var(--primary); letter-spacing: 0.5px; }
+      .nav-links { display: flex; gap: var(--sp-lg); flex: 1; }
+      .nav-links a { color: var(--body); text-decoration: none; font-size: var(--nav-link); font-weight: 500; }
+      .nav-links a:hover { color: var(--on-dark); }
+      .nav-cluster { display: flex; gap: var(--sp-md); align-items: center; }
+      @media (max-width: 833px) { .nav-links { display: none; } }
+
+      /* Hero — headline + stat callouts + markets card side by side */
+      .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--sp-xxl); align-items: center; }
+      @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
+      .stat-callout { color: var(--primary); font-family: var(--font-plex); font-size: var(--number-display); font-weight: 700; line-height: 1.1; letter-spacing: -0.3px; }
+      .stat-row { display: flex; gap: var(--sp-xl); flex-wrap: wrap; }
+      .stat-row .label { color: var(--muted); font-size: var(--body-md); margin-block-start: var(--sp-xxs); }
+
+      /* Search input on dark — carries the sign-up pill */
+      .search {
+        display: flex; align-items: center; gap: var(--sp-xs); margin-block-start: var(--sp-lg);
+        background: var(--surface-card-dark); border-radius: var(--r-lg); padding: 4px 4px 4px 16px; max-width: 440px;
+      }
+      .search input { flex: 1; border: none; outline: none; background: transparent; color: var(--on-dark); font: inherit; }
+      .search input::placeholder { color: var(--muted); }
+
+      /* Markets table card */
+      .markets-card { background: var(--surface-card-dark); border-radius: var(--r-xl); padding: var(--sp-lg); }
+      .markets-tabs { display: flex; gap: var(--sp-md); margin-block-end: var(--sp-md); }
+      .markets-tabs button { background: none; border: none; color: var(--muted); font: inherit; font-size: var(--nav-link); font-weight: 500; cursor: pointer; padding: 0; }
+      .markets-tabs button[aria-selected="true"] { color: var(--on-dark); border-bottom: 2px solid var(--primary); padding-block-end: var(--sp-xxs); }
+      .markets-tabs button:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--r-xs); }
+      .markets-row {
+        display: grid; grid-template-columns: 1.4fr 1fr 0.8fr auto; align-items: center; gap: var(--sp-sm);
+        padding-block: var(--sp-sm); border-top: 1px solid var(--hairline-on-dark);
+      }
+      .markets-row:first-of-type { border-top: none; }
+      .coin { display: flex; align-items: center; gap: var(--sp-sm); }
+      .coin .glyph { width: 32px; height: 32px; border-radius: var(--r-full); background: linear-gradient(135deg, var(--primary), var(--primary-active)); display: grid; place-items: center; color: var(--on-primary); font-weight: 700; font-size: var(--caption); }
+      .coin .sym { font-weight: 600; color: var(--on-dark); }
+      .coin .full { color: var(--muted); font-size: var(--caption); }
+      .price { font-family: var(--font-plex); font-size: var(--number-md); font-weight: 500; color: var(--on-dark); text-align: right; }
+      .price-up { font-family: var(--font-plex); font-size: var(--number-md); font-weight: 500; color: var(--trading-up); text-align: right; }
+      .price-down { font-family: var(--font-plex); font-size: var(--number-md); font-weight: 500; color: var(--trading-down); text-align: right; }
+
+      /* Trust badges */
+      .trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+      @media (max-width: 768px) { .trust-grid { grid-template-columns: 1fr; } }
+      .trust-badge { background: var(--surface-card-dark); border-radius: var(--r-lg); padding: 16px 20px; display: flex; gap: var(--sp-md); align-items: center; }
+      .trust-badge .rank { color: var(--primary); font-weight: 700; font-size: var(--title-lg); }
+      .trust-badge .label { color: var(--on-dark); font-size: var(--title-sm); font-weight: 600; }
+
+      /* FUNDS ARE SAFU band */
+      .safu .display-lg { color: var(--primary); }
+      .safu-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); margin-block-start: var(--sp-xl); }
+      @media (max-width: 768px) { .safu-stats { grid-template-columns: 1fr; } }
+
+      /* QR promo card */
+      .qr-card { background: var(--surface-card-dark); border-radius: var(--r-xl); padding: var(--sp-xl); display: grid; grid-template-columns: 1fr auto; gap: var(--sp-lg); align-items: center; }
+      @media (max-width: 640px) { .qr-card { grid-template-columns: 1fr; } }
+      .qr { width: 120px; height: 120px; border-radius: var(--r-lg); background:
+        repeating-conic-gradient(var(--on-dark) 0 25%, var(--surface-elevated-dark) 0 50%) 0 0 / 20px 20px; }
+
+      /* CTA band */
+      .cta-band { background: var(--surface-card-dark); border-radius: var(--r-xl); padding: var(--sp-xxl); display: flex; justify-content: space-between; align-items: center; gap: var(--sp-lg); flex-wrap: wrap; }
+
+      /* Light transactional card specimen */
+      .buy-card { background: var(--canvas-light); border-radius: var(--r-lg); padding: var(--sp-lg); max-width: 380px; border: 1px solid var(--hairline-on-light); }
+      .buy-amount { font-family: var(--font-plex); font-size: var(--number-display); font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
+      .text-input-light {
+        display: flex; align-items: center; width: 100%; height: 40px; margin-block: var(--sp-md);
+        background: var(--canvas-light); border: 1px solid var(--hairline-on-light); border-radius: var(--r-md); padding: 10px 16px;
+      }
+      .text-input-light input { border: none; outline: none; background: transparent; width: 100%; font: inherit; color: var(--ink); }
+      .text-input-light:focus-within { box-shadow: var(--focus-ring); border-color: var(--info); }
+
+      .eyebrow { font-size: var(--caption); letter-spacing: 0.08em; text-transform: uppercase; color: var(--primary); font-weight: 600; }
+      .icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+      /* Footer — light on dark: the deliberate marketing-reset close */
+      .footer { background: var(--surface-soft-light); color: var(--body-on-light); padding-block: 64px; }
+      .footer-inner { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--sp-lg); }
+      .footer-cols { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-lg); }
+      @media (max-width: 900px) { .footer-cols { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 480px) { .footer-cols { grid-template-columns: 1fr; } }
+      .footer-col h4 { font-size: var(--body-md); font-weight: 600; color: var(--ink); margin: 0 0 var(--sp-sm); }
+      .footer-col a { display: block; color: var(--muted); text-decoration: none; font-size: var(--body-md); line-height: 2; }
+      .footer-col a:hover { color: var(--ink); }
+      .footer-legal { border-top: 1px solid var(--hairline-on-light); margin-block-start: var(--sp-lg); padding-block-start: var(--sp-md); font-size: var(--body-sm); color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <!-- top-nav-dark: yellow wordmark + sign-up pill -->
+    <nav class="top-nav" aria-label="Primary">
+      <span class="wordmark">BINANCE</span>
+      <div class="nav-links">
+        <a href="./DESIGN.md">Buy Crypto</a>
+        <a href="./DESIGN.md">Markets</a>
+        <a href="./DESIGN.md">Trade</a>
+        <a href="./DESIGN.md">Futures</a>
+        <a href="./DESIGN.md">Earn</a>
+        <a href="./DESIGN.md">Square</a>
+      </div>
+      <div class="nav-cluster">
+        <a href="./DESIGN.md" class="btn btn-tertiary" style="color: var(--body)">Log In</a>
+        <a href="./DESIGN.md" class="btn btn-primary">Sign Up</a>
+      </div>
+    </nav>
+
+    <main>
+      <!-- hero-band-dark: headline + stat callouts beside markets table card -->
+      <section class="band" aria-labelledby="hero-h">
+        <div class="band-inner hero-grid">
+          <div class="stack-6">
+            <p class="eyebrow">Reference fixture · binance</p>
+            <h1 id="hero-h"><span class="num stat-callout" style="font-size: var(--hero-display); display:block; letter-spacing:-1px">316,258,026</span>USERS TRUST US</h1>
+            <div class="stat-row">
+              <div><div class="stat-callout num">$429,423,449</div><div class="label">24h volume</div></div>
+              <div><div class="stat-callout num">15,000 BTC</div><div class="label">SAFU reserves</div></div>
+            </div>
+            <label class="search" aria-label="Search currencies">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input type="search" placeholder="Search currencies" />
+              <a href="./DESIGN.md" class="btn btn-primary btn-pill">Sign Up</a>
+            </label>
+          </div>
+
+          <!-- markets-table-card -->
+          <div class="markets-card">
+            <div class="markets-tabs" role="tablist" aria-label="Markets">
+              <button role="tab" aria-selected="true">Popular</button>
+              <button role="tab" aria-selected="false">New listing</button>
+              <button role="tab" aria-selected="false">Top gainers</button>
+            </div>
+            <div class="markets-row">
+              <div class="coin"><span class="glyph" aria-hidden="true">B</span><span><span class="sym">BTC</span> <span class="full">Bitcoin</span></span></div>
+              <span class="price">$79,065.04</span>
+              <span class="price-up">▲ 0.45%</span>
+              <a href="./DESIGN.md" class="btn btn-up" style="font-size: var(--caption)">Trade</a>
+            </div>
+            <div class="markets-row">
+              <div class="coin"><span class="glyph" aria-hidden="true">E</span><span><span class="sym">ETH</span> <span class="full">Ethereum</span></span></div>
+              <span class="price">$3,142.18</span>
+              <span class="price-down">▼ 1.12%</span>
+              <a href="./DESIGN.md" class="btn btn-down" style="font-size: var(--caption)">Trade</a>
+            </div>
+            <div class="markets-row">
+              <div class="coin"><span class="glyph" aria-hidden="true">S</span><span><span class="sym">SOL</span> <span class="full">Solana</span></span></div>
+              <span class="price">$168.42</span>
+              <span class="price-up">▲ 3.27%</span>
+              <a href="./DESIGN.md" class="btn btn-up" style="font-size: var(--caption)">Trade</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- trust-badges -->
+      <section class="band" style="padding-block: var(--sp-xl)" aria-label="Trust badges">
+        <div class="band-inner trust-grid">
+          <div class="trust-badge"><span class="rank">No.1</span><span class="label">Trading Volume</span></div>
+          <div class="trust-badge"><span class="rank">No.1</span><span class="label">Customer Service</span></div>
+          <div class="trust-badge"><span class="rank">700+</span><span class="label">Cryptocurrencies Listed</span></div>
+        </div>
+      </section>
+
+      <!-- funds-safu-band: yellow claim headline + big stat callouts -->
+      <section class="band safu" aria-labelledby="safu-h">
+        <div class="band-inner">
+          <p class="display-lg" id="safu-h">FUNDS ARE SAFU</p>
+          <p class="muted-strong" style="margin-block-start: var(--sp-md); max-width: 56ch">
+            The Secure Asset Fund for Users protects your holdings. Yellow does all the
+            value-claim work; the canvas stays near-black.
+          </p>
+          <div class="safu-stats">
+            <div><div class="stat-callout num">$1,000,000,000</div><div class="muted" style="margin-block-start: var(--sp-xxs)">Insurance fund</div></div>
+            <div><div class="stat-callout num">7,488,223</div><div class="muted" style="margin-block-start: var(--sp-xxs)">Users protected</div></div>
+            <div><div class="stat-callout num">$429,423,449</div><div class="muted" style="margin-block-start: var(--sp-xxs)">Funds recovered</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- qr-promo-card -->
+      <section class="band" style="padding-block: var(--sp-xl)" aria-labelledby="qr-h">
+        <div class="band-inner qr-card">
+          <div class="stack-4">
+            <h3 id="qr-h">Trade on the go. Anywhere, anytime.</h3>
+            <p class="muted">Scan to download the Binance app for iOS and Android.</p>
+            <div style="display:flex; gap: var(--sp-sm); flex-wrap: wrap">
+              <a href="./DESIGN.md" class="btn btn-secondary-dark">App Store</a>
+              <a href="./DESIGN.md" class="btn btn-secondary-dark">Google Play</a>
+            </div>
+          </div>
+          <div class="qr" role="img" aria-label="QR code to download the app"></div>
+        </div>
+      </section>
+
+      <!-- Light transactional specimen: buy-crypto-amount-card + inputs -->
+      <section class="band band-light" aria-labelledby="buy-h">
+        <div class="band-inner" style="display:grid; grid-template-columns: 1fr auto; gap: var(--sp-xxl); align-items:center">
+          <div class="stack-4">
+            <h2 id="buy-h" style="color: var(--ink)">Buy Crypto in Minutes</h2>
+            <p style="color: var(--body-on-light)">Transactional surfaces flip to a light theme — the same yellow CTA, the same gray-blue hairlines.</p>
+            <div style="display:flex; gap: var(--sp-md); flex-wrap: wrap">
+              <a href="./DESIGN.md" class="btn btn-primary">Continue</a>
+              <a href="./DESIGN.md" class="btn btn-secondary-light">Learn More</a>
+            </div>
+          </div>
+          <div class="buy-card">
+            <div class="muted" style="font-size: var(--caption)">You pay</div>
+            <div class="buy-amount">$500.00</div>
+            <div class="text-input-light"><input type="text" value="0.006324 BTC" aria-label="You receive" /></div>
+            <button class="btn btn-primary" style="width:100%">Confirm Order</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- cta-band-dark -->
+      <section class="band" style="padding-block: var(--sp-xl)" aria-labelledby="cta-h">
+        <div class="band-inner cta-band">
+          <h2 id="cta-h">Secure, Low-Fee Trading on Binance</h2>
+          <a href="./DESIGN.md" class="btn btn-primary btn-pill">Get Started</a>
+        </div>
+      </section>
+
+      <!-- Buttons specimen -->
+      <section class="band" style="padding-block: var(--sp-xl)" aria-labelledby="btn-h">
+        <div class="band-inner">
+          <h2 id="btn-h" style="margin-block-end: var(--sp-lg)">Buttons</h2>
+          <div style="display:flex; gap: var(--sp-md); flex-wrap: wrap; align-items: center">
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-primary btn-pill">Sign Up</button>
+            <button class="btn btn-secondary-dark">Secondary</button>
+            <button class="btn btn-up">Buy / Long</button>
+            <button class="btn btn-down">Sell / Short</button>
+            <button class="btn btn-subscribe">Subscribe</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- footer-light: light gray footer closes the dark page -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-cols">
+          <div class="footer-col"><h4>Community</h4><a href="./DESIGN.md">Announcements</a><a href="./DESIGN.md">Blog</a><a href="./DESIGN.md">Square</a></div>
+          <div class="footer-col"><h4>About Us</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Terms</a></div>
+          <div class="footer-col"><h4>Products</h4><a href="./DESIGN.md">Spot</a><a href="./DESIGN.md">Futures</a><a href="./DESIGN.md">Earn</a></div>
+          <div class="footer-col"><h4>Business</h4><a href="./DESIGN.md">P2P</a><a href="./DESIGN.md">Merchant</a><a href="./DESIGN.md">Listing</a></div>
+          <div class="footer-col"><h4>Service</h4><a href="./DESIGN.md">Buy Crypto</a><a href="./DESIGN.md">Fees</a><a href="./DESIGN.md">Referral</a></div>
+          <div class="footer-col"><h4>Learn</h4><a href="./DESIGN.md">Academy</a><a href="./DESIGN.md">Research</a><a href="./DESIGN.md">Support</a></div>
+        </div>
+        <p class="footer-legal">Binance © 2026 · Reference fixture. <a class="text-link" href="./DESIGN.md" style="color: var(--muted)">Privacy</a> · <a class="text-link" href="./DESIGN.md" style="color: var(--muted)">Cookie Preferences</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

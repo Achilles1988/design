@@ -1,0 +1,485 @@
+<!-- source_content_hash: 5b1201f7b1b4e72570d148d1f980fd1cb35e6e4122d48dd271787aa3538a25ad -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Warp — Component Preview</title>
+<style>
+  /* ============================================================
+     Warp design tokens — mapped from DESIGN.md frontmatter.
+     Agentic development environment: a single warm near-charcoal
+     canvas (browner than pure black), one off-white "primary" that
+     is both text and CTA fill (no chromatic accent), Inter weight
+     400 hero, extremely tight 3-4px button radius, terminal
+     mockups as the only decorative system.
+     ============================================================ */
+  :root {
+    /* The one primary: warm off-white, doubles as text + CTA fill */
+    --primary: #f7f5f0;
+    --on-primary: #2b2622;
+
+    /* Text — every neutral carries warmth, never neutral gray */
+    --ink: #f7f5f0;
+    --body: #c9c0ad;
+    --body-strong: #dad2c1;
+    --mute: #aea69c;
+
+    /* Surface — warm dark, the warmth IS the identity */
+    --canvas: #2b2622;
+    --canvas-soft: #383330;
+    --hairline: #3f3a36;
+
+    /* Type — Inter narrative, DM Mono technical, Instrument Serif editorial */
+    --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+    --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Radius — tight; the brand never uses generous pills for CTAs */
+    --r-none: 0px;
+    --r-xxs: 1px;
+    --r-xs: 2px;
+    --r-sm: 3px;
+    --r-md: 4px;
+    --r-lg: 6px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --s-xxs: 2px;
+    --s-xs: 4px;
+    --s-sm: 8px;
+    --s-md: 10px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-2xl: 32px;
+    --s-3xl: 48px;
+    --s-4xl: 64px;
+    --s-5xl: 96px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--ink); text-decoration: none; }
+  a:hover { color: var(--body-strong); }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--s-xl); }
+  section { padding: var(--s-5xl) 0; }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: var(--s-lg);
+    padding: var(--s-md) var(--s-xl);
+    background: var(--canvas);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .brand { font-weight: 600; font-size: 18px; letter-spacing: -0.4px; display: flex; align-items: center; gap: var(--s-sm); }
+  .brand svg { display: block; }
+  .nav-links { display: flex; gap: var(--s-xs); margin-left: var(--s-md); }
+  .nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    padding: var(--s-xs) var(--s-md);
+    border-radius: var(--r-sm);
+    color: var(--body-strong);
+  }
+  .nav-link:hover { color: var(--ink); }
+  .nav-right { margin-left: auto; display: flex; gap: var(--s-sm); align-items: center; }
+  .icon-btn {
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-full);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  /* ---------- Buttons (tight radius) ---------- */
+  .btn {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: var(--s-sm) var(--s-lg);
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-sm);
+    transition: opacity 0.15s;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { opacity: 0.88; color: var(--on-primary); }
+  .btn-ghost { background: var(--canvas); color: var(--ink); }
+  .btn-ghost:hover { background: var(--canvas-soft); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: var(--s-5xl) var(--s-xl); }
+  .hero h1 {
+    font-weight: 400;
+    font-size: clamp(38px, 6vw, 64px);
+    line-height: 1.1;
+    letter-spacing: -1.6px;
+    max-width: 18ch;
+  }
+  .hero .serif { font-family: var(--font-serif); font-style: italic; letter-spacing: -0.5px; }
+  .hero p { font-size: 18px; line-height: 28px; color: var(--body); max-width: 54ch; margin-top: var(--s-lg); }
+  .hero .cta-row { display: flex; gap: var(--s-md); margin-top: var(--s-xl); flex-wrap: wrap; }
+
+  /* ---------- Terminal mockup (the only decorative system) ---------- */
+  .mock-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-lg); margin-top: var(--s-3xl); }
+  .mock {
+    background: var(--canvas-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .mock-bar {
+    display: flex; align-items: center; gap: 6px;
+    padding: var(--s-md) var(--s-lg);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .mock-bar .dot { width: 10px; height: 10px; border-radius: var(--r-full); background: var(--hairline); }
+  .mock-bar .title { margin-left: var(--s-sm); font-size: 12px; color: var(--mute); }
+  .mock-body { padding: var(--s-lg); font-family: var(--font-mono); font-size: 13px; line-height: 18px; color: var(--body-strong); }
+  .mock-body .prompt { color: var(--primary); }
+  .mock-body .cmd { color: var(--ink); }
+  .mock-body .cm { color: var(--mute); }
+  .mock-body .agent {
+    margin-top: var(--s-md);
+    padding: var(--s-md);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    color: var(--body);
+  }
+
+  /* ---------- Section headings ---------- */
+  .eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--mute); margin-bottom: var(--s-md); }
+  .sec-title { font-weight: 500; font-size: clamp(24px, 4vw, 32px); line-height: 40px; letter-spacing: -0.8px; }
+  .sec-lead { font-size: 16px; line-height: 24px; color: var(--body); max-width: 56ch; margin-top: var(--s-md); }
+
+  /* ---------- Partner logos ---------- */
+  .partners { display: flex; gap: var(--s-lg); flex-wrap: wrap; margin-top: var(--s-xl); }
+  .partner-tile {
+    background: var(--canvas-soft);
+    border-radius: var(--r-md);
+    padding: var(--s-lg);
+    min-width: 140px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--body-strong);
+  }
+
+  /* ---------- Feature cards ---------- */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); margin-top: var(--s-xl); }
+  .card {
+    background: var(--canvas-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--s-xl);
+  }
+  .card h3 { font-weight: 500; font-size: 24px; line-height: 32px; letter-spacing: -0.4px; margin-bottom: var(--s-sm); }
+  .card p { font-size: 16px; line-height: 24px; color: var(--body); }
+
+  /* ---------- Testimonial ---------- */
+  .testimonial {
+    background: var(--canvas-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--s-xl);
+    display: flex;
+    gap: var(--s-lg);
+    align-items: flex-start;
+    margin-top: var(--s-xl);
+  }
+  .portrait {
+    width: 64px; height: 64px; flex: none;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, var(--canvas), var(--body));
+  }
+  .testimonial blockquote { font-size: 18px; line-height: 28px; color: var(--ink); }
+  .testimonial cite { display: block; margin-top: var(--s-md); font-size: 14px; color: var(--mute); font-style: normal; }
+
+  /* ---------- Pricing (ex-* examples) ---------- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); margin-top: var(--s-xl); }
+  .tier {
+    background: var(--canvas-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .tier.featured { background: var(--ink); color: var(--on-primary); border-color: var(--ink); }
+  .tier .name { font-weight: 500; font-size: 20px; }
+  .tier .price { font-size: 32px; font-weight: 400; letter-spacing: -0.8px; margin: var(--s-md) 0; }
+  .tier ul { list-style: none; margin: var(--s-lg) 0; }
+  .tier li { font-size: 14px; padding: 6px 0; opacity: 0.85; }
+  .tier.featured .btn-primary { background: var(--on-primary); color: var(--primary); }
+
+  /* ---------- Press / job rows ---------- */
+  .rows { margin-top: var(--s-xl); }
+  .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: var(--s-lg) 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .row .lhs { font-size: 16px; font-weight: 500; }
+  .row .rhs { font-size: 14px; color: var(--mute); }
+
+  /* ---------- Download tiles ---------- */
+  .downloads { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); margin-top: var(--s-xl); }
+  .dl-tile {
+    background: var(--canvas-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--s-xl);
+    text-align: center;
+  }
+  .dl-tile .glyph { font-size: 28px; margin-bottom: var(--s-md); }
+  .dl-tile .os { font-weight: 500; font-size: 16px; margin-bottom: var(--s-md); }
+
+  /* ---------- Input ---------- */
+  .field { display: flex; gap: var(--s-sm); max-width: 440px; margin-top: var(--s-lg); }
+  .field input {
+    flex: 1;
+    background: var(--canvas-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: var(--s-sm) var(--s-md);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+  }
+  .field input::placeholder { color: var(--mute); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: var(--canvas);
+    padding: var(--s-3xl) var(--s-xl);
+    border-top: 1px solid var(--hairline);
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--s-xl); max-width: 1200px; margin: 0 auto; }
+  .footer-grid h4 { font-size: 14px; margin-bottom: var(--s-md); }
+  .footer-grid a { display: block; padding: 4px 0; font-size: 14px; color: var(--body); }
+  .footer-grid a:hover { color: var(--ink); }
+  .footer-bottom { max-width: 1200px; margin: var(--s-xl) auto 0; padding-top: var(--s-lg); border-top: 1px solid var(--hairline); font-size: 12px; color: var(--mute); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .cards, .pricing, .downloads { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 767px) {
+    .mock-split, .cards, .pricing, .downloads { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    section { padding: var(--s-4xl) 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <header class="nav">
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="1" y="1" width="18" height="18" rx="4" stroke="var(--ink)" stroke-width="1.5"/><path d="M5 7l3 3-3 3M10 13h5" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Warp
+    </div>
+    <nav class="nav-links" aria-label="Primary">
+      <a class="nav-link" href="./DESIGN.md">Product</a>
+      <a class="nav-link" href="./DESIGN.md">Pricing</a>
+      <a class="nav-link" href="./DESIGN.md">Docs</a>
+      <a class="nav-link" href="./DESIGN.md">Blog</a>
+    </nav>
+    <div class="nav-right">
+      <button class="icon-btn" aria-label="Search">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <a class="nav-link" href="./DESIGN.md">Sign in</a>
+      <a class="btn btn-primary" href="./DESIGN.md">Download</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <h1>Warp is the <span class="serif">agentic</span> development environment</h1>
+      <p>A terminal that wraps an AI agent — write, run, and debug faster with an assistant that lives where you work.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="./DESIGN.md">Download for Mac</a>
+        <a class="btn btn-ghost" href="./DESIGN.md">Watch demo →</a>
+      </div>
+
+      <div class="mock-split">
+        <div class="mock">
+          <div class="mock-bar" aria-hidden="true">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="title">agent mode</span>
+          </div>
+          <div class="mock-body">
+            <div><span class="prompt">$</span> <span class="cmd">warp "fix the failing test"</span></div>
+            <div class="agent">Reading test output… found an off-by-one in <code>range()</code>. Applying patch to <code>utils.py</code> and re-running.</div>
+          </div>
+        </div>
+        <div class="mock">
+          <div class="mock-bar" aria-hidden="true">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="title">terminal</span>
+          </div>
+          <div class="mock-body">
+            <div><span class="prompt">$</span> <span class="cmd">git status</span></div>
+            <div><span class="cm"># On branch main</span></div>
+            <div><span class="cm"># nothing to commit, working tree clean</span></div>
+            <div><span class="prompt">$</span> <span class="cmd">npm run build</span></div>
+            <div class="cm">✓ built in 1.24s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Partners -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Trusted by teams at</div>
+      <div class="partners">
+        <div class="partner-tile">Anthropic</div>
+        <div class="partner-tile">OpenAI</div>
+        <div class="partner-tile">Google</div>
+        <div class="partner-tile">Stanford</div>
+        <div class="partner-tile">Vercel</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Why Warp</div>
+      <h2 class="sec-title">A terminal built for the way you actually work</h2>
+      <p class="sec-lead">Blocks, an agent, and a modern editor — all in one warm, fast surface.</p>
+      <div class="cards">
+        <article class="card">
+          <h3>Agent mode</h3>
+          <p>Delegate multi-step tasks to an AI that reads output, edits files, and runs commands.</p>
+        </article>
+        <article class="card">
+          <h3>Blocks</h3>
+          <p>Commands and their output are grouped into blocks you can share, copy, and re-run.</p>
+        </article>
+        <article class="card">
+          <h3>Editor</h3>
+          <p>Type commands like you type code — cursor selection, autocomplete, and multi-line editing.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonial -->
+  <section>
+    <div class="wrap">
+      <div class="testimonial">
+        <div class="portrait" aria-hidden="true"></div>
+        <div>
+          <blockquote>“Warp changed how our whole team uses the terminal. The agent handles the tedious parts and stays out of the way for everything else.”</blockquote>
+          <cite>— Staff Engineer, infrastructure team</cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Pricing</div>
+      <h2 class="sec-title">Simple, per-seat pricing</h2>
+      <div class="pricing">
+        <div class="tier">
+          <div class="name">Free</div>
+          <div class="price">$0</div>
+          <ul><li>Core terminal</li><li>Blocks &amp; workflows</li><li>Limited agent requests</li></ul>
+          <a class="btn btn-ghost" href="./DESIGN.md" style="width:100%;justify-content:center;">Get started</a>
+        </div>
+        <div class="tier featured">
+          <div class="name">Pro</div>
+          <div class="price">$18</div>
+          <ul><li>Unlimited agent requests</li><li>Team sharing</li><li>Priority support</li></ul>
+          <a class="btn btn-primary" href="./DESIGN.md" style="width:100%;justify-content:center;">Start Pro</a>
+        </div>
+        <div class="tier">
+          <div class="name">Enterprise</div>
+          <div class="price">Custom</div>
+          <ul><li>SSO &amp; SCIM</li><li>Admin controls</li><li>Dedicated support</li></ul>
+          <a class="btn btn-ghost" href="./DESIGN.md" style="width:100%;justify-content:center;">Contact sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Press rows -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">In the press</div>
+      <div class="rows">
+        <div class="row"><span class="lhs">“The terminal, reinvented for the AI era.”</span><span class="rhs">TechCrunch</span></div>
+        <div class="row"><span class="lhs">“A genuinely faster way to work in the shell.”</span><span class="rhs">The Verge</span></div>
+        <div class="row"><span class="lhs">“Agent mode is a glimpse of the future.”</span><span class="rhs">Hacker News</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Downloads -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Get Warp</div>
+      <h2 class="sec-title">Download for your platform</h2>
+      <div class="downloads">
+        <div class="dl-tile"><div class="glyph" aria-hidden="true">⌘</div><div class="os">macOS</div><a class="btn btn-primary" href="./DESIGN.md">Download</a></div>
+        <div class="dl-tile"><div class="glyph" aria-hidden="true">🐧</div><div class="os">Linux</div><a class="btn btn-primary" href="./DESIGN.md">Download</a></div>
+        <div class="dl-tile"><div class="glyph" aria-hidden="true">⊞</div><div class="os">Windows</div><a class="btn btn-primary" href="./DESIGN.md">Download</a></div>
+      </div>
+      <div class="field">
+        <input type="email" placeholder="Get release notes by email" aria-label="Email address" />
+        <a class="btn btn-primary" href="./DESIGN.md">Subscribe</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="brand">Warp</div>
+        <p style="color:var(--body);font-size:14px;margin-top:var(--s-md);max-width:30ch;">The agentic development environment.</p>
+      </div>
+      <div><h4>Product</h4><a href="./DESIGN.md">Features</a><a href="./DESIGN.md">Pricing</a><a href="./DESIGN.md">Download</a></div>
+      <div><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Blog</a></div>
+      <div><h4>Resources</h4><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">Changelog</a><a href="./DESIGN.md">Community</a></div>
+      <div><h4>Legal</h4><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a></div>
+    </div>
+    <div class="footer-bottom">© 2026 Warp. Built with warmth.</div>
+  </footer>
+
+</body>
+</html>

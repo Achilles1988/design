@@ -1,0 +1,457 @@
+<!-- source_content_hash: 1c49a5a5f88d43841d4f4afa33831328d47a5715048700a3b75086a822575883 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cohere — Component Preview</title>
+<style>
+  /* ============================================================
+     COHERE design tokens — mapped from DESIGN.md
+     Enterprise AI: stark white editorial space, deep green-black
+     product bands, soft mineral surfaces, rounded media cards,
+     near-black pill CTAs, coral taxonomy, monospaced-spirit display.
+     ============================================================ */
+  :root {
+    /* Brand & accent */
+    --primary: #17171c;
+    --cohere-black: #000000;
+    --deep-green: #003c33;
+    --dark-navy: #071829;
+    --action-blue: #1863dc;
+    --focus-blue: #4c6ee6;
+    --coral: #ff7759;
+    --coral-soft: #ffad9b;
+    --form-focus: #9b60aa;
+
+    /* Text */
+    --ink: #212121;
+    --muted: #93939f;
+    --slate: #75758a;
+    --body-muted: #616161;
+
+    /* Surface */
+    --canvas: #ffffff;
+    --soft-stone: #eeece7;
+    --pale-green: #edfce9;
+    --pale-blue: #f1f5ff;
+    --hairline: #d9d9dd;
+    --border-light: #e5e7eb;
+    --card-border: #f2f2f2;
+
+    /* On-color */
+    --on-primary: #ffffff;
+    --on-dark: #ffffff;
+    --error: #b30000;
+
+    /* Type — CohereText display / Unica77 body / CohereMono */
+    --font-display: "CohereText", "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Unica77 Cohere Web", "Inter", Arial, ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "CohereMono", "IBM Plex Mono", ui-monospace, monospace;
+
+    /* Radius */
+    --r-xs: 4px;
+    --r-sm: 8px;
+    --r-md: 16px;
+    --r-lg: 22px;
+    --r-xl: 30px;
+    --r-pill: 32px;
+    --r-full: 9999px;
+
+    /* Spacing — base 8 */
+    --s-xxs: 2px;
+    --s-xs: 6px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-section: 80px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--canvas);
+  }
+  p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3 { margin: 0; font-weight: 400; }
+
+  :focus-visible { outline: 3px solid var(--focus-blue); outline-offset: 2px; }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding-inline: var(--s-xl); }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.28px;
+    text-transform: uppercase;
+    color: var(--body-muted);
+  }
+
+  /* ---------- Announcement bar ---------- */
+  .announce {
+    background: var(--cohere-black);
+    color: var(--on-dark);
+    height: 36px;
+    display: flex; align-items: center; justify-content: center; gap: var(--s-sm);
+    font-size: 12px;
+  }
+  .announce a { text-decoration: underline; }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--canvas);
+    border-bottom: 1px solid var(--card-border);
+  }
+  .nav .wrap { height: 68px; display: flex; align-items: center; gap: var(--s-xl); }
+  .brand { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.5px; color: var(--ink); }
+  .nav-links { display: flex; gap: var(--s-xl); margin-inline: auto; }
+  .nav-links a { font-size: 14px; color: var(--ink); }
+  .nav-right { display: flex; align-items: center; gap: var(--s-lg); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    font-family: var(--font-body);
+    font-size: 14px; font-weight: 500; line-height: 1.71;
+    border-radius: var(--r-pill);
+    padding: 12px 24px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: var(--s-sm);
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: #000; }
+  .btn-on-dark { background: var(--canvas); color: var(--ink); }
+  .btn-text { background: transparent; border: 0; padding: 8px 0; color: var(--ink); font-size: 16px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+  .btn-pill-outline { background: transparent; color: var(--primary); border: 1px solid var(--hairline); border-radius: var(--r-xl); padding: 6px 14px; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .btn-pill-outline[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-block: var(--s-section); text-align: center; }
+  .hero h1 { font-family: var(--font-display); font-size: clamp(48px, 9vw, 96px); line-height: 1; letter-spacing: -1.92px; max-width: 16ch; margin: var(--s-lg) auto var(--s-xl); }
+  .hero p.sub { font-size: 18px; color: var(--body-muted); max-width: 52ch; margin: 0 auto var(--s-xl); }
+  .hero-btns { display: flex; gap: var(--s-lg); justify-content: center; align-items: center; }
+
+  .hero-media { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--s-lg); margin-top: var(--s-section); }
+  .agent-console {
+    background: var(--primary);
+    color: var(--on-dark);
+    border-radius: var(--r-sm);
+    padding: var(--s-xl);
+    text-align: left;
+  }
+  .console-row { display: flex; align-items: center; gap: var(--s-sm); padding: var(--s-md) 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .console-row:last-child { border-bottom: 0; }
+  .dot { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--coral); flex: 0 0 auto; }
+  .dot.green { background: #4ade80; }
+  .chip-dark { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.28px; color: var(--on-dark); background: rgba(255,255,255,0.1); border-radius: var(--r-xs); padding: 2px 8px; }
+  .photo-card {
+    border-radius: var(--r-lg);
+    background: linear-gradient(150deg, #003c33, #071829 70%);
+    min-height: 220px;
+    position: relative;
+    overflow: hidden;
+  }
+  .photo-card::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(60% 60% at 70% 30%, rgba(255,119,89,0.5), transparent 60%), radial-gradient(50% 50% at 20% 80%, rgba(76,110,230,0.4), transparent 60%);
+  }
+
+  /* ---------- Trust logo strip ---------- */
+  .trust { padding-block: var(--s-section); text-align: center; }
+  .trust p { color: var(--body-muted); margin-bottom: var(--s-xl); }
+  .logos { display: flex; flex-wrap: wrap; gap: var(--s-xxl) 56px; justify-content: center; align-items: center; }
+  .logo-mark { width: 120px; height: 28px; background: var(--ink); opacity: 0.4; border-radius: var(--r-xs); -webkit-mask: linear-gradient(#000,#000); }
+  .logo-mark:nth-child(2n) { clip-path: polygon(0 20%, 100% 0, 100% 80%, 0 100%); }
+
+  /* ---------- Sections ---------- */
+  section { padding-block: var(--s-section); }
+  .section-head { max-width: 60ch; margin-bottom: var(--s-xxl); }
+  .section-head h2 { font-family: var(--font-display); font-size: 48px; line-height: 1.2; letter-spacing: -0.48px; margin-top: var(--s-md); }
+
+  /* ---------- Product cards (stone) ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .product-card { background: var(--soft-stone); border-radius: var(--r-sm); padding: var(--s-xxl); display: flex; flex-direction: column; gap: var(--s-md); }
+  .product-card h3 { font-family: var(--font-display); font-size: 24px; line-height: 1.3; }
+  .product-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-sm); border-top: 1px solid var(--hairline); padding-top: var(--s-md); font-size: 14px; }
+  .product-card li { display: flex; gap: var(--s-sm); align-items: flex-start; color: var(--body-muted); }
+  .product-card li svg { flex: 0 0 auto; margin-top: 2px; color: var(--deep-green); }
+  .product-card .btn { align-self: flex-start; }
+
+  /* ---------- Dark feature band (deep green) ---------- */
+  .dark-band { background: var(--deep-green); color: var(--on-dark); border-radius: var(--r-lg); padding: var(--s-section); }
+  .dark-band h2 { font-family: var(--font-display); color: var(--on-dark); font-size: 48px; line-height: 1.2; letter-spacing: -0.48px; max-width: 20ch; }
+  .dark-band p { color: rgba(255,255,255,0.75); max-width: 52ch; margin-top: var(--s-lg); }
+  .dark-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); margin-top: var(--s-xxl); }
+  .dark-cap { border: 1px solid rgba(255,255,255,0.14); border-radius: var(--r-sm); padding: var(--s-xl); }
+  .dark-cap h3 { font-family: var(--font-display); color: var(--on-dark); font-size: 24px; margin-bottom: var(--s-sm); }
+  .dark-cap p { color: rgba(255,255,255,0.7); margin: 0; }
+
+  /* ---------- Blog filters + research table ---------- */
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s-md); margin-bottom: var(--s-xl); }
+  .filter-chip {
+    font-family: var(--font-display);
+    font-size: 32px; line-height: 1.2; letter-spacing: -0.32px;
+    color: var(--coral);
+    background: transparent;
+    border: 1px solid var(--coral-soft);
+    border-radius: var(--r-sm);
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .filter-chip[aria-pressed="true"] { background: var(--coral); color: var(--ink); border-color: var(--coral); }
+  .research-table { border-top: 1px solid var(--hairline); }
+  .research-row {
+    display: grid; grid-template-columns: 1fr auto auto; gap: var(--s-xl); align-items: center;
+    padding: var(--s-xl) 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .research-row h3 { font-family: var(--font-display); font-size: 24px; line-height: 1.3; }
+  .research-row .topic { color: var(--action-blue); font-size: 14px; }
+  .research-row .date { color: var(--muted); font-size: 14px; }
+
+  /* ---------- Contact form ---------- */
+  .form-section { background: var(--soft-stone); }
+  .form-card { background: var(--canvas); border-radius: var(--r-lg); padding: var(--s-xxl); max-width: 720px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-lg); }
+  .field { display: flex; flex-direction: column; gap: var(--s-xs); }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 14px; color: var(--ink); }
+  .field input, .field textarea {
+    font-family: var(--font-body); font-size: 16px; color: var(--ink);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xs);
+    padding: 12px 16px;
+  }
+  .field input:focus-visible, .field textarea:focus-visible { outline: none; border-color: var(--form-focus); box-shadow: 0 0 0 3px rgba(155,96,170,0.18); }
+  .field .err { color: var(--error); font-size: 14px; }
+
+  /* ---------- Footer newsletter ---------- */
+  footer { background: var(--primary); color: var(--on-dark); padding: var(--s-section) 0; }
+  .news-label { color: var(--coral); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.28px; text-transform: uppercase; }
+  .news-head { font-family: var(--font-display); font-size: 32px; line-height: 1.2; color: var(--on-dark); margin: var(--s-sm) 0 var(--s-lg); }
+  .news-input { display: flex; align-items: center; gap: var(--s-sm); border-bottom: 1px solid rgba(255,255,255,0.3); max-width: 420px; padding-bottom: var(--s-sm); }
+  .news-input input { flex: 1; background: transparent; border: 0; color: var(--on-dark); font-family: var(--font-body); font-size: 16px; }
+  .news-input input::placeholder { color: rgba(255,255,255,0.5); }
+  .news-input button { background: transparent; border: 0; color: var(--on-dark); cursor: pointer; }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--s-xl); margin-top: var(--s-section); }
+  footer h4 { color: var(--on-dark); font-size: 14px; margin-bottom: var(--s-md); font-weight: 500; }
+  footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-sm); }
+  footer a { color: var(--muted); font-size: 12px; }
+  footer a:hover { color: var(--on-dark); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .grid-3, .dark-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-media { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 767px) {
+    section, .hero { padding-block: var(--s-xxl); }
+    .grid-3, .dark-grid, .form-grid, .foot-grid { grid-template-columns: 1fr; }
+    .research-row { grid-template-columns: 1fr; gap: var(--s-sm); }
+    .dark-band { padding: var(--s-xxl); }
+    .section-head h2, .dark-band h2 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Announcement bar -->
+  <div class="announce">
+    <span>Cohere North is now generally available.</span>
+    <a href="./DESIGN.md">Learn more</a>
+  </div>
+
+  <!-- Nav -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./DESIGN.md" aria-label="Cohere home">cohere</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Products</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Research</a>
+        <a href="./DESIGN.md">Blog</a>
+        <a href="./DESIGN.md">Company</a>
+      </nav>
+      <div class="nav-right">
+        <a href="./DESIGN.md" style="font-size:14px;">Sign in</a>
+        <button class="btn btn-primary">Request a demo</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="mono-label">Enterprise AI</span>
+      <h1>The AI platform for the enterprise</h1>
+      <p class="sub">Secure, private, and grounded models and agents that transform how your business works — built for scale and controlled by you.</p>
+      <div class="hero-btns">
+        <button class="btn btn-primary">Request a demo</button>
+        <button class="btn-text">Try the Playground</button>
+      </div>
+
+      <div class="hero-media">
+        <div class="agent-console" role="img" aria-label="Agent console mockup">
+          <div class="console-row"><span class="dot green"></span> <strong>Research Agent</strong> <span class="chip-dark">RUNNING</span></div>
+          <div class="console-row"><span class="dot"></span> Retrieving from 4 connected sources <span class="chip-dark" style="margin-left:auto">RAG</span></div>
+          <div class="console-row"><span class="dot green"></span> Grounded response generated <span class="chip-dark" style="margin-left:auto">CITED</span></div>
+        </div>
+        <div class="photo-card" role="img" aria-label="Abstract product imagery"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust strip -->
+  <section class="trust">
+    <div class="wrap">
+      <p>Trusted by enterprises building with AI</p>
+      <div class="logos">
+        <span class="logo-mark"></span>
+        <span class="logo-mark"></span>
+        <span class="logo-mark"></span>
+        <span class="logo-mark"></span>
+        <span class="logo-mark"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product cards -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="mono-label">Products</span>
+        <h2>Models built for real work</h2>
+      </div>
+      <div class="grid-3">
+        <article class="product-card">
+          <h3>Command</h3>
+          <p>Generative models optimized for enterprise use cases and tool use.</p>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Tool calling</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Multilingual</li>
+          </ul>
+          <button class="btn btn-primary">Explore</button>
+        </article>
+        <article class="product-card">
+          <h3>Embed</h3>
+          <p>State-of-the-art embeddings for search and retrieval at scale.</p>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>100+ languages</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Multimodal</li>
+          </ul>
+          <button class="btn btn-primary">Explore</button>
+        </article>
+        <article class="product-card">
+          <h3>Rerank</h3>
+          <p>Boost search relevance with a precision reranking model.</p>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Drop-in relevance</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Low latency</li>
+          </ul>
+          <button class="btn btn-primary">Explore</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dark feature band -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="dark-band">
+        <span class="mono-label" style="color:var(--coral-soft)">Security</span>
+        <h2>Your data stays yours</h2>
+        <p>Deploy in any environment — cloud, VPC, or on-prem. Cohere never trains on your data.</p>
+        <div class="dark-grid">
+          <div class="dark-cap"><h3>Private deployment</h3><p>Run models entirely within your own infrastructure.</p></div>
+          <div class="dark-cap"><h3>Grounded output</h3><p>Every response is cited and traceable to sources.</p></div>
+          <div class="dark-cap"><h3>Compliance-ready</h3><p>SOC 2, GDPR, and enterprise governance built in.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog filters + research table -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="mono-label">Research &amp; Blog</span>
+        <h2>Advancing the science of AI</h2>
+      </div>
+      <div class="filters" role="group" aria-label="Topic filters">
+        <button class="filter-chip" aria-pressed="true">All</button>
+        <button class="filter-chip" aria-pressed="false">Models</button>
+        <button class="filter-chip" aria-pressed="false">Safety</button>
+        <button class="filter-chip" aria-pressed="false">Retrieval</button>
+      </div>
+      <div class="research-table">
+        <article class="research-row">
+          <h3>Scaling grounded generation for enterprise search</h3>
+          <span class="topic">Retrieval</span>
+          <span class="date">May 2026</span>
+        </article>
+        <article class="research-row">
+          <h3>Command R+: tool use at production scale</h3>
+          <span class="topic">Models</span>
+          <span class="date">Apr 2026</span>
+        </article>
+        <article class="research-row">
+          <h3>Evaluating enterprise safety in agentic workflows</h3>
+          <span class="topic">Safety</span>
+          <span class="date">Mar 2026</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact form -->
+  <section class="form-section">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="mono-label">Contact</span>
+        <h2>Talk to sales</h2>
+      </div>
+      <div class="form-card">
+        <form class="form-grid" novalidate>
+          <div class="field"><label for="fn">First name</label><input id="fn" type="text" placeholder="Grace" /></div>
+          <div class="field"><label for="ln">Last name</label><input id="ln" type="text" placeholder="Hopper" /></div>
+          <div class="field"><label for="em">Work email</label><input id="em" type="email" placeholder="you@company.com" aria-describedby="e2" /><span class="err" id="e2">Enter a valid work email.</span></div>
+          <div class="field"><label for="co">Company</label><input id="co" type="text" placeholder="Acme Inc." /></div>
+          <div class="field full"><label for="mg">Message</label><textarea id="mg" rows="3" placeholder="Tell us about your project"></textarea></div>
+          <div class="field full"><button class="btn btn-primary" type="submit">Submit</button></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer newsletter -->
+  <footer>
+    <div class="wrap">
+      <span class="news-label">AI moves fast</span>
+      <h2 class="news-head">Stay ahead with Cohere</h2>
+      <div class="news-input">
+        <input type="email" placeholder="Enter your email" aria-label="Email" />
+        <button aria-label="Subscribe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+      <div class="foot-grid">
+        <div><span class="brand" style="color:var(--on-dark)">cohere</span></div>
+        <div><h4>Products</h4><ul><li><a href="./DESIGN.md">Command</a></li><li><a href="./DESIGN.md">Embed</a></li><li><a href="./DESIGN.md">Rerank</a></li></ul></div>
+        <div><h4>Company</h4><ul><li><a href="./DESIGN.md">About</a></li><li><a href="./DESIGN.md">Careers</a></li><li><a href="./DESIGN.md">Research</a></li></ul></div>
+        <div><h4>Resources</h4><ul><li><a href="./DESIGN.md">Docs</a></li><li><a href="./DESIGN.md">Blog</a></li><li><a href="./DESIGN.md">Status</a></li></ul></div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,672 @@
+<!-- source_content_hash: 03cb243015a2e11d0faf05caba7f3d0c7fda6839b1f5ce707a23e8d46d1a11bd -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Slack — Component Preview</title>
+<style>
+  /* ============================================================
+     Slack — inspired design tokens
+     Chromatic monotheism: deep aubergine primary reused across CTAs,
+     the featured pricing tier, the closing band, and the wordmark.
+     Cream-lavender heroes + pastel-mesh gradient backdrops carry
+     floating product UI. Blue inline links are the only chromatic
+     departure. Over-padded 90px pills. Tight negative display tracking.
+     Source of truth: ./DESIGN.md
+     ============================================================ */
+  :root {
+    /* ── Brand aubergine ──────────────────────────────────── */
+    --primary: #4a154b;
+    --primary-deep: #481a54;
+    --primary-press: #611f69;
+    --primary-tint: #592466;
+    --on-primary: #ffffff;
+
+    /* ── Ink ──────────────────────────────────────────────── */
+    --ink: #1d1d1d;
+    --ink-mute: #696969;
+
+    /* ── Link blue (only non-aubergine chromatic accent) ──── */
+    --link-blue: #1264a3;
+    --link-hover: #3860be;
+
+    /* ── Surfaces ─────────────────────────────────────────── */
+    --canvas: #ffffff;
+    --canvas-cream: #f4ede4;
+    --canvas-lavender: #f9f0ff;
+    --surface-elev: #ffffff;
+    --surface-aubergine: #4a154b;
+    --hairline: #e6e6e6;
+
+    /* ── On-aubergine text ────────────────────────────────── */
+    --on-aubergine-mute: #d9bdde;
+
+    /* ── Semantic ─────────────────────────────────────────── */
+    --error: #cc4117;
+    --success: #007a5a;
+
+    /* ── Pastel-mesh stops (hero atmospherics) ────────────── */
+    --mesh-peach: #ffe6d2;
+    --mesh-lavender: #ecd8ff;
+    --mesh-green: #d6ecd8;
+
+    /* ── Type (Inter substitutes proprietary faces) ───────── */
+    --font-display: "Salesforce Avant Garde", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: "Salesforce Sans", Inter, system-ui, -apple-system, sans-serif;
+
+    /* ── Radius ───────────────────────────────────────────── */
+    --r-xs: 2px;
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-xxl: 48px;
+    --r-pill: 90px;
+
+    /* ── Spacing (8px base) ───────────────────────────────── */
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 20px;
+    --sp-xxl: 24px;
+    --sp-huge: 28px;
+    --sp-section: 96px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--primary); color: var(--on-primary); }
+
+  h1, h2, h3, h4 { margin: 0; font-family: var(--font-display); color: var(--ink); }
+  p { margin: 0; }
+
+  a { color: var(--link-blue); text-decoration: none; }
+  a:hover { color: var(--link-hover); text-decoration: underline; }
+
+  :focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding-inline: var(--sp-xxl);
+  }
+
+  section { padding-block: var(--sp-section); }
+
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 12px; font-weight: 700; line-height: 1;
+    letter-spacing: 0.96px; text-transform: uppercase;
+    color: var(--ink);
+    background: var(--canvas-cream);
+    padding: var(--sp-xs) var(--sp-md);
+    border-radius: var(--r-pill);
+    margin-bottom: var(--sp-lg);
+  }
+  .eyebrow--onaub { color: var(--on-aubergine-mute); background: rgba(255,255,255,.1); }
+
+  .section-head { max-width: 680px; margin-bottom: var(--sp-section); margin-bottom: 56px; }
+  .section-head h2 {
+    font-size: 50px; font-weight: 700; line-height: 1.12; letter-spacing: -0.6px;
+    color: var(--ink);
+  }
+  .section-head p { margin-top: var(--sp-lg); font-size: 18px; line-height: 1.55; color: var(--ink-mute); }
+
+  /* ── Buttons — over-padded 90px pills ───────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-sm);
+    font-family: var(--font-body);
+    font-size: 16px; font-weight: 700; line-height: 1.38; letter-spacing: 0.2px;
+    padding: 14px 28px;
+    border-radius: var(--r-pill);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: background .12s ease, transform .12s ease, border-color .12s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn--primary { background: var(--primary); color: var(--on-primary); }
+  .btn--primary:hover { background: var(--primary-press); }
+  .btn--secondary { background: var(--canvas-lavender); color: var(--ink); padding: 10px 30px; }
+  .btn--secondary:hover { background: #f1e3ff; }
+  .btn--outline { background: var(--canvas); color: var(--primary); border-color: var(--primary); }
+  .btn--outline:hover { background: var(--canvas-lavender); }
+  .btn--outline-onaub { background: transparent; color: var(--on-primary); border-color: var(--on-primary); }
+  .btn--outline-onaub:hover { background: rgba(255,255,255,.1); }
+  .btn a, a.btn { text-decoration: none; }
+
+  /* ============================================================
+     NAV
+     ============================================================ */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--canvas) 90%, transparent);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav__inner { display: flex; align-items: center; gap: var(--sp-xxl); padding-block: var(--sp-lg); }
+  .brand {
+    display: inline-flex; align-items: center; gap: var(--sp-sm);
+    font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--primary);
+  }
+  .brand:hover { text-decoration: none; }
+  .brand__mark { width: 26px; height: 26px; display: grid; place-items: center; }
+  .nav__links { display: flex; gap: var(--sp-xxl); margin-left: var(--sp-md); }
+  .nav__links a { font-family: var(--font-body); font-size: 16px; color: var(--ink); }
+  .nav__links a:hover { color: var(--primary); text-decoration: none; }
+  .nav__actions { display: flex; align-items: center; gap: var(--sp-md); margin-left: auto; }
+  @media (max-width: 960px) { .nav__links { display: none; } }
+
+  /* ============================================================
+     HERO — pastel-mesh backdrop + floating product UI
+     ============================================================ */
+  .hero {
+    position: relative;
+    background: var(--canvas-cream);
+    overflow: hidden;
+    padding-block: var(--sp-section);
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: -20% -10% auto -10%; height: 130%;
+    background:
+      radial-gradient(680px 420px at 12% 18%, var(--mesh-peach) 0%, transparent 60%),
+      radial-gradient(720px 480px at 88% 8%, var(--mesh-lavender) 0%, transparent 62%),
+      radial-gradient(600px 420px at 70% 92%, var(--mesh-green) 0%, transparent 60%);
+    filter: blur(6px);
+    z-index: 0; pointer-events: none;
+  }
+  .hero > .container { position: relative; z-index: 1; }
+  .hero__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-section); align-items: center; }
+  .hero h1 {
+    font-size: 64px; font-weight: 700; line-height: 1.12; letter-spacing: -0.768px;
+    color: var(--ink);
+    margin-top: var(--sp-md);
+  }
+  .hero .lead { margin-top: var(--sp-xxl); font-size: 18px; line-height: 1.55; letter-spacing: -0.0216px; color: var(--ink-mute); max-width: 46ch; }
+  .hero__cta { display: flex; gap: var(--sp-md); margin-top: var(--sp-huge); flex-wrap: wrap; }
+
+  /* Floating product UI mockup — sits ABOVE mesh, no card chrome */
+  .product-ui {
+    background: var(--surface-elev);
+    border-radius: var(--r-lg);
+    box-shadow: rgba(0,0,0,.10) 0 0 32px 0;
+    overflow: hidden;
+  }
+  .product-ui__top { display: flex; gap: 6px; padding: var(--sp-md) var(--sp-lg); background: var(--primary); }
+  .product-ui__top i { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,.35); }
+  .product-ui__body { display: grid; grid-template-columns: 130px 1fr; min-height: 300px; }
+  .product-ui__side { background: var(--primary-press); padding: var(--sp-lg) var(--sp-md); }
+  .product-ui__side .ch { display: flex; align-items: center; gap: 6px; color: var(--on-aubergine-mute); font-size: 13px; margin-bottom: 12px; }
+  .product-ui__side .ch.active { color: #fff; font-weight: 700; }
+  .product-ui__side .ch::before { content: "#"; opacity: .7; }
+  .product-ui__main { padding: var(--sp-lg); background: var(--canvas); }
+  .msg { display: flex; gap: 10px; margin-bottom: 16px; }
+  .msg__avatar { width: 32px; height: 32px; border-radius: var(--r-md); flex: none; }
+  .msg__lines { flex: 1; }
+  .msg__name { height: 9px; width: 90px; border-radius: 3px; background: var(--ink); opacity: .8; margin-bottom: 7px; }
+  .msg__text { height: 8px; border-radius: 3px; background: var(--hairline); margin-bottom: 5px; }
+  .msg__text.short { width: 60%; }
+
+  @media (max-width: 900px) {
+    .hero__grid { grid-template-columns: 1fr; }
+    .product-ui__body { grid-template-columns: 1fr; }
+    .product-ui__side { display: none; }
+  }
+
+  /* ============================================================
+     LOGO STRIP
+     ============================================================ */
+  .logos { text-align: center; padding-block: 56px; background: var(--canvas); }
+  .logos p { font-size: 14px; letter-spacing: 0.1px; color: var(--ink-mute); margin-bottom: var(--sp-xxl); }
+  .logos__row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--sp-huge) 56px; }
+  .logos__row span { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--ink-mute); opacity: .7; }
+
+  /* ============================================================
+     FEATURES (cream cards)
+     ============================================================ */
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xxl); }
+  .feature {
+    background: var(--canvas-cream);
+    border-radius: var(--r-xl);
+    padding: 32px;
+  }
+  .feature__icon {
+    width: 52px; height: 52px; border-radius: var(--r-lg);
+    background: var(--primary);
+    display: grid; place-items: center; color: var(--on-primary);
+    margin-bottom: var(--sp-xl);
+  }
+  .feature h3 { font-family: var(--font-display); font-size: 32px; font-weight: 700; line-height: 1.25; letter-spacing: -0.256px; margin-bottom: var(--sp-md); }
+  .feature p { font-size: 16px; color: var(--ink-mute); }
+
+  /* ============================================================
+     STATS (massive aubergine numerals)
+     ============================================================ */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xxl); }
+  .stat {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    padding: 32px;
+    text-align: center;
+  }
+  .stat__num { font-family: var(--font-display); font-size: 50px; font-weight: 700; line-height: 1.12; letter-spacing: -0.6px; color: var(--primary); }
+  .stat__label { margin-top: var(--sp-md); font-size: 16px; color: var(--ink-mute); }
+
+  /* ============================================================
+     PRICING
+     ============================================================ */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xxl); align-items: stretch; }
+  .price {
+    display: flex; flex-direction: column;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    padding: 32px;
+  }
+  .price--featured { background: var(--surface-aubergine); color: var(--on-primary); border-color: var(--surface-aubergine); }
+  .price--featured .price__name, .price--featured .price__amount { color: var(--on-primary); }
+  .price--featured .price__list li { color: var(--on-aubergine-mute); }
+  .price__cap {
+    align-self: flex-start;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.96px; text-transform: uppercase;
+    background: var(--canvas-cream); color: var(--ink);
+    padding: 4px 12px; border-radius: var(--r-pill);
+    margin-bottom: var(--sp-lg);
+  }
+  .price--featured .price__cap { background: rgba(255,255,255,.14); color: var(--on-primary); }
+  .price__name { font-family: var(--font-display); font-size: 24px; font-weight: 700; line-height: 1.33; letter-spacing: -0.096px; color: var(--ink); }
+  .price__amount { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -0.256px; color: var(--ink); margin-block: var(--sp-md); }
+  .price__amount small { font-family: var(--font-body); font-size: 14px; font-weight: 400; color: var(--ink-mute); }
+  .price--featured .price__amount small { color: var(--on-aubergine-mute); }
+  .price__list { list-style: none; margin: var(--sp-lg) 0 var(--sp-xxl); padding: 0; display: flex; flex-direction: column; gap: var(--sp-md); }
+  .price__list li { display: flex; gap: var(--sp-sm); font-size: 16px; color: var(--ink-mute); }
+  .price__list svg { flex: none; margin-top: 3px; color: var(--success); }
+  .price--featured .price__list svg { color: #7fdcc0; }
+  .price .btn { width: 100%; justify-content: center; margin-top: auto; }
+
+  /* ============================================================
+     CLOSING AUBERGINE BAND (signature)
+     ============================================================ */
+  .aub-band { padding-block: var(--sp-section); }
+  .aub-band__inner {
+    background: var(--surface-aubergine);
+    color: var(--on-primary);
+    border-radius: var(--r-xl);
+    padding: 48px;
+    min-height: 380px;
+    display: flex; flex-direction: column; justify-content: center;
+    text-align: center;
+    align-items: center;
+  }
+  .aub-band__inner h2 { font-family: var(--font-display); font-size: 50px; font-weight: 700; line-height: 1.12; letter-spacing: -0.6px; color: var(--on-primary); max-width: 20ch; }
+  .aub-band__inner p { margin-top: var(--sp-lg); font-size: 18px; color: var(--on-aubergine-mute); max-width: 48ch; }
+  .aub-band__cta { display: flex; gap: var(--sp-md); margin-top: var(--sp-huge); flex-wrap: wrap; justify-content: center; }
+
+  /* ============================================================
+     SIGNUP FORM
+     ============================================================ */
+  .signup {
+    background: var(--canvas-lavender);
+    border-radius: var(--r-xl);
+    padding: 48px;
+    display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center;
+  }
+  .signup h2 { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -0.256px; }
+  .signup p { margin-top: var(--sp-md); color: var(--ink-mute); }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--sp-lg); }
+  .field label { font-size: 14px; font-weight: 700; letter-spacing: 0.16px; color: var(--ink); }
+  .input {
+    font-family: var(--font-body); font-size: 16px; color: var(--ink);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: 12px 12px;
+  }
+  .input::placeholder { color: var(--ink-mute); }
+  .input:focus-visible { outline: none; box-shadow: var(--primary-press) 0 0 0 2px inset; border-color: transparent; }
+
+  /* ============================================================
+     FOOTER (aubergine band)
+     ============================================================ */
+  .footer { background: var(--surface-aubergine); color: var(--on-primary); padding: 64px 0 32px; }
+  .footer__grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: var(--sp-xxl); }
+  .footer h4 { font-family: var(--font-body); font-size: 12px; font-weight: 700; letter-spacing: 0.96px; text-transform: uppercase; color: var(--on-primary); margin-bottom: var(--sp-lg); }
+  .footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-md); }
+  .footer ul a { color: var(--on-aubergine-mute); font-size: 14px; }
+  .footer ul a:hover { color: var(--on-primary); }
+  .footer__brand .brand { color: var(--on-primary); }
+  .footer__brand p { color: var(--on-aubergine-mute); font-size: 14px; margin-top: var(--sp-md); max-width: 32ch; }
+  .footer__bottom {
+    margin-top: 48px; padding-top: var(--sp-lg);
+    border-top: 1px solid var(--primary-tint);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-md);
+    font-size: 14px; color: var(--on-aubergine-mute);
+  }
+  .footer__bottom a { color: var(--on-aubergine-mute); text-decoration: underline; }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 1024px) {
+    .feature-grid, .price-grid, .stats { grid-template-columns: repeat(2, 1fr); }
+    .footer__grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 40px; letter-spacing: -0.5px; }
+    .section-head h2 { font-size: 34px; }
+    .feature-grid, .price-grid, .stats { grid-template-columns: 1fr; }
+    .aub-band__inner h2 { font-size: 32px; }
+    .signup { grid-template-columns: 1fr; padding: var(--sp-huge); }
+    .footer__grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Slack home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="10" y="3" width="4" height="11" rx="2" fill="currentColor"/>
+            <rect x="10" y="17" width="4" height="4" rx="2" fill="currentColor"/>
+            <rect x="3" y="10" width="11" height="4" rx="2" fill="currentColor" opacity=".7"/>
+            <rect x="17" y="10" width="4" height="4" rx="2" fill="currentColor" opacity=".7"/>
+          </svg>
+        </span>
+        slack
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="./DESIGN.md">Features</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Enterprise</a>
+        <a href="./DESIGN.md">Resources</a>
+        <a href="./DESIGN.md">Pricing</a>
+      </nav>
+      <div class="nav__actions">
+        <a class="btn btn--secondary" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn--primary" href="./DESIGN.md">Try for free</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <div class="container hero__grid">
+        <div>
+          <span class="eyebrow">Where work happens</span>
+          <h1>Made for people. Built for productivity.</h1>
+          <p class="lead">Slack brings your team, tools, and conversations together in one place — so work flows and everyone stays in sync. Read the <a href="./DESIGN.md">product tour</a> to see how.</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="./DESIGN.md">Try for free</a>
+            <a class="btn btn--outline" href="./DESIGN.md">Talk to sales</a>
+          </div>
+        </div>
+
+        <!-- Floating product UI mockup -->
+        <div class="product-ui" aria-label="Slack workspace preview">
+          <div class="product-ui__top" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="product-ui__body">
+            <div class="product-ui__side" aria-hidden="true">
+              <div class="ch active">general</div>
+              <div class="ch">design</div>
+              <div class="ch">launch-plan</div>
+              <div class="ch">random</div>
+              <div class="ch">eng-team</div>
+            </div>
+            <div class="product-ui__main" aria-hidden="true">
+              <div class="msg">
+                <div class="msg__avatar" style="background:#e8912d"></div>
+                <div class="msg__lines"><div class="msg__name"></div><div class="msg__text"></div><div class="msg__text short"></div></div>
+              </div>
+              <div class="msg">
+                <div class="msg__avatar" style="background:var(--primary)"></div>
+                <div class="msg__lines"><div class="msg__name"></div><div class="msg__text"></div><div class="msg__text"></div><div class="msg__text short"></div></div>
+              </div>
+              <div class="msg">
+                <div class="msg__avatar" style="background:#007a5a"></div>
+                <div class="msg__lines"><div class="msg__name"></div><div class="msg__text short"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LOGO STRIP ===================== -->
+    <section class="logos">
+      <div class="container">
+        <p>Trusted by teams at companies of every size</p>
+        <div class="logos__row">
+          <span>Airbnb</span><span>NASA</span><span>Uber</span><span>Target</span><span>IBM</span><span>Spotify</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURES ===================== -->
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Why Slack</span>
+          <h2>Everything your team needs, in channels</h2>
+          <p>Organize conversations by project, topic, or team. Bring in the tools you already use and let automation handle the busywork.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature">
+            <div class="feature__icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 5h16M4 12h16M4 19h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Channels</h3>
+            <p>Bring order to your work with dedicated spaces for every project, topic, and team — inside and outside your org.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 3.5 9 9l6 1-4 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Workflows</h3>
+            <p>Automate routine tasks and approvals with no-code Workflow Builder — from onboarding to standups.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 20h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Huddles</h3>
+            <p>Start a live audio or video conversation in any channel with a single click — spontaneous, just like the office.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== STATS ===================== -->
+    <section style="background:var(--canvas-lavender)">
+      <div class="container">
+        <div class="section-head" style="max-width:none;text-align:center;margin-inline:auto">
+          <span class="eyebrow">Proven results</span>
+          <h2>Teams move faster with Slack</h2>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="stat__num">90%</div><p class="stat__label">of users say Slack improves communication</p></div>
+          <div class="stat"><div class="stat__num">43%</div><p class="stat__label">increase in productivity reported by teams</p></div>
+          <div class="stat"><div class="stat__num">87%</div><p class="stat__label">feel more connected to their teammates</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING ===================== -->
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Pricing</span>
+          <h2>A plan for every team</h2>
+          <p>Start free and upgrade as you grow. Every paid plan unlocks unlimited message history and app integrations.</p>
+        </div>
+        <div class="price-grid">
+          <div class="price">
+            <span class="price__cap">Free</span>
+            <div class="price__name">Free</div>
+            <div class="price__amount">$0<small> / user / mo</small></div>
+            <ul class="price__list">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 90 days of message history</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 10 app integrations</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 1:1 huddles</li>
+            </ul>
+            <a class="btn btn--outline" href="./DESIGN.md">Get started</a>
+          </div>
+
+          <div class="price price--featured">
+            <span class="price__cap">Most popular</span>
+            <div class="price__name">Pro</div>
+            <div class="price__amount">$8.75<small> / user / mo</small></div>
+            <ul class="price__list">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlimited message history</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlimited integrations</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Group huddles &amp; Workflow Builder</li>
+            </ul>
+            <a class="btn btn--outline-onaub" href="./DESIGN.md">Start free trial</a>
+          </div>
+
+          <div class="price">
+            <span class="price__cap">Business+</span>
+            <div class="price__name">Business+</div>
+            <div class="price__amount">$15<small> / user / mo</small></div>
+            <ul class="price__list">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> SAML SSO &amp; provisioning</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 99.99% uptime SLA</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 24/7 support</li>
+            </ul>
+            <a class="btn btn--outline" href="./DESIGN.md">Contact sales</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SIGNUP ===================== -->
+    <section>
+      <div class="container">
+        <div class="signup">
+          <div>
+            <span class="eyebrow">Get started</span>
+            <h2>Create your workspace in seconds</h2>
+            <p>Enter your work email and we'll help you set up a new Slack workspace for your team.</p>
+          </div>
+          <form onsubmit="return false">
+            <div class="field">
+              <label for="email">Work email</label>
+              <input class="input" id="email" type="email" placeholder="you@company.com" autocomplete="email" />
+            </div>
+            <div class="field">
+              <label for="team">Team name</label>
+              <input class="input" id="team" type="text" placeholder="Acme Inc." autocomplete="organization" />
+            </div>
+            <button class="btn btn--primary" type="submit" style="width:100%;justify-content:center">Create workspace</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CLOSING AUBERGINE BAND ===================== -->
+    <section class="aub-band">
+      <div class="container">
+        <div class="aub-band__inner">
+          <span class="eyebrow eyebrow--onaub">Ready to get started?</span>
+          <h2>Make work simpler, more pleasant, more productive</h2>
+          <p>Join the millions of people who use Slack to bring their teams together and get more done.</p>
+          <div class="aub-band__cta">
+            <a class="btn btn--outline-onaub" href="./DESIGN.md">Talk to sales</a>
+            <a class="btn btn--secondary" href="./DESIGN.md">Try for free</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a class="brand" href="./DESIGN.md">
+            <span class="brand__mark" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <rect x="10" y="3" width="4" height="11" rx="2" fill="currentColor"/>
+                <rect x="10" y="17" width="4" height="4" rx="2" fill="currentColor"/>
+                <rect x="3" y="10" width="11" height="4" rx="2" fill="currentColor" opacity=".7"/>
+                <rect x="17" y="10" width="4" height="4" rx="2" fill="currentColor" opacity=".7"/>
+              </svg>
+            </span>
+            slack
+          </a>
+          <p>Slack is where work flows. It's where the people you need, the information you share, and the tools you use come together.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Features</a></li>
+            <li><a href="./DESIGN.md">Integrations</a></li>
+            <li><a href="./DESIGN.md">Enterprise</a></li>
+            <li><a href="./DESIGN.md">Security</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Solutions</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Engineering</a></li>
+            <li><a href="./DESIGN.md">Sales</a></li>
+            <li><a href="./DESIGN.md">Marketing</a></li>
+            <li><a href="./DESIGN.md">Customer support</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Help center</a></li>
+            <li><a href="./DESIGN.md">Blog</a></li>
+            <li><a href="./DESIGN.md">Community</a></li>
+            <li><a href="./DESIGN.md">API docs</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="./DESIGN.md">About us</a></li>
+            <li><a href="./DESIGN.md">Careers</a></li>
+            <li><a href="./DESIGN.md">Newsroom</a></li>
+            <li><a href="./DESIGN.md">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Slack. Inspired design preview.</span>
+        <span>Tokens sourced from <a href="./DESIGN.md">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

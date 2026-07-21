@@ -1,0 +1,298 @@
+<!-- source_content_hash: 9aa68c53b481a0befdf72859db5625f85454122294509989aa58414aaee04b34 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lamborghini — Component Preview</title>
+<style>
+  /* ============================================================
+     Lamborghini design tokens (from DESIGN.md)
+     A cathedral of darkness: true, uncompromising black (#000000)
+     saturates the viewport. White type + Lamborghini Gold (#FFC000)
+     are deployed with surgical precision — gold is the ONLY chromatic
+     color, reserved exclusively for primary CTA buttons.
+     LamboType: ALL-CAPS at extreme scale (120px) with tight line-heights.
+     Zero border-radius — sharp angular rectangles. Hexagonal motifs.
+     Depth via surface layering (#000 -> #181818 -> #202020), never shadow.
+     ============================================================ */
+  :root {
+    /* Accent — gold, primary CTA only. Never decorative. */
+    --gold: #ffc000;
+    --gold-dark: #917300;   /* pressed */
+    --gold-text: #ffce3e;
+
+    /* Text */
+    --white: #ffffff;
+    --smoke: #f5f5f5;
+    --ash: #7d7d7d;         /* body */
+    --steel: #969696;
+    --slate: #666666;
+    --shadow: #313131;
+
+    /* Surfaces — the darkness gradient */
+    --abyss: #000000;       /* canvas */
+    --dark-iron: #181818;
+    --charcoal: #202020;
+    --graphite: #494949;
+    --overlay: rgba(0,0,0,0.7);
+
+    /* Secondary informational accents (rare) */
+    --cyan-pulse: #29abe2;
+    --link-blue: #3860be;
+    --teal-action: #1eaedb;
+
+    /* Type — LamboType; Roboto/Arial fallback */
+    --font: "LamboType", "Roboto", "Helvetica Neue", Arial, sans-serif;
+
+    /* Radius — 0 for everything; 20px reserved for toggles only */
+    --r-none: 0px;
+    --r-badge: 2px;
+    --r-toggle: 20px;
+
+    /* Spacing — 8px base */
+    --s-2: 2px; --s-4: 4px; --s-8: 8px; --s-12: 12px; --s-16: 16px;
+    --s-20: 20px; --s-24: 24px; --s-32: 32px; --s-40: 40px; --s-48: 48px; --s-56: 56px;
+
+    --maxw: 1440px;
+    --content: 1200px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--abyss); color: var(--ash);
+    font-family: var(--font); font-size: 16px; line-height: 1.5;
+    font-weight: 400; -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: var(--font); font-weight: 400; color: var(--white); text-transform: uppercase; margin: 0; }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .wrap { max-width: var(--content); margin: 0 auto; padding-inline: var(--s-40); }
+  section { padding-block: var(--s-56); }
+
+  /* Gold accent CTA — the primary action, sharp 0px, black text */
+  .btn-gold {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s-8);
+    background: var(--gold); color: var(--abyss);
+    padding: var(--s-24); min-height: 48px;
+    font-size: 16px; font-weight: 400; border: 0; border-radius: var(--r-none); cursor: pointer;
+  }
+  .btn-gold:active { background: var(--gold-dark); }
+  /* Ghost — secondary CTA on dark: transparent, white border at 50% */
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s-8);
+    background: transparent; color: var(--white);
+    border: 1px solid rgba(255,255,255,0.5); border-radius: var(--r-none);
+    padding: var(--s-16); min-height: 48px;
+    font-size: 14.4px; font-weight: 300; letter-spacing: 0.2px; text-transform: uppercase; cursor: pointer;
+  }
+  .read-more { color: var(--white); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Nav — no visible background, marks float in darkness; centered bull */
+  header.nav { position: sticky; top: 0; z-index: 20; background: transparent; }
+  .nav__inner { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; max-width: var(--maxw); margin: 0 auto; padding: var(--s-20) var(--s-40); }
+  .nav__left { display: inline-flex; align-items: center; gap: var(--s-12); }
+  .menu-btn { display: inline-flex; align-items: center; gap: var(--s-8); background: none; border: 0; color: var(--white); font-size: 14px; text-transform: uppercase; cursor: pointer; }
+  .bull { justify-self: center; font-family: var(--font); font-weight: 400; color: var(--white); letter-spacing: 6px; text-transform: uppercase; font-size: 18px; }
+  .nav__right { justify-self: end; display: inline-flex; gap: var(--s-16); }
+  .icon-btn { background: none; border: 0; color: var(--white); cursor: pointer; padding: 0; }
+
+  /* Hexagon motif */
+  .hex { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--white);
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); border: 1px solid rgba(255,255,255,0.6); }
+
+  /* Hero — full-viewport video/photo band, model name floats -->  */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: var(--s-56) var(--s-40);
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.75)),
+      radial-gradient(120% 80% at 50% 60%, #141414, #000 70%);
+    overflow: hidden;
+  }
+  .hero h1 { font-size: clamp(54px, 13vw, 120px); line-height: 0.92; }
+  .hero .sub { color: var(--smoke); text-transform: uppercase; letter-spacing: 0.96px; margin: var(--s-24) 0 var(--s-32); font-size: 16px; }
+  .hero__cta { display: flex; gap: var(--s-16); flex-wrap: wrap; justify-content: center; }
+  .hero__pause { position: absolute; right: var(--s-40); bottom: var(--s-40); }
+  .hero__progress { position: absolute; left: 0; bottom: 0; height: 2px; width: 40%; background: var(--white); }
+
+  .eyebrow { text-transform: uppercase; letter-spacing: 0.96px; font-size: 12px; color: var(--gold-text); margin: 0 0 var(--s-16); }
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s-24); margin-bottom: var(--s-32); flex-wrap: wrap; }
+  .section-head h2 { font-size: clamp(40px, 6vw, 80px); line-height: 1.13; }
+
+  /* Model cards — charcoal surface OR photo on black, sharp corners */
+  .model-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--charcoal); }
+  .model-card { background: var(--abyss); }
+  .model-card .photo { aspect-ratio: 16/9; background: linear-gradient(135deg, #262626, #050505); }
+  .model-card .body { padding: var(--s-24); }
+  .model-card h3 { font-size: 27px; line-height: 1.37; }
+  .model-card p { color: var(--ash); margin: var(--s-8) 0 var(--s-16); }
+
+  /* Spec cells — charcoal, gold numbers */
+  .spec-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-24); background: var(--charcoal); padding: var(--s-40); }
+  .spec-cell .val { font-size: clamp(40px, 6vw, 80px); line-height: 1; color: var(--gold); }
+  .spec-cell .lbl { text-transform: uppercase; letter-spacing: 0.96px; font-size: 12px; color: var(--steel); margin-top: var(--s-8); }
+
+  /* News cards on charcoal */
+  .news { background: var(--charcoal); }
+  .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-24); }
+  .news-card .photo { aspect-ratio: 3/2; background: linear-gradient(135deg, #2e2e2e, #101010); margin-bottom: var(--s-16); }
+  .badge { display: inline-block; background: var(--steel); color: var(--white); padding: var(--s-8); font-size: 10px; text-transform: uppercase; letter-spacing: 0.96px; border-radius: var(--r-badge); }
+  .news-card h3 { font-size: 24px; margin: var(--s-8) 0 var(--s-12); }
+  .news-card p { color: var(--ash); font-size: 16px; margin-bottom: var(--s-16); }
+
+  /* Config form — dark-iron surface */
+  .config { background: var(--dark-iron); }
+  .form { max-width: 640px; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-16); }
+  .field { display: flex; flex-direction: column; gap: var(--s-8); }
+  .field.full { grid-column: 1 / -1; }
+  label { text-transform: uppercase; letter-spacing: 0.96px; font-size: 12px; color: var(--steel); }
+  input, select {
+    height: 48px; padding: 0 var(--s-16); background: var(--charcoal); color: var(--white);
+    border: 1px solid var(--graphite); border-radius: var(--r-none); font-family: var(--font); font-size: 16px;
+  }
+  input::placeholder { color: var(--slate); }
+  input:focus, select:focus { border-color: var(--gold); }
+  .swatches { display: flex; gap: var(--s-12); }
+  .swatch { width: 40px; height: 40px; border-radius: var(--r-none); border: 1px solid var(--graphite); }
+
+  /* CTA band */
+  .cta-band { text-align: center; background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.85)), radial-gradient(60% 50% at 50% 50%, #161616, #000 70%); }
+  .cta-band h2 { font-size: clamp(40px, 6vw, 80px); line-height: 1; margin-bottom: var(--s-32); }
+
+  /* Footer — dark-iron */
+  footer.site { background: var(--dark-iron); border-top: 1px solid var(--charcoal); padding: var(--s-56) var(--s-40); color: var(--ash); }
+  .foot-grid { max-width: var(--content); margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-24); }
+  .foot-grid h4 { color: var(--white); text-transform: uppercase; letter-spacing: 0.96px; font-size: 12px; margin-bottom: var(--s-16); }
+  .foot-grid a { display: block; padding: 6px 0; font-size: 14px; color: var(--steel); }
+  .foot-bottom { max-width: var(--content); margin: var(--s-32) auto 0; border-top: 1px solid var(--charcoal); padding-top: var(--s-24); font-size: 12px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.96px; }
+
+  @media (max-width: 1024px) {
+    .model-grid, .news-grid { grid-template-columns: repeat(2, 1fr); }
+    .spec-grid { grid-template-columns: repeat(2, 1fr); }
+    .foot-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .nav__right { display: none; }
+    .model-grid, .news-grid, .spec-grid, .form, .foot-grid { grid-template-columns: 1fr; }
+    section { padding-block: var(--s-40); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Nav: MENU + bull logo centered + icons, floating in darkness -->
+  <header class="nav">
+    <div class="nav__inner">
+      <div class="nav__left">
+        <button class="menu-btn" aria-label="Open menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          Menu
+        </button>
+      </div>
+      <a class="bull" href="./DESIGN.md">Lamborghini</a>
+      <div class="nav__right">
+        <button class="icon-btn" aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+        <button class="icon-btn" aria-label="Bookmarks"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero: full-viewport, 120px uppercase model name, gold CTA + ghost -->
+  <main>
+  <section class="hero" aria-label="Hero">
+    <h1>Temerario</h1>
+    <p class="sub">The next chapter of the super sports car</p>
+    <div class="hero__cta">
+      <a class="btn-gold" href="./DESIGN.md">Discover More</a>
+      <a class="btn-ghost" href="./DESIGN.md">Start Configuration</a>
+    </div>
+    <span class="hex hero__pause" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+    </span>
+    <span class="hero__progress" aria-hidden="true"></span>
+  </section>
+
+  <!-- Spec cells — gold numbers -->
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Performance · Temerario</p>
+      <div class="spec-grid">
+        <div class="spec-cell"><div class="val">920</div><div class="lbl">CV Total Power</div></div>
+        <div class="spec-cell"><div class="val">2.7</div><div class="lbl">s · 0–100 km/h</div></div>
+        <div class="spec-cell"><div class="val">343</div><div class="lbl">km/h Top Speed</div></div>
+        <div class="spec-cell"><div class="val">V8</div><div class="lbl">Twin-turbo hybrid</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Model cards -->
+  <section>
+    <div class="wrap">
+      <div class="section-head"><h2>The Range</h2><a class="read-more" href="./DESIGN.md">View all models</a></div>
+      <div class="model-grid">
+        <article class="model-card"><div class="photo" role="img" aria-label="Revuelto"></div><div class="body"><h3>Revuelto</h3><p>V12 HPEV flagship.</p><a class="read-more" href="./DESIGN.md">Discover</a></div></article>
+        <article class="model-card"><div class="photo" role="img" aria-label="Temerario"></div><div class="body"><h3>Temerario</h3><p>Twin-turbo V8 hybrid.</p><a class="read-more" href="./DESIGN.md">Discover</a></div></article>
+        <article class="model-card"><div class="photo" role="img" aria-label="Urus"></div><div class="body"><h3>Urus SE</h3><p>The Super SUV, electrified.</p><a class="read-more" href="./DESIGN.md">Discover</a></div></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- News cards on charcoal -->
+  <section class="news">
+    <div class="wrap">
+      <div class="section-head"><h2>News</h2></div>
+      <div class="news-grid">
+        <article class="news-card"><div class="photo" role="img" aria-label="Event"></div><span class="badge">Arena</span><h3>Nights of the bull</h3><p>Inside the Lamborghini Arena event under the stars.</p><a class="read-more" href="./DESIGN.md">Read More</a></article>
+        <article class="news-card"><div class="photo" role="img" aria-label="Motorsport"></div><span class="badge">Squadra Corse</span><h3>On the grid</h3><p>The GT3 program takes on a new endurance season.</p><a class="read-more" href="./DESIGN.md">Read More</a></article>
+        <article class="news-card"><div class="photo" role="img" aria-label="Design"></div><span class="badge">Centro Stile</span><h3>Hexagonal DNA</h3><p>How brand geometry shapes every surface.</p><a class="read-more" href="./DESIGN.md">Read More</a></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Config form -->
+  <section class="config">
+    <div class="wrap">
+      <p class="eyebrow">Build yours</p>
+      <div class="section-head"><h2>Configure</h2></div>
+      <form class="form" onsubmit="return false">
+        <div class="field"><label for="mdl">Model</label><select id="mdl"><option>Revuelto</option><option>Temerario</option><option>Urus SE</option></select></div>
+        <div class="field"><label for="reg">Region</label><select id="reg"><option>Europe</option><option>North America</option><option>Asia Pacific</option></select></div>
+        <div class="field full"><label>Exterior color</label>
+          <div class="swatches" role="group" aria-label="Exterior color">
+            <span class="swatch" style="background:var(--gold)" title="Giallo"></span>
+            <span class="swatch" style="background:#0a0a0a" title="Nero"></span>
+            <span class="swatch" style="background:#2b4a7a" title="Blu"></span>
+            <span class="swatch" style="background:#7a1f1f" title="Rosso"></span>
+          </div>
+        </div>
+        <div class="field full"><label for="em">Email</label><input id="em" type="email" placeholder="you@example.com" /></div>
+        <div class="field full"><button class="btn-gold" type="submit">Request a quote</button></div>
+      </form>
+    </div>
+  </section>
+  </main>
+
+  <!-- CTA band -->
+  <section class="cta-band">
+    <div class="wrap">
+      <h2>Feel the thrill</h2>
+      <a class="btn-gold" href="./DESIGN.md">Find a dealer</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site">
+    <div class="foot-grid">
+      <div><h4>Models</h4><a href="./DESIGN.md">Revuelto</a><a href="./DESIGN.md">Temerario</a><a href="./DESIGN.md">Urus SE</a></div>
+      <div><h4>World</h4><a href="./DESIGN.md">Arena</a><a href="./DESIGN.md">Squadra Corse</a><a href="./DESIGN.md">Museum</a></div>
+      <div><h4>Ownership</h4><a href="./DESIGN.md">Ad Personam</a><a href="./DESIGN.md">Selezione</a><a href="./DESIGN.md">Service</a></div>
+      <div><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Press</a></div>
+    </div>
+    <div class="foot-bottom">© Automobili Lamborghini S.p.A. — token-driven component preview generated from DESIGN.md. Not an official Lamborghini product.</div>
+  </footer>
+
+</body>
+</html>

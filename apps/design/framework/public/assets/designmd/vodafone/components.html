@@ -1,0 +1,471 @@
+<!-- source_content_hash: 293a40951e654283978fa744b24177a159d8f2a60f402bc735bf081618af0ef6 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vodafone — Component Preview</title>
+<style>
+  /* ============================================================
+     VODAFONE DESIGN SYSTEM — token map
+     Telecom super-brand: campaign-poster posture. Colossal
+     UPPERCASE weight-800 display stencil (-1px tracking) over
+     editorial photography, single scarlet-red CTA pill (60px),
+     dark ink / light canvas band rhythm, speechmark orb anchor.
+     No second accent — red + ink + grayscale only.
+     ============================================================ */
+  :root {
+    --primary:      #e60000; /* Vodafone Red — single brand accent */
+    --on-primary:   #ffffff;
+    --ink:          #25282b; /* near-black surface + text */
+    --body:         #7e7e7e; /* secondary text */
+    --mute:         #bebebe; /* placeholder, low-key links */
+    --canvas:       #ffffff;
+    --canvas-soft:  #f2f2f2; /* badge-chip bg */
+    --on-dark:      #ffffff;
+
+    /* Type — single custom family (weight 300/400/600/700/800) */
+    --font: "Vodafone", "Vodafone Rg", "Helvetica Neue", Arial, sans-serif;
+
+    /* Radius — pill ladder */
+    --r-none: 0px;
+    --r-sm: 6px;       /* canonical content radius */
+    --r-card: 6px;
+    --r-pill-md: 32px; /* badge / chip */
+    --r-pill-lg: 60px; /* signature CTA pill */
+    --r-full: 9999px;  /* circular icon */
+
+    /* Spacing — base 4px */
+    --sp-xxs: 2px; --sp-xs: 4px; --sp-sm: 8px; --sp-md: 12px;
+    --sp-lg: 16px; --sp-xl: 20px; --sp-2xl: 24px; --sp-3xl: 32px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 18px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--primary); color: var(--on-primary); }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; border-radius: var(--r-sm); }
+  .on-dark :focus-visible { outline-color: var(--on-dark); }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 var(--sp-3xl); }
+
+  /* ---------- Speechmark logo orb ---------- */
+  .orb {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; flex: none;
+    background: var(--primary);
+    border-radius: var(--r-sm);
+  }
+  .orb svg { width: 26px; height: 26px; }
+
+  /* ---------- Buttons — 60px pill ---------- */
+  .btn {
+    font-family: var(--font);
+    font-size: 18px; font-weight: 400; line-height: 28px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-sm);
+    border-radius: var(--r-pill-lg);
+    padding: var(--sp-md) var(--sp-2xl);
+    border: 1px solid transparent;
+    transition: background .16s ease, color .16s ease, transform .08s ease;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .btn-primary:hover { background: #c40000; border-color: #c40000; }
+  .btn-outline-red { background: var(--canvas); color: var(--primary); border-color: var(--primary); }
+  .btn-outline-red:hover { background: var(--primary); color: var(--on-primary); }
+  .btn-outline-dark { background: var(--canvas); color: var(--ink); border-color: var(--ink); }
+  .btn-outline-dark:hover { background: var(--ink); color: var(--on-dark); }
+  .on-dark .btn-outline-dark { background: transparent; color: var(--on-dark); border-color: var(--on-dark); }
+  .on-dark .btn-outline-dark:hover { background: var(--on-dark); color: var(--ink); }
+
+  .icon-circular {
+    width: 48px; height: 48px; flex: none;
+    background: var(--canvas); color: var(--ink);
+    border: none; border-radius: var(--r-full);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+
+  /* ---------- Badge chip ---------- */
+  .chip {
+    display: inline-flex; align-items: center;
+    background: var(--canvas-soft); color: var(--ink);
+    font-size: 14px; font-weight: 700; line-height: 21px;
+    border-radius: var(--r-pill-md);
+    padding: var(--sp-xs) var(--sp-md);
+  }
+
+  /* ---------- Nav (dark) ---------- */
+  .nav {
+    background: var(--ink);
+    color: var(--on-dark);
+    padding: var(--sp-lg) 0;
+  }
+  .nav-inner { display: flex; align-items: center; gap: var(--sp-2xl); }
+  .nav-brand { display: flex; align-items: center; gap: var(--sp-md); font-weight: 800; font-size: 20px; letter-spacing: -0.3px; }
+  .nav-links { display: flex; gap: var(--sp-2xl); flex: 1; }
+  .nav-link { color: var(--on-dark); font-size: 16px; }
+  .nav-link:hover { color: var(--mute); }
+  .nav-actions { display: flex; align-items: center; gap: var(--sp-md); }
+
+  /* ---------- Hero band (dark, colossal display) ---------- */
+  .hero {
+    background:
+      linear-gradient(90deg, rgba(37,40,43,0.92) 30%, rgba(37,40,43,0.35) 100%),
+      radial-gradient(120% 120% at 80% 30%, #4a3d3d 0%, #25282b 60%);
+    color: var(--on-dark);
+    padding: 96px 0;
+  }
+  .hero .eyebrow {
+    font-size: 16px; font-weight: 800; line-height: 24px;
+    text-transform: uppercase; color: var(--primary);
+    margin-bottom: var(--sp-lg);
+  }
+  .hero h1 {
+    font-size: 144px;
+    font-weight: 800;
+    line-height: 114px;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    margin-bottom: var(--sp-2xl);
+  }
+  .hero .lead { font-size: 22px; font-weight: 400; line-height: 28px; max-width: 520px; margin-bottom: var(--sp-2xl); color: var(--on-dark); }
+  .hero .actions { display: flex; gap: var(--sp-md); flex-wrap: wrap; }
+
+  /* ---------- Red hero band (rare campaign) ---------- */
+  .band-red {
+    background: var(--primary);
+    color: var(--on-primary);
+    padding: 72px 0;
+    text-align: center;
+  }
+  .band-red h2 {
+    font-size: 90px; font-weight: 800; line-height: 84px; text-transform: uppercase;
+    margin-bottom: var(--sp-lg);
+  }
+  .band-red p { font-size: 22px; max-width: 560px; margin: 0 auto var(--sp-2xl); }
+  .band-red .btn-primary { background: var(--canvas); color: var(--primary); border-color: var(--canvas); }
+  .band-red .btn-primary:hover { background: var(--ink); color: var(--on-dark); border-color: var(--ink); }
+
+  /* ---------- Light content band ---------- */
+  .band-light { background: var(--canvas); padding: 80px 0; }
+  .band-light .eyebrow { font-size: 16px; font-weight: 800; text-transform: uppercase; color: var(--primary); margin-bottom: var(--sp-md); }
+  .band-light h2 {
+    font-size: 48px; font-weight: 300; line-height: 52px;
+    max-width: 20ch; margin-bottom: var(--sp-md);
+  }
+  .band-light .band-lead { font-size: 18px; color: var(--body); max-width: 60ch; margin-bottom: var(--sp-3xl); }
+
+  /* orb anchor row */
+  .orb-anchor { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-lg); padding: var(--sp-3xl) 0; }
+  .orb-anchor .orb { width: 72px; height: 72px; }
+  .orb-anchor .orb svg { width: 42px; height: 42px; }
+  .orb-anchor .quote { font-size: 40px; font-weight: 300; line-height: 44px; max-width: 22ch; }
+  .orb-anchor .cite { font-size: 16px; font-weight: 700; color: var(--body); }
+
+  /* ---------- Story card grid ---------- */
+  .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3xl); }
+  .story-card {
+    background: var(--canvas);
+    color: var(--ink);
+    border-radius: var(--r-card);
+    padding: var(--sp-lg);
+    border: 1px solid var(--canvas-soft);
+  }
+  .story-card .thumb {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--r-card);
+    margin-bottom: var(--sp-lg);
+  }
+  .story-card.lead .thumb { aspect-ratio: 21 / 9; }
+  .story-card .chip { margin-bottom: var(--sp-md); }
+  .story-card h3 { font-size: 32px; font-weight: 700; line-height: 40px; margin-bottom: var(--sp-sm); }
+  .story-card.lead h3 { font-size: 40px; line-height: 44px; }
+  .story-card p { font-size: 16px; color: var(--body); margin-bottom: var(--sp-lg); }
+  .thumb-1 { background: linear-gradient(135deg, #e60000, #7a1f1f); }
+  .thumb-2 { background: linear-gradient(135deg, #3a3f45, #25282b); }
+  .thumb-3 { background: linear-gradient(135deg, #b23030, #5a2626); }
+
+  /* ---------- Pricing tiers ---------- */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2xl); }
+  .tier {
+    background: var(--canvas-soft);
+    border: 1px solid var(--mute);
+    border-radius: var(--r-card);
+    padding: var(--sp-lg);
+    display: flex; flex-direction: column; gap: var(--sp-md);
+  }
+  .tier.featured { background: var(--ink); color: var(--on-primary); border-color: var(--ink); }
+  .tier.featured .tier-sub, .tier.featured p { color: var(--mute); }
+  .tier h3 { font-size: 24px; font-weight: 700; line-height: 24px; }
+  .tier .price { font-size: 48px; font-weight: 800; line-height: 52px; letter-spacing: -1px; }
+  .tier .price small { font-size: 16px; font-weight: 400; color: var(--body); }
+  .tier.featured .price small { color: var(--mute); }
+  .tier ul { list-style: none; display: flex; flex-direction: column; gap: var(--sp-sm); margin: var(--sp-sm) 0; }
+  .tier li { display: flex; gap: var(--sp-sm); font-size: 16px; }
+  .tier li::before { content: "✓"; color: var(--primary); font-weight: 700; }
+  .tier .btn { margin-top: auto; }
+  .tier.featured .btn-outline-red { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+  /* ---------- Form ---------- */
+  .signup { max-width: 460px; }
+  .field { display: block; margin-bottom: var(--sp-lg); }
+  .field span { display: block; font-size: 16px; font-weight: 700; margin-bottom: var(--sp-xs); }
+  .field input {
+    width: 100%;
+    background: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: var(--r-sm);
+    padding: var(--sp-md) var(--sp-lg);
+    font-family: var(--font); font-size: 16px;
+  }
+  .field input::placeholder { color: var(--mute); }
+  .field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(230,0,0,0.15); }
+
+  /* ---------- Footer (dark) ---------- */
+  footer {
+    background: var(--ink);
+    color: var(--on-dark);
+    padding: var(--sp-3xl) 0;
+  }
+  .foot-top { display: flex; align-items: center; gap: var(--sp-md); margin-bottom: var(--sp-3xl); }
+  .foot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-3xl); }
+  .foot-col h4 { font-size: 12px; font-weight: 600; letter-spacing: 0.57px; text-transform: uppercase; margin-bottom: var(--sp-lg); }
+  .foot-col a { display: block; color: var(--mute); font-size: 16px; padding: var(--sp-xs) 0; }
+  .foot-col a:hover { color: var(--on-dark); }
+  .foot-legal {
+    margin-top: var(--sp-3xl); padding-top: var(--sp-lg);
+    border-top: 1px solid rgba(255,255,255,0.25);
+    font-size: 14px; color: var(--mute);
+    display: flex; justify-content: space-between; gap: var(--sp-lg); flex-wrap: wrap;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .hero h1 { font-size: 90px; line-height: 84px; }
+    .band-red h2 { font-size: 64px; line-height: 60px; }
+    .tiers { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .container { padding: 0 var(--sp-lg); }
+    .nav-links { display: none; }
+    .hero { padding: 56px 0; }
+    .hero h1 { font-size: 56px; line-height: 52px; }
+    .band-light h2 { font-size: 32px; line-height: 36px; }
+    .story-grid { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <!-- ============ NAV (dark) ============ -->
+  <nav class="nav on-dark">
+    <div class="container nav-inner">
+      <a class="nav-brand" href="./DESIGN.md" aria-label="Vodafone home">
+        <span class="orb" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M14 4C8 4 4 8.5 4 14c0 4 2.5 6 5.5 6 3 0 5-2 5-4.5 0-3-2.4-3.6-2.4-6C12.1 7 13 5.4 15 4.6c.3-.1.2-.6-.1-.6H14z" fill="#ffffff"/></svg>
+        </span>
+        Vodafone
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="./DESIGN.md">Mobile</a>
+        <a class="nav-link" href="./DESIGN.md">Broadband</a>
+        <a class="nav-link" href="./DESIGN.md">Business</a>
+        <a class="nav-link" href="./DESIGN.md">Support</a>
+      </div>
+      <div class="nav-actions">
+        <button class="icon-circular" aria-label="Search">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M16 16l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button class="btn btn-outline-dark">Log in</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ HERO BAND (dark, colossal display) ============ -->
+  <header class="hero on-dark">
+    <div class="container">
+      <p class="eyebrow">Unlimited data</p>
+      <h1>Stay connected</h1>
+      <p class="lead">The network built for your whole life. Fast 5G, endless data, and a plan that flexes with you.</p>
+      <div class="actions">
+        <button class="btn btn-primary">Shop plans</button>
+        <button class="btn btn-outline-dark">See coverage</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ LIGHT CONTENT BAND — stories ============ -->
+  <section class="band-light" aria-labelledby="stories">
+    <div class="container">
+      <p class="eyebrow">What's new</p>
+      <h2 id="stories">More reasons to love the network</h2>
+      <p class="band-lead">From 5G rollouts to entertainment perks — here's what's happening across Vodafone.</p>
+
+      <div class="story-grid">
+        <article class="story-card lead" style="grid-column:1 / -1">
+          <div class="thumb thumb-1" aria-hidden="true"></div>
+          <span class="chip">5G Network</span>
+          <h3>5G now reaches more places than ever</h3>
+          <p>Our fastest network is expanding to hundreds of new towns this year — check if yours is covered.</p>
+          <button class="btn btn-outline-red">Check coverage</button>
+        </article>
+        <article class="story-card">
+          <div class="thumb thumb-2" aria-hidden="true"></div>
+          <span class="chip">Entertainment</span>
+          <h3>Streaming on us</h3>
+          <p>Get six months of premium streaming free when you join an eligible plan.</p>
+          <button class="btn btn-outline-red">Learn more</button>
+        </article>
+        <article class="story-card">
+          <div class="thumb thumb-3" aria-hidden="true"></div>
+          <span class="chip">Devices</span>
+          <h3>Upgrade and save</h3>
+          <p>Trade in your old phone and get up to £300 towards your next one.</p>
+          <button class="btn btn-outline-red">Trade in</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RED CAMPAIGN BAND ============ -->
+  <section class="band-red on-dark" aria-labelledby="campaign">
+    <div class="container">
+      <h2 id="campaign">Together we can</h2>
+      <p>Join millions who trust Vodafone to keep them connected, wherever life takes them.</p>
+      <button class="btn btn-primary">Join Vodafone</button>
+    </div>
+  </section>
+
+  <!-- ============ SPEECHMARK ORB ANCHOR ============ -->
+  <section class="band-light" aria-label="Customer voice">
+    <div class="container">
+      <div class="orb-anchor">
+        <span class="orb" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M14 4C8 4 4 8.5 4 14c0 4 2.5 6 5.5 6 3 0 5-2 5-4.5 0-3-2.4-3.6-2.4-6C12.1 7 13 5.4 15 4.6c.3-.1.2-.6-.1-.6H14z" fill="#ffffff"/></svg>
+        </span>
+        <p class="quote">"The signal just works — everywhere I go, I stay connected."</p>
+        <p class="cite">Priya S. · Vodafone customer since 2019</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRICING TIERS ============ -->
+  <section class="band-light" aria-labelledby="plans">
+    <div class="container">
+      <p class="eyebrow">Pay monthly</p>
+      <h2 id="plans">Pick a plan that fits</h2>
+      <p class="band-lead">All plans include unlimited calls and texts. Cancel anytime.</p>
+      <div class="tiers">
+        <article class="tier">
+          <h3>Essential</h3>
+          <span class="price">£15<small>/mo</small></span>
+          <p>For light users who mostly browse and message.</p>
+          <ul>
+            <li>25GB data</li>
+            <li>5G access</li>
+            <li>EU roaming</li>
+          </ul>
+          <button class="btn btn-outline-red">Choose Essential</button>
+        </article>
+        <article class="tier featured">
+          <span class="chip" style="background:var(--primary);color:var(--on-primary);align-self:flex-start">Most popular</span>
+          <h3>Unlimited</h3>
+          <span class="price">£25<small>/mo</small></span>
+          <p>Endless data for streaming, gaming, and everything else.</p>
+          <ul>
+            <li>Unlimited data</li>
+            <li>Fastest 5G speeds</li>
+            <li>6 months streaming free</li>
+          </ul>
+          <button class="btn btn-outline-red">Choose Unlimited</button>
+        </article>
+        <article class="tier">
+          <h3>Family</h3>
+          <span class="price">£45<small>/mo</small></span>
+          <p>Share unlimited data across up to four connected members.</p>
+          <ul>
+            <li>Unlimited shared data</li>
+            <li>Up to 4 SIMs</li>
+            <li>Priority support</li>
+          </ul>
+          <button class="btn btn-outline-red">Choose Family</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SIGNUP FORM ============ -->
+  <section class="band-light" aria-labelledby="signup">
+    <div class="container">
+      <p class="eyebrow">Get started</p>
+      <h2 id="signup">Check your address for coverage</h2>
+      <form class="signup">
+        <label class="field">
+          <span>Postcode</span>
+          <input type="text" placeholder="e.g. SW1A 1AA" aria-label="Postcode" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" placeholder="you@example.com" aria-label="Email" />
+        </label>
+        <button type="submit" class="btn btn-primary">Check coverage</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER (dark) ============ -->
+  <footer class="on-dark" aria-label="Site footer">
+    <div class="container">
+      <div class="foot-top">
+        <span class="orb" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M14 4C8 4 4 8.5 4 14c0 4 2.5 6 5.5 6 3 0 5-2 5-4.5 0-3-2.4-3.6-2.4-6C12.1 7 13 5.4 15 4.6c.3-.1.2-.6-.1-.6H14z" fill="#ffffff"/></svg>
+        </span>
+        <strong style="font-weight:800;font-size:20px">Vodafone</strong>
+      </div>
+      <div class="foot-grid">
+        <div class="foot-col">
+          <h4>Mobile</h4>
+          <a href="./DESIGN.md">Pay monthly</a>
+          <a href="./DESIGN.md">Pay as you go</a>
+          <a href="./DESIGN.md">SIM only</a>
+        </div>
+        <div class="foot-col">
+          <h4>Broadband</h4>
+          <a href="./DESIGN.md">Full fibre</a>
+          <a href="./DESIGN.md">Pro II</a>
+          <a href="./DESIGN.md">Coverage</a>
+        </div>
+        <div class="foot-col">
+          <h4>Support</h4>
+          <a href="./DESIGN.md">Help centre</a>
+          <a href="./DESIGN.md">Contact us</a>
+          <a href="./DESIGN.md">Network status</a>
+        </div>
+        <div class="foot-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About us</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Sustainability</a>
+        </div>
+      </div>
+      <div class="foot-legal">
+        <span>© 2026 Vodafone Limited</span>
+        <span>Privacy · Cookies · Terms &amp; Conditions</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

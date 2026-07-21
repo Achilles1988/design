@@ -1,0 +1,411 @@
+<!-- source_content_hash: e76ceaa187f43bd24b8338d2b2314e71e9225b36492e40f32a55782281a10437 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mastercard — Component Preview</title>
+<style>
+  /* ============================================================
+     MASTERCARD — Design tokens
+     Warm editorial magazine of soft stone + signal orange.
+     Putty-cream canvas (never white). Extreme radius language:
+     20px buttons, 40px stadiums, 999px pills, 50% circular portraits.
+     Circular portraits w/ white satellite CTAs + traced-orange orbits.
+     MarkForMC (Sofia Sans fallback) weight 450 body / 500 headlines -2%.
+     ============================================================ */
+  :root {
+    /* Primary */
+    --ink:            #141413;  /* warm near-black — CTAs, text, footer */
+    --charcoal:       #262627;
+
+    /* Signal — reserved: orange = consent/legal only; light = arcs only */
+    --signal:         #CF4500;  /* consent / legal actions only */
+    --signal-light:   #F37338;  /* decorative orbital arcs, active dots */
+    --clay:           #9A3A0A;
+
+    /* Surface */
+    --cream:          #F3F0EE;  /* the canvas — warm putty, never white */
+    --cream-lift:     #FCFBFA;  /* raised nested sections */
+    --ghost:          #E8E2DA;  /* cream-on-cream ghost watermark */
+    --white:          #FFFFFF;  /* nav pill, satellite CTAs, modal cards */
+    --bone:           #F4F4F4;
+
+    /* Text */
+    --slate:          #696969;
+    --granite:        #555555;
+    --dust:           #D1CDC7;
+
+    /* Accent */
+    --link-blue:      #3860BE;
+
+    /* Type — MarkForMC substitute: Sofia Sans / Inter */
+    --font: "Sofia Sans", "Inter", Arial, sans-serif;
+
+    /* Radius scale — the signature language */
+    --r-chip: 6px;
+    --r-btn:  20px;   /* primary/secondary body CTA */
+    --r-consent: 24px;
+    --r-stadium: 40px;
+    --r-pill: 999px;
+
+    /* Spacing — powers of 8 */
+    --s-1:8px; --s-2:16px; --s-3:24px; --s-4:32px; --s-6:48px; --s-8:64px; --s-12:96px; --s-16:128px;
+
+    /* Elevation — atmospheric cushioning */
+    --lift-nav: rgba(0,0,0,0.04) 0px 4px 24px 0px;
+    --lift-card: rgba(0,0,0,0.08) 0px 24px 48px 0px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    font-weight: 450; font-size: 16px; line-height: 1.4;
+    color: var(--ink); background: var(--cream);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--signal-light); color: var(--white); }
+  a { color: var(--ink); text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: var(--r-chip); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-6); }
+
+  /* ---------- Floating nav pill ---------- */
+  .nav { position: sticky; top: var(--s-3); z-index: 30; padding: 0 var(--s-6); }
+  .nav__pill {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; gap: var(--s-6);
+    background: var(--white); border-radius: var(--r-pill);
+    box-shadow: var(--lift-nav); padding: 14px 40px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 18px; letter-spacing: -0.36px; }
+  .mc-mark { position: relative; width: 34px; height: 22px; }
+  .mc-mark i { position: absolute; top: 0; width: 22px; height: 22px; border-radius: 50%; }
+  .mc-mark i.r { left: 0; background: #EB001B; }
+  .mc-mark i.y { right: 0; background: #F79E1B; mix-blend-mode: multiply; }
+  .nav__links { display: flex; gap: var(--s-6); margin: 0 auto; }
+  .nav__links a { font-weight: 500; font-size: 16px; letter-spacing: -0.48px; }
+  .nav__links a:hover { color: var(--signal-light); }
+  .nav__search { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--ink); background: transparent; display: grid; place-items: center; cursor: pointer; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+    font-family: var(--font); font-size: 16px; font-weight: 500; letter-spacing: -0.32px;
+    border: 1.5px solid var(--ink); border-radius: var(--r-btn);
+    padding: 10px 28px; cursor: pointer; line-height: 1.3;
+    transition: transform .08s ease;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn--primary { background: var(--ink); color: var(--cream); }
+  .btn--secondary { background: var(--white); color: var(--ink); }
+  .btn--consent { background: var(--signal); color: var(--white); border: 0; border-radius: var(--r-consent); padding: 8px 30px; font-size: 14px; font-weight: 400; }
+
+  /* ---------- Eyebrow ---------- */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.56px;
+    color: var(--ink); margin-bottom: var(--s-2);
+  }
+  .eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--signal-light); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: var(--s-12) 0 var(--s-8); position: relative; }
+  .hero__grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--s-8); align-items: center; }
+  .hero .ghost { position: absolute; top: 40px; right: -20px; font-size: 128px; font-weight: 500; letter-spacing: -2.56px; color: var(--ghost); z-index: 0; pointer-events: none; user-select: none; }
+  .hero h1 { position: relative; z-index: 1; font-size: 64px; font-weight: 500; line-height: 1; letter-spacing: -1.28px; margin-bottom: var(--s-3); }
+  .hero p.lead { position: relative; z-index: 1; font-size: 18px; color: var(--granite); max-width: 42ch; margin-bottom: var(--s-4); }
+  .hero__actions { position: relative; z-index: 1; display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+  /* Circular portrait with satellite CTA + orbit */
+  .portrait-zone { position: relative; display: grid; place-items: center; min-height: 380px; }
+  .orbit { position: absolute; inset: -20px; border: 1.5px solid var(--signal-light); border-radius: 50%; opacity: 0.55; transform: rotate(-12deg); }
+  .portrait {
+    position: relative; width: 320px; height: 320px; border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, var(--signal-light), var(--signal) 55%, var(--clay) 100%);
+    box-shadow: var(--lift-card);
+  }
+  .satellite {
+    position: absolute; bottom: 8px; right: 8px;
+    width: 56px; height: 56px; border-radius: 50%; background: var(--white);
+    display: grid; place-items: center; border: 0; cursor: pointer;
+  }
+
+  /* ---------- Section ---------- */
+  section.block { padding: var(--s-12) 0; }
+  .section-head { max-width: 60ch; margin-bottom: var(--s-6); }
+  .section-head h2 { font-size: 36px; font-weight: 500; line-height: 1.22; letter-spacing: -0.72px; }
+  .section-head p { color: var(--granite); margin-top: var(--s-2); font-size: 17px; }
+
+  /* Constellation of service portraits */
+  .constellation { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-8); }
+  .service { text-align: center; }
+  .service__portrait { position: relative; width: 220px; height: 220px; border-radius: 50%; margin: 0 auto var(--s-3); box-shadow: var(--lift-card); }
+  .service:nth-child(1) .service__portrait { background: radial-gradient(circle at 35% 30%, #f9c8a3, var(--signal-light) 60%, var(--clay)); }
+  .service:nth-child(2) .service__portrait { background: radial-gradient(circle at 35% 30%, #b7c7ea, var(--link-blue) 65%, #223c78); }
+  .service:nth-child(3) .service__portrait { background: radial-gradient(circle at 35% 30%, #e2ddd6, var(--dust) 60%, var(--slate)); }
+  .service__satellite { position: absolute; bottom: 4px; right: 24px; width: 48px; height: 48px; border-radius: 50%; background: var(--white); display: grid; place-items: center; }
+  .service .eyebrow { justify-content: center; }
+  .service h3 { font-size: 24px; font-weight: 500; letter-spacing: -0.48px; }
+  /* orbital arc connectors */
+  .constellation .service:not(:last-child) .service__portrait::after {
+    content: ""; position: absolute; top: 50%; left: 100%; width: var(--s-8); height: 60px;
+    border-top: 1.5px solid var(--signal-light); border-radius: 50%;
+    transform: translateY(-30px) rotate(8deg); pointer-events: none;
+  }
+
+  /* Feature stadium band */
+  .stadium {
+    background: var(--cream-lift); border-radius: var(--r-stadium);
+    padding: var(--s-8); display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-8); align-items: center;
+  }
+  .stadium h2 { font-size: 36px; font-weight: 500; letter-spacing: -0.72px; line-height: 1.15; }
+  .stadium p { color: var(--granite); margin: var(--s-2) 0 var(--s-4); }
+  .stadium .media { aspect-ratio: 16/10; border-radius: var(--r-stadium); background: radial-gradient(circle at 30% 25%, var(--signal-light), var(--signal) 70%, var(--clay)); box-shadow: var(--lift-card); }
+
+  /* ---------- Pricing ---------- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3); }
+  .tier { background: var(--white); border-radius: var(--r-stadium); padding: var(--s-4); display: flex; flex-direction: column; }
+  .tier--featured { background: var(--ink); color: var(--cream); }
+  .tier__name { font-size: 24px; font-weight: 500; letter-spacing: -0.48px; }
+  .tier__price { font-size: 44px; font-weight: 500; letter-spacing: -0.88px; margin: var(--s-2) 0; }
+  .tier__price span { font-size: 15px; font-weight: 450; color: var(--slate); }
+  .tier--featured .tier__price span { color: var(--dust); }
+  .tier ul { list-style: none; display: grid; gap: 10px; margin-bottom: var(--s-4); }
+  .tier li { display: flex; gap: 10px; font-size: 15px; color: var(--granite); }
+  .tier--featured li { color: rgba(255,255,255,0.82); }
+  .tier li svg { flex: none; color: var(--signal-light); margin-top: 2px; }
+  .tier .btn { margin-top: auto; }
+  .tier--featured .btn { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+
+  /* ---------- Consent strip demo ---------- */
+  .consent { background: var(--cream-lift); border-radius: var(--r-stadium); padding: var(--s-4) var(--s-6); display: flex; align-items: center; gap: var(--s-4); flex-wrap: wrap; }
+  .consent p { flex: 1; min-width: 240px; font-size: 14px; color: var(--granite); }
+  .consent .actions { display: flex; gap: var(--s-1); }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--ink); color: var(--white); border-radius: var(--r-stadium) var(--r-stadium) 0 0; padding: var(--s-12) var(--s-6) var(--s-16); margin-top: var(--s-8); }
+  .foot__inner { max-width: 1280px; margin: 0 auto; }
+  .foot__head { font-size: 36px; font-weight: 500; letter-spacing: -0.72px; margin-bottom: var(--s-8); max-width: 20ch; }
+  .foot__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-6); }
+  .foot__col h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.56px; color: var(--dust); margin-bottom: var(--s-2); }
+  .foot__col a { display: block; color: var(--white); font-weight: 450; font-size: 14px; padding: 6px 0; opacity: 0.85; }
+  .foot__col a:hover { opacity: 1; color: var(--signal-light); }
+  .foot__bottom { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); margin-top: var(--s-8); padding-top: var(--s-3); border-top: 1px solid rgba(255,255,255,0.2); font-size: 13px; color: var(--dust); flex-wrap: wrap; }
+  .country { border: 1px solid rgba(255,255,255,0.4); border-radius: var(--r-pill); padding: 8px 18px; color: var(--white); background: transparent; }
+
+  @media (max-width: 1024px) {
+    .hero__grid, .stadium { grid-template-columns: 1fr; }
+    .constellation, .pricing { grid-template-columns: 1fr; }
+    .constellation .service__portrait::after { display: none; }
+    .foot__grid { grid-template-columns: 1fr 1fr; }
+    .hero .ghost { font-size: 84px; }
+  }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 40px; }
+    .nav__links { display: none; }
+    .foot__grid { grid-template-columns: 1fr; }
+    .foot__bottom { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== FLOATING NAV PILL ===================== -->
+  <header class="nav">
+    <div class="nav__pill">
+      <a class="brand" href="./DESIGN.md" aria-label="Mastercard home">
+        <span class="mc-mark" aria-hidden="true"><i class="r"></i><i class="y"></i></span>
+        Mastercard
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="./DESIGN.md">For you</a>
+        <a href="./DESIGN.md">For business</a>
+        <a href="./DESIGN.md">For the world</a>
+        <a href="./DESIGN.md">News and trends</a>
+      </nav>
+      <button class="nav__search" aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div>
+          <span class="ghost" aria-hidden="true">Priceless</span>
+          <span class="eyebrow">Connecting everyone</span>
+          <h1>Powering economies and empowering people</h1>
+          <p class="lead">A technology company in the global payments industry — connecting people, businesses, and governments in more than 210 countries.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="./DESIGN.md">Explore</a>
+            <a class="btn btn--secondary" href="./DESIGN.md">Learn more</a>
+          </div>
+        </div>
+        <div class="portrait-zone">
+          <span class="orbit" aria-hidden="true"></span>
+          <div class="portrait" role="img" aria-label="A warm-toned circular editorial portrait">
+            <button class="satellite" aria-label="Discover more">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SERVICE CONSTELLATION ===================== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Services</span>
+          <h2>Solutions that move the world forward</h2>
+        </div>
+        <div class="constellation">
+          <article class="service">
+            <div class="service__portrait">
+              <button class="service__satellite" aria-label="Explore payments">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+            <span class="eyebrow">Payments</span>
+            <h3>Seamless transactions</h3>
+          </article>
+          <article class="service">
+            <div class="service__portrait">
+              <button class="service__satellite" aria-label="Explore cyber & intelligence">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+            <span class="eyebrow">Security</span>
+            <h3>Cyber &amp; intelligence</h3>
+          </article>
+          <article class="service">
+            <div class="service__portrait">
+              <button class="service__satellite" aria-label="Explore data & services">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+            <span class="eyebrow">Insights</span>
+            <h3>Data &amp; services</h3>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== STADIUM FEATURE ===================== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="stadium">
+          <div>
+            <span class="eyebrow">Innovation</span>
+            <h2>Building a more inclusive digital economy</h2>
+            <p>From tokenization to real-time payments, we design the rails that make commerce faster, safer, and available to everyone.</p>
+            <a class="btn btn--primary" href="./DESIGN.md">Discover</a>
+          </div>
+          <div class="media" role="img" aria-label="Editorial media frame with 40px stadium radius"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING ===================== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">For business</span>
+          <h2>Plans for every ambition</h2>
+        </div>
+        <div class="pricing">
+          <div class="tier">
+            <div class="tier__name">Start</div>
+            <div class="tier__price">$0<span> / month</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Core acceptance</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Basic reporting</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Standard support</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Get started</a>
+          </div>
+          <div class="tier tier--featured">
+            <div class="tier__name">Scale</div>
+            <div class="tier__price">$49<span> / month</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Advanced fraud tools</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Data &amp; insights</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Priority support</li>
+            </ul>
+            <a class="btn" href="./DESIGN.md">Choose Scale</a>
+          </div>
+          <div class="tier">
+            <div class="tier__name">Enterprise</div>
+            <div class="tier__price">Custom</div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Global rails</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Dedicated team</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Custom SLAs</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Contact us</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONSENT (orange reserved for legal) ===================== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="consent" role="region" aria-label="Cookie consent">
+          <p>We use cookies to improve your experience. Signal Orange is reserved for consent and legal actions only — never for marketing CTAs.</p>
+          <div class="actions">
+            <button class="btn btn--consent" type="button">Accept all</button>
+            <a class="btn btn--secondary" href="./DESIGN.md" style="font-size:14px;padding:8px 24px">Cookie details</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="foot__inner">
+      <h2 class="foot__head">We're always here when you need us</h2>
+      <div class="foot__grid">
+        <div class="foot__col">
+          <h4>Need help?</h4>
+          <a href="./DESIGN.md">Contact support</a>
+          <a href="./DESIGN.md">Report a lost card</a>
+          <a href="./DESIGN.md">Find an ATM</a>
+          <a href="./DESIGN.md">FAQs</a>
+        </div>
+        <div class="foot__col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About us</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Investors ↗</a>
+          <a href="./DESIGN.md">Newsroom</a>
+        </div>
+        <div class="foot__col">
+          <h4>Products</h4>
+          <a href="./DESIGN.md">Credit</a>
+          <a href="./DESIGN.md">Debit</a>
+          <a href="./DESIGN.md">Prepaid</a>
+          <a href="./DESIGN.md">Business</a>
+        </div>
+        <div class="foot__col">
+          <h4>Legal</h4>
+          <a href="./DESIGN.md">Privacy</a>
+          <a href="./DESIGN.md">Terms of use</a>
+          <a href="./DESIGN.md">Cookie policy</a>
+        </div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Mastercard. Design tokens sourced from <a href="./DESIGN.md" style="color:var(--dust);text-decoration:underline">DESIGN.md</a></span>
+        <button class="country" type="button">United States · English ▾</button>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

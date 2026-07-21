@@ -1,0 +1,331 @@
+<!-- source_content_hash: aee472c583f55a2f2c7ee1c403a96dddadb3ff6dc518335451f431e313bf43cf -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Together AI — Component Preview</title>
+<style>
+  /* ============================================================
+     TOGETHER AI design tokens — mapped from DESIGN.md
+     AI-native cloud. Surfaces alternate between near-black hero
+     bands and bright white research/pricing bands. The single
+     piece of brand chrome is a three-color orange→magenta→
+     periwinkle gradient ribbon. Display sans (The Future → Inter)
+     for headlines; uppercase mono (PP Neue Montreal Mono →
+     JetBrains Mono) for every eyebrow, button label, cell header.
+     4px canonical radius; a giant together.ai wordmark closes.
+     ============================================================ */
+  :root {
+    /* Brand */
+    --primary: #000000;
+    --on-primary: #ffffff;
+    --ink: #000000;
+    --body: #6b6b6b;
+    --hairline: #ebebeb;
+
+    /* Surfaces */
+    --canvas: #ffffff;
+    --canvas-dark: #010120;
+    --surface-dark-soft: #26263a;
+    --surface-dark-fill: #313641;
+    --on-dark: #ffffff;
+
+    /* Three-color brand gradient (the only decorative system) */
+    --accent-orange: #fc4c02;
+    --accent-magenta: #ef2cc1;
+    --accent-periwinkle: #bdbbff;
+    --accent-mint: #c8f6f9;
+
+    /* Type */
+    --font-sans: "The Future", "Inter", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "PP Neue Montreal Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    /* Radius */
+    --r-none: 0px;
+    --r-xs: 3.25px;
+    --r-sm: 4px;   /* canonical */
+    --r-md: 8px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --s-xxs: 2px; --s-xs: 4px; --s-sm: 8px; --s-md: 12px; --s-lg: 16px;
+    --s-xl: 20px; --s-2xl: 24px; --s-3xl: 32px; --s-4xl: 44px; --s-5xl: 48px; --s-section: 80px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: var(--canvas);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.3;
+    letter-spacing: -0.16px;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; }
+
+  :focus-visible { outline: none; box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px var(--accent-magenta); border-radius: var(--r-sm); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-3xl); }
+
+  .eyebrow { font-family: var(--font-mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.55px; }
+  .eyebrow.on-light { color: var(--body); }
+  .eyebrow.on-dark { color: var(--accent-periwinkle); }
+
+  /* ---- Nav (dark on hero) ---- */
+  .nav { background: var(--canvas-dark); color: var(--on-dark); }
+  .nav-inner { display: flex; align-items: center; gap: var(--s-2xl); height: 64px; }
+  .logo { font-size: 18px; font-weight: 500; letter-spacing: -0.4px; }
+  .nav-links { display: flex; gap: var(--s-2xl); margin-left: var(--s-lg); }
+  .nav-links a { font-size: 16px; opacity: .9; }
+  .nav-right { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+
+  /* ---- Buttons (mono caps labels, 4px) ---- */
+  .btn { font-family: var(--font-mono); font-size: 16px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08px; border-radius: var(--r-sm); padding: 8px 24px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; line-height: 1; }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-mint { background: var(--accent-mint); color: var(--ink); }
+  .btn-white { background: var(--canvas); color: var(--ink); }
+  .btn-ghost-dark { background: var(--surface-dark-fill); color: var(--on-dark); }
+  .btn-outline { background: var(--canvas); color: var(--ink); border-color: rgba(0,0,0,0.08); border-radius: var(--r-xs); }
+
+  /* ---- Hero (dark, 50/50 + ribbon) ---- */
+  .hero { background: var(--canvas-dark); color: var(--on-dark); }
+  .hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3xl); align-items: center; padding: var(--s-section) 0; }
+  .hero h1 { font-size: 64px; font-weight: 500; line-height: 1.1; letter-spacing: -1.92px; margin: var(--s-lg) 0; }
+  .hero p { font-size: 18px; color: #b8b8c8; letter-spacing: -0.18px; margin: 0 0 var(--s-2xl); max-width: 42ch; }
+  .hero .cta-row { display: flex; gap: var(--s-md); }
+  .ribbon { aspect-ratio: 1/0.85; border-radius: var(--r-sm); position: relative; overflow: hidden; background: var(--canvas-dark); }
+  .ribbon::before, .ribbon::after { content: ""; position: absolute; inset: -20%; }
+  .ribbon::before {
+    background:
+      radial-gradient(60% 45% at 30% 35%, var(--accent-orange) 0%, transparent 60%),
+      radial-gradient(55% 45% at 65% 45%, var(--accent-magenta) 0%, transparent 60%),
+      radial-gradient(70% 55% at 55% 75%, var(--accent-periwinkle) 0%, transparent 62%);
+    filter: blur(6px);
+  }
+  .ribbon::after {
+    background: repeating-linear-gradient(115deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 22px);
+    mix-blend-mode: screen;
+  }
+
+  /* ---- Bands ---- */
+  .band { padding: var(--s-section) 0; }
+  .band.dark { background: var(--canvas-dark); color: var(--on-dark); }
+  .band.light { background: var(--canvas); color: var(--ink); }
+  .band-head { margin-bottom: var(--s-3xl); }
+  .band-head h2 { font-size: 40px; font-weight: 500; line-height: 1.2; letter-spacing: -0.8px; margin: var(--s-md) 0 0; }
+  .band-head p { font-size: 18px; letter-spacing: -0.18px; margin: var(--s-md) 0 0; max-width: 56ch; }
+  .band.dark .band-head p { color: #b8b8c8; }
+  .band.light .band-head p { color: var(--body); }
+
+  /* ---- Research cards (dark) ---- */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-lg); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-lg); }
+  .research-card { background: var(--canvas-dark); color: var(--on-dark); border: 1px solid var(--surface-dark-soft); border-radius: var(--r-sm); padding: var(--s-2xl); }
+  .research-card h3 { font-size: 22px; font-weight: 500; letter-spacing: -0.22px; margin: var(--s-md) 0 var(--s-sm); }
+  .research-card p { font-size: 16px; color: #b8b8c8; margin: 0; }
+
+  /* ---- Stats tiles (tinted) ---- */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .stat { border-radius: var(--r-sm); padding: var(--s-3xl); }
+  .stat .num { font-size: 40px; font-weight: 500; letter-spacing: -0.8px; }
+  .stat .lbl { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.55px; color: var(--body); margin-top: var(--s-sm); }
+  .stat-mint { background: var(--accent-mint); }
+  .stat-peri { background: var(--accent-periwinkle); }
+  .stat-peach { background: #ffdcc2; }
+
+  /* ---- Code editor mockup ---- */
+  .code { background: var(--canvas-dark); color: var(--on-dark); border: 1px solid var(--surface-dark-soft); border-radius: var(--r-sm); padding: var(--s-2xl); }
+  .code pre { margin: 0; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: #c8c8d4; overflow-x: auto; }
+  .code .k { color: var(--accent-periwinkle); }
+  .code .s { color: var(--accent-mint); }
+  .code .c { color: #6b6b80; }
+
+  /* ---- Pricing table ---- */
+  .table-wrap { border: 1px solid var(--hairline); border-radius: var(--r-sm); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--hairline); color: var(--body); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.55px; text-align: left; padding: 12px 16px; font-weight: 500; }
+  tbody td { padding: 12px 16px; border-bottom: 1px solid var(--hairline); font-size: 16px; letter-spacing: -0.16px; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody td:first-child { font-weight: 500; }
+
+  /* ---- Toggle pill group ---- */
+  .toggle { display: inline-flex; background: var(--hairline); border-radius: var(--r-sm); padding: 4px; gap: 4px; margin-bottom: var(--s-lg); }
+  .toggle button { font-family: var(--font-mono); font-size: 16px; text-transform: uppercase; letter-spacing: 0.08px; border: 0; background: transparent; color: var(--ink); padding: 6px 18px; border-radius: var(--r-sm); cursor: pointer; }
+  .toggle button[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
+
+  /* ---- Badges ---- */
+  .badge { display: inline-block; border-radius: var(--r-sm); padding: 2px 8px; font-size: 16px; }
+  .badge-neutral { background: var(--hairline); color: var(--ink); border: 1px solid var(--hairline); }
+  .badge-dark { background: var(--surface-dark-fill); color: var(--on-dark); }
+
+  /* ---- Form ---- */
+  .form { max-width: 460px; }
+  .field { margin-bottom: var(--s-lg); }
+  label { display: block; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.55px; color: var(--body); margin-bottom: var(--s-sm); }
+  input { width: 100%; font-family: var(--font-sans); font-size: 16px; background: var(--canvas); color: var(--ink); border: 1px solid rgba(0,0,0,0.08); border-radius: var(--r-sm); padding: 12px 16px; }
+  input:focus { outline: none; border-color: var(--ink); }
+
+  /* ---- Footer + giant wordmark banner ---- */
+  .footer { background: var(--canvas); color: var(--ink); padding: var(--s-section) 0 0; }
+  .footer-cols { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: var(--s-2xl); }
+  .footer h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.55px; color: var(--body); margin: 0 0 var(--s-md); }
+  .footer a { display: block; font-size: 16px; color: var(--ink); padding: 5px 0; }
+  .footer a:hover { color: var(--accent-magenta); }
+  .footer .logo-blk { font-size: 20px; font-weight: 500; }
+  .wordmark-banner { text-align: center; overflow: hidden; padding: var(--s-3xl) 0 var(--s-lg); }
+  .wordmark-banner .word { font-size: clamp(64px, 16vw, 240px); font-weight: 500; letter-spacing: -0.04em; color: var(--hairline); line-height: 0.9; white-space: nowrap; }
+  .footer-legal { border-top: 1px solid var(--hairline); padding: var(--s-lg) 0; font-size: 14px; color: var(--body); }
+
+  @media (max-width: 991px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 44px; letter-spacing: -1px; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .stats { grid-template-columns: 1fr; }
+    .footer-cols { grid-template-columns: repeat(2, 1fr); }
+    .band-head h2 { font-size: 32px; }
+  }
+  @media (max-width: 767px) {
+    .nav-links { display: none; }
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="./DESIGN.md">together.ai</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="./DESIGN.md">Platform</a>
+      <a href="./DESIGN.md">Models</a>
+      <a href="./DESIGN.md">Pricing</a>
+      <a href="./DESIGN.md">Research</a>
+      <a href="./DESIGN.md">Docs</a>
+    </nav>
+    <div class="nav-right">
+      <a href="./DESIGN.md" style="font-size:16px">Contact sales</a>
+      <a class="btn btn-primary" href="./DESIGN.md">Sign in</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div>
+        <span class="eyebrow on-dark">The AI Native Cloud</span>
+        <h1>Build what's next on the AI Native Cloud</h1>
+        <p>Train, fine-tune, and run inference on 200+ open models across the fastest GPU clusters.</p>
+        <div class="cta-row">
+          <a class="btn btn-mint" href="./DESIGN.md">Get started</a>
+          <a class="btn btn-white" href="./DESIGN.md">Read docs</a>
+        </div>
+      </div>
+      <div class="ribbon" role="img" aria-label="Three-color brand gradient ribbon"></div>
+    </div>
+  </section>
+
+  <section class="band dark" aria-labelledby="research-h">
+    <div class="wrap">
+      <div class="band-head">
+        <span class="eyebrow on-dark">Research</span>
+        <h2 id="research-h">Grounded in cutting-edge research</h2>
+      </div>
+      <div class="grid-4">
+        <article class="research-card"><span class="eyebrow on-dark">Inference</span><h3>FlashAttention-3</h3><p>State-of-the-art kernels powering fast serving.</p></article>
+        <article class="research-card"><span class="eyebrow on-dark">Training</span><h3>Together Kernel</h3><p>Optimized training stack for large clusters.</p></article>
+        <article class="research-card"><span class="eyebrow on-dark">Models</span><h3>Open reproductions</h3><p>Fully open model families you can own.</p></article>
+        <article class="research-card"><span class="eyebrow on-dark">Systems</span><h3>GPU orchestration</h3><p>Scheduling across thousands of accelerators.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light" aria-labelledby="platform-h">
+    <div class="wrap">
+      <div class="band-head">
+        <span class="eyebrow on-light">The Platform</span>
+        <h2 id="platform-h">The Together AI Platform</h2>
+        <p>Everything a team needs to ship AI — inference, fine-tuning, and dedicated GPU clusters.</p>
+      </div>
+      <div class="grid-2" style="align-items:center">
+        <div class="stats" style="grid-template-columns:1fr 1fr">
+          <div class="stat stat-mint"><div class="num">200+</div><div class="lbl">Open models</div></div>
+          <div class="stat stat-peri"><div class="num">4×</div><div class="lbl">Faster inference</div></div>
+          <div class="stat stat-peach"><div class="num">11×</div><div class="lbl">Cost reduction</div></div>
+          <div class="stat stat-mint"><div class="num">99.9%</div><div class="lbl">Uptime SLA</div></div>
+        </div>
+        <div class="code" role="img" aria-label="Inference API example">
+          <pre><span class="c"># serverless inference</span>
+<span class="k">import</span> together
+
+client = together.Together()
+resp = client.chat.completions.create(
+  model=<span class="s">"meta-llama/Llama-3-70b"</span>,
+  messages=[{<span class="s">"role"</span>:<span class="s">"user"</span>,
+             <span class="s">"content"</span>:<span class="s">"Hello"</span>}],
+)</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light" aria-labelledby="pricing-h" style="padding-top:0">
+    <div class="wrap">
+      <div class="band-head">
+        <span class="eyebrow on-light">Pricing</span>
+        <h2 id="pricing-h">Serverless inference pricing</h2>
+      </div>
+      <div class="toggle" role="group" aria-label="Pricing mode">
+        <button aria-pressed="true">Standard</button>
+        <button aria-pressed="false">Wholesale</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Model</th><th scope="col">Type</th><th scope="col">Input / 1M</th><th scope="col">Output / 1M</th></tr></thead>
+          <tbody>
+            <tr><td>Llama-3-70B</td><td><span class="badge badge-neutral">TEXT</span></td><td>$0.88</td><td>$0.88</td></tr>
+            <tr><td>Mixtral-8x22B</td><td><span class="badge badge-neutral">TEXT</span></td><td>$1.20</td><td>$1.20</td></tr>
+            <tr><td>FLUX.1</td><td><span class="badge badge-neutral">IMAGE</span></td><td>$0.003 / img</td><td>—</td></tr>
+            <tr><td>Whisper-v3</td><td><span class="badge badge-neutral">AUDIO</span></td><td>$0.0006 / min</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light" aria-labelledby="start-h" style="padding-top:0">
+    <div class="wrap">
+      <div class="band-head">
+        <span class="eyebrow on-light">Get started</span>
+        <h2 id="start-h">Start building on Together AI</h2>
+      </div>
+      <form class="form" onsubmit="return false">
+        <div class="field"><label for="name">Full name</label><input id="name" type="text" placeholder="Ada Lovelace" /></div>
+        <div class="field"><label for="email">Work email</label><input id="email" type="email" placeholder="you@company.com" /></div>
+        <button class="btn btn-primary" type="submit">Create account</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div class="logo-blk">together.ai</div>
+      <div><h4>Products</h4><a href="./DESIGN.md">Inference</a><a href="./DESIGN.md">Fine-tuning</a><a href="./DESIGN.md">GPU Clusters</a></div>
+      <div><h4>Models</h4><a href="./DESIGN.md">Chat</a><a href="./DESIGN.md">Image</a><a href="./DESIGN.md">Code</a></div>
+      <div><h4>Resources</h4><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">Blog</a><a href="./DESIGN.md">Research</a></div>
+      <div><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Contact</a></div>
+    </div>
+  </div>
+  <div class="wordmark-banner" aria-hidden="true"><div class="word">together.ai</div></div>
+  <div class="wrap"><div class="footer-legal">© 2026 Together AI. Design tokens from <a href="./DESIGN.md" style="display:inline;padding:0;text-decoration:underline;color:var(--body)">DESIGN.md</a></div></div>
+</footer>
+
+</body>
+</html>

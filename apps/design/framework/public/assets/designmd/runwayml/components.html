@@ -1,0 +1,289 @@
+<!-- source_content_hash: b0e69bf643f89bb57ac0b82a3bf025e59ff1478c244cb0528ad1e38b3f80dac9 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Runway — Component Preview</title>
+<style>
+  /* ============================================================
+     RUNWAY design tokens — mapped from DESIGN.md
+     A cinematic reel as a website. Full-bleed photography/video
+     ARE the primary UI; the interface retreats to near-invisible.
+     Single typeface (abcNormal → Inter/DM Sans fallback), dark
+     canvas, cool-toned neutrals, ZERO shadows, tight display type
+     (line-height 1.0, negative tracking), uppercase tracked labels.
+     ============================================================ */
+  :root {
+    /* Core */
+    --black: #000000;
+    --deep-black: #030303;
+    --dark-surface: #1a1a1a;
+    --white: #ffffff;
+    --near-white: #fefefe;
+    --cool-cloud: #e9ecf2;
+
+    /* Borders */
+    --border-dark: #27272a;
+    --cool-silver: #c9ccd1;
+    --light-silver: #d0d4d4;
+
+    /* Cool-toned neutrals (secondary text) */
+    --charcoal: #404040;
+    --near-charcoal: #3f3f3f;
+    --cool-slate: #767d88;
+    --mid-slate: #7d848e;
+    --muted-gray: #a7a7a7;
+    --footer-gray: #999999;
+    --dark-link: #0c0c0c;
+
+    /* Type — one typeface, complete expression */
+    --font: "abcNormal", "Inter", "DM Sans", -apple-system, "Segoe UI", sans-serif;
+
+    /* Radius — subtly rounded, never pill */
+    --r-sharp: 4px;
+    --r-subtle: 6px;
+    --r-comfort: 8px;
+    --r-generous: 16px;
+
+    /* Spacing (base 8) */
+    --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px;
+    --s-6: 24px; --s-7: 28px; --s-8: 32px; --s-9: 48px; --s-10: 64px; --s-11: 78px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    background: var(--black);
+    color: var(--white);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: -0.16px;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; }
+
+  :focus-visible { outline: none; box-shadow: 0 0 0 2px var(--black), 0 0 0 4px var(--white); border-radius: var(--r-sharp); }
+
+  .wrap { max-width: 1600px; margin: 0 auto; padding: 0 var(--s-9); }
+  .label { font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.35px; color: var(--cool-slate); }
+  .tag { font-size: 11px; font-weight: 450; text-transform: uppercase; letter-spacing: 0.35px; color: var(--muted-gray); }
+
+  /* ---- Nav (transparent over hero) ---- */
+  .nav { position: absolute; top: 0; left: 0; right: 0; z-index: 20; }
+  .nav-inner { display: flex; align-items: center; gap: var(--s-8); height: 72px; }
+  .logo { font-size: 20px; font-weight: 600; letter-spacing: -0.9px; color: var(--white); }
+  .nav-links { display: flex; gap: var(--s-6); margin-left: var(--s-6); }
+  .nav-links a { font-size: 16px; color: var(--white); opacity: .82; }
+  .nav-links a:hover { opacity: 1; }
+  .nav-right { margin-left: auto; display: flex; gap: var(--s-3); align-items: center; }
+
+  /* ---- Buttons (extremely restrained) ---- */
+  .btn { font-family: var(--font); font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: var(--r-sharp); border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-solid { background: var(--white); color: var(--black); }
+  .btn-outline { background: transparent; color: var(--white); border-color: rgba(255,255,255,0.24); }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.6); }
+  .btn-dark-outline { background: transparent; color: var(--charcoal); border-color: var(--cool-silver); }
+
+  /* ---- Cinematic hero (full-bleed) ---- */
+  .hero { position: relative; min-height: 92vh; display: flex; align-items: flex-end; overflow: hidden; }
+  .hero-media {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.75) 100%),
+      radial-gradient(120% 80% at 25% 20%, #5a4a6e 0%, transparent 55%),
+      radial-gradient(100% 90% at 85% 30%, #b5623a 0%, transparent 50%),
+      linear-gradient(135deg, #1a1420 0%, #2c1f2e 45%, #40241c 100%);
+  }
+  .hero-inner { position: relative; z-index: 2; padding: 0 0 var(--s-11); max-width: 900px; }
+  .hero h1 { font-size: 48px; font-weight: 400; line-height: 1.0; letter-spacing: -1.2px; margin: var(--s-4) 0 var(--s-5); }
+  .hero p { font-size: 16px; color: var(--cool-slate); max-width: 46ch; margin: 0 0 var(--s-6); }
+  .hero .cta-row { display: flex; gap: var(--s-3); }
+
+  .section { padding: var(--s-11) 0; }
+  .section.light { background: var(--cool-cloud); color: var(--charcoal); }
+  .section.dark { background: var(--black); }
+  .section-head { margin-bottom: var(--s-8); }
+  .section-head h2 { font-size: 40px; font-weight: 400; line-height: 1.05; letter-spacing: -1px; margin: var(--s-3) 0 0; }
+  .section.light .section-head h2 { color: var(--charcoal); }
+
+  /* ---- Trust bar ---- */
+  .trust { display: flex; gap: var(--s-9); flex-wrap: wrap; align-items: center; opacity: .7; }
+  .trust span { font-size: 18px; font-weight: 500; color: var(--muted-gray); letter-spacing: -0.5px; }
+  .section.light .trust span { color: var(--mid-slate); }
+
+  /* ---- Editorial image grid (mixed sizes) ---- */
+  .reel { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, 1fr); gap: var(--s-4); }
+  .frame { position: relative; border-radius: var(--r-comfort); overflow: hidden; min-height: 200px; }
+  .frame.big { grid-row: span 2; min-height: 420px; }
+  .frame .cap { position: absolute; left: var(--s-4); bottom: var(--s-4); z-index: 2; }
+  .frame .cap h3 { font-size: 24px; font-weight: 400; line-height: 1.0; margin: 6px 0 0; color: var(--white); }
+  .frame::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.7) 100%); }
+  .f1 { background: linear-gradient(140deg, #2b3a4f, #6d4b3a 60%, #d19a5c); }
+  .f2 { background: linear-gradient(140deg, #3a2c3f, #7a4a5e); }
+  .f3 { background: linear-gradient(140deg, #1f2e33, #3f6a63); }
+  .f4 { background: linear-gradient(140deg, #402a1f, #a2673f); }
+
+  /* ---- Research article cards ---- */
+  .articles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-6); }
+  .article .thumb { aspect-ratio: 16/10; border-radius: var(--r-comfort); }
+  .a1 { background: linear-gradient(135deg,#2c2436,#5a4a6e); }
+  .a2 { background: linear-gradient(135deg,#332622,#8a5636); }
+  .a3 { background: linear-gradient(135deg,#1e2b30,#3f5d5a); }
+  .article h3 { font-size: 24px; font-weight: 400; line-height: 1.0; letter-spacing: -0.3px; margin: var(--s-4) 0 var(--s-2); color: var(--charcoal); }
+  .article p { font-size: 13px; line-height: 1.3; color: var(--mid-slate); margin: 0; }
+
+  /* ---- Alert / form (rare bordered container) ---- */
+  .panel { border: 1px solid var(--border-dark); border-radius: var(--r-generous); padding: var(--s-8); }
+  .form-row { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+  input { flex: 1 1 240px; font-family: var(--font); font-size: 16px; background: var(--dark-surface); color: var(--white); border: 1px solid var(--border-dark); border-radius: var(--r-comfort); padding: 12px 16px; }
+  input:focus { outline: none; border-color: rgba(255,255,255,0.5); }
+  input::placeholder { color: var(--mid-slate); }
+
+  /* ---- Mission statement ---- */
+  .mission { text-align: center; padding: calc(var(--s-11) * 1.4) 0; }
+  .mission p { font-size: 36px; font-weight: 400; line-height: 1.0; letter-spacing: -0.9px; max-width: 20ch; margin: 0 auto; }
+
+  /* ---- Footer ---- */
+  .footer { background: var(--black); border-top: 1px solid var(--border-dark); padding: var(--s-10) 0 var(--s-8); }
+  .footer-cols { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: var(--s-6); }
+  .footer .logo { font-size: 24px; }
+  .footer h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.35px; color: var(--muted-gray); margin: 0 0 var(--s-3); }
+  .footer a { display: block; font-size: 14px; color: var(--footer-gray); padding: 5px 0; }
+  .footer a:hover { color: var(--white); }
+  .footer-bottom { margin-top: var(--s-8); padding-top: var(--s-4); border-top: 1px solid var(--border-dark); font-size: 13px; color: var(--footer-gray); }
+
+  @media (max-width: 1024px) {
+    .articles { grid-template-columns: repeat(2, 1fr); }
+    .footer-cols { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .wrap { padding: 0 var(--s-6); }
+    .nav-links { display: none; }
+    .reel { grid-template-columns: 1fr; grid-template-rows: none; }
+    .frame.big { grid-row: auto; min-height: 260px; }
+    .articles { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 34px; }
+    .mission p { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="./DESIGN.md">Runway</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="./DESIGN.md">Research</a>
+      <a href="./DESIGN.md">Product</a>
+      <a href="./DESIGN.md">Studios</a>
+      <a href="./DESIGN.md">Company</a>
+    </nav>
+    <div class="nav-right">
+      <a class="btn btn-outline" href="./DESIGN.md">Log in</a>
+      <a class="btn btn-solid" href="./DESIGN.md">Get started</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-media" role="img" aria-label="Cinematic AI-generated landscape"></div>
+    <div class="wrap">
+      <div class="hero-inner">
+        <span class="label">Gen-4 · Now available</span>
+        <h1>Building AI to simulate the world through imagination, art and aesthetics.</h1>
+        <p>Advanced tools for image, video and creative production — a new medium for storytelling.</p>
+        <div class="cta-row">
+          <a class="btn btn-solid" href="./DESIGN.md">Try Runway</a>
+          <a class="btn btn-outline" href="./DESIGN.md">Watch the film</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dark" aria-label="Trusted by">
+    <div class="wrap">
+      <div class="trust">
+        <span>Google</span><span>New Balance</span><span>Publicis</span><span>Vogue</span><span>CBS</span><span>Deutsche Telekom</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dark" aria-labelledby="reel-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Featured work</span>
+        <h2 id="reel-h">Every frame, generated.</h2>
+      </div>
+      <div class="reel">
+        <article class="frame big f1"><div class="cap"><span class="tag">Film</span><h3>Cinematic landscapes</h3></div></article>
+        <article class="frame f2"><div class="cap"><span class="tag">Portrait</span><h3>Artistic portraits</h3></div></article>
+        <article class="frame f3"><div class="cap"><span class="tag">Render</span><h3>Architectural renders</h3></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section light" aria-labelledby="research-h">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Research</span>
+        <h2 id="research-h">Advancing the frontier.</h2>
+      </div>
+      <div class="articles">
+        <article class="article">
+          <div class="thumb a1"></div>
+          <h3>Gen-4 Video Model</h3>
+          <p>Consistent characters and scenes across shots with a single reference.</p>
+        </article>
+        <article class="article">
+          <div class="thumb a2"></div>
+          <h3>Frames image model</h3>
+          <p>Fine-grained stylistic control for high-fidelity image generation.</p>
+        </article>
+        <article class="article">
+          <div class="thumb a3"></div>
+          <h3>Act-One performance</h3>
+          <p>Drive expressive character performances from a single video input.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dark" aria-labelledby="join-h">
+    <div class="wrap">
+      <div class="panel">
+        <span class="label">Stay in the loop</span>
+        <h2 id="join-h" style="font-size:32px;font-weight:400;letter-spacing:-0.6px;line-height:1.0;margin:var(--s-3) 0 var(--s-5)">Get research and release notes.</h2>
+        <form class="form-row" onsubmit="return false">
+          <label for="email" class="tag" style="position:absolute;left:-9999px">Email address</label>
+          <input id="email" type="email" placeholder="you@studio.com" />
+          <button class="btn btn-solid" type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dark mission" aria-labelledby="mission-h">
+    <div class="wrap">
+      <p id="mission-h">We are building a new kind of creative tool — where imagination is the only limit.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <a class="logo" href="./DESIGN.md">Runway</a>
+      <div><h4>Product</h4><a href="./DESIGN.md">Gen-4</a><a href="./DESIGN.md">Frames</a><a href="./DESIGN.md">API</a></div>
+      <div><h4>Research</h4><a href="./DESIGN.md">Papers</a><a href="./DESIGN.md">Blog</a></div>
+      <div><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Studios</a></div>
+      <div><h4>Connect</h4><a href="./DESIGN.md">X</a><a href="./DESIGN.md">Instagram</a><a href="./DESIGN.md">YouTube</a></div>
+    </div>
+    <div class="footer-bottom">© 2026 Runway. Design tokens from <a href="./DESIGN.md" style="display:inline;padding:0;text-decoration:underline">DESIGN.md</a></div>
+  </div>
+</footer>
+
+</body>
+</html>

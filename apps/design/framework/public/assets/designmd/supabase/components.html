@@ -1,0 +1,411 @@
+<!-- source_content_hash: f57287d7f44d59e8169dc4b4304ff03c1a2efb37f5433b9c04460caae7710880 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Supabase — Component Preview</title>
+<style>
+  /* ============================================================
+     Supabase design tokens — mapped from DESIGN.md frontmatter.
+     Quietly technical: clean white canvas, near-black ink (#171717,
+     never pure black), a single signature emerald-green CTA (#3ecf8e)
+     as the ONLY chromatic event. Circular (→ Inter) weight 500 with
+     tight negative tracking (-1.92px at 64px). Square-ish 6px button
+     radius — never pills. Composited product UI mockups are the
+     brand's argument. Code blocks in near-black canvas-night. The
+     featured pricing tier is DARK-inverted, not green. On-primary
+     text is near-black on the emerald button (brand idiosyncrasy).
+     ============================================================ */
+  :root {
+    /* Emerald — the only chromatic event */
+    --primary: #3ecf8e;
+    --primary-deep: #24b47e;
+    --primary-soft: #4ade80;
+    --on-primary: #171717;
+
+    /* Ink ladder */
+    --ink: #171717;
+    --ink-secondary: #212121;
+    --ink-mute: #707070;
+    --ink-mute-2: #9a9a9a;
+    --ink-faint: #b2b2b2;
+    --on-dark: #ffffff;
+
+    /* Surface */
+    --canvas: #ffffff;
+    --canvas-soft: #fafafa;
+    --canvas-night: #1c1c1c;
+    --canvas-night-soft: #202020;
+    --hairline: #dfdfdf;
+    --hairline-strong: #c7c7c7;
+    --hairline-cool: #ededed;
+    --hairline-cool-2: #efefef;
+    --hairline-cool-3: #d4d4d4;
+
+    /* Rare accents — charts / logos only */
+    --accent-purple: #6b01c2;
+    --accent-violet: #644fc1;
+    --accent-yellow: #ffdb13;
+    --accent-tomato: #ff2201;
+    --accent-pink: #c7007e;
+    --accent-indigo: #054cff;
+
+    /* Type */
+    --font: "Circular", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+    /* Radius — square-ish, never pill for buttons */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --s-xxs: 2px;
+    --s-xs: 4px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-huge: 64px;
+
+    /* Elevation */
+    --e1: 0 1px 3px rgba(0,0,0,0.06);
+    --e2: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--canvas); color: var(--ink); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: var(--ink); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--r-xs); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-xl); }
+  .section { padding: var(--s-huge) 0; }
+
+  h1,h2,h3 { color: var(--ink); font-weight: 500; }
+  .display { letter-spacing: -1.92px; }
+
+  .eyebrow { font-size: 13px; font-weight: 500; color: var(--ink-mute); display: inline-block; margin-bottom: var(--s-md); }
+
+  /* ---------- Nav ---------- */
+  .nav { background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--hairline-cool); padding: var(--s-lg) 0; position: sticky; top: 0; z-index: 20; }
+  .nav .wrap { display: flex; align-items: center; gap: var(--s-xl); }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 18px; letter-spacing: -0.4px; }
+  .brand .mark { width: 22px; height: 22px; }
+  .nav-links { display: flex; gap: var(--s-xl); margin-left: var(--s-md); }
+  .nav-links a { color: var(--ink-mute); font-size: 14px; }
+  .nav-links a:hover { color: var(--ink); text-decoration: none; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-lg); }
+  .nav-right .signin { color: var(--ink); font-size: 14px; }
+
+  /* ---------- Buttons — 6px square-ish ---------- */
+  .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-size: 14px; font-weight: 500; line-height: 1; border: 1px solid transparent; cursor: pointer; padding: 10px 16px; border-radius: var(--r-sm); text-decoration: none; transition: background .15s ease, border-color .15s ease; }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-deep); text-decoration: none; }
+  .btn-outline { background: var(--canvas); color: var(--ink); border-color: var(--hairline-strong); }
+  .btn-outline:hover { border-color: var(--ink); text-decoration: none; }
+  .btn-dark { background: var(--canvas-night); color: var(--on-dark); }
+  .btn-dark:hover { background: #000; text-decoration: none; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: var(--s-huge) 0 var(--s-xxl); }
+  .hero-inner { max-width: 780px; }
+  .hero h1 { font-size: clamp(40px, 6.5vw, 64px); line-height: 1.1; letter-spacing: -1.92px; }
+  .hero h1 .em { color: var(--primary); }
+  .hero p.lead { margin: var(--s-xl) 0; font-size: 18px; line-height: 1.55; color: var(--ink-mute); max-width: 56ch; }
+  .hero-cta { display: flex; gap: var(--s-md); flex-wrap: wrap; }
+
+  .pill-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--primary); color: var(--on-primary); font-size: 12px; padding: 2px 8px; border-radius: var(--r-full); margin-bottom: var(--s-lg); }
+
+  /* ---------- Product UI mockup ---------- */
+  .mock-stack { margin-top: var(--s-huge); position: relative; }
+  .mock { background: var(--canvas-night); border: 1px solid var(--canvas-night-soft); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--e2); }
+  .mock .bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid #2a2a2a; }
+  .mock .bar .d { width: 10px; height: 10px; border-radius: var(--r-full); background: #3a3a3a; }
+  .mock .bar .t { margin-left: 8px; font-family: var(--mono); font-size: 12px; color: var(--ink-mute-2); }
+  .mock .body { display: grid; grid-template-columns: 180px 1fr; min-height: 260px; }
+  .mock .side { border-right: 1px solid #2a2a2a; padding: var(--s-md); }
+  .mock .side .row { color: #8a8a8a; font-size: 13px; padding: 7px 8px; border-radius: var(--r-xs); }
+  .mock .side .row.on { background: #262626; color: #fff; }
+  .mock .main { padding: var(--s-lg); }
+  .mock table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+  .mock th, .mock td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #262626; color: #c9c9c9; }
+  .mock th { color: var(--ink-mute-2); font-weight: 400; }
+  .mock td .g { color: var(--primary-soft); }
+
+  /* ---------- Logo strip ---------- */
+  .logos { border-top: 1px solid var(--hairline-cool); border-bottom: 1px solid var(--hairline-cool); }
+  .logos .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-huge); }
+  .logos .lg { color: var(--ink-mute-2); font-weight: 500; font-size: 16px; padding: var(--s-lg) 0; }
+
+  /* ---------- Section head ---------- */
+  .sec-head { max-width: 60ch; margin-bottom: var(--s-xxl); }
+  .sec-head h2 { font-size: clamp(28px, 4vw, 48px); line-height: 1.1; letter-spacing: -1.44px; }
+  .sec-head p { margin-top: var(--s-md); color: var(--ink-mute); font-size: 18px; }
+
+  /* ---------- Feature cards ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .fcard { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-xxl); }
+  .fcard.dark { background: var(--canvas-night); border-color: var(--canvas-night-soft); color: var(--on-dark); }
+  .fcard .fi { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--canvas-soft); border: 1px solid var(--hairline); display: grid; place-items: center; margin-bottom: var(--s-lg); }
+  .fcard.dark .fi { background: #262626; border-color: #333; }
+  .fcard h3 { font-size: 22px; letter-spacing: -0.3px; margin-bottom: var(--s-sm); }
+  .fcard.dark h3 { color: var(--on-dark); }
+  .fcard p { font-size: 15px; color: var(--ink-mute); }
+  .fcard.dark p { color: var(--ink-faint); }
+
+  /* ---------- Code block ---------- */
+  .codeblock { background: var(--canvas-night); color: var(--on-dark); border-radius: var(--r-sm); padding: var(--s-lg); font-family: var(--mono); font-size: 14px; line-height: 1.5; overflow-x: auto; margin-top: var(--s-lg); }
+  .codeblock .k { color: var(--primary-soft); }
+  .codeblock .s { color: #f9d47a; }
+  .codeblock .c { color: var(--ink-mute); }
+
+  /* ---------- Inputs ---------- */
+  .field { max-width: 420px; }
+  .field label { display: block; font-size: 13px; color: var(--ink-mute); margin-bottom: 6px; }
+  .text-input { width: 100%; background: var(--canvas); color: var(--ink); font-family: var(--font); font-size: 16px; border: 1px solid var(--hairline); border-radius: var(--r-sm); padding: 8px 12px; }
+  .text-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(62,207,142,0.2); }
+  .text-input::placeholder { color: var(--ink-faint); }
+
+  /* ---------- Pricing (dark featured) ---------- */
+  .grid-price { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); align-items: stretch; }
+  .price { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-xxl); display: flex; flex-direction: column; }
+  .price.featured { background: var(--canvas-night); color: var(--on-dark); border-color: var(--canvas-night); }
+  .price h3 { font-size: 22px; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .price.featured h3 { color: var(--on-dark); }
+  .price .amt { font-size: 36px; font-weight: 500; letter-spacing: -0.72px; margin: var(--s-md) 0; }
+  .price.featured .amt { color: var(--on-dark); }
+  .price .amt span { font-size: 15px; color: var(--ink-mute); font-weight: 400; }
+  .price.featured .amt span { color: var(--ink-faint); }
+  .price ul { list-style: none; margin: var(--s-md) 0 var(--s-xl); display: grid; gap: 10px; }
+  .price li { font-size: 14px; color: var(--ink-mute); display: flex; gap: 8px; }
+  .price.featured li { color: var(--ink-faint); }
+  .price li::before { content: "✓"; color: var(--primary); font-weight: 700; }
+  .price .btn { margin-top: auto; width: 100%; justify-content: center; }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--canvas); border-top: 1px solid var(--hairline-cool); padding: var(--s-huge) 0; }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: var(--s-xl); }
+  .foot-brand .brand { margin-bottom: var(--s-md); }
+  .foot-brand p { color: var(--ink-mute); font-size: 13px; max-width: 28ch; }
+  .foot-col h4 { color: var(--ink); font-size: 13px; font-weight: 500; margin-bottom: var(--s-md); }
+  .foot-col a { display: block; color: var(--ink-mute); font-size: 13px; padding: 4px 0; }
+  .foot-col a:hover { color: var(--ink); text-decoration: none; }
+  .foot-bottom { border-top: 1px solid var(--hairline-cool); margin-top: var(--s-xl); padding-top: var(--s-lg); font-size: 13px; color: var(--ink-mute-2); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s-sm); }
+
+  @media (max-width: 960px) {
+    .grid-3, .grid-price { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .mock .body { grid-template-columns: 1fr; }
+    .mock .side { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== Nav ===== -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./DESIGN.md" aria-label="Supabase home">
+        <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2 4 13h7l-1 9 10-12h-7l1-8z" fill="#3ecf8e"/></svg>
+        Supabase
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">Developers</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Blog</a>
+      </nav>
+      <div class="nav-right">
+        <a class="signin" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Start your project</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-inner">
+        <span class="pill-tag">New · Realtime Presence</span>
+        <h1>Build in a weekend.<br /><span class="em">Scale</span> to millions.</h1>
+        <p class="lead">Supabase is the open-source Firebase alternative. Start your project with a Postgres database, Authentication, instant APIs, Realtime subscriptions, and Storage.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="./DESIGN.md">Start your project</a>
+          <a class="btn btn-outline" href="./DESIGN.md">Request a demo</a>
+        </div>
+      </div>
+
+      <div class="mock-stack">
+        <div class="mock" role="img" aria-label="Supabase table editor">
+          <div class="bar">
+            <span class="d" aria-hidden="true"></span><span class="d" aria-hidden="true"></span><span class="d" aria-hidden="true"></span>
+            <span class="t">Table editor · public.profiles</span>
+          </div>
+          <div class="body">
+            <div class="side">
+              <div class="row on">Table editor</div>
+              <div class="row">SQL editor</div>
+              <div class="row">Authentication</div>
+              <div class="row">Storage</div>
+              <div class="row">Edge Functions</div>
+            </div>
+            <div class="main">
+              <table>
+                <thead><tr><th>id</th><th>username</th><th>plan</th><th>created_at</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td class="g">ada.l</td><td>pro</td><td>2026-01-04</td></tr>
+                  <tr><td>2</td><td class="g">grace.h</td><td>free</td><td>2026-01-11</td></tr>
+                  <tr><td>3</td><td class="g">alan.t</td><td>team</td><td>2026-02-02</td></tr>
+                  <tr><td>4</td><td class="g">edsger.d</td><td>pro</td><td>2026-02-19</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Logo strip ===== -->
+  <div class="logos">
+    <div class="wrap row">
+      <span class="lg">GitHub</span>
+      <span class="lg">Mozilla</span>
+      <span class="lg">1Password</span>
+      <span class="lg">PwC</span>
+      <span class="lg">Chatbase</span>
+      <span class="lg">Humata</span>
+    </div>
+  </div>
+
+  <!-- ===== Features ===== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Everything you need</span>
+        <h2 class="display">Use one or all. Best of breed products. Integrated as a platform.</h2>
+      </div>
+      <div class="grid-3">
+        <article class="fcard">
+          <div class="fi" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+          <h3>Postgres database</h3>
+          <p>Every project is a full Postgres database, the world's most trusted relational database.</p>
+        </article>
+        <article class="fcard">
+          <div class="fi" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <h3>Authentication</h3>
+          <p>Add user sign-ups and logins, securing your data with Row Level Security.</p>
+        </article>
+        <article class="fcard dark">
+          <div class="fi" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <h3>Realtime</h3>
+          <p>Build multiplayer experiences with realtime data synchronization over websockets.</p>
+        </article>
+      </div>
+
+      <div style="margin-top:var(--s-xl); max-width:720px;">
+        <div class="codeblock" role="img" aria-label="Query example">
+<span class="c">// Fetch profiles on the Pro plan</span>
+<span class="k">const</span> { data } = <span class="k">await</span> supabase
+  .from(<span class="s">'profiles'</span>)
+  .select(<span class="s">'username, plan'</span>)
+  .eq(<span class="s">'plan'</span>, <span class="s">'pro'</span>)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Newsletter / input demo ===== -->
+  <section class="section" style="background:var(--canvas-soft); padding:var(--s-huge) 0;">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:var(--s-lg);">
+        <h2 class="display" style="font-size:32px;letter-spacing:-0.72px;">Stay in the loop</h2>
+        <p>Product updates, straight to your inbox. No spam.</p>
+      </div>
+      <form class="field" onsubmit="return false;">
+        <label for="email">Work email</label>
+        <div style="display:flex; gap:var(--s-md);">
+          <input class="text-input" id="email" type="email" placeholder="you@company.com" />
+          <button class="btn btn-primary" type="submit">Subscribe</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== Pricing (dark inverted featured) ===== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Pricing</span>
+        <h2 class="display" style="font-size:40px;">Predictable pricing, designed to scale</h2>
+      </div>
+      <div class="grid-price">
+        <div class="price">
+          <h3>Free</h3>
+          <div class="amt">$0<span> / mo</span></div>
+          <ul>
+            <li>Unlimited API requests</li>
+            <li>500 MB database</li>
+            <li>50,000 monthly active users</li>
+          </ul>
+          <a class="btn btn-outline" href="./DESIGN.md">Start free</a>
+        </div>
+        <div class="price featured">
+          <h3>Pro</h3>
+          <div class="amt">$25<span> / mo</span></div>
+          <ul>
+            <li>8 GB database included</li>
+            <li>100,000 monthly active users</li>
+            <li>Daily backups &amp; email support</li>
+            <li>No project pausing</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+        </div>
+        <div class="price">
+          <h3>Team</h3>
+          <div class="amt">$599<span> / mo</span></div>
+          <ul>
+            <li>SOC2 &amp; SSO</li>
+            <li>Priority support</li>
+            <li>Read replicas</li>
+          </ul>
+          <a class="btn btn-outline" href="./DESIGN.md">Contact us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <a class="brand" href="./DESIGN.md">
+            <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2 4 13h7l-1 9 10-12h-7l1-8z" fill="#3ecf8e"/></svg>
+            Supabase
+          </a>
+          <p>The open-source Firebase alternative. Build in a weekend, scale to millions.</p>
+        </div>
+        <div class="foot-col"><h4>Product</h4><a href="./DESIGN.md">Database</a><a href="./DESIGN.md">Auth</a><a href="./DESIGN.md">Storage</a></div>
+        <div class="foot-col"><h4>Developers</h4><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">Guides</a><a href="./DESIGN.md">Changelog</a></div>
+        <div class="foot-col"><h4>Company</h4><a href="./DESIGN.md">Blog</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Open source</a></div>
+        <div class="foot-col"><h4>Resources</h4><a href="./DESIGN.md">Support</a><a href="./DESIGN.md">Status</a><a href="./DESIGN.md">Pricing</a></div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 Supabase Inc.</span>
+        <span>Design tokens from <a href="./DESIGN.md">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!-- source_content_hash: d2df9be72d867e48d318fd18db04e60a78357c27e392ab921fc2ba7f46951442 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HashiCorp — Component Preview</title>
+<style>
+  /* ============================================================
+     HashiCorp design tokens — mapped from DESIGN.md frontmatter.
+     Enterprise-infrastructure canvas: near-black ground, per-product
+     accent colors as identity tokens (Terraform purple, Vault yellow,
+     Waypoint cyan, etc.), hashicorpSans (→ Inter) 500/600/700 with
+     tight-display / relaxed-body line-heights, 8px CTA corners (not
+     pills), charcoal surface lift instead of shadows, eyebrow labels.
+     ============================================================ */
+  :root {
+    /* Brand & accent */
+    --primary: #000000;
+    --on-primary: #ffffff;
+    --accent-blue: #2b89ff;
+
+    /* Text */
+    --ink: #ffffff;
+    --ink-muted: #b2b6bd;
+    --ink-subtle: #656a76;
+
+    /* Surface — lift, not shadow */
+    --canvas: #000000;
+    --surface-1: #15181e;
+    --surface-2: #1f232b;
+    --surface-3: #3b3d45;
+    --hairline: #3b3d45;
+    --hairline-soft: #252830;
+    --inverse-canvas: #ffffff;
+    --inverse-ink: #000000;
+
+    /* Per-product identity tokens */
+    --p-terraform: #7b42bc;
+    --p-terraform-bright: #911ced;
+    --p-vault: #ffcf25;
+    --p-consul: #e62b1e;
+    --p-waypoint: #14c6cb;
+    --p-waypoint-deep: #12b6bb;
+    --p-vagrant: #1868f2;
+    --p-nomad: #00ca8e;
+    --p-boundary: #f24c53;
+
+    /* Semantic */
+    --success: #00ca8e;
+    --warning: #ffcf25;
+    --error: #e62b1e;
+    --visited: #a737ff;
+
+    /* Type — one family across the whole hierarchy */
+    --font: "Inter", "Geist Sans", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", helvetica, arial, sans-serif;
+
+    /* Radius */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-xxl: 24px;
+    --r-pill: 9999px;
+
+    /* Spacing */
+    --s-hair: 1px;
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 16px;
+    --s-lg: 24px;
+    --s-xl: 32px;
+    --s-xxl: 48px;
+    --s-section: 96px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--ink-muted);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:visited { color: var(--visited); }
+
+  :focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; border-radius: var(--r-sm); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-xl); }
+  section { padding: var(--s-section) 0; }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: var(--s-sm);
+  }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: var(--s-lg);
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline-soft);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .brand { display: flex; align-items: center; gap: var(--s-xs); font-weight: 700; font-size: 18px; color: var(--ink); }
+  .brand .cube {
+    width: 20px; height: 20px;
+    background: conic-gradient(from 45deg, var(--p-terraform), var(--p-vault), var(--p-waypoint), var(--p-terraform));
+    transform: rotate(45deg);
+  }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-md); }
+  .nav-links a { color: var(--ink); font-size: 14px; font-weight: 500; }
+  .nav-links a:hover { text-decoration: none; color: var(--ink-muted); }
+  .nav-right { margin-left: auto; display: flex; gap: var(--s-sm); align-items: center; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.29;
+    padding: 10px 18px;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-xs);
+    text-decoration: none;
+  }
+  .btn:hover { text-decoration: none; }
+  .btn-primary { background: var(--inverse-canvas); color: var(--inverse-ink); }
+  .btn-secondary { background: var(--surface-2); color: var(--ink); }
+  .btn-tertiary { background: var(--canvas); color: var(--ink); border-color: var(--hairline); }
+  .btn-terraform { background: var(--p-terraform); color: var(--ink); }
+  .btn-vault { background: var(--p-vault); color: var(--inverse-ink); }
+  .btn-waypoint { background: var(--p-waypoint); color: var(--inverse-ink); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: var(--s-section) 0; }
+  .hero-grid { display: grid; grid-template-columns: 7fr 5fr; gap: var(--s-xxl); align-items: center; }
+  .hero h1 {
+    font-weight: 700;
+    font-size: clamp(40px, 8vw, 80px);
+    line-height: 1.17;
+    letter-spacing: -2.5px;
+    color: var(--ink);
+  }
+  .hero p { font-size: 18px; font-weight: 500; line-height: 1.69; color: var(--ink-muted); max-width: 46ch; margin-top: var(--s-lg); }
+  .hero .cta-row { display: flex; gap: var(--s-sm); margin-top: var(--s-xl); flex-wrap: wrap; }
+  .hero-visual {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--r-xl);
+    background:
+      radial-gradient(circle at 30% 30%, var(--p-terraform-bright), transparent 60%),
+      radial-gradient(circle at 70% 70%, var(--p-terraform), var(--canvas) 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-visual .cube3d {
+    position: absolute; inset: 25%;
+    background: linear-gradient(135deg, var(--p-terraform-bright), var(--p-terraform));
+    transform: rotate(45deg);
+    border-radius: var(--r-md);
+    box-shadow: inset 0 0 40px rgba(255,255,255,0.2);
+  }
+
+  /* ---------- Product cards (identity surfaces) ---------- */
+  .sec-title { font-weight: 600; font-size: clamp(28px, 5vw, 40px); line-height: 1.19; letter-spacing: -1px; color: var(--ink); }
+  .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); margin-top: var(--s-lg); }
+  .product-card {
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-card.tf { background: var(--p-terraform); color: var(--ink); }
+  .product-card.vault { background: var(--p-vault); color: var(--inverse-ink); }
+  .product-card.waypoint { background: var(--p-waypoint); color: var(--inverse-ink); }
+  .product-card h3 { font-weight: 600; font-size: 22px; line-height: 1.18; letter-spacing: -0.4px; margin-bottom: var(--s-xs); }
+  .product-card p { font-size: 14px; font-weight: 500; line-height: 1.71; }
+  .product-card .arrow { margin-top: auto; font-weight: 600; font-size: 14px; }
+
+  /* ---------- Feature cards ---------- */
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); margin-top: var(--s-lg); }
+  .feature-card {
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-lg);
+  }
+  .feature-card h3 { font-weight: 600; font-size: 22px; line-height: 1.18; letter-spacing: -0.4px; color: var(--ink); margin-bottom: var(--s-xs); }
+  .feature-card p { font-size: 14px; font-weight: 500; line-height: 1.71; color: var(--ink-muted); }
+  .pill {
+    display: inline-block;
+    background: var(--surface-1);
+    color: var(--ink-muted);
+    font-size: 13px;
+    border-radius: var(--r-pill);
+    padding: 4px 10px;
+    border: 1px solid var(--hairline);
+    margin-bottom: var(--s-sm);
+  }
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); margin-top: var(--s-lg); }
+  .tier {
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .tier.featured { background: var(--surface-2); }
+  .tier .tname { font-weight: 600; font-size: 28px; line-height: 1.21; letter-spacing: -0.6px; color: var(--ink); }
+  .tier .tprice { font-weight: 700; font-size: 40px; letter-spacing: -1px; color: var(--ink); margin: var(--s-sm) 0; }
+  .tier .tprice span { font-size: 16px; font-weight: 500; color: var(--ink-muted); }
+  .tier ul { list-style: none; margin: var(--s-md) 0; }
+  .tier li { font-size: 14px; font-weight: 500; color: var(--ink-muted); padding: 6px 0; display: flex; gap: var(--s-xs); }
+  .tier li::before { content: "✓"; color: var(--success); }
+
+  /* ---------- Comparison table ---------- */
+  .cmp { margin-top: var(--s-lg); border: 1px solid var(--hairline); border-radius: var(--r-lg); overflow: hidden; }
+  .cmp-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: var(--s-sm) var(--s-lg); border-bottom: 1px solid var(--hairline-soft); font-size: 14px; }
+  .cmp-row:last-child { border-bottom: none; }
+  .cmp-row.head { background: var(--surface-1); color: var(--ink); font-weight: 600; }
+  .cmp-row span:first-child { color: var(--ink); }
+
+  /* ---------- CTA banner ---------- */
+  .cta-banner {
+    background: var(--surface-1);
+    border-radius: var(--r-xxl);
+    padding: var(--s-xxl);
+    text-align: center;
+  }
+  .cta-banner h2 { font-weight: 600; font-size: 28px; line-height: 1.21; letter-spacing: -0.6px; color: var(--ink); margin-bottom: var(--s-md); }
+
+  /* ---------- Input ---------- */
+  .field { display: flex; gap: var(--s-xs); max-width: 440px; margin: var(--s-lg) auto 0; }
+  .field input {
+    flex: 1;
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .field input::placeholder { color: var(--ink-subtle); }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--canvas); border-top: 1px solid var(--hairline-soft); padding: 64px var(--s-xl); }
+  .footer-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--s-xl); max-width: 1280px; margin: 0 auto; }
+  .footer-grid h4 { font-size: 13px; color: var(--ink); margin-bottom: var(--s-sm); }
+  .footer-grid a { display: block; padding: 4px 0; font-size: 13px; color: var(--ink-muted); }
+  .footer-grid a:hover { color: var(--ink); text-decoration: none; }
+  .footer-bottom { max-width: 1280px; margin: var(--s-xl) auto 0; padding-top: var(--s-md); border-top: 1px solid var(--hairline-soft); font-size: 13px; color: var(--ink-subtle); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .product-grid, .feature-grid, .pricing-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767px) {
+    .nav-links { display: none; }
+    .cmp-row { grid-template-columns: 1fr 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    section { padding: 64px 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <header class="nav">
+    <div class="wrap" style="display:flex;align-items:center;gap:var(--s-lg);width:100%;">
+      <div class="brand"><span class="cube" aria-hidden="true"></span>HashiCorp</div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Products</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Resources</a>
+      </nav>
+      <div class="nav-right">
+        <a class="btn btn-secondary" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Sign up</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">The Infrastructure Cloud</div>
+          <h1>Infrastructure and security lifecycle management</h1>
+          <p>Provision, secure, connect, and run any infrastructure for any application — with a consistent workflow across clouds.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+            <a class="btn btn-tertiary" href="./DESIGN.md">Talk to sales</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true"><span class="cube3d"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product cards (per-product identity) -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Products</div>
+      <h2 class="sec-title">One workflow, every product</h2>
+      <div class="product-grid">
+        <article class="product-card tf">
+          <h3>Terraform</h3>
+          <p>Provision and manage infrastructure as code across any cloud.</p>
+          <span class="arrow">Learn more →</span>
+        </article>
+        <article class="product-card vault">
+          <h3>Vault</h3>
+          <p>Secure, store, and control access to tokens, passwords, and secrets.</p>
+          <span class="arrow">Learn more →</span>
+        </article>
+        <article class="product-card waypoint">
+          <h3>Waypoint</h3>
+          <p>A consistent workflow to build, deploy, and release applications.</p>
+          <span class="arrow">Learn more →</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature cards -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Why HashiCorp</div>
+      <h2 class="sec-title">Built for the multi-cloud era</h2>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <span class="pill">Infrastructure</span>
+          <h3>Consistent workflow</h3>
+          <p>One provisioning workflow across every provider and environment.</p>
+        </article>
+        <article class="feature-card">
+          <span class="pill">Security</span>
+          <h3>Identity-based access</h3>
+          <p>Dynamic secrets and encryption as a service, at scale.</p>
+        </article>
+        <article class="feature-card">
+          <span class="pill">Networking</span>
+          <h3>Service networking</h3>
+          <p>Discover, secure, and connect services across any runtime.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Pricing</div>
+      <h2 class="sec-title">Plans for every team</h2>
+      <div class="pricing-grid">
+        <div class="tier">
+          <div class="tname">Free</div>
+          <div class="tprice">$0</div>
+          <ul><li>Community edition</li><li>Single workspace</li><li>Community support</li></ul>
+          <a class="btn btn-tertiary" href="./DESIGN.md" style="width:100%;justify-content:center;">Start free</a>
+        </div>
+        <div class="tier featured">
+          <div class="tname">Standard</div>
+          <div class="tprice">$0.10<span> /hr</span></div>
+          <ul><li>Team management</li><li>Remote state</li><li>Priority support</li></ul>
+          <a class="btn btn-primary" href="./DESIGN.md" style="width:100%;justify-content:center;">Choose Standard</a>
+        </div>
+        <div class="tier">
+          <div class="tname">Enterprise</div>
+          <div class="tprice">Custom</div>
+          <ul><li>Self-hosted</li><li>SSO &amp; audit logs</li><li>Dedicated support</li></ul>
+          <a class="btn btn-tertiary" href="./DESIGN.md" style="width:100%;justify-content:center;">Contact sales</a>
+        </div>
+      </div>
+
+      <div class="cmp">
+        <div class="cmp-row head"><span>Feature</span><span>Free</span><span>Standard</span><span>Enterprise</span></div>
+        <div class="cmp-row"><span>Remote state</span><span>—</span><span>✓</span><span>✓</span></div>
+        <div class="cmp-row"><span>Team &amp; governance</span><span>—</span><span>✓</span><span>✓</span></div>
+        <div class="cmp-row"><span>Self-hosted</span><span>—</span><span>—</span><span>✓</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA banner -->
+  <section>
+    <div class="wrap">
+      <div class="cta-banner">
+        <h2>Ready to get started?</h2>
+        <p style="color:var(--ink-muted);">Try HashiCorp Cloud free, or talk to our team about Enterprise.</p>
+        <div class="field">
+          <input type="email" placeholder="you@company.com" aria-label="Email address" />
+          <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="brand"><span class="cube" aria-hidden="true"></span>HashiCorp</div>
+        <p style="color:var(--ink-muted);font-size:13px;margin-top:var(--s-sm);max-width:30ch;">Infrastructure and security lifecycle management.</p>
+      </div>
+      <div><h4>Products</h4><a href="./DESIGN.md">Terraform</a><a href="./DESIGN.md">Vault</a><a href="./DESIGN.md">Consul</a></div>
+      <div><h4>Solutions</h4><a href="./DESIGN.md">Multi-cloud</a><a href="./DESIGN.md">Security</a><a href="./DESIGN.md">Networking</a></div>
+      <div><h4>Resources</h4><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">Tutorials</a><a href="./DESIGN.md">Community</a></div>
+      <div><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Blog</a></div>
+    </div>
+    <div class="footer-bottom">© 2026 HashiCorp. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>

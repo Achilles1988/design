@@ -1,0 +1,366 @@
+<!-- source_content_hash: 83fbc614443a9b3d7569e9956a43e7b8740f9d0f939f58b8154f7a7cec3002b2 -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Apple — reference components</title>
+    <meta
+      name="description"
+      content="Reference fixture for design-md/apple. Photography-first product tiles alternating
+        light and dark canvases, SF Pro Display with negative tracking, a single Action Blue
+        (#0066cc), pill CTAs, and exactly one drop-shadow reserved for product imagery."
+    />
+
+    <style>
+      /* ─── Tokens — mapped 1:1 from DESIGN.md ───────────────────
+         Apple recedes the UI so the product speaks. One blue accent, alternating
+         light/dark tiles as the divider, SF Pro tight headlines. Exactly ONE shadow —
+         on product imagery only, never on chrome. */
+      :root {
+        /* Brand — the single interactive color */
+        --primary: #0066cc;         /* Action Blue */
+        --primary-focus: #0071e3;   /* focus ring */
+        --primary-on-dark: #2997ff; /* Sky Link Blue — dark tiles only */
+
+        /* Text */
+        --ink: #1d1d1f;             /* near-black, not pure black */
+        --body: #1d1d1f;
+        --body-on-dark: #ffffff;
+        --body-muted: #cccccc;
+        --ink-muted-80: #333333;
+        --ink-muted-48: #7a7a7a;
+
+        /* Surface — light ↔ dark tile alternation is the rhythm */
+        --canvas: #ffffff;
+        --canvas-parchment: #f5f5f7; /* signature off-white */
+        --surface-pearl: #fafafc;
+        --tile-1: #272729;
+        --tile-2: #2a2a2c;
+        --tile-3: #252527;
+        --black: #000000;           /* global nav, true void */
+        --chip-translucent: rgba(210, 210, 215, 0.64);
+        --on-primary: #ffffff;
+        --on-dark: #ffffff;
+
+        --divider-soft: #f0f0f0;
+        --hairline: #e0e0e0;
+
+        /* Type — SF Pro Display / Text; Inter is the OSS substitute */
+        --font-display: "SF Pro Display", system-ui, -apple-system, Inter, sans-serif;
+        --font-text: "SF Pro Text", system-ui, -apple-system, Inter, sans-serif;
+
+        --hero-display: 56px;
+        --display-lg: 40px;
+        --display-md: 34px;
+        --lead: 28px;
+        --lead-airy: 24px;  /* the rare weight 300 */
+        --tagline: 21px;
+        --body-size: 17px;  /* 17px, not 16px — the reading pace */
+        --caption: 14px;
+        --button-large: 18px; /* rare weight 300 */
+        --fine-print: 12px;
+        --nav-link: 12px;
+
+        /* Rounded — pill is the action signal */
+        --r-none: 0px;
+        --r-xs: 5px;
+        --r-sm: 8px;   /* dark utility buttons */
+        --r-md: 11px;  /* pearl capsules */
+        --r-lg: 18px;  /* utility cards */
+        --r-pill: 9999px;
+        --r-full: 9999px;
+
+        /* Spacing — 8px base, 80px section */
+        --sp-xxs: 4px;
+        --sp-xs: 8px;
+        --sp-sm: 12px;
+        --sp-md: 17px;
+        --sp-lg: 24px;
+        --sp-xl: 32px;
+        --sp-xxl: 48px;
+        --sp-section: 80px;
+
+        /* The ONE shadow — product imagery only */
+        --product-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
+        --focus-outline: 2px solid var(--primary-focus);
+
+        --motion: 200ms;
+        --ease: cubic-bezier(0.28, 0, 0.24, 1);
+        --container-max: 1440px;
+        --text-max: 980px;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--canvas); color: var(--body);
+        font-family: var(--font-text); font-size: var(--body-size); line-height: 1.47;
+        letter-spacing: -0.374px; -webkit-font-smoothing: antialiased;
+      }
+
+      /* Tiles stack edge-to-edge with 0 gap — the color change IS the divider */
+      .tile { padding-block: var(--sp-section); }
+      .tile-inner { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--sp-lg); text-align: center; }
+      .tile-inner.text { max-width: var(--text-max); }
+      .tile-light { background: var(--canvas); color: var(--ink); }
+      .tile-parchment { background: var(--canvas-parchment); color: var(--ink); }
+      .tile-dark { background: var(--tile-1); color: var(--on-dark); }
+      .tile-dark-2 { background: var(--tile-2); color: var(--on-dark); }
+      @media (max-width: 640px) { .tile { padding-block: var(--sp-xxl); } }
+
+      /* Typography — SF Pro tight; weight 600 headlines, 400 body, rare 300 */
+      h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; }
+      h1 { font-size: var(--hero-display); line-height: 1.07; letter-spacing: -0.28px; }
+      h2 { font-size: var(--display-lg); line-height: 1.1; letter-spacing: 0; }
+      h3 { font-size: var(--tagline); line-height: 1.19; letter-spacing: 0.231px; }
+      p { margin: 0; }
+      .lead { font-size: var(--lead); font-weight: 400; line-height: 1.14; letter-spacing: 0.196px; }
+      .lead-airy { font-size: var(--lead-airy); font-weight: 300; line-height: 1.5; }
+      .body-strong { font-weight: 600; }
+      .muted-dark { color: var(--body-muted); }
+      .stack-3 > * + * { margin-block-start: var(--sp-sm); }
+      .stack-4 > * + * { margin-block-start: var(--sp-md); }
+      .stack-6 > * + * { margin-block-start: var(--sp-lg); }
+      .center-actions { display: flex; gap: var(--sp-lg); justify-content: center; flex-wrap: wrap; margin-block-start: var(--sp-md); }
+
+      /* Buttons — blue pill CTAs + ghost pill; active = scale(0.95) system-wide */
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-xs);
+        padding: 11px 22px; border-radius: var(--r-pill);
+        font-family: var(--font-text); font-size: var(--body-size); font-weight: 400; line-height: 1.24;
+        letter-spacing: -0.374px; cursor: pointer; border: 1px solid transparent; text-decoration: none;
+        transition: transform var(--motion) var(--ease), background-color var(--motion) var(--ease);
+      }
+      .btn:active { transform: scale(0.95); }
+      .btn:focus-visible { outline: var(--focus-outline); outline-offset: 2px; }
+      .btn-primary { background: var(--primary); color: var(--on-primary); }
+      .btn-primary:hover { background: color-mix(in oklab, var(--primary), white 8%); }
+      .btn-ghost { background: transparent; color: var(--primary); border-color: var(--primary); }
+      .btn-ghost.on-dark { color: var(--primary-on-dark); border-color: var(--primary-on-dark); }
+      .btn-store { font-size: var(--button-large); font-weight: 300; padding: 14px 28px; }
+      .btn-utility {
+        background: var(--ink); color: var(--on-dark); border-radius: var(--r-sm);
+        padding: 8px 15px; font-size: var(--caption); letter-spacing: -0.224px;
+      }
+      .text-link { color: var(--primary); text-decoration: none; }
+      .text-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+      .text-link.on-dark { color: var(--primary-on-dark); }
+
+      /* Global nav — ultra-thin true-black bar, 44px */
+      .global-nav {
+        background: var(--black); color: var(--on-dark); height: 44px;
+        display: flex; align-items: center; justify-content: center; gap: var(--sp-lg);
+        font-size: var(--nav-link); letter-spacing: -0.12px;
+      }
+      .global-nav a { color: var(--on-dark); text-decoration: none; opacity: 0.9; }
+      .global-nav a:hover { opacity: 1; }
+      @media (max-width: 833px) { .global-nav .hide-mobile { display: none; } }
+
+      /* Sub-nav — frosted parchment, sticky category name + persistent CTA */
+      .sub-nav {
+        position: sticky; top: 0; z-index: 5;
+        background: color-mix(in oklab, var(--canvas-parchment), transparent 20%);
+        backdrop-filter: saturate(180%) blur(20px);
+        border-bottom: 1px solid var(--hairline);
+        height: 52px; display: flex; align-items: center; justify-content: space-between;
+        padding-inline: var(--sp-xl); gap: var(--sp-md);
+      }
+      .sub-nav .cat-name { font-family: var(--font-display); font-size: var(--tagline); font-weight: 600; color: var(--ink); }
+      .sub-nav .sub-links { display: flex; gap: var(--sp-lg); align-items: center; }
+      .sub-nav .sub-links a { color: var(--ink); text-decoration: none; font-size: var(--caption); letter-spacing: -0.224px; }
+      @media (max-width: 833px) { .sub-nav .sub-links a:not(.keep) { display: none; } }
+
+      /* Product render placeholder — the only place the system shadow lives */
+      .product-render {
+        margin: var(--sp-xl) auto 0; max-width: 640px; aspect-ratio: 16 / 10;
+        border-radius: var(--r-lg);
+        background: linear-gradient(160deg, #e9e9ee 0%, #d6d7dd 55%, #c3c4cc 100%);
+        box-shadow: var(--product-shadow);
+      }
+      .tile-dark .product-render { background: linear-gradient(160deg, #3a3a3d 0%, #2c2c2f 60%, #1f1f22 100%); }
+
+      /* Store utility cards — hairline border, 18px radius, no shadow on card */
+      .store-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-lg); text-align: left; }
+      @media (max-width: 1068px) { .store-grid { grid-template-columns: repeat(3, 1fr); } }
+      @media (max-width: 833px) { .store-grid { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 640px) { .store-grid { grid-template-columns: 1fr; } }
+      .store-card {
+        background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg);
+        padding: var(--sp-lg); display: flex; flex-direction: column; gap: var(--sp-xs);
+      }
+      .store-card .thumb {
+        aspect-ratio: 1 / 1; border-radius: var(--r-sm); margin-block-end: var(--sp-sm);
+        background: linear-gradient(160deg, #f2f2f5, #dfe0e6);
+      }
+      .store-card .name { font-size: var(--body-size); font-weight: 600; color: var(--ink); }
+      .store-card .price { font-size: var(--body-size); color: var(--ink); }
+
+      /* Configurator option chips — pill, selected = 2px focus-blue border */
+      .chip-row { display: flex; gap: var(--sp-sm); flex-wrap: wrap; justify-content: center; }
+      .chip {
+        display: inline-flex; align-items: center; gap: var(--sp-xs);
+        background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline);
+        border-radius: var(--r-pill); padding: 12px 16px; font-size: var(--caption); cursor: pointer;
+      }
+      .chip[aria-pressed="true"] { border: 2px solid var(--primary-focus); padding: 11px 15px; }
+      .chip:focus-visible { outline: var(--focus-outline); outline-offset: 2px; }
+      .swatch { width: 14px; height: 14px; border-radius: var(--r-full); }
+
+      /* Search input — pill, matching the CTA grammar */
+      .search {
+        display: inline-flex; align-items: center; gap: var(--sp-xs); width: 100%; max-width: 440px;
+        background: var(--canvas); border: 1px solid rgba(0,0,0,0.08); border-radius: var(--r-pill);
+        padding: 12px 20px; height: 44px; margin-inline: auto;
+      }
+      .search input { border: none; outline: none; background: transparent; flex: 1; font: inherit; color: var(--ink); }
+      .search input::placeholder { color: var(--ink-muted-48); }
+
+      /* Floating sticky bar — frosted parchment */
+      .sticky-bar {
+        display: flex; align-items: center; justify-content: space-between; gap: var(--sp-md);
+        background: color-mix(in oklab, var(--canvas-parchment), transparent 20%);
+        backdrop-filter: saturate(180%) blur(20px);
+        border: 1px solid var(--hairline); border-radius: var(--r-lg);
+        height: 64px; padding: 12px 32px; max-width: 720px; margin: var(--sp-lg) auto 0; text-align: left;
+      }
+
+      /* Footer — parchment, relaxed dense-link leading */
+      .footer { background: var(--canvas-parchment); color: var(--ink-muted-80); padding-block: 64px; }
+      .footer-inner { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--sp-lg); }
+      .footer-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-lg); }
+      @media (max-width: 833px) { .footer-cols { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 480px) { .footer-cols { grid-template-columns: 1fr; } }
+      .footer-col h4 { font-size: var(--caption); font-weight: 600; color: var(--ink); margin: 0 0 var(--sp-xs); letter-spacing: -0.224px; }
+      .footer-col a { display: block; color: var(--ink-muted-80); text-decoration: none; font-size: var(--caption); line-height: 2.41; }
+      .footer-col a:hover { text-decoration: underline; }
+      .legal { border-top: 1px solid var(--hairline); margin-block-start: var(--sp-lg); padding-block-start: var(--sp-md); font-size: var(--fine-print); color: var(--ink-muted-48); }
+      .icon { width: 16px; height: 16px; flex-shrink: 0; }
+      .eyebrow { font-size: var(--caption); letter-spacing: 0.02em; color: var(--primary); text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <!-- global-nav: true black, 44px, quiet 12px links -->
+    <nav class="global-nav" aria-label="Global">
+      <a href="./DESIGN.md" aria-label="Apple"></a>
+      <a href="./DESIGN.md" class="hide-mobile">Store</a>
+      <a href="./DESIGN.md" class="hide-mobile">iPhone</a>
+      <a href="./DESIGN.md" class="hide-mobile">Watch</a>
+      <a href="./DESIGN.md" class="hide-mobile">Support</a>
+      <a href="./DESIGN.md" aria-label="Search"></a>
+      <a href="./DESIGN.md" aria-label="Bag"></a>
+    </nav>
+
+    <!-- sub-nav-frosted: sticky category + persistent primary CTA -->
+    <div class="sub-nav">
+      <span class="cat-name">iPhone</span>
+      <div class="sub-links">
+        <a href="./DESIGN.md">Overview</a>
+        <a href="./DESIGN.md">Compare</a>
+        <a href="./DESIGN.md">Tech Specs</a>
+        <a href="./DESIGN.md" class="btn btn-primary keep" style="padding: 6px 14px; font-size: var(--caption)">Buy</a>
+      </div>
+    </div>
+
+    <main>
+      <!-- product-tile-light: centered hero stack + product render on surface -->
+      <section class="tile tile-light" aria-labelledby="hero-h">
+        <div class="tile-inner text">
+          <p class="eyebrow">Reference fixture · apple</p>
+          <h1 style="margin-block-start: var(--sp-sm)">iPhone 17 Pro</h1>
+          <p class="lead" style="margin-block-start: var(--sp-sm)">The most advanced iPhone ever.</p>
+          <div class="center-actions">
+            <a href="./DESIGN.md" class="btn btn-primary">Buy</a>
+            <a href="./DESIGN.md" class="btn btn-ghost">Learn more</a>
+          </div>
+          <!-- product render — the ONLY drop-shadow in the system -->
+          <div class="product-render" role="img" aria-label="iPhone 17 Pro product render"></div>
+        </div>
+      </section>
+
+      <!-- product-tile-dark: color change IS the divider; Sky Link Blue for inline copy -->
+      <section class="tile tile-dark" aria-labelledby="dark-h">
+        <div class="tile-inner text">
+          <h2 id="dark-h">Titanium. So strong. So light. So Pro.</h2>
+          <p class="lead-airy muted-dark" style="margin-block-start: var(--sp-md); max-width: 46ch; margin-inline: auto">
+            An aerospace-grade titanium design — and the airy weight 300 read reserved
+            for moments that should breathe.
+          </p>
+          <div class="center-actions">
+            <a href="./DESIGN.md" class="btn btn-primary">Buy</a>
+            <a href="./DESIGN.md" class="text-link on-dark" style="align-self: center">Watch the film ›</a>
+          </div>
+          <div class="product-render" role="img" aria-label="Titanium frame render"></div>
+        </div>
+      </section>
+
+      <!-- Store utility cards: hairline border, 18px radius, no card shadow -->
+      <section class="tile tile-parchment" aria-labelledby="store-h">
+        <div class="tile-inner" style="text-align: left">
+          <h2 id="store-h" style="text-align: center; margin-block-end: var(--sp-xl)">The latest. Take a look.</h2>
+          <div class="store-grid">
+            <article class="store-card"><div class="thumb"></div><span class="name">iPhone 17 Pro</span><span class="price">From $999</span><a class="text-link" href="./DESIGN.md">Buy</a></article>
+            <article class="store-card"><div class="thumb"></div><span class="name">Apple Watch Ultra</span><span class="price">From $799</span><a class="text-link" href="./DESIGN.md">Buy</a></article>
+            <article class="store-card"><div class="thumb"></div><span class="name">AirPods Pro</span><span class="price">From $249</span><a class="text-link" href="./DESIGN.md">Buy</a></article>
+            <article class="store-card"><div class="thumb"></div><span class="name">MacBook Air</span><span class="price">From $1,099</span><a class="text-link" href="./DESIGN.md">Buy</a></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Configurator chips + search + sticky bar -->
+      <section class="tile tile-light" aria-labelledby="config-h">
+        <div class="tile-inner">
+          <h2 id="config-h" style="margin-block-end: var(--sp-lg)">Finish</h2>
+          <div class="chip-row">
+            <button class="chip" aria-pressed="true"><span class="swatch" style="background:#3a3a3d"></span> Black Titanium</button>
+            <button class="chip" aria-pressed="false"><span class="swatch" style="background:#e3e0d8"></span> Natural</button>
+            <button class="chip" aria-pressed="false"><span class="swatch" style="background:#c8d3dd"></span> Blue</button>
+            <button class="chip" aria-pressed="false"><span class="swatch" style="background:#e5d3c8"></span> Desert</button>
+          </div>
+
+          <div style="margin-block-start: var(--sp-xl)">
+            <label class="search" aria-label="Search accessories">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--ink-muted-48)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input type="search" placeholder="Search accessories" />
+            </label>
+          </div>
+
+          <!-- floating-sticky-bar -->
+          <div class="sticky-bar">
+            <div>
+              <p class="body-strong">iPhone 17 Pro · Black Titanium · 256GB</p>
+              <p style="color: var(--ink-muted-48); font-size: var(--caption)">From $999 or $41.62/mo.</p>
+            </div>
+            <a href="./DESIGN.md" class="btn btn-primary">Add to Bag</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Buttons specimen -->
+      <section class="tile tile-parchment" aria-labelledby="btn-h">
+        <div class="tile-inner">
+          <h2 id="btn-h" style="margin-block-end: var(--sp-lg)">Buttons</h2>
+          <div class="center-actions">
+            <button class="btn btn-primary">Buy</button>
+            <button class="btn btn-ghost">Learn more</button>
+            <button class="btn btn-primary btn-store">Get started</button>
+            <button class="btn btn-utility">Sign in</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- footer: parchment, dense-link 2.41 leading -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-cols">
+          <div class="footer-col"><h4>Shop and Learn</h4><a href="./DESIGN.md">Store</a><a href="./DESIGN.md">iPhone</a><a href="./DESIGN.md">Watch</a><a href="./DESIGN.md">Accessories</a></div>
+          <div class="footer-col"><h4>Services</h4><a href="./DESIGN.md">Music</a><a href="./DESIGN.md">TV+</a><a href="./DESIGN.md">iCloud</a></div>
+          <div class="footer-col"><h4>Account</h4><a href="./DESIGN.md">Manage ID</a><a href="./DESIGN.md">Store Account</a><a href="./DESIGN.md">iCloud.com</a></div>
+          <div class="footer-col"><h4>About Apple</h4><a href="./DESIGN.md">Newsroom</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Investors</a></div>
+        </div>
+        <p class="legal">Copyright © 2026 Apple Inc. All rights reserved. · <a class="text-link" href="./DESIGN.md">Privacy Policy</a> · <a class="text-link" href="./DESIGN.md">Terms of Use</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

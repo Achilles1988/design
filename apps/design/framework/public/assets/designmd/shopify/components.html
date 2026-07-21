@@ -1,0 +1,454 @@
+<!-- source_content_hash: 495e89b8d0a1848ded013c040f7a2ae62077e9d87fc4385350e25dee02ccdb38 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shopify — Component Preview</title>
+<style>
+  /* ============================================================
+     SHOPIFY DESIGN SYSTEM — token map
+     Two parallel tracks sharing type DNA + one pill vocabulary:
+     · Cinematic (black canvas, full-bleed photo, thin 330 display)
+     · Transactional (cream/light canvas, aloe/pistachio greens)
+     ss03 stylistic set enabled globally; pill is the only button.
+     ============================================================ */
+  :root {
+    /* Colour */
+    --primary:        #000000;
+    --ink:            #000000;
+    --on-primary:     #ffffff;
+    --on-dark:        #ffffff;
+    --canvas-night:          #000000; /* cinematic hero, footer */
+    --canvas-night-elevated: #0a0a0a; /* cards on cinematic */
+    --canvas-light:          #ffffff; /* pricing, signup */
+    --canvas-cream:          #fbfbf5; /* warm off-white transactional bg */
+    --surface-elevated-dark: #1e2c31; /* teal-shifted dark card */
+
+    /* Shade ladder */
+    --shade-30: #d4d4d8;
+    --shade-40: #a1a1aa;
+    --shade-50: #71717a;
+    --shade-60: #52525b;
+    --shade-70: #3f3f46; /* pressed primary pill */
+    --hairline-light: #e4e4e7;
+    --hairline-dark:  #1e2c31;
+
+    /* Accent — light track only */
+    --aloe-10:      #c1fbd4; /* featured tier + growth pill */
+    --pistachio-10: #d4f9e0; /* wide category band */
+
+    /* Cool link tones — dark track tertiary */
+    --link-cool-1: #9dabad;
+    --link-cool-2: #9797a2;
+    --link-cool-3: #bdbdca;
+    --link-mint:   #99b3ad;
+
+    /* Type — NHGD display (thin 330) + Inter UI */
+    --font-display: "NeueHaasGrotesk Display", "Inter Display", Inter, Helvetica, Arial, sans-serif;
+    --font-ui:      "Inter Variable", Inter, Helvetica, Arial, sans-serif;
+    --font-mono:    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Radius */
+    --r-xs: 4px; --r-sm: 5px; --r-md: 8px; --r-lg: 12px; --r-xl: 20px;
+    --r-pill: 9999px;
+
+    /* Spacing — base 8px */
+    --sp-xxs: 2px; --sp-xs: 4px; --sp-sm: 8px; --sp-md: 12px;
+    --sp-lg: 16px; --sp-xl: 24px; --sp-xxl: 32px; --sp-huge: 64px;
+
+    /* Elevation */
+    --sh-light-halo: 0 8px 8px rgba(0,0,0,0.1), 0 4px 4px rgba(0,0,0,0.1), 0 2px 2px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.1);
+    --sh-dark-inset: 0 1px 2px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.04);
+    --sh-modal: 0 25px 50px -12px rgba(0,0,0,0.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--canvas-cream);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 420;
+    line-height: 1.5;
+    font-feature-settings: "ss03";
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--aloe-10); color: var(--ink); }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: var(--r-md); }
+  .track-dark :focus-visible, .footer-dark :focus-visible { outline-color: var(--on-dark); }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 var(--sp-xl); }
+
+  /* Display type — thin 330 is the brand */
+  h1, h2, h3, .display { font-family: var(--font-display); font-weight: 330; letter-spacing: 0; }
+
+  /* ---------- Buttons — pill only ---------- */
+  .btn {
+    font-family: var(--font-ui);
+    font-size: 16px; font-weight: 420;
+    border: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-sm);
+    border-radius: var(--r-pill);
+    padding: 12px 24px;
+    transition: background .14s ease, filter .14s ease, transform .08s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--shade-70); }
+  .btn-aloe { background: var(--aloe-10); color: var(--ink); }
+  .btn-aloe:hover { filter: brightness(0.96); }
+  .btn-outline-dark { background: transparent; color: var(--on-primary); border: 2px solid var(--on-primary); padding: 12px 26px; }
+  .btn-outline-dark:hover { background: rgba(255,255,255,0.08); }
+  .btn-outline-light { background: var(--canvas-light); color: var(--ink); border: 1px solid var(--ink); }
+  .btn-outline-light:hover { background: var(--canvas-cream); }
+
+  /* ---------- Pills / tags ---------- */
+  .pill-tag {
+    display: inline-flex; align-items: center;
+    font-size: 12px; font-weight: 400; letter-spacing: 0.72px;
+    text-transform: uppercase;
+    border-radius: var(--r-pill);
+    padding: 4px 12px;
+  }
+  .pill-tag.mint  { background: var(--aloe-10); color: var(--ink); }
+  .pill-tag.shade { background: var(--shade-30); color: var(--ink); }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    background: var(--canvas-light);
+    padding: var(--sp-lg) 0;
+    border-bottom: 1px solid var(--hairline-light);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .nav-inner { display: flex; align-items: center; gap: var(--sp-xl); }
+  .logo { font-family: var(--font-display); font-weight: 330; font-size: 26px; }
+  .nav-links { display: flex; gap: var(--sp-xl); flex: 1; }
+  .nav-links a { font-size: 16px; color: var(--ink); }
+  .nav-links a:hover { color: var(--shade-50); }
+  .nav-actions { display: flex; align-items: center; gap: var(--sp-md); }
+
+  /* ============ CINEMATIC HERO (dark track) ============ */
+  .track-dark { background: var(--canvas-night); color: var(--on-dark); }
+  .hero {
+    padding: 128px 0 var(--sp-huge);
+    text-align: center;
+  }
+  .hero .eyebrow {
+    font-size: 12px; font-weight: 400; letter-spacing: 0.72px; text-transform: uppercase;
+    color: var(--link-cool-1);
+    margin-bottom: var(--sp-xl);
+  }
+  .hero h1 {
+    font-size: 96px;
+    line-height: 1.0;
+    letter-spacing: 2.4px;
+    margin: 0 auto var(--sp-xl);
+    max-width: 12ch;
+  }
+  .hero p {
+    font-size: 18px; font-weight: 550; color: var(--shade-40);
+    max-width: 520px; margin: 0 auto var(--sp-xl);
+  }
+  .hero .actions { display: flex; gap: var(--sp-md); justify-content: center; }
+
+  /* Full-bleed cinematic photo frame */
+  .photo-frame {
+    max-width: 1100px; margin: var(--sp-huge) auto 0;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--r-xl);
+    background:
+      radial-gradient(120% 120% at 30% 20%, #26343a 0%, transparent 55%),
+      linear-gradient(160deg, #12181b, #05070a);
+    box-shadow: var(--sh-dark-inset);
+    display: flex; align-items: flex-end; padding: var(--sp-xxl);
+  }
+  .photo-frame .cap { font-family: var(--font-ui); font-size: 14px; color: var(--link-cool-1); }
+
+  /* Cinematic feature cards */
+  .cine-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); padding: var(--sp-huge) 0; }
+  .cine-card {
+    background: var(--canvas-night-elevated);
+    color: var(--on-primary);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xxl);
+    box-shadow: var(--sh-dark-inset);
+  }
+  .cine-card.teal { background: var(--surface-elevated-dark); }
+  .cine-card h3 { font-family: var(--font-display); font-weight: 330; font-size: 28px; margin-bottom: var(--sp-md); }
+  .cine-card p { color: var(--shade-40); font-size: 16px; }
+
+  /* ============ TRANSACTIONAL (light track) ============ */
+  .track-light { background: var(--canvas-cream); padding: var(--sp-huge) 0; }
+  .section-head { text-align: center; margin-bottom: var(--sp-xxl); }
+  .section-head h2 { font-size: 55px; line-height: 1.16; margin-bottom: var(--sp-md); }
+  .section-head p { color: var(--shade-50); font-size: 18px; }
+
+  /* Pistachio category band */
+  .pistachio-band {
+    background: var(--pistachio-10);
+    color: var(--ink);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xxl);
+    display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--sp-xl); align-items: center;
+    margin-bottom: var(--sp-huge);
+  }
+  .pistachio-band h3 { font-family: var(--font-display); font-weight: 330; font-size: 48px; line-height: 1.14; }
+  .pistachio-band p { color: var(--shade-60); margin: var(--sp-md) 0 var(--sp-lg); }
+  .band-visual {
+    aspect-ratio: 4 / 3; border-radius: var(--r-md);
+    background: linear-gradient(135deg, #a8f0c0, #d4f9e0);
+  }
+
+  /* Pricing tiers */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+  .tier {
+    background: var(--canvas-light);
+    border: 1px solid var(--hairline-light);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xxl);
+    box-shadow: var(--sh-light-halo);
+    display: flex; flex-direction: column; gap: var(--sp-md);
+  }
+  .tier.featured { background: var(--aloe-10); border-color: transparent; }
+  .tier h3 { font-family: var(--font-display); font-weight: 500; font-size: 28px; letter-spacing: 0.42px; }
+  .tier .price { font-family: var(--font-display); font-weight: 330; font-size: 48px; line-height: 1.14; }
+  .tier .price small { font-family: var(--font-ui); font-size: 13px; font-weight: 500; color: var(--shade-50); letter-spacing: -0.13px; }
+  .tier .desc { color: var(--shade-50); font-size: 16px; }
+  .tier ul { list-style: none; display: flex; flex-direction: column; gap: var(--sp-sm); margin: var(--sp-sm) 0; }
+  .tier li { display: flex; gap: var(--sp-sm); font-size: 16px; }
+  .tier li::before { content: "✓"; color: var(--shade-60); font-weight: 600; }
+  .tier .btn { margin-top: auto; }
+
+  /* Signup / auth card + input */
+  .auth {
+    max-width: 460px; margin: var(--sp-huge) auto 0;
+    background: var(--canvas-light);
+    border: 1px solid var(--hairline-light);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xxl);
+    box-shadow: var(--sh-light-halo);
+  }
+  .auth h3 { font-family: var(--font-display); font-weight: 500; font-size: 28px; letter-spacing: 0.42px; margin-bottom: var(--sp-lg); }
+  .field { display: block; margin-bottom: var(--sp-lg); }
+  .field span { display: block; font-size: 14px; font-weight: 500; letter-spacing: 0.28px; margin-bottom: var(--sp-xs); }
+  .field input {
+    width: 100%;
+    background: var(--canvas-light);
+    border: 1px solid var(--hairline-light);
+    border-radius: var(--r-md);
+    padding: 10px 12px;
+    font-family: var(--font-ui); font-size: 16px; color: var(--ink);
+  }
+  .field input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--aloe-10); }
+  .field input::placeholder { color: var(--shade-40); }
+  .auth .btn { width: 100%; margin-top: var(--sp-sm); }
+  .auth .fine { font-size: 13px; color: var(--shade-50); text-align: center; margin-top: var(--sp-md); letter-spacing: -0.13px; }
+
+  /* ---------- Footer (dark track) ---------- */
+  .footer-dark {
+    background: var(--canvas-night);
+    color: var(--on-dark);
+    padding: var(--sp-huge) 0;
+  }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: var(--sp-xl); }
+  .foot-brand .logo { color: var(--on-dark); margin-bottom: var(--sp-md); }
+  .foot-brand p { color: var(--link-cool-1); font-size: 14px; max-width: 260px; }
+  .foot-col h4 { font-size: 14px; font-weight: 550; letter-spacing: 0.28px; margin-bottom: var(--sp-lg); }
+  .foot-col a { display: block; color: var(--link-cool-2); font-size: 14px; padding: var(--sp-xs) 0; text-decoration: underline; text-underline-offset: 3px; }
+  .foot-col a:hover { color: var(--on-dark); }
+  .foot-legal {
+    margin-top: var(--sp-huge); padding-top: var(--sp-lg);
+    border-top: 1px solid var(--shade-70);
+    display: flex; justify-content: space-between; gap: var(--sp-lg); flex-wrap: wrap;
+    font-size: 13px; color: var(--link-cool-3); letter-spacing: -0.13px;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    .hero h1 { font-size: 70px; }
+    .tiers, .cine-grid { grid-template-columns: 1fr 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .container { padding: 0 var(--sp-lg); }
+    .nav-links { display: none; }
+    .hero { padding: var(--sp-huge) 0; }
+    .hero h1 { font-size: 56px; letter-spacing: 0; }
+    .section-head h2 { font-size: 40px; }
+    .tiers, .cine-grid, .pistachio-band { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <!-- ============ NAV (light) ============ -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="logo" href="./DESIGN.md">Shopify</a>
+      <div class="nav-links">
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Resources</a>
+        <a href="./DESIGN.md">Enterprise</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-outline-light">Log in</button>
+        <button class="btn btn-primary">Start free trial</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ CINEMATIC HERO (dark track) ============ -->
+  <header class="track-dark">
+    <div class="container hero">
+      <p class="eyebrow">The commerce platform</p>
+      <h1>Make it real</h1>
+      <p>The all-in-one platform to start, run, and grow a business. Sell online, in person, and everywhere in between.</p>
+      <div class="actions">
+        <button class="btn btn-primary" style="background:var(--on-primary);color:var(--ink)">Start free trial</button>
+        <button class="btn btn-outline-dark">Watch the film</button>
+      </div>
+
+      <figure class="photo-frame">
+        <figcaption class="cap">Full-bleed merchant photography — the editorial spread does the visual lifting.</figcaption>
+      </figure>
+    </div>
+
+    <!-- Cinematic feature cards -->
+    <div class="container">
+      <div class="cine-grid">
+        <article class="cine-card">
+          <h3>Sell everywhere</h3>
+          <p>One back office for online, retail, wholesale, and social — inventory synced across every channel.</p>
+        </article>
+        <article class="cine-card teal">
+          <h3>Ship it fast</h3>
+          <p>Discounted labels, fulfillment, and tracking built in. Get orders out the door in minutes.</p>
+        </article>
+        <article class="cine-card">
+          <h3>Grow globally</h3>
+          <p>Localized currencies, languages, and payments for buyers in 175+ countries.</p>
+        </article>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ TRANSACTIONAL (light track) ============ -->
+  <main class="track-light">
+    <div class="container">
+      <!-- Pistachio category band -->
+      <section class="pistachio-band" aria-labelledby="build">
+        <div>
+          <span class="pill-tag mint">Website builder</span>
+          <h3 id="build">Build a store that sells</h3>
+          <p>Drag-and-drop themes, built-in checkout, and blazing-fast hosting. No code required.</p>
+          <button class="btn btn-primary">Design your store</button>
+        </div>
+        <div class="band-visual" aria-hidden="true"></div>
+      </section>
+
+      <!-- Pricing -->
+      <section aria-labelledby="pricing">
+        <div class="section-head">
+          <h2 id="pricing">Pick the plan that fits</h2>
+          <p>Start with a free trial. Switch or cancel anytime.</p>
+        </div>
+        <div class="tiers">
+          <article class="tier">
+            <span class="pill-tag shade">Starter</span>
+            <h3>Basic</h3>
+            <span class="price">$29<small>/mo</small></span>
+            <p class="desc">For solo entrepreneurs getting their first sales.</p>
+            <ul>
+              <li>Online store</li>
+              <li>2 staff accounts</li>
+              <li>10 inventory locations</li>
+            </ul>
+            <button class="btn btn-outline-light">Choose Basic</button>
+          </article>
+          <article class="tier featured">
+            <span class="pill-tag shade" style="background:rgba(0,0,0,0.08)">Most popular</span>
+            <h3>Grow</h3>
+            <span class="price">$79<small>/mo</small></span>
+            <p class="desc">For growing businesses scaling their operations.</p>
+            <ul>
+              <li>Everything in Basic</li>
+              <li>5 staff accounts</li>
+              <li>Professional reports</li>
+            </ul>
+            <button class="btn btn-aloe">Start free trial</button>
+          </article>
+          <article class="tier">
+            <span class="pill-tag shade">Scale</span>
+            <h3>Advanced</h3>
+            <span class="price">$299<small>/mo</small></span>
+            <p class="desc">For scaling brands that need advanced reporting.</p>
+            <ul>
+              <li>Everything in Grow</li>
+              <li>15 staff accounts</li>
+              <li>Custom report builder</li>
+            </ul>
+            <button class="btn btn-outline-light">Choose Advanced</button>
+          </article>
+        </div>
+      </section>
+
+      <!-- Signup / auth card -->
+      <section aria-labelledby="signup">
+        <form class="auth">
+          <h3 id="signup">Start your free trial</h3>
+          <label class="field">
+            <span>Email address</span>
+            <input type="email" placeholder="you@business.com" aria-label="Email address" />
+          </label>
+          <label class="field">
+            <span>Store name</span>
+            <input type="text" placeholder="My Store" aria-label="Store name" />
+          </label>
+          <button type="submit" class="btn btn-primary">Create your store</button>
+          <p class="fine">No credit card required · 3-day free trial</p>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============ FOOTER (dark track) ============ -->
+  <footer class="footer-dark" aria-label="Site footer">
+    <div class="container">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <div class="logo">Shopify</div>
+          <p>The commerce platform powering millions of businesses worldwide.</p>
+        </div>
+        <div class="foot-col">
+          <h4>Products</h4>
+          <a href="./DESIGN.md">Online store</a>
+          <a href="./DESIGN.md">Point of sale</a>
+          <a href="./DESIGN.md">Checkout</a>
+          <a href="./DESIGN.md">Payments</a>
+        </div>
+        <div class="foot-col">
+          <h4>Solutions</h4>
+          <a href="./DESIGN.md">Start a business</a>
+          <a href="./DESIGN.md">Sell online</a>
+          <a href="./DESIGN.md">Enterprise</a>
+        </div>
+        <div class="foot-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Careers</a>
+          <a href="./DESIGN.md">Press</a>
+        </div>
+      </div>
+      <div class="foot-legal">
+        <span>© 2026 Shopify Inc.</span>
+        <span>Terms · Privacy · Sitemap</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

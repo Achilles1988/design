@@ -1,0 +1,346 @@
+<!-- source_content_hash: 495450c79faab54d12d677649ca0a2c30a60f64f536a802e945ad54185c5baad -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SpaceX-Inspired — Component Preview</title>
+<style>
+  /* ============================================================
+     SpaceX-inspired tokens — mapped from DESIGN.md front matter.
+     An exercise in negation: pure black canvas, uppercase D-DIN
+     display in tight leading + wide tracking, full-bleed
+     photography, and a single ghost outlined pill CTA per band.
+     No brand accent — black, white, and the imagery itself.
+     ============================================================ */
+  :root {
+    --primary: #000000;
+    --ink: #000000;
+    --on-primary: #ffffff;
+    --on-primary-mute: #f0f0fa;
+    --canvas-night: #000000;
+    --canvas-night-soft: #0a0a0a;
+    --canvas-light: #ffffff;
+    --canvas-cool: #f0f0fa;
+    --hairline-on-dark: #3a3a3f;
+    --hairline-on-light: #e0e0e8;
+    --link-on-dark: #ffffff;
+    --ink-mute: #5a5a5f;
+
+    /* Radius — pill is the signature button shape */
+    --r-xs: 4px;
+    --r-sm: 8px;
+    --r-md: 16px;
+    --r-pill: 32px;
+    --r-full: 9999px;
+
+    /* Spacing — 8px base with denser sub-units */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 18px;
+    --sp-xl: 24px;
+    --sp-xxl: 32px;
+    --sp-huge: 48px;
+
+    /* Type — D-DIN-Bold display (Arial Narrow fallback); D-DIN body.
+       Inter 700 + 1.6px tracking approximates the industrial rhythm. */
+    --font-display: "D-DIN-Bold", "Arial Narrow", "Inter", Arial, Verdana, sans-serif;
+    --font-body: "D-DIN", "Inter", Arial, Verdana, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.32px;
+    color: var(--on-primary);
+    background: var(--canvas-night);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--on-primary);
+    outline-offset: 3px;
+  }
+  .on-light :focus-visible { outline-color: var(--ink); }
+
+  /* ---- Type scale ---- */
+  .display-xxl { font-family: var(--font-display); font-size: 80px; font-weight: 700; line-height: 0.95; letter-spacing: 1.6px; text-transform: uppercase; margin: 0; }
+  .display-xl  { font-family: var(--font-display); font-size: 60px; font-weight: 700; line-height: 1.2; letter-spacing: 1.2px; text-transform: uppercase; margin: 0; }
+  .display-lg  { font-family: var(--font-display); font-size: 48px; font-weight: 700; line-height: 1.25; letter-spacing: 0.96px; text-transform: uppercase; margin: 0; }
+  .body-lg { font-size: 16px; line-height: 1.7; letter-spacing: 0.32px; }
+  .micro-cap { font-size: 12px; font-weight: 400; line-height: 2; letter-spacing: 0.96px; text-transform: uppercase; }
+  .caption { font-size: 13px; line-height: 1.5; }
+
+  /* ---- Buttons: ghost outlined pill (the only marketing CTA) ---- */
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-body); font-size: 13px; font-weight: 700;
+    line-height: 0.94; letter-spacing: 1.17px; text-transform: uppercase;
+    padding: 18px 24px; border-radius: var(--r-pill);
+    background: transparent; border: 1px solid var(--on-primary); color: var(--on-primary);
+    cursor: pointer; transition: background-color 160ms ease, color 160ms ease;
+  }
+  .btn-ghost:hover { background: var(--on-primary); color: var(--ink); }
+  .btn-ghost--light { border-color: var(--ink); color: var(--ink); }
+  .btn-ghost--light:hover { background: var(--ink); color: var(--on-primary); }
+  .btn-filled-cool {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-body); font-size: 13px; font-weight: 700;
+    line-height: 0.94; letter-spacing: 1.17px; text-transform: uppercase;
+    padding: 18px 24px; border-radius: var(--r-pill);
+    background: var(--canvas-cool); border: 1px solid var(--canvas-cool); color: var(--ink);
+    cursor: pointer;
+  }
+
+  /* ---- Nav overlay: transparent, white-on-image, fixed feel ---- */
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 32px; background: transparent; color: var(--on-primary);
+  }
+  .nav.scrolled { background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
+  .wordmark { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+  .nav-links { display: flex; gap: var(--sp-xl); list-style: none; margin: 0; padding: 0; }
+  .nav-links a { font-size: 12px; font-weight: 400; line-height: 2; letter-spacing: 0.96px; text-transform: uppercase; }
+  .nav-links a:hover { color: var(--on-primary-mute); text-decoration: underline; text-underline-offset: 4px; }
+
+  /* ---- Full-bleed photo/video hero bands ---- */
+  .hero {
+    min-height: 78vh; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding: 120px 24px 80px;
+    color: var(--on-primary); position: relative; overflow: hidden;
+  }
+  /* Photography stands in for imagery — graded so type lands cleanly */
+  .hero--launch { background: radial-gradient(120% 90% at 50% 120%, #241a12 0%, #0a0806 45%, #000 100%); }
+  .hero--mars   { background: radial-gradient(140% 100% at 50% 100%, #5a2410 0%, #1a0c06 50%, #000 100%); }
+  .hero--orbit  { background: radial-gradient(120% 120% at 50% 20%, #0e1420 0%, #04060a 60%, #000 100%); }
+  .hero .eyebrow { margin: 0 0 var(--sp-md); }
+  .hero h1, .hero h2 { margin: 0 0 var(--sp-xl); max-width: 14ch; }
+  .hero .body-lg { max-width: 52ch; margin: 0 0 var(--sp-huge); color: var(--on-primary-mute); }
+  .video-frame {
+    width: min(720px, 90%); aspect-ratio: 16/9; margin-top: var(--sp-huge);
+    border-radius: var(--r-sm); background: rgba(255,255,255,0.04);
+    border: 1px solid var(--hairline-on-dark); display: grid; place-items: center;
+  }
+  .play {
+    width: 64px; height: 64px; border-radius: var(--r-full);
+    border: 1px solid var(--on-primary); background: rgba(0,0,0,0.3);
+    display: grid; place-items: center; color: var(--on-primary); cursor: pointer;
+  }
+
+  /* ---- Soft near-black content band ---- */
+  .band-soft {
+    background: var(--canvas-night-soft); color: var(--on-primary);
+    padding: 80px 32px; border-top: 1px solid var(--hairline-on-dark);
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  .mission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-huge); }
+  .mission-grid h3 { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.96px; font-weight: 700; font-size: 20px; margin: 0 0 var(--sp-sm); }
+  .mission-grid p { color: var(--on-primary-mute); }
+  .stat { font-family: var(--font-display); font-size: 48px; font-weight: 700; letter-spacing: 0.96px; }
+
+  /* ---- Shop site: light-canvas dual track ---- */
+  .shop { background: var(--canvas-light); color: var(--ink); padding: 64px 32px; }
+  .shop .display-lg, .shop h2 { color: var(--ink); }
+  .shop-head { margin-bottom: var(--sp-huge); }
+  .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-xxl); }
+  .product-card {
+    background: var(--canvas-light); border: 1px solid var(--hairline-on-light);
+    border-radius: var(--r-sm); padding: 16px;
+  }
+  .product-photo { aspect-ratio: 1; border-radius: var(--r-xs); background: var(--canvas-cool); margin-bottom: var(--sp-md); }
+  .product-card .name { font-size: 16px; }
+  .product-card .price { font-size: 16px; font-weight: 700; margin: 4px 0 var(--sp-md); }
+
+  /* ---- Form (shop site) ---- */
+  .form-band { background: var(--canvas-light); color: var(--ink); padding: 64px 32px; border-top: 1px solid var(--hairline-on-light); }
+  .form-card { max-width: 480px; }
+  .field { margin-bottom: var(--sp-md); }
+  .field label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.96px; margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 12px 16px; border: 1px solid var(--hairline-on-light);
+    border-radius: var(--r-xs); font-family: var(--font-body); font-size: 16px; color: var(--ink); background: var(--canvas-light);
+  }
+  .field input:focus { outline: none; border-color: var(--ink); }
+
+  /* ---- Footer ---- */
+  footer { background: var(--canvas-night); color: var(--on-primary); padding: 32px 24px; border-top: 1px solid var(--hairline-on-dark); }
+  .footer-cols { display: flex; flex-wrap: wrap; gap: var(--sp-huge); justify-content: space-between; }
+  .footer-cols nav { display: flex; flex-direction: column; gap: var(--sp-sm); }
+  .footer-cols a { font-size: 12px; text-transform: uppercase; letter-spacing: 0.96px; line-height: 2; }
+  .footer-cols a:hover { color: var(--on-primary-mute); text-decoration: underline; text-underline-offset: 4px; }
+  .legal { margin-top: var(--sp-xxl); font-size: 13px; color: var(--ink-mute); }
+  .legal a { text-decoration: underline; }
+  .inline-link { text-decoration: underline; color: var(--link-on-dark); }
+
+  @media (max-width: 960px) {
+    .display-xxl { font-size: 60px; }
+    .product-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .display-xxl { font-size: 48px; }
+    .nav-links { display: none; }
+    .mission-grid { grid-template-columns: 1fr; gap: var(--sp-xl); }
+  }
+  @media (max-width: 600px) {
+    .display-xxl { font-size: 40px; }
+    .product-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Primary">
+  <a class="wordmark" href="./DESIGN.md" aria-label="Home">SPACEX</a>
+  <ul class="nav-links">
+    <li><a href="./DESIGN.md">Falcon 9</a></li>
+    <li><a href="./DESIGN.md">Starship</a></li>
+    <li><a href="./DESIGN.md">Human Spaceflight</a></li>
+    <li><a href="./DESIGN.md">Mission</a></li>
+    <li><a href="./DESIGN.md">Shop</a></li>
+  </ul>
+</nav>
+
+<main>
+  <!-- Full-bleed hero band #1 — launch photography -->
+  <section class="hero hero--launch" aria-labelledby="hero1">
+    <p class="micro-cap eyebrow">Falcon 9 · Mission 340</p>
+    <h1 id="hero1" class="display-xxl">Making life multiplanetary</h1>
+    <p class="body-lg">SpaceX designs, manufactures, and launches advanced rockets and spacecraft.</p>
+    <button class="btn-ghost">Watch launch</button>
+  </section>
+
+  <!-- Full-bleed hero band #2 — Mars landscape -->
+  <section class="hero hero--mars" aria-labelledby="hero2">
+    <p class="micro-cap eyebrow">Starship</p>
+    <h2 id="hero2" class="display-xl">The road to Mars</h2>
+    <p class="body-lg">A fully reusable transportation system designed to carry crew and cargo beyond Earth orbit.</p>
+    <button class="btn-ghost">Learn more</button>
+    <div class="video-frame" role="img" aria-label="Starship flight test video frame">
+      <button class="play" aria-label="Play video">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- Soft near-black content band — mission stats -->
+  <section class="band-soft" aria-labelledby="mission-h">
+    <div class="wrap">
+      <p class="micro-cap eyebrow" style="text-align:center; margin-bottom:var(--sp-huge)">By the numbers</p>
+      <h2 id="mission-h" style="position:absolute; left:-9999px;">Mission statistics</h2>
+      <div class="mission-grid">
+        <div>
+          <p class="stat">400+</p>
+          <h3>Total launches</h3>
+          <p>Falcon family missions to orbit and beyond, with routine booster recovery.</p>
+        </div>
+        <div>
+          <p class="stat">300+</p>
+          <h3>Landings</h3>
+          <p>First-stage boosters returned to the launch site and autonomous drone ships.</p>
+        </div>
+        <div>
+          <p class="stat">250+</p>
+          <h3>Reflights</h3>
+          <p>Flight-proven hardware turned around and launched again — reusability at scale.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Full-bleed hero band #3 — orbit -->
+  <section class="hero hero--orbit" aria-labelledby="hero3">
+    <p class="micro-cap eyebrow">Human Spaceflight</p>
+    <h2 id="hero3" class="display-xl">Crew to orbit</h2>
+    <p class="body-lg">Dragon carries astronauts to the International Space Station and future commercial destinations.</p>
+    <button class="btn-ghost">Overview</button>
+  </section>
+
+  <!-- Shop site — light-canvas dual track -->
+  <section class="shop on-light" aria-labelledby="shop-h">
+    <div class="wrap">
+      <div class="shop-head">
+        <p class="micro-cap eyebrow">Shop</p>
+        <h2 id="shop-h" class="display-lg">Mission gear</h2>
+      </div>
+      <div class="product-grid">
+        <article class="product-card">
+          <div class="product-photo" role="img" aria-label="Product"></div>
+          <p class="name">Launch Jacket</p>
+          <p class="price">$120</p>
+          <button class="btn-filled-cool">Add to cart</button>
+        </article>
+        <article class="product-card">
+          <div class="product-photo" role="img" aria-label="Product"></div>
+          <p class="name">Starman Tee</p>
+          <p class="price">$35</p>
+          <button class="btn-filled-cool">Add to cart</button>
+        </article>
+        <article class="product-card">
+          <div class="product-photo" role="img" aria-label="Product"></div>
+          <p class="name">Falcon Cap</p>
+          <p class="price">$28</p>
+          <button class="btn-filled-cool">Add to cart</button>
+        </article>
+        <article class="product-card">
+          <div class="product-photo" role="img" aria-label="Product"></div>
+          <p class="name">Dragon Hoodie</p>
+          <p class="price">$85</p>
+          <button class="btn-filled-cool">Add to cart</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form band (shop / light) -->
+  <section class="form-band on-light" aria-labelledby="form-h">
+    <div class="wrap">
+      <div class="shop-head">
+        <p class="micro-cap eyebrow">Updates</p>
+        <h2 id="form-h" class="display-lg">Follow the missions</h2>
+      </div>
+      <form class="form-card" novalidate>
+        <div class="field">
+          <label for="sx-email">Email</label>
+          <input id="sx-email" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <button class="btn-ghost--light btn-ghost" type="submit">Sign up</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer aria-label="Site footer">
+  <div class="footer-cols">
+    <nav aria-label="Vehicles">
+      <a href="./DESIGN.md">Falcon 9</a>
+      <a href="./DESIGN.md">Falcon Heavy</a>
+      <a href="./DESIGN.md">Dragon</a>
+      <a href="./DESIGN.md">Starship</a>
+    </nav>
+    <nav aria-label="Company">
+      <a href="./DESIGN.md">Mission</a>
+      <a href="./DESIGN.md">Launches</a>
+      <a href="./DESIGN.md">Careers</a>
+      <a href="./DESIGN.md">Updates</a>
+    </nav>
+    <nav aria-label="Resources">
+      <a href="./DESIGN.md">Shop</a>
+      <a href="./DESIGN.md">Media</a>
+      <a href="./DESIGN.md">Contact</a>
+    </nav>
+  </div>
+  <p class="legal">© 2026 Space Exploration Technologies Corp. Design tokens sourced from <a class="inline-link" href="./DESIGN.md">DESIGN.md</a>.</p>
+</footer>
+
+</body>
+</html>

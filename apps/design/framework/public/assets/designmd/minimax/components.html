@@ -1,0 +1,482 @@
+<!-- source_content_hash: 2658b96488bb629749259b152c5ba2912a0e8feb6a03477e265879abd9264c50 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MiniMax — Component Preview</title>
+<style>
+  /* ============================================================
+     MINIMAX design tokens — mapped from DESIGN.md
+     Premium AI infrastructure brand built on a striking duality:
+     stark black-pill CTAs + white canvas for marketing, paired
+     with vibrant gradient product cards (coral / magenta / blue /
+     purple) that turn each model release into its own identity.
+     DM Sans across every surface; 80px hero; pills everywhere.
+     ============================================================ */
+  :root {
+    /* Brand — black is the dominant CTA */
+    --primary: #0a0a0a;
+    --primary-soft: #181e25;
+    --charcoal: #222222;
+    --on-primary: #ffffff;
+
+    /* Product-identity brand colors (reserved for product cards) */
+    --brand-coral: #ff5530;   /* M2.7 / Token Plan */
+    --brand-magenta: #ea5ec1; /* Music 2.6 */
+    --brand-blue: #1456f0;    /* Hailuo */
+    --brand-blue-mid: #3b82f6;
+    --brand-blue-deep: #1d4ed8;
+    --brand-blue-700: #17437d;
+    --brand-cyan: #3daeff;
+    --brand-blue-200: #bfdbfe;
+    --brand-purple: #a855f7;  /* Speech 2.8 */
+
+    /* Surface */
+    --canvas: #ffffff;
+    --surface: #f7f8fa;
+    --surface-soft: #f2f3f5;
+    --hairline: #e5e7eb;
+    --hairline-soft: #eaecf0;
+
+    /* Text */
+    --ink: #0a0a0a;
+    --ink-strong: #000000;
+    --slate: #45515e;
+    --steel: #5f5f5f;
+    --stone: #8e8e93;
+    --muted: #a8aab2;
+
+    /* Semantic */
+    --success-bg: #e8ffea;
+    --success-text: #1ba673;
+    --error: #d45656;
+
+    --on-dark: #ffffff;
+    --footer-bg: #0a0a0a;
+
+    /* Type — DM Sans everywhere */
+    --font: "DM Sans", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    /* Radius */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-xxl: 20px;
+    --r-xxxl: 24px;
+    --r-hero: 32px;
+    --r-full: 9999px;
+
+    /* Spacing */
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 16px;
+    --s-lg: 20px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-xxxl: 40px;
+    --s-section-sm: 48px;
+    --s-section: 64px;
+    --s-section-lg: 80px;
+    --s-hero: 96px;
+
+    /* Elevation */
+    --shadow-1: rgba(0,0,0,0.04) 0px 1px 2px 0px;
+    --shadow-2: rgba(0,0,0,0.08) 0px 4px 6px 0px;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    background: var(--canvas);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px var(--brand-blue-deep);
+    border-radius: var(--r-sm);
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--s-xxl); }
+
+  /* ---- Promo banner (black, above nav) ---- */
+  .promo {
+    background: var(--primary);
+    color: var(--on-primary);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    padding: var(--s-sm) var(--s-lg);
+  }
+  .promo a { text-decoration: underline; text-underline-offset: 2px; }
+
+  /* ---- Nav ---- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .nav-inner { display: flex; align-items: center; gap: var(--s-xl); height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; letter-spacing: -0.5px; }
+  .logo .mark { width: 26px; height: 26px; border-radius: 7px; background: var(--primary); display: grid; place-items: center; }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-md); }
+  .nav-links a { font-size: 14px; color: var(--slate); font-weight: 500; padding: 6px 2px; }
+  .nav-cta { margin-left: auto; display: flex; gap: var(--s-sm); align-items: center; }
+
+  /* ---- Buttons (all pills) ---- */
+  .btn {
+    font-family: var(--font);
+    font-size: 14px; font-weight: 600; line-height: 1.4;
+    border-radius: var(--r-full);
+    padding: 11px 24px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--charcoal); }
+  .btn-secondary { background: transparent; color: var(--ink); border-color: var(--ink); }
+  .btn-tertiary { background: var(--canvas); color: var(--ink); border-color: var(--hairline); }
+  .btn-white { background: var(--canvas); color: var(--ink); }
+  .btn-link { background: transparent; color: var(--ink); padding: 8px 0; font-size: 14px; font-weight: 500; }
+  .btn-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---- Hero ---- */
+  .hero { padding: var(--s-hero) 0 var(--s-section-lg); text-align: center; }
+  .hero h1 {
+    font-size: 80px; font-weight: 600; line-height: 1.10;
+    letter-spacing: -2px; margin: 0 auto var(--s-lg); max-width: 14ch;
+  }
+  .hero .sub { font-size: 18px; font-weight: 500; color: var(--steel); max-width: 52ch; margin: 0 auto var(--s-xl); }
+  .hero .cta-row { display: flex; gap: var(--s-sm); justify-content: center; }
+
+  .section { padding: var(--s-section) 0; }
+  .section-head { margin-bottom: var(--s-xxl); }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0.4px; color: var(--brand-blue-700); text-transform: uppercase; margin-bottom: var(--s-sm); }
+  .section-head h2 { font-size: 40px; font-weight: 600; line-height: 1.2; letter-spacing: -1px; margin: 0 0 var(--s-sm); }
+  .section-head p { font-size: 18px; color: var(--steel); margin: 0; max-width: 60ch; }
+
+  /* ---- Vibrant product matrix ---- */
+  .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-lg); }
+  .pcard {
+    border-radius: var(--r-hero);
+    padding: var(--s-xxl);
+    color: var(--on-dark);
+    min-height: 360px;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+  .pcard .tag { position: absolute; top: var(--s-lg); right: var(--s-lg); }
+  .pcard .wordmark { font-size: 44px; font-weight: 600; letter-spacing: -1.5px; line-height: 1.05; margin-top: auto; }
+  .pcard .tagline { font-size: 14px; opacity: 0.85; margin-top: var(--s-xs); }
+  .pcard::after { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 90% at 80% 0%, rgba(255,255,255,0.28), transparent 60%); pointer-events: none; }
+  .pcard-coral { background: linear-gradient(160deg, var(--brand-coral), #e0350f); }
+  .pcard-magenta { background: linear-gradient(160deg, var(--brand-magenta), #c93a9f); }
+  .pcard-blue { background: linear-gradient(160deg, var(--brand-blue), var(--brand-blue-deep)); }
+  .pcard-purple { background: linear-gradient(160deg, var(--brand-purple), #7c3aed); }
+
+  .badge { font-size: 13px; font-weight: 600; border-radius: var(--r-full); padding: 4px 10px; display: inline-block; }
+  .badge-new { background: var(--brand-coral); color: var(--on-dark); }
+  .badge-beta { background: var(--brand-blue-200); color: var(--brand-blue-deep); }
+  .badge-success { background: var(--success-bg); color: var(--success-text); }
+  .badge-code { background: var(--brand-blue-200); color: var(--brand-blue-deep); border-radius: var(--r-sm); padding: 2px 6px; font-family: var(--font-mono); }
+
+  /* ---- AI product tiles (quiet white cards) ---- */
+  .tile-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-lg); }
+  .tile {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xxxl);
+    padding: var(--s-xl);
+  }
+  .tile .icon { width: 56px; height: 56px; border-radius: var(--r-lg); background: var(--surface); display: grid; place-items: center; margin-bottom: var(--s-md); color: var(--ink); }
+  .tile h3 { font-size: 20px; font-weight: 600; margin: 0 0 6px; }
+  .tile p { font-size: 14px; color: var(--steel); margin: 0; }
+
+  /* ---- Segmented tabs ---- */
+  .seg { display: flex; gap: var(--s-lg); border-bottom: 1px solid var(--hairline); margin-bottom: var(--s-xl); }
+  .seg button {
+    background: transparent; border: 0; border-bottom: 2px solid transparent;
+    padding: 16px 4px; font-family: var(--font); font-size: 14px; font-weight: 600;
+    color: var(--steel); cursor: pointer; margin-bottom: -1px;
+  }
+  .seg button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+
+  /* ---- Pill tabs ---- */
+  .pill-tabs { display: flex; gap: var(--s-xs); flex-wrap: wrap; }
+  .pill-tab {
+    background: var(--canvas); color: var(--steel);
+    border: 1px solid var(--hairline); border-radius: var(--r-full);
+    padding: 8px 16px; font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+  .pill-tab[aria-selected="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+  /* ---- Data table ---- */
+  .table-wrap { border: 1px solid var(--hairline); border-radius: var(--r-md); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th { background: var(--surface); color: var(--steel); font-size: 13px; font-weight: 600; text-align: left; padding: 12px 16px; }
+  tbody td { padding: 16px; border-bottom: 1px solid var(--hairline-soft); }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody td:first-child { font-weight: 500; }
+
+  /* ---- Stats row ---- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-lg); }
+  .stat { padding: var(--s-xl); }
+  .stat .num { font-size: 40px; font-weight: 600; letter-spacing: -1px; }
+  .stat .lbl { font-size: 14px; color: var(--steel); margin-top: 4px; }
+
+  /* ---- Form ---- */
+  .form { max-width: 460px; }
+  .field { margin-bottom: var(--s-md); }
+  label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  input, textarea {
+    width: 100%; font-family: var(--font); font-size: 16px;
+    background: var(--canvas); color: var(--ink);
+    border: 1px solid var(--hairline); border-radius: var(--r-md);
+    padding: 12px 16px; height: 40px;
+  }
+  textarea { height: auto; min-height: 100px; resize: vertical; }
+  input:focus, textarea:focus { outline: none; border: 2px solid var(--brand-blue-deep); padding: 11px 15px; }
+
+  /* ---- Promo CTA card ---- */
+  .promo-cta {
+    background: var(--brand-coral);
+    color: var(--on-dark);
+    border-radius: var(--r-hero);
+    padding: var(--s-section);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s-xl); flex-wrap: wrap;
+  }
+  .promo-cta h2 { font-size: 32px; font-weight: 600; letter-spacing: -0.5px; margin: 0; max-width: 20ch; }
+
+  /* ---- Footer ---- */
+  .footer { background: var(--footer-bg); color: var(--on-dark); padding: var(--s-section) 0; }
+  .footer-top { display: flex; justify-content: space-between; gap: var(--s-xl); flex-wrap: wrap; margin-bottom: var(--s-xxl); }
+  .footer .brand { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .footer .brand span { display: block; font-size: 14px; font-weight: 400; color: var(--muted); margin-top: 6px; }
+  .footer-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-xl); }
+  .footer-cols h4 { font-size: 14px; font-weight: 500; margin: 0 0 var(--s-sm); color: var(--on-dark); }
+  .footer-cols a { display: block; font-size: 14px; color: var(--muted); padding: 4px 0; }
+  .footer-cols a:hover { color: var(--on-dark); }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,0.12); margin-top: var(--s-xxl); padding-top: var(--s-lg); font-size: 13px; color: var(--muted); }
+
+  .socials { display: flex; gap: var(--s-sm); }
+  .socials a { width: 36px; height: 36px; border: 1px solid rgba(255,255,255,0.2); border-radius: var(--r-full); display: grid; place-items: center; color: var(--muted); }
+
+  @media (max-width: 1023px) {
+    .product-grid, .tile-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .footer-cols { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 56px; }
+  }
+  @media (max-width: 767px) {
+    .nav-links { display: none; }
+    .hero h1 { font-size: 40px; }
+    .section-head h2 { font-size: 32px; }
+  }
+  @media (max-width: 479px) {
+    .product-grid, .tile-grid, .stats { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="promo">Invite &amp; Earn — Rewards for Both! <a href="./DESIGN.md">Learn more →</a></div>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="./DESIGN.md" aria-label="MiniMax home">
+      <span class="mark"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 11V3l3 4 3-4v8M11 3v8" stroke="#fff" stroke-width="1.6" fill="none" stroke-linejoin="round"/></svg></span>
+      MiniMax
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="./DESIGN.md">Models</a>
+      <a href="./DESIGN.md">Product</a>
+      <a href="./DESIGN.md">API</a>
+      <a href="./DESIGN.md">Company</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-secondary" href="./DESIGN.md">Login</a>
+      <a class="btn btn-primary" href="./DESIGN.md">Contact Us</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <span class="badge badge-new" style="margin-bottom:var(--s-md)">NEW · M2.7</span>
+    <h1>Intelligence with everyone</h1>
+    <p class="sub">A full-stack AI infrastructure — text, audio, music and video models unified on one premium platform for builders.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+      <a class="btn btn-secondary" href="./DESIGN.md">Read the docs</a>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="matrix-h">
+    <div class="section-head">
+      <div class="eyebrow">Model Matrix</div>
+      <h2 id="matrix-h">Full-stack model matrix</h2>
+      <p>Each model line carries its own vibrant identity — a distinct color that turns every release into a product moment.</p>
+    </div>
+    <div class="product-grid">
+      <article class="pcard pcard-coral">
+        <span class="tag badge badge-new" style="position:absolute">NEW</span>
+        <div class="wordmark">M2.7</div>
+        <div class="tagline">Frontier text reasoning</div>
+      </article>
+      <article class="pcard pcard-magenta">
+        <div class="wordmark">Music 2.6</div>
+        <div class="tagline">Studio-grade generation</div>
+      </article>
+      <article class="pcard pcard-blue">
+        <div class="wordmark">Hailuo</div>
+        <div class="tagline">Cinematic video</div>
+      </article>
+      <article class="pcard pcard-purple">
+        <div class="wordmark">Speech 2.8</div>
+        <div class="tagline">Expressive voices</div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--surface)" aria-labelledby="tiles-h">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Products</div>
+        <h2 id="tiles-h">Build across every modality</h2>
+      </div>
+      <div class="tile-grid">
+        <article class="tile">
+          <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M7 20h10" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <h3>Agent</h3>
+          <p>Autonomous task-completing agents with tool use.</p>
+        </article>
+        <article class="tile">
+          <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/></svg></div>
+          <h3>Hailuo Video</h3>
+          <p>Text-to-video and image-to-video pipelines.</p>
+        </article>
+        <article class="tile">
+          <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0116 0M8 12a4 4 0 018 0M12 12v0" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></div>
+          <h3>MiniMax Audio</h3>
+          <p>Speech synthesis, cloning and dubbing.</p>
+        </article>
+        <article class="tile">
+          <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 8l9-5 9 5-9 5-9-5z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/></svg></div>
+          <h3>Platform API</h3>
+          <p>One key, every model, production-ready SLAs.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="bench-h">
+    <div class="section-head">
+      <div class="eyebrow">M2.7</div>
+      <h2 id="bench-h">Benchmarks &amp; evaluation</h2>
+    </div>
+    <div class="seg" role="tablist" aria-label="Evaluation views">
+      <button role="tab" aria-selected="true">Benchmark</button>
+      <button role="tab" aria-selected="false">Self-Evaluation</button>
+      <button role="tab" aria-selected="false">Multi-Agent</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only" style="position:absolute;left:-9999px">Model comparison</caption>
+        <thead>
+          <tr><th scope="col">Model</th><th scope="col">Context</th><th scope="col">MMLU</th><th scope="col">Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>MiniMax M2.7 <span class="badge-code">API</span></td><td>1M tokens</td><td>88.4</td><td><span class="badge badge-success">Available</span></td></tr>
+          <tr><td>Music 2.6</td><td>—</td><td>—</td><td><span class="badge badge-new">Live</span></td></tr>
+          <tr><td>Hailuo Video</td><td>—</td><td>—</td><td><span class="badge badge-beta">Beta</span></td></tr>
+          <tr><td>Speech 2.8</td><td>—</td><td>—</td><td><span class="badge badge-success">Available</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--surface)" aria-labelledby="stats-h">
+    <div class="wrap">
+      <h2 id="stats-h" class="sr-only" style="position:absolute;left:-9999px">Company stats</h2>
+      <div class="stats">
+        <div class="stat"><div class="num">214,000+</div><div class="lbl">Enterprise clients &amp; developers</div></div>
+        <div class="stat"><div class="num">180+</div><div class="lbl">Countries served</div></div>
+        <div class="stat"><div class="num">1M</div><div class="lbl">Token context window</div></div>
+        <div class="stat"><div class="num">99.9%</div><div class="lbl">API uptime</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="pricing-h">
+    <div class="section-head">
+      <div class="eyebrow">Pricing</div>
+      <h2 id="pricing-h">Token plans</h2>
+    </div>
+    <div class="pill-tabs" role="tablist" aria-label="Plan types" style="margin-bottom:var(--s-xl)">
+      <button class="pill-tab" role="tab" aria-selected="true">Token Plan</button>
+      <button class="pill-tab" role="tab" aria-selected="false">Audio Subscription</button>
+      <button class="pill-tab" role="tab" aria-selected="false">Video Package</button>
+    </div>
+    <div class="tile-grid" style="grid-template-columns:repeat(3,1fr)">
+      <article class="tile"><h3>Starter</h3><p>Pay as you go. $0 base + usage.</p><a class="btn btn-tertiary" href="./DESIGN.md" style="margin-top:var(--s-md)">Choose</a></article>
+      <article class="tile" style="border-color:var(--ink)"><span class="badge badge-new">Popular</span><h3 style="margin-top:8px">Pro</h3><p>Volume discounts + priority queue.</p><a class="btn btn-primary" href="./DESIGN.md" style="margin-top:var(--s-md)">Choose</a></article>
+      <article class="tile"><h3>Enterprise</h3><p>Custom SLA, dedicated capacity.</p><a class="btn btn-tertiary" href="./DESIGN.md" style="margin-top:var(--s-md)">Contact</a></article>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="contact-h">
+    <div class="section-head">
+      <div class="eyebrow">Get in touch</div>
+      <h2 id="contact-h">Talk to our team</h2>
+    </div>
+    <form class="form" onsubmit="return false">
+      <div class="field"><label for="name">Name</label><input id="name" type="text" placeholder="Ada Lovelace" /></div>
+      <div class="field"><label for="email">Work email</label><input id="email" type="email" placeholder="you@company.com" /></div>
+      <div class="field"><label for="msg">Message</label><textarea id="msg" placeholder="Tell us about your use case…"></textarea></div>
+      <button class="btn btn-primary" type="submit">Send message</button>
+    </form>
+  </section>
+
+  <section class="section wrap">
+    <div class="promo-cta">
+      <h2>Get 10% back on every token top-up this month.</h2>
+      <a class="btn btn-white" href="./DESIGN.md">Join now</a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="brand">MiniMax<span>Intelligence with everyone</span></div>
+      <div class="socials">
+        <a href="./DESIGN.md" aria-label="X"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 2h3l-7 8 8 12h-6l-5-7-6 7H2l8-9L2 2h6l4 6 6-6z"/></svg></a>
+        <a href="./DESIGN.md" aria-label="GitHub"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-3 19.5c.5 0 .7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.1-1.1-1.4-1.1-1.4-.9-.6 0-.6 0-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1 2.9.8.1-.7.3-1 .6-1.3-2.2-.2-4.6-1.1-4.6-5 0-1 .4-1.9 1-2.5 0-.3-.4-1.2.1-2.5 0 0 .8-.3 2.7 1a9 9 0 014.8 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.1 2.2.1 2.5.6.6 1 1.5 1 2.5 0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.6c0 .3.2.6.7.5A10 10 0 0012 2z"/></svg></a>
+      </div>
+    </div>
+    <div class="footer-cols">
+      <div><h4>Research</h4><a href="./DESIGN.md">Papers</a><a href="./DESIGN.md">Models</a><a href="./DESIGN.md">Benchmarks</a></div>
+      <div><h4>Product</h4><a href="./DESIGN.md">Agent</a><a href="./DESIGN.md">Audio</a><a href="./DESIGN.md">Video</a></div>
+      <div><h4>API</h4><a href="./DESIGN.md">Docs</a><a href="./DESIGN.md">Pricing</a><a href="./DESIGN.md">Status</a></div>
+      <div><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">News</a></div>
+    </div>
+    <div class="footer-bottom">© 2026 MiniMax. All rights reserved. · Design tokens from <a href="./DESIGN.md" style="text-decoration:underline">DESIGN.md</a></div>
+  </div>
+</footer>
+
+</body>
+</html>

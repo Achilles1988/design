@@ -1,0 +1,562 @@
+<!-- source_content_hash: f30d2257d2d090790332d00ccb16cd2516c3c6008be61ad2ce83c4e991bcc803 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Uber — Component Preview</title>
+<style>
+  /* ============================================================
+     UBER DESIGN SYSTEM — token map
+     A black-and-white duet. Black is the ONLY conversion colour;
+     the pill (999px) is the single signature shape on every
+     interactive element. Sentence-case display type, no accent.
+     ============================================================ */
+  :root {
+    /* Colour — two-colour duet + grayscale */
+    --primary:        #000000; /* Ink Black — every CTA pill, footer, dark band */
+    --on-primary:     #ffffff;
+    --ink:            #000000; /* headings + body on light */
+    --body:           #5e5e5e; /* secondary text */
+    --mute:           #afafaf; /* placeholder, fine print */
+    --hairline-mid:   #4b4b4b; /* muted footer links */
+    --canvas:         #ffffff; /* default background */
+    --canvas-soft:    #efefef; /* chips, subtle pills, form rows */
+    --canvas-softer:  #f3f3f3; /* nested input fill */
+    --surface-pressed:#e2e2e2; /* pressed white pill */
+    --black-elevated: #282828; /* tab-toggle hover */
+    --link:           #0000ee; /* browser-default blue, legal only */
+    --on-dark:        #ffffff;
+
+    /* Type — UberMove (display 700) + UberMoveText (body 400/500) */
+    --font-display: "UberMove", "UberMoveText", Inter, system-ui, "Helvetica Neue", Arial, sans-serif;
+    --font-text:    "UberMoveText", Inter, system-ui, "Helvetica Neue", Arial, sans-serif;
+
+    /* Radius — pill is the signature */
+    --r-none:     0px;
+    --r-md:       8px;
+    --r-lg:       12px;
+    --r-xl:       16px;   /* canonical card radius */
+    --r-pill:     999px;  /* every interactive element */
+    --r-pill-tab: 36px;   /* off-shape hero tab toggle */
+    --r-full:     9999px; /* circular icons */
+
+    /* Spacing — base 4px */
+    --sp-xxs: 4px; --sp-xs: 6px; --sp-sm: 8px; --sp-md: 12px;
+    --sp-lg: 16px; --sp-xl: 20px; --sp-2xl: 24px; --sp-3xl: 32px;
+
+    /* Elevation */
+    --sh-1: rgba(0,0,0,0.12) 0px 4px 16px 0px;
+    --sh-2: rgba(0,0,0,0.16) 0px 4px 16px 0px;
+    --sh-pill: rgba(0,0,0,0.16) 0px 2px 8px 0px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-text);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--ink); color: var(--on-dark); }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: var(--r-md);
+  }
+  .band-dark :focus-visible { outline-color: var(--on-dark); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--sp-3xl); }
+
+  /* ---------- Headings ---------- */
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0; }
+
+  /* ---------- Buttons — the pill signature ---------- */
+  .btn {
+    font-family: var(--font-text);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 20px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-sm);
+    border-radius: var(--r-pill);
+    padding: 12px 20px;
+    transition: transform .08s ease, background .12s ease, filter .12s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { filter: brightness(1.25); }
+  .btn-primary:active { background: var(--hairline-mid); }
+
+  .btn-secondary { background: var(--canvas); color: var(--ink); box-shadow: inset 0 0 0 1px var(--surface-pressed); }
+  .btn-secondary:hover { background: var(--canvas-soft); }
+  .btn-secondary:active { background: var(--surface-pressed); }
+
+  .btn-subtle { background: var(--canvas-soft); color: var(--ink); }
+  .btn-subtle:hover { background: var(--surface-pressed); }
+
+  .btn-floating { background: var(--canvas); color: var(--ink); box-shadow: var(--sh-pill); padding: 12px; }
+
+  .btn-large-rounded {
+    background: var(--primary); color: var(--on-primary);
+    border-radius: var(--r-xl); /* the documented pill-rule exception */
+    font-size: 18px; line-height: 24px; padding: 16px 20px;
+  }
+
+  .btn-on-dark { background: var(--canvas); color: var(--ink); }
+  .btn-on-dark:hover { background: var(--canvas-soft); }
+
+  .icon-circular {
+    width: 44px; height: 44px; flex: none;
+    background: var(--canvas-soft); color: var(--ink);
+    border: none; border-radius: var(--r-full);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .icon-circular:hover { background: var(--surface-pressed); }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--canvas);
+    padding: var(--sp-lg) 0;
+    border-bottom: 1px solid var(--canvas-soft);
+  }
+  .nav-inner { display: flex; align-items: center; gap: var(--sp-2xl); }
+  .logo { font-family: var(--font-display); font-weight: 700; font-size: 24px; }
+  .nav-links { display: flex; gap: var(--sp-xl); flex: 1; }
+  .nav-link { font-size: 16px; font-weight: 500; color: var(--ink); }
+  .nav-link:hover { color: var(--body); }
+  .nav-actions { display: flex; align-items: center; gap: var(--sp-md); }
+
+  /* ---------- Hero band ---------- */
+  .hero {
+    padding: 64px 0;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--sp-3xl);
+    align-items: center;
+  }
+  .hero h1 {
+    font-size: 52px;
+    line-height: 64px;
+    margin-bottom: var(--sp-2xl);
+  }
+  .hero .lead { font-size: 18px; font-weight: 500; color: var(--body); margin-bottom: var(--sp-xl); max-width: 440px; }
+
+  /* Ride-request form card */
+  .request-card {
+    background: var(--canvas);
+    border-radius: var(--r-xl);
+    padding: var(--sp-lg);
+    box-shadow: var(--sh-2);
+    max-width: 490px;
+  }
+  .tab-toggle {
+    display: inline-flex;
+    gap: var(--sp-xxs);
+    background: var(--canvas-soft);
+    border-radius: var(--r-pill-tab);
+    padding: var(--sp-xxs);
+    margin-bottom: var(--sp-lg);
+  }
+  .tab {
+    border: none; cursor: pointer;
+    background: transparent; color: var(--ink);
+    font-family: var(--font-text); font-size: 16px; font-weight: 500;
+    padding: var(--sp-sm) var(--sp-lg);
+    border-radius: var(--r-pill-tab);
+  }
+  .tab.active { background: var(--canvas); box-shadow: var(--sh-pill); }
+  .tab:not(.active):hover { color: var(--body); }
+
+  .form-row {
+    display: flex; align-items: center; gap: var(--sp-md);
+    background: var(--canvas-soft);
+    border-radius: var(--r-md);
+    padding: var(--sp-lg);
+    margin-bottom: var(--sp-sm);
+  }
+  .form-row .rdot { width: 8px; height: 8px; flex: none; }
+  .form-row .rdot.pickup { background: var(--ink); }
+  .form-row .rdot.dest { background: var(--ink); border-radius: 2px; }
+  .form-row input {
+    flex: 1; border: none; background: transparent;
+    font-family: var(--font-text); font-size: 16px; color: var(--ink);
+  }
+  .form-row input::placeholder { color: var(--mute); }
+  .form-row input:focus { outline: none; }
+  .form-chips { display: flex; gap: var(--sp-sm); margin: var(--sp-sm) 0 var(--sp-lg); }
+  .chip-time {
+    display: inline-flex; align-items: center; gap: var(--sp-sm);
+    background: var(--canvas-soft); color: var(--ink);
+    border: none; cursor: pointer;
+    border-radius: var(--r-pill);
+    padding: var(--sp-sm) var(--sp-lg);
+    font-size: 14px; font-weight: 500;
+  }
+
+  /* ---------- Category chips row ---------- */
+  .section { padding: 64px 0; }
+  .eyebrow {
+    font-size: 12px; font-weight: 500; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--body);
+    margin-bottom: var(--sp-md);
+  }
+  .section h2 { font-size: 36px; line-height: 44px; margin-bottom: var(--sp-2xl); }
+
+  .chip-row { display: flex; gap: var(--sp-md); flex-wrap: wrap; }
+  .category-btn {
+    display: inline-flex; align-items: center; gap: var(--sp-sm);
+    background: var(--canvas-soft); color: var(--ink);
+    border: none; cursor: pointer;
+    border-radius: var(--r-pill);
+    padding: var(--sp-sm) var(--sp-lg);
+    font-size: 14px; font-weight: 500;
+  }
+  .category-btn:hover { background: var(--surface-pressed); }
+  .category-btn svg { flex: none; }
+
+  /* ---------- Promo cards — alternating band rhythm ---------- */
+  .promo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    margin-bottom: var(--sp-3xl);
+  }
+  .promo-illus {
+    aspect-ratio: 4 / 3;
+    background: repeating-linear-gradient(45deg, #e6e6e6 0 24px, #efefef 24px 48px);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--mute); font-size: 14px; font-weight: 500;
+  }
+  .promo-copy {
+    padding: var(--sp-3xl);
+    display: flex; flex-direction: column; justify-content: center;
+    gap: var(--sp-md);
+  }
+  .promo.light .promo-copy { background: var(--canvas); color: var(--ink); }
+  .promo.light { box-shadow: var(--sh-1); }
+  .promo-copy h3 { font-size: 24px; line-height: 32px; }
+  .promo-copy p { color: var(--body); }
+  .promo-copy .actions { margin-top: var(--sp-sm); display: flex; gap: var(--sp-md); }
+
+  /* Polarity-flipped black promo band */
+  .promo.dark { background: var(--ink); }
+  .promo.dark .promo-copy { color: var(--on-dark); }
+  .promo.dark .promo-copy p { color: var(--mute); }
+  .promo.dark .promo-illus {
+    background: repeating-linear-gradient(45deg, #1a1a1a 0 24px, #222 24px 48px);
+    color: var(--hairline-mid);
+  }
+
+  /* ---------- Full black promo band (drive) ---------- */
+  .band-dark {
+    background: var(--ink);
+    color: var(--on-dark);
+    padding: 64px 0;
+  }
+  .band-dark h2 { font-size: 52px; line-height: 64px; margin-bottom: var(--sp-lg); max-width: 640px; }
+  .band-dark p { color: var(--mute); max-width: 480px; margin-bottom: var(--sp-xl); }
+  .app-pills { display: flex; gap: var(--sp-md); flex-wrap: wrap; }
+  .app-pill {
+    display: inline-flex; align-items: center; gap: var(--sp-md);
+    background: var(--ink); color: var(--on-dark);
+    border: 1px solid var(--on-dark);
+    border-radius: var(--r-pill);
+    padding: var(--sp-md) var(--sp-xl);
+    font-size: 16px; font-weight: 500;
+  }
+  .app-pill:hover { background: var(--black-elevated); }
+
+  /* ---------- Pricing tiers ---------- */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-xl); }
+  .tier {
+    background: var(--canvas-soft);
+    border: 1px solid var(--surface-pressed);
+    border-radius: var(--r-xl);
+    padding: var(--sp-2xl);
+    display: flex; flex-direction: column; gap: var(--sp-md);
+  }
+  .tier.featured { background: var(--ink); color: var(--on-primary); border-color: var(--ink); }
+  .tier.featured p, .tier.featured .tier-sub { color: var(--mute); }
+  .tier h3 { font-family: var(--font-display); font-size: 20px; }
+  .tier .price { font-family: var(--font-display); font-size: 32px; line-height: 40px; }
+  .tier .tier-sub { color: var(--body); font-size: 14px; }
+  .tier ul { list-style: none; display: flex; flex-direction: column; gap: var(--sp-sm); margin: var(--sp-sm) 0; }
+  .tier li { display: flex; gap: var(--sp-sm); font-size: 14px; }
+  .tier li::before { content: "✓"; font-weight: 700; }
+  .tier .btn { margin-top: auto; }
+
+  /* ---------- FAQ ---------- */
+  .faq-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--sp-lg) 0;
+    border-bottom: 1px solid var(--canvas-soft);
+    font-size: 16px; font-weight: 500;
+    cursor: pointer;
+  }
+  .faq-row:hover { color: var(--body); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: var(--primary);
+    color: var(--on-dark);
+    padding: 64px 0;
+    margin-top: 64px;
+  }
+  .foot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-3xl); }
+  .foot-col h4 { font-size: 16px; font-weight: 500; margin-bottom: var(--sp-lg); }
+  .foot-col a { display: block; color: var(--mute); font-size: 14px; padding: var(--sp-xs) 0; }
+  .foot-col a:hover { color: var(--on-dark); }
+  .foot-legal {
+    margin-top: var(--sp-3xl); padding-top: var(--sp-lg);
+    border-top: 1px solid var(--hairline-mid);
+    font-size: 12px; color: var(--mute);
+    display: flex; justify-content: space-between; gap: var(--sp-lg); flex-wrap: wrap;
+  }
+  .foot-legal a { color: var(--mute); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1024px) {
+    .tiers { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .container { padding: 0 var(--sp-lg); }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; }
+    .hero h1, .band-dark h2 { font-size: 40px; line-height: 48px; }
+    .promo { grid-template-columns: 1fr; }
+    .promo-illus { order: -1; }
+    .foot-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <!-- ============ NAV ============ -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="logo" href="./DESIGN.md">Uber</a>
+      <div class="nav-links">
+        <a class="nav-link" href="./DESIGN.md">Ride</a>
+        <a class="nav-link" href="./DESIGN.md">Drive</a>
+        <a class="nav-link" href="./DESIGN.md">Business</a>
+        <a class="nav-link" href="./DESIGN.md">About</a>
+      </div>
+      <div class="nav-actions">
+        <a class="nav-link" href="./DESIGN.md">Help</a>
+        <button class="btn btn-subtle">Log in</button>
+        <button class="btn btn-primary">Sign up</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ HERO + REQUEST FORM ============ -->
+  <header class="container hero">
+    <div>
+      <h1>Go anywhere with Uber</h1>
+      <p class="lead">Request a ride, hop in, and go. Your city, moving at your pace.</p>
+      <div class="nav-actions" style="gap:var(--sp-md)">
+        <button class="btn btn-primary">Get started</button>
+        <a class="btn btn-secondary" href="./DESIGN.md">Learn more</a>
+      </div>
+    </div>
+
+    <form class="request-card" aria-label="Request a ride">
+      <div class="tab-toggle" role="tablist" aria-label="Ride or drive">
+        <button type="button" class="tab active" role="tab" aria-selected="true">Ride</button>
+        <button type="button" class="tab" role="tab" aria-selected="false">Drive</button>
+      </div>
+
+      <label class="form-row">
+        <span class="rdot pickup" aria-hidden="true"></span>
+        <input type="text" placeholder="Pickup location" aria-label="Pickup location" value="Current location" />
+      </label>
+      <label class="form-row">
+        <span class="rdot dest" aria-hidden="true"></span>
+        <input type="text" placeholder="Dropoff location" aria-label="Dropoff location" />
+      </label>
+
+      <div class="form-chips">
+        <button type="button" class="chip-time">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+          Today
+        </button>
+        <button type="button" class="chip-time">
+          Now
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+        </button>
+      </div>
+
+      <button type="submit" class="btn btn-large-rounded" style="width:100%">See prices</button>
+    </form>
+  </header>
+
+  <!-- ============ CATEGORY CHIPS ============ -->
+  <section class="container section" aria-labelledby="suggestions">
+    <p class="eyebrow">Suggestions</p>
+    <h2 id="suggestions">Ways to move with Uber</h2>
+    <div class="chip-row">
+      <button class="category-btn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="9" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>Ride</button>
+      <button class="category-btn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>Reserve</button>
+      <button class="category-btn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>Rentals</button>
+      <button class="category-btn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="15" cy="8" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>Group rides</button>
+      <button class="category-btn"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v6c0 4-3 6-7 8-4-2-7-4-7-8V7z" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>Teens</button>
+    </div>
+  </section>
+
+  <!-- ============ PROMO CARDS — alternating rhythm ============ -->
+  <section class="container section" aria-label="Featured products">
+    <article class="promo light">
+      <div class="promo-illus" aria-hidden="true">Rider illustration</div>
+      <div class="promo-copy">
+        <h3>Plan for later</h3>
+        <p>Reserve your ride up to 90 days in advance. Extra wait time, cancellations at no charge, and a fixed price up front.</p>
+        <div class="actions">
+          <button class="btn btn-primary">Use Reserve</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="promo dark">
+      <div class="promo-copy">
+        <h3>Drive when you want</h3>
+        <p>Make money on your schedule with deliveries or rides — or both. Set your own hours and get paid weekly.</p>
+        <div class="actions">
+          <button class="btn btn-on-dark">Get started</button>
+        </div>
+      </div>
+      <div class="promo-illus" aria-hidden="true">Driver illustration</div>
+    </article>
+  </section>
+
+  <!-- ============ BLACK PROMO BAND — app downloads ============ -->
+  <section class="band-dark" aria-labelledby="apps">
+    <div class="container">
+      <p class="eyebrow" style="color:var(--mute)">Get the app</p>
+      <h2 id="apps">Move with the tap of a button</h2>
+      <p>Download the app for a smoother ride — real-time tracking, saved places, and one-tap requests.</p>
+      <div class="app-pills">
+        <a class="app-pill" href="./DESIGN.md">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v13m0 0l-4-4m4 4l4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+          Download the Rider app
+        </a>
+        <a class="app-pill" href="./DESIGN.md">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v13m0 0l-4-4m4 4l4-4M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+          Download the Driver app
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRICING TIERS ============ -->
+  <section class="container section" aria-labelledby="tiers">
+    <p class="eyebrow">Uber One</p>
+    <h2 id="tiers">Choose your membership</h2>
+    <div class="tiers">
+      <article class="tier">
+        <h3>Pay as you go</h3>
+        <span class="price">$0<span class="tier-sub">/mo</span></span>
+        <p class="tier-sub">No commitment. Standard pricing on every ride and order.</p>
+        <ul>
+          <li>Standard fares</li>
+          <li>Ride tracking</li>
+          <li>24/7 support</li>
+        </ul>
+        <button class="btn btn-secondary">Continue</button>
+      </article>
+      <article class="tier featured">
+        <h3>Uber One</h3>
+        <span class="price">$9.99<span class="tier-sub">/mo</span></span>
+        <p>Save on rides and eats with member pricing and free delivery.</p>
+        <ul>
+          <li>$0 delivery fee</li>
+          <li>Up to 10% off rides</li>
+          <li>Member-only offers</li>
+        </ul>
+        <button class="btn btn-on-dark">Join Uber One</button>
+      </article>
+      <article class="tier">
+        <h3>Business</h3>
+        <span class="price">Custom</span>
+        <p class="tier-sub">Manage travel and meals for your whole team from one dashboard.</p>
+        <ul>
+          <li>Centralized billing</li>
+          <li>Travel policies</li>
+          <li>Expense reports</li>
+        </ul>
+        <button class="btn btn-secondary">Contact sales</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="container section" aria-labelledby="faq">
+    <h2 id="faq">Frequently asked questions</h2>
+    <div>
+      <div class="faq-row" role="button" tabindex="0">
+        How do I request a ride?
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="faq-row" role="button" tabindex="0">
+        How much does a ride cost?
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="faq-row" role="button" tabindex="0">
+        What safety features are built in?
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer aria-label="Site footer">
+    <div class="container">
+      <div class="foot-grid">
+        <div class="foot-col">
+          <h4>Company</h4>
+          <a href="./DESIGN.md">About us</a>
+          <a href="./DESIGN.md">Our offerings</a>
+          <a href="./DESIGN.md">Newsroom</a>
+          <a href="./DESIGN.md">Investors</a>
+        </div>
+        <div class="foot-col">
+          <h4>Products</h4>
+          <a href="./DESIGN.md">Ride</a>
+          <a href="./DESIGN.md">Drive</a>
+          <a href="./DESIGN.md">Eats</a>
+          <a href="./DESIGN.md">Business</a>
+        </div>
+        <div class="foot-col">
+          <h4>Global citizenship</h4>
+          <a href="./DESIGN.md">Safety</a>
+          <a href="./DESIGN.md">Sustainability</a>
+        </div>
+        <div class="foot-col">
+          <h4>Travel</h4>
+          <a href="./DESIGN.md">Reserve</a>
+          <a href="./DESIGN.md">Airports</a>
+          <a href="./DESIGN.md">Cities</a>
+        </div>
+      </div>
+      <div class="foot-legal">
+        <span>© 2026 Uber Technologies Inc. See the full <a href="./DESIGN.md">terms</a>.</span>
+        <span>Privacy · Accessibility · Terms</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

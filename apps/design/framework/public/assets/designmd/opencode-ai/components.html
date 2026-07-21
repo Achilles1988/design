@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<!-- source_content_hash: d1a8893c4b8ac90b1e86230eee2effa8bd15add3582853477920e32432336dda -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenCode — Component Preview</title>
+<style>
+  /* ============================================================
+     OpenCode design tokens — mapped from DESIGN.md
+     Terminal-native: 100% Berkeley Mono (→JetBrains Mono) across
+     every text role. Warm cream canvas (#fdfcfc), near-black ink,
+     4px radius on interactive / 0px on containers, ASCII bracket
+     markers [+]/[-]/[x] as bullets, block-pixel ASCII wordmark,
+     single dark hero TUI mockup. Flat-on-cream, no shadows.
+     ============================================================ */
+  :root {
+    --primary: #201d1d;
+    --on-primary: #fdfcfc;
+    --ink: #201d1d;
+    --ink-deep: #0f0000;
+    --charcoal: #302c2c;
+    --body: #424245;
+    --mute: #646262;
+    --stone: #6e6e73;
+    --ash: #9a9898;
+    --canvas: #fdfcfc;
+    --surface-soft: #f8f7f7;
+    --surface-card: #f1eeee;
+    --surface-dark: #201d1d;
+    --surface-dark-elevated: #302c2c;
+    --hairline: rgba(15,0,0,0.12);
+    --hairline-strong: #646262;
+    --on-dark: #fdfcfc;
+    --on-dark-mute: #9a9898;
+    /* Apple HIG semantic ramp — reserved for the in-TUI mockup */
+    --accent: #007aff;
+    --accent-hover: #0056b3;
+    --warning: #ff9f0a;
+    --danger: #ff3b30;
+    --success: #30d158;
+
+    /* Berkeley Mono (paid) → JetBrains Mono / IBM Plex Mono substitutes */
+    --font-mono: 'Berkeley Mono', 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    --r-none: 0px;
+    --r-sm: 4px;
+    --r-full: 9999px;
+
+    --s-xxs: 1px;
+    --s-xs: 4px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-section: 96px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-mono);
+    background: var(--canvas);
+    color: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 var(--s-xl); }
+  .wrap-wide { max-width: 1100px; margin: 0 auto; padding: 0 var(--s-xl); }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  h1, h2, h3 { color: var(--ink); font-weight: 700; }
+
+  /* ---- Nav ---- */
+  .nav { height: 56px; display: flex; align-items: center; border-bottom: 1px solid var(--hairline); position: sticky; top: 0; background: var(--canvas); z-index: 20; }
+  .nav .wrap-wide { display: flex; align-items: center; gap: var(--s-lg); width: 100%; }
+  /* block-pixel ASCII wordmark */
+  .wordmark { font-weight: 700; color: var(--ink); font-size: 15px; letter-spacing: 1px; display: inline-flex; align-items: center; }
+  .wordmark .block { background: var(--ink); color: var(--canvas); padding: 2px 6px; margin-right: 2px; }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-xl); }
+  .nav-links a { font-size: 16px; font-weight: 500; color: var(--ink); }
+  .nav-links a:hover { color: var(--mute); }
+  .nav-links a .cnt { color: var(--mute); }
+  .nav-right { margin-left: auto; }
+
+  /* ---- Buttons ---- */
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 2;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 20px;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--ink-deep); }
+  .btn-secondary { background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline-strong); }
+  .btn-secondary:hover { background: var(--surface-soft); }
+
+  .badge-news { display: inline-block; background: var(--surface-dark); color: var(--on-dark); font-size: 14px; line-height: 2; border-radius: var(--r-sm); padding: 2px 8px; }
+
+  /* ---- Hero ---- */
+  .hero { padding: var(--s-section) 0 var(--s-xxl); }
+  .hero .newsline { margin-bottom: var(--s-lg); font-size: 14px; color: var(--mute); }
+  .hero h1 { font-size: 38px; font-weight: 700; line-height: 1.5; margin-bottom: var(--s-lg); max-width: 20ch; }
+  .hero p.lead { font-size: 16px; color: var(--body); max-width: 60ch; margin-bottom: var(--s-xl); }
+
+  /* ---- Install tab strip + snippet ---- */
+  .install-block { margin-bottom: var(--s-xl); max-width: 620px; }
+  .tab-strip { display: flex; gap: 0; border-bottom: 1px solid var(--hairline-strong); margin-bottom: var(--s-md); }
+  .tab { background: transparent; border: none; cursor: pointer; font-family: var(--font-mono); font-size: 16px; font-weight: 500; line-height: 2; color: var(--mute); padding: 8px 16px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--ink); border-bottom-color: var(--ash); }
+  .install-snippet {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-md);
+    background: var(--surface-card);
+    border-radius: var(--r-sm);
+    padding: 12px 16px;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .install-snippet .cmd { overflow-x: auto; white-space: nowrap; }
+  .install-snippet .copy { flex-shrink: 0; color: var(--mute); cursor: pointer; display: flex; }
+  .hero-cta { display: flex; gap: var(--s-md); }
+
+  /* ---- Hero TUI mockup (signature dark surface) ---- */
+  .tui-mockup {
+    margin-top: var(--s-xxl);
+    background: var(--surface-dark);
+    color: var(--on-dark);
+    border-radius: var(--r-none);
+    padding: 64px 32px;
+    text-align: center;
+  }
+  .ascii-wordmark {
+    color: var(--on-dark);
+    font-size: 12px;
+    line-height: 1.15;
+    white-space: pre;
+    display: inline-block;
+    text-align: left;
+    margin-bottom: var(--s-xl);
+  }
+  .tui-prompt-row {
+    background: var(--surface-dark-elevated);
+    color: var(--on-dark);
+    border-radius: var(--r-sm);
+    padding: 8px 12px;
+    max-width: 560px;
+    margin: 0 auto var(--s-md);
+    text-align: left;
+    font-size: 16px;
+  }
+  .tui-prompt-row .pipe { color: var(--ash); }
+  .tui-prompt-row .token { color: var(--accent); }
+  .tui-prompt-row .ok { color: var(--success); }
+  .keybind-hints { color: var(--ash); font-size: 14px; }
+  .keybind-hints .kb { color: var(--on-dark); }
+
+  /* ---- Section scaffold ---- */
+  section.band { padding: var(--s-section) 0; }
+  .section-label { font-size: 16px; font-weight: 700; color: var(--ink); padding-bottom: var(--s-sm); border-bottom: 1px solid var(--hairline); margin-bottom: var(--s-lg); }
+  .band > .wrap > p.intro { font-size: 16px; color: var(--body); max-width: 62ch; margin-bottom: var(--s-lg); }
+
+  /* ---- List rows with ASCII bracket bullets ---- */
+  .list-row { display: flex; gap: var(--s-md); padding: 8px 0; color: var(--body); }
+  .list-row .marker { color: var(--ink); font-weight: 700; flex-shrink: 0; }
+  .list-row .marker.on { color: var(--success); }
+  .list-row .marker.off { color: var(--danger); }
+  .list-row b { color: var(--ink); font-weight: 700; }
+
+  /* ---- Chart tiles (ASCII sparse-line) ---- */
+  .chart-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .chart-tile { padding: 16px; border: 1px solid var(--hairline); border-radius: var(--r-none); }
+  .chart-tile svg { display: block; width: 100%; height: 60px; }
+  .chart-tile .cap { font-size: 14px; color: var(--mute); margin-top: var(--s-sm); }
+
+  /* ---- FAQ ---- */
+  .faq-row { padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+  .faq-row .q { color: var(--ink); font-weight: 500; }
+  .faq-row .q .toggle { color: var(--mute); margin-right: 8px; }
+  .faq-row .a { color: var(--body); margin-top: var(--s-xs); }
+
+  /* ---- Testimonial rows ---- */
+  .testimonial-row { display: flex; gap: var(--s-md); background: var(--surface-soft); border-radius: var(--r-sm); padding: 16px 20px; margin-bottom: var(--s-md); }
+  .testimonial-row .avatar { width: 32px; height: 32px; border-radius: var(--r-full); background: var(--accent); flex-shrink: 0; }
+  .testimonial-row .who { color: var(--ink); font-weight: 500; }
+  .testimonial-row .who span { color: var(--mute); font-weight: 400; }
+  .testimonial-row .quote { color: var(--body); margin-top: 2px; }
+
+  /* ---- Enterprise form (two-column split) ---- */
+  .split-form { display: grid; grid-template-columns: 360px 1fr; gap: var(--s-xxl); align-items: start; }
+  .split-form .lead-col h2 { font-size: 38px; line-height: 1.5; margin-bottom: var(--s-md); }
+  .split-form .lead-col p { color: var(--body); }
+  .field { margin-bottom: var(--s-md); }
+  .field label { display: block; font-size: 14px; color: var(--mute); margin-bottom: var(--s-xs); }
+  .text-input, .textarea {
+    width: 100%;
+    background: var(--surface-soft);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 16px;
+  }
+  .text-input { height: 40px; padding: 8px 12px; }
+  .textarea { padding: 12px; min-height: 96px; resize: vertical; }
+  .text-input::placeholder, .textarea::placeholder { color: var(--ash); }
+  .text-input:focus, .textarea:focus { outline: none; background: var(--canvas); border-color: var(--ink); }
+
+  /* ---- Footer ---- */
+  footer { border-top: 1px solid var(--hairline); padding: 32px 0; margin-top: var(--s-section); }
+  .footer-links { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; }
+  .footer-links a { font-size: 14px; color: var(--body); padding: var(--s-sm); border-right: 1px solid var(--hairline); }
+  .footer-links a:last-child { border-right: none; }
+  .footer-links a:hover { color: var(--ink); }
+  .footer-bottom { display: flex; justify-content: space-between; margin-top: var(--s-lg); font-size: 14px; color: var(--mute); }
+  .footer-bottom .util { display: flex; gap: var(--s-md); }
+
+  @media (max-width: 1024px) { .chart-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 850px) { .split-form { grid-template-columns: 1fr; } .footer-links { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 768px) { .nav-links { display: none; } }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 28px; }
+    .footer-links { grid-template-columns: 1fr; }
+    .footer-links a { border-right: none; border-bottom: 1px solid var(--hairline); }
+  }
+</style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap-wide">
+      <div class="wordmark"><span class="block">OPEN</span>CODE</div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">GitHub <span class="cnt">[150K]</span></a>
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Zen</a>
+        <a href="./DESIGN.md">Go</a>
+        <a href="./DESIGN.md">Enterprise</a>
+      </nav>
+      <div class="nav-right"><button class="btn btn-primary">↓ Download</button></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div class="newsline"><span class="badge-news">News</span> &nbsp;OpenCode Zen is now available →</div>
+      <h1>The open source AI coding agent</h1>
+      <p class="lead">A terminal-native coding agent that reads like a man page. Runs in your shell, speaks any model, and stays out of your way.</p>
+
+      <div class="install-block">
+        <div class="tab-strip" role="tablist">
+          <button class="tab active" role="tab" aria-selected="true">curl</button>
+          <button class="tab" role="tab" aria-selected="false">npm</button>
+          <button class="tab" role="tab" aria-selected="false">bun</button>
+          <button class="tab" role="tab" aria-selected="false">brew</button>
+          <button class="tab" role="tab" aria-selected="false">yay</button>
+        </div>
+        <div class="install-snippet">
+          <span class="cmd">curl -fsSL https://opencode.ai/install | bash</span>
+          <span class="copy" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="1" stroke="currentColor" stroke-width="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="2"/></svg></span>
+        </div>
+      </div>
+
+      <div class="hero-cta">
+        <button class="btn btn-primary">Get started with Zen</button>
+        <button class="btn btn-secondary">Read docs →</button>
+      </div>
+
+      <div class="tui-mockup" aria-label="TUI preview">
+<div class="ascii-wordmark"> ___  ____  ____  _  _  ___  ___  ____  ____
+/ _ \(  _ \( ___)( \( )/ __)/ _ \(  _ \( ___)
+| (_) )) __/ )__)  )  (( (__( (_) ))(_) ))__)
+ \___/(__)  (____)(_)\_)\___)\___/(____)(____)</div>
+        <div class="tui-prompt-row"><span class="pipe">| </span>Build&nbsp;&nbsp;<span class="token">[Claude Opus 4.5]</span>&nbsp;&nbsp;<span class="token">[OpenCode Zen]</span></div>
+        <div class="tui-prompt-row"><span class="pipe">| </span>&gt; refactor auth module&nbsp;&nbsp;<span class="ok">✓ 3 files changed</span></div>
+        <div class="keybind-hints"><span class="kb">tab</span> switch agent&nbsp;&nbsp;&nbsp;<span class="kb">ctrl-p</span> commands</div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-label">What is OpenCode?</div>
+        <p class="intro">An open source coding agent that lives in your terminal. It loads the right language servers, edits across your repo, and works with whatever model you bring.</p>
+        <div class="list-row"><span class="marker on">[+]</span><div><b>LSP enabled</b> &nbsp;&nbsp;Automatically loads the right LSPs for the IDE.</div></div>
+        <div class="list-row"><span class="marker on">[+]</span><div><b>Model agnostic</b> &nbsp;&nbsp;Bring Claude, GPT, or any local model via OpenCode Zen.</div></div>
+        <div class="list-row"><span class="marker on">[+]</span><div><b>Repo-aware edits</b> &nbsp;&nbsp;Reads and rewrites across the whole codebase, not one file.</div></div>
+        <div class="list-row"><span class="marker off">[-]</span><div><b>No telemetry</b> &nbsp;&nbsp;Nothing leaves your machine unless you say so.</div></div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-label">By the numbers</div>
+        <div class="chart-grid">
+          <div class="chart-tile">
+            <svg viewBox="0 0 200 60" fill="none" aria-hidden="true"><polyline points="0,50 30,44 60,46 90,30 120,32 150,16 200,8" stroke="var(--body)" stroke-width="1.5" stroke-dasharray="2 3"/></svg>
+            <div class="cap">Fig 1. 150K GitHub Stars</div>
+          </div>
+          <div class="chart-tile">
+            <svg viewBox="0 0 200 60" fill="none" aria-hidden="true"><polyline points="0,52 40,40 80,42 120,26 160,20 200,12" stroke="var(--body)" stroke-width="1.5" stroke-dasharray="2 3"/></svg>
+            <div class="cap">Fig 2. 850 Contributors</div>
+          </div>
+          <div class="chart-tile">
+            <svg viewBox="0 0 200 60" fill="none" aria-hidden="true"><polyline points="0,54 35,48 70,36 105,34 140,18 200,6" stroke="var(--body)" stroke-width="1.5" stroke-dasharray="2 3"/></svg>
+            <div class="cap">Fig 3. 6.5M Monthly Devs</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-label">From the community</div>
+        <div class="testimonial-row">
+          <span class="avatar" aria-hidden="true"></span>
+          <div>
+            <div class="who">jane_dev <span>· Staff Engineer, Anomaly</span></div>
+            <div class="quote">"It's the first agent that feels like a real unix tool. Pipes, keybindings, no chrome."</div>
+          </div>
+        </div>
+        <div class="testimonial-row">
+          <span class="avatar" aria-hidden="true" style="background:var(--warning);"></span>
+          <div>
+            <div class="who">m_ortega <span>· OSS Maintainer</span></div>
+            <div class="quote">"Runs any model, edits my whole repo, and never phones home. Exactly what I wanted."</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-label">FAQ</div>
+        <div class="faq-row"><div class="q"><span class="toggle">+</span>Is OpenCode really free?</div><div class="a">Yes — the agent is open source under a permissive license. OpenCode Zen adds hosted model routing.</div></div>
+        <div class="faq-row"><div class="q"><span class="toggle">+</span>Which models can I use?</div><div class="a">Any — Claude, GPT, Gemini, or a local model. Bring your own key or route through Zen.</div></div>
+        <div class="faq-row"><div class="q"><span class="toggle">−</span>Does it send my code anywhere?</div><div class="a">No. Code stays local; only the prompts you approve are sent to the model you configure.</div></div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <div class="section-label">Built for privacy first</div>
+        <div class="split-form">
+          <div class="lead-col">
+            <h2>Talk to us about enterprise</h2>
+            <p>Self-hosted routing, SSO, and audit logs for teams that need control.</p>
+          </div>
+          <form onsubmit="return false">
+            <div class="field"><label for="name">Full name</label><input class="text-input" id="name" type="text" placeholder="Ada Lovelace"></div>
+            <div class="field"><label for="email">Company email</label><input class="text-input" id="email" type="email" placeholder="ada@company.com"></div>
+            <div class="field"><label for="problem">What problem are you trying to solve?</label><textarea class="textarea" id="problem" placeholder="We want a self-hosted coding agent for our platform team…"></textarea></div>
+            <button class="btn btn-primary">Send →</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap-wide">
+      <div class="footer-links">
+        <a href="./DESIGN.md">GitHub [150K]</a>
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Changelog</a>
+        <a href="./DESIGN.md">Discord</a>
+        <a href="./DESIGN.md">X</a>
+      </div>
+      <div class="footer-bottom">
+        <span>©2026 Anomaly</span>
+        <span class="util"><a href="./DESIGN.md">Brand</a><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a><a href="./DESIGN.md">English ▼</a></span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

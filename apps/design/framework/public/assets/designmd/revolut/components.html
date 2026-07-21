@@ -1,0 +1,391 @@
+<!-- source_content_hash: b7fa8473315541f5d7e7d76f68a77105d255e6dae00d31d5eb34621d1d52de59 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Revolut — Component Preview</title>
+<style>
+  /* ============================================================
+     REVOLUT — Design tokens
+     Two-mode canvas: true-black storytelling / white catalogue,
+     switched in full-bleed bands that slam against each other.
+     Aeonik Pro 500 display (80–136px, lineHeight 1.0, tight tracking).
+     Primary CTA = white pill on black (brightest pixel). Cobalt violet
+     scarce (featured plan card only). Pills for buttons; 20px cards.
+     ============================================================ */
+  :root {
+    /* Brand — cobalt violet, used scarcely */
+    --primary:        #494fdf;
+    --primary-bright: #4f55f1;
+    --primary-deep:   #3a40c4;
+    --on-primary:     #ffffff;
+
+    /* Text */
+    --ink:            #191c1f;
+    --body:           #1f2226;
+    --charcoal:       #3a3d40;
+    --mute:           #505a63;
+    --ash:            #5c5e60;
+    --stone:          #8d969e;
+    --faint:          #c9c9cd;
+    --on-dark:        #ffffff;
+    --on-dark-mute:   rgba(255,255,255,0.72);
+
+    /* Surface */
+    --canvas-light:   #ffffff;
+    --canvas-dark:    #000000;   /* true black — never near-black */
+    --surface-soft:   #f4f4f4;
+    --surface-deep:   #0a0a0a;
+    --surface-elev:   #16181a;   /* plan-card lift on black */
+    --hairline-light: #e2e2e7;
+    --hairline-dark:  rgba(255,255,255,0.12);
+    --hairline-strong:#191c1f;
+    --divider-soft:   rgba(255,255,255,0.06);
+
+    /* Accent palette — illustrations only, never button surfaces */
+    --a-teal:  #00a87e;
+    --a-blue:  #007bc2;
+    --a-green: #428619;
+    --a-pink:  #e61e49;
+    --a-warn:  #ec7e00;
+    --a-yellow:#b09000;
+    --link:    #376cd5;
+
+    /* Type — Aeonik Pro substitute: Inter (display) + Inter (body) */
+    --font-display: "Inter", "General Sans", "Söhne", system-ui, sans-serif;
+    --font-body:    "Inter", system-ui, -apple-system, sans-serif;
+
+    /* Radius */
+    --r-none:0px; --r-sm:8px; --r-md:12px; --r-lg:20px; --r-xl:28px; --r-full:9999px;
+
+    /* Spacing — base 4 */
+    --s-xs:6px; --s-sm:8px; --s-md:14px; --s-lg:16px; --s-xl:24px; --s-xxl:32px;
+    --s-3xl:48px; --s-block:80px; --s-section:88px; --s-band:120px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body); font-weight: 400;
+    font-size: 16px; line-height: 1.5; letter-spacing: 0.24px;
+    color: var(--ink); background: var(--canvas-light);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--primary); color: #fff; }
+  a { color: var(--link); text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--primary-bright); outline-offset: 3px; border-radius: var(--r-sm); }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--s-xl); }
+  .band { padding: var(--s-section) 0; }
+  .band--dark { background: var(--canvas-dark); color: var(--on-dark); }
+  .band--light { background: var(--canvas-light); color: var(--ink); }
+
+  h1,h2,h3 { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.4px; }
+
+  /* ---------- Buttons — all pills ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+    font-family: var(--font-body); font-size: 16px; font-weight: 600; letter-spacing: 0.24px;
+    border: 1px solid transparent; border-radius: var(--r-full);
+    padding: 13px 28px; min-height: 48px; cursor: pointer; line-height: 1;
+    transition: background .15s ease, opacity .15s ease;
+  }
+  .btn--primary { background: var(--canvas-light); color: var(--canvas-dark); } /* white pill on dark */
+  .btn--primary:hover { background: var(--faint); }
+  .btn--dark { background: var(--canvas-dark); color: var(--on-dark); }
+  .btn--soft { background: var(--surface-soft); color: var(--ink); }
+  .btn--outline-light { background: var(--canvas-light); color: var(--ink); border-color: var(--hairline-strong); }
+  .btn--outline-dark { background: var(--canvas-dark); color: var(--on-dark); border-color: var(--on-dark); }
+  .btn--sm { min-height: 36px; padding: 8px 16px; font-size: 14px; }
+
+  .badge {
+    display: inline-block; background: var(--surface-soft); color: var(--ink);
+    font-size: 13px; padding: 4px 12px; border-radius: var(--r-full); font-weight: 600;
+  }
+  .badge--feature { background: var(--primary); color: var(--on-primary); }
+
+  /* ---------- Nav ---------- */
+  .nav { background: var(--canvas-dark); color: var(--on-dark); }
+  .nav__inner { display: flex; align-items: center; gap: var(--s-xl); height: 64px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 600; font-size: 20px; color: #fff; letter-spacing: -0.4px; }
+  .nav__links { display: flex; gap: var(--s-xl); margin-left: var(--s-lg); }
+  .nav__links a { color: var(--on-dark); font-weight: 600; font-size: 15px; }
+  .nav__links a:hover { color: var(--faint); }
+  .nav__right { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+  .nav__right a.plain { color: var(--on-dark); font-weight: 600; }
+
+  /* ---------- Hero (dark band) ---------- */
+  .hero { padding: var(--s-band) 0; }
+  .hero__grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--s-3xl); align-items: center; }
+  .hero h1 { font-size: 96px; font-weight: 500; line-height: 1.0; letter-spacing: -1.92px; margin-bottom: var(--s-xl); }
+  .hero p.lead { font-size: 18px; line-height: 1.56; color: var(--on-dark-mute); max-width: 40ch; margin-bottom: var(--s-xl); }
+  .hero__actions { display: flex; gap: var(--s-md); flex-wrap: wrap; }
+  .sub-nav { display: flex; gap: var(--s-sm); margin-bottom: var(--s-xl); flex-wrap: wrap; }
+  .sub-nav-pill { background: var(--surface-elev); color: var(--on-dark); font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: var(--r-full); }
+
+  /* Product mockup — phone */
+  .phone { justify-self: center; width: 260px; aspect-ratio: 9/19.5; border-radius: var(--r-xl); background: linear-gradient(160deg, #1a1c2e, #000); border: 1px solid var(--hairline-dark); padding: 16px; box-shadow: 0 40px 80px rgba(73,79,223,0.25); }
+  .phone__screen { height: 100%; border-radius: 20px; background: var(--surface-elev); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .phone__bal { color: var(--on-dark-mute); font-size: 12px; }
+  .phone__amt { font-family: var(--font-display); font-weight: 500; font-size: 34px; letter-spacing: -0.6px; font-variant-numeric: tabular-nums; }
+  .phone__card { border-radius: 12px; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--primary-deep)); color: #fff; margin-top: 4px; }
+  .phone__card small { opacity: .8; font-size: 11px; }
+  .phone__row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--hairline-dark); font-size: 13px; color: var(--on-dark); }
+  .phone__dot { width: 28px; height: 28px; border-radius: 50%; flex: none; }
+  .phone__row span.amt { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Section heads ---------- */
+  .section-head { max-width: 60ch; margin-bottom: var(--s-3xl); }
+  .section-head h2 { font-size: 48px; line-height: 1.21; letter-spacing: -0.48px; }
+  .band--dark .section-head p, .section-head p { color: var(--mute); margin-top: var(--s-md); font-size: 18px; }
+  .band--dark .section-head p { color: var(--on-dark-mute); }
+
+  /* ---------- Feature grid ---------- */
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .feature { border-radius: var(--r-lg); padding: var(--s-xxl); }
+  .band--light .feature { background: var(--canvas-light); border: 1px solid var(--hairline-light); }
+  .band--dark .feature { background: var(--surface-elev); }
+  .feature__ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; margin-bottom: var(--s-lg); color: #fff; }
+  .feature h3 { font-size: 24px; margin-bottom: var(--s-sm); letter-spacing: -0.2px; }
+  .band--dark .feature p { color: var(--on-dark-mute); }
+  .band--light .feature p { color: var(--mute); }
+
+  /* ---------- Plans (dark band) ---------- */
+  .plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-lg); }
+  .plan { background: var(--surface-elev); color: var(--on-dark); border-radius: var(--r-lg); padding: var(--s-xxl); display: flex; flex-direction: column; }
+  .plan--featured { background: var(--primary); color: var(--on-primary); } /* cobalt inversion */
+  .plan__name { font-family: var(--font-display); font-weight: 500; font-size: 32px; letter-spacing: -0.32px; }
+  .plan__price { font-size: 20px; margin: var(--s-md) 0 var(--s-lg); font-variant-numeric: tabular-nums; }
+  .plan ul { list-style: none; display: grid; gap: 10px; margin-bottom: var(--s-xl); }
+  .plan li { display: flex; gap: 10px; font-size: 15px; color: var(--on-dark-mute); }
+  .plan--featured li { color: rgba(255,255,255,0.9); }
+  .plan li svg { flex: none; margin-top: 2px; color: var(--primary-bright); }
+  .plan--featured li svg { color: #fff; }
+  .plan .btn { margin-top: auto; width: 100%; }
+  .plan--featured .btn { background: #fff; color: var(--primary); }
+
+  /* ---------- Download / form (light band) ---------- */
+  .signup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3xl); align-items: center; }
+  .form-card { background: var(--surface-soft); border-radius: var(--r-lg); padding: var(--s-xxl); }
+  .field { margin-bottom: var(--s-lg); }
+  .field label { display: block; font-size: 14px; color: var(--body); margin-bottom: 6px; font-weight: 600; }
+  .input { width: 100%; font-family: var(--font-body); font-size: 16px; height: 56px; padding: 14px 16px; border: 1px solid var(--hairline-light); border-radius: var(--r-md); background: var(--canvas-light); color: var(--ink); }
+  .input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(73,79,223,0.18); }
+  .downloads { display: flex; gap: var(--s-md); margin-top: var(--s-lg); }
+  .dl-tile { display: flex; align-items: center; gap: 10px; background: var(--canvas-dark); color: #fff; border-radius: var(--r-md); padding: 12px 20px; height: 56px; font-size: 14px; }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--canvas-dark); color: var(--on-dark-mute); padding: var(--s-block) 0 var(--s-3xl); }
+  .foot__grid { display: grid; grid-template-columns: 1.4fr repeat(4,1fr); gap: var(--s-xl); }
+  .foot__col h4 { color: var(--on-dark); font-size: 13px; font-weight: 700; margin-bottom: var(--s-md); }
+  .foot__col a { display: block; color: var(--on-dark-mute); font-size: 14px; padding: 6px 0; }
+  .foot__col a:hover { color: #fff; }
+  .foot__bottom { margin-top: var(--s-3xl); padding-top: var(--s-lg); border-top: 1px solid var(--divider-soft); font-size: 13px; color: var(--ash); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s-sm); }
+
+  @media (max-width: 1024px) {
+    .hero__grid, .signup-grid { grid-template-columns: 1fr; }
+    .features { grid-template-columns: 1fr; }
+    .plans { grid-template-columns: 1fr 1fr; }
+    .foot__grid { grid-template-columns: 1fr 1fr 1fr; }
+    .hero h1 { font-size: 64px; letter-spacing: -1.2px; }
+  }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 48px; }
+    .nav__links { display: none; }
+    .plans { grid-template-columns: 1fr; }
+    .foot__grid { grid-template-columns: 1fr 1fr; }
+    .band { padding: var(--s-block) 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav">
+    <div class="wrap nav__inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Revolut home">
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="var(--primary)"/><path d="M7 6h6.2c2.4 0 4 1.6 4 3.8 0 1.9-1.2 3.3-3 3.7L18 18h-2.6l-2.6-4.4H9.5V18H7V6zm2.5 2.2v3.4h3.4c1 0 1.7-.7 1.7-1.7s-.7-1.7-1.7-1.7H9.5z" fill="#fff"/></svg>
+        Revolut
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="./DESIGN.md">Personal</a>
+        <a href="./DESIGN.md">Business</a>
+        <a href="./DESIGN.md">Company</a>
+      </nav>
+      <div class="nav__right">
+        <a class="plain" href="./DESIGN.md">Log in</a>
+        <a class="btn btn--primary btn--sm" href="./DESIGN.md">Sign up</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO (dark storytelling) ===================== -->
+    <section class="band--dark">
+      <div class="wrap hero">
+        <div class="hero__grid">
+          <div>
+            <div class="sub-nav" aria-label="Product modes">
+              <span class="sub-nav-pill">Personal</span>
+              <span class="sub-nav-pill">Premium</span>
+              <span class="sub-nav-pill">Metal</span>
+            </div>
+            <h1>Banking &amp; Beyond</h1>
+            <p class="lead">Join the 70+ million people and businesses managing their money the smarter way with Revolut.</p>
+            <div class="hero__actions">
+              <a class="btn btn--primary" href="./DESIGN.md">Choose your subscription</a>
+              <a class="btn btn--outline-dark" href="./DESIGN.md">See all plans</a>
+            </div>
+          </div>
+
+          <!-- Full-bleed phone product mockup -->
+          <div class="phone" role="img" aria-label="Revolut app mockup showing balance and transactions">
+            <div class="phone__screen">
+              <div class="phone__bal">Total balance</div>
+              <div class="phone__amt">£12,480.55</div>
+              <div class="phone__card">
+                <small>Revolut · Metal</small>
+                <div style="font-variant-numeric:tabular-nums;letter-spacing:2px;margin-top:6px">•••• 4021</div>
+              </div>
+              <div class="phone__row"><span class="phone__dot" style="background:var(--a-teal)"></span> Groceries <span class="amt">−£42.10</span></div>
+              <div class="phone__row"><span class="phone__dot" style="background:var(--a-pink)"></span> Transfer <span class="amt">−£120.00</span></div>
+              <div class="phone__row"><span class="phone__dot" style="background:var(--a-warn)"></span> Salary <span class="amt">+£3,200</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURES (light catalogue) ===================== -->
+    <section class="band band--light">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Everything your money can do</h2>
+          <p>Spend, save, invest, and transfer — all inside one app built for the way you live.</p>
+        </div>
+        <div class="features">
+          <article class="feature">
+            <div class="feature__ico" style="background:var(--a-teal)" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M2 12h20M12 2v20"/></svg></div>
+            <h3>Spend anywhere</h3>
+            <p>Pay in 150+ currencies at the real exchange rate, with no hidden fees abroad.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__ico" style="background:var(--a-green)" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg></div>
+            <h3>Invest &amp; grow</h3>
+            <p>Buy stocks, commodities, and crypto from as little as £1 — commission-free tiers included.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__ico" style="background:var(--a-blue)" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 3l7 4v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V7l7-4z"/></svg></div>
+            <h3>Stay protected</h3>
+            <p>Card controls, disposable virtual cards, and real-time fraud alerts keep your money secure.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PLANS (dark) ===================== -->
+    <section class="band band--dark">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Pick the plan that's right for you</h2>
+          <p>From everyday essentials to premium perks — upgrade or downgrade anytime.</p>
+        </div>
+        <div class="plans">
+          <div class="plan">
+            <div class="plan__name">Standard</div>
+            <div class="plan__price">£0<span style="color:var(--stone)"> /mo</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Free UK account</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Fee-free spending</li>
+            </ul>
+            <a class="btn btn--outline-dark" href="./DESIGN.md">Get started</a>
+          </div>
+          <div class="plan">
+            <div class="plan__name">Plus</div>
+            <div class="plan__price">£3.99<span style="color:var(--stone)"> /mo</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Purchase protection</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Priority support</li>
+            </ul>
+            <a class="btn btn--outline-dark" href="./DESIGN.md">Choose Plus</a>
+          </div>
+          <div class="plan plan--featured">
+            <span class="badge badge--feature" style="align-self:flex-start;margin-bottom:12px">Most popular</span>
+            <div class="plan__name">Premium</div>
+            <div class="plan__price">£7.99<span style="opacity:.8"> /mo</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Metal-tier rates</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Travel insurance</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Airport lounges</li>
+            </ul>
+            <a class="btn" href="./DESIGN.md">Choose Premium</a>
+          </div>
+          <div class="plan">
+            <div class="plan__name">Metal</div>
+            <div class="plan__price">£14.99<span style="color:var(--stone)"> /mo</span></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Metal card</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> 1% cashback</li>
+            </ul>
+            <a class="btn btn--outline-dark" href="./DESIGN.md">Choose Metal</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SIGNUP + DOWNLOAD (light) ===================== -->
+    <section class="band band--light">
+      <div class="wrap">
+        <div class="signup-grid">
+          <div>
+            <div class="section-head" style="margin-bottom:var(--s-lg)">
+              <h2>Get the app</h2>
+              <p>Sign up in minutes. Get instant access to your account, right from your phone.</p>
+            </div>
+            <div class="downloads">
+              <span class="dl-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M16 1c.1 1-.3 2-1 2.7-.6.7-1.7 1.3-2.6 1.2-.1-1 .4-2 1-2.7C14 1.5 15.1 1 16 1zm2.7 6.5c-1.5-.9-3.1-.7-4 .3-.9 0-1.9-.6-3.1-.6C9.4 7.2 7.5 8.6 7.5 11c0 3.8 3 8 4.4 8 .8 0 1.1-.5 2.1-.5s1.2.5 2 .5c1.5 0 3.5-3.6 3.6-5.6-1.9-.8-2-3.3-.9-4.4z"/></svg> App Store</span>
+              <span class="dl-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M4 3l11 9L4 21V3zm13 6l3 2c1 .6 1 1.4 0 2l-3 2-3-3 3-3z"/></svg> Google Play</span>
+            </div>
+          </div>
+          <form class="form-card" onsubmit="return false">
+            <div class="field">
+              <label for="r-phone">Phone number</label>
+              <input id="r-phone" class="input" type="tel" placeholder="+44 7000 000000" />
+            </div>
+            <div class="field">
+              <label for="r-email">Email</label>
+              <input id="r-email" class="input" type="email" placeholder="you@example.com" />
+            </div>
+            <button class="btn btn--dark" type="submit" style="width:100%">Get started</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="wrap">
+      <div class="foot__grid">
+        <div class="foot__col">
+          <a class="brand" href="./DESIGN.md" aria-label="Revolut home" style="margin-bottom:var(--s-md)">
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="var(--primary)"/><path d="M7 6h6.2c2.4 0 4 1.6 4 3.8 0 1.9-1.2 3.3-3 3.7L18 18h-2.6l-2.6-4.4H9.5V18H7V6zm2.5 2.2v3.4h3.4c1 0 1.7-.7 1.7-1.7s-.7-1.7-1.7-1.7H9.5z" fill="#fff"/></svg>
+            Revolut
+          </a>
+          <p style="max-width:32ch;font-size:14px">One app, all things money.</p>
+        </div>
+        <div class="foot__col"><h4>Products</h4><a href="./DESIGN.md">Accounts</a><a href="./DESIGN.md">Cards</a><a href="./DESIGN.md">Invest</a><a href="./DESIGN.md">Crypto</a></div>
+        <div class="foot__col"><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Blog</a><a href="./DESIGN.md">Press</a></div>
+        <div class="foot__col"><h4>Support</h4><a href="./DESIGN.md">Help centre</a><a href="./DESIGN.md">Contact</a><a href="./DESIGN.md">Status</a></div>
+        <div class="foot__col"><h4>Legal</h4><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a><a href="./DESIGN.md">Licences</a></div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Revolut Ltd.</span>
+        <span>Design tokens sourced from <a href="./DESIGN.md" style="color:var(--faint)">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

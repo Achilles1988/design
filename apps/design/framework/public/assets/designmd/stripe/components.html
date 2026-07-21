@@ -1,0 +1,423 @@
+<!-- source_content_hash: 5c8806b7dd3e0c2554ccba9d1e2a7c78e7c6e50e44fcf6ff5daea6026f8a9ed9 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stripi — Component Preview</title>
+<style>
+  /* ============================================================
+     STRIPI — Design tokens
+     Financial-infrastructure brand. Deep navy ink, electric indigo,
+     a recurring atmospheric gradient mesh across the upper third.
+     Sohne thin (300) display with negative tracking; tabular figures
+     wherever money lives; tight-radius pills; dark-app dashboard track.
+     ============================================================ */
+  :root {
+    /* Brand & accent */
+    --primary:        #533afd;  /* signature CTA — used sparingly */
+    --primary-deep:   #4434d4;
+    --primary-press:  #2e2b8c;
+    --primary-soft:   #665efd;
+    --primary-sub:    #b9b9f9;  /* pale indigo tag */
+    --brand-dark-900: #1c1e54;  /* featured tier & dashboard chrome */
+
+    /* Ink */
+    --ink:            #0d253d;  /* deep navy — body, never pure black */
+    --ink-2:          #273951;
+    --ink-mute:       #64748d;
+    --on-primary:     #ffffff;
+
+    /* Surface */
+    --canvas:         #ffffff;
+    --canvas-soft:    #f6f9fc;
+    --canvas-cream:   #f5e9d4;
+    --hairline:       #e3e8ee;
+    --hairline-input: #a8c3de;
+
+    /* Mesh accents (decorative only) */
+    --ruby:           #ea2261;
+    --magenta:        #f96bee;
+    --lemon:          #f5cf98;
+
+    /* Type — Sohne substitute: Inter at weight 300 */
+    --font: "Inter", "SF Pro Display", system-ui, -apple-system, sans-serif;
+
+    /* Radius */
+    --r-xs: 4px; --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-pill: 9999px;
+
+    /* Spacing */
+    --s-xxs:2px; --s-xs:4px; --s-sm:8px; --s-md:12px; --s-lg:16px;
+    --s-xl:24px; --s-xxl:32px; --s-huge:64px;
+
+    /* Elevation */
+    --lift-1: rgba(0,55,112,0.08) 0 1px 3px;
+    --lift-2: rgba(0,55,112,0.08) 0 8px 24px, rgba(0,55,112,0.04) 0 2px 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    font-weight: 300;
+    font-feature-settings: "ss01";  /* stylistic set on globally */
+    font-size: 15px; line-height: 1.4;
+    color: var(--ink); background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--primary-sub); color: var(--primary-press); }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { color: var(--primary-deep); }
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--r-sm); }
+
+  .tnum { font-feature-settings: "tnum"; letter-spacing: -0.42px; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--s-xl); }
+
+  /* ---------- Gradient mesh backdrop ---------- */
+  .mesh {
+    position: relative;
+    background:
+      radial-gradient(60% 120% at 8% 0%, var(--lemon) 0%, transparent 45%),
+      radial-gradient(55% 120% at 38% -10%, var(--magenta) 0%, transparent 42%),
+      radial-gradient(60% 130% at 62% 0%, var(--primary-soft) 0%, transparent 46%),
+      radial-gradient(60% 120% at 92% -8%, var(--ruby) 0%, transparent 44%),
+      var(--canvas);
+  }
+
+  /* ---------- Nav ---------- */
+  .nav { position: sticky; top: 0; z-index: 20; }
+  .nav__inner {
+    display: flex; align-items: center; gap: var(--s-xl); height: 68px;
+    padding: var(--s-lg) 0;
+  }
+  .brand { display: flex; align-items: center; gap: 8px; font-size: 21px; font-weight: 500; letter-spacing: -0.5px; color: var(--ink); }
+  .nav__links { display: flex; gap: var(--s-xl); margin-left: var(--s-lg); }
+  .nav__links a { color: var(--ink); font-weight: 400; }
+  .nav__spacer { margin-left: auto; display: flex; gap: var(--s-md); align-items: center; }
+
+  /* ---------- Buttons — tight pills ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; justify-content: center;
+    font-family: var(--font); font-size: 16px; font-weight: 400; line-height: 1;
+    border: 1px solid transparent; border-radius: var(--r-pill);
+    padding: 8px 16px; cursor: pointer; transition: background .15s ease;
+  }
+  .btn--primary { background: var(--primary); color: var(--on-primary); }
+  .btn--primary:hover { background: var(--primary-press); }
+  .btn--secondary { background: var(--canvas); color: var(--primary); border-color: var(--primary); }
+  .btn--dark { background: var(--brand-dark-900); color: var(--on-primary); }
+  .btn--lg { padding: 11px 22px; font-size: 16px; }
+
+  .pill-tag {
+    display: inline-block; background: var(--primary-sub); color: var(--primary-deep);
+    font-size: 10px; font-weight: 400; letter-spacing: 0.1px; text-transform: uppercase;
+    padding: 4px 8px; border-radius: var(--r-pill); margin-bottom: var(--s-lg);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: var(--s-huge) 0 96px; }
+  .hero__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-huge); align-items: center; }
+  .hero h1 { font-size: 56px; font-weight: 300; line-height: 1.03; letter-spacing: -1.4px; margin-bottom: var(--s-lg); }
+  .hero p.lead { font-size: 16px; font-weight: 300; color: var(--ink-2); max-width: 42ch; margin-bottom: var(--s-xl); }
+  .hero__actions { display: flex; gap: var(--s-md); flex-wrap: wrap; }
+
+  /* ---------- Composited dashboard mockup ---------- */
+  .composite {
+    background: var(--brand-dark-900); border-radius: var(--r-xl);
+    padding: var(--s-xl); box-shadow: var(--lift-2); color: #cfd6ea;
+  }
+  .comp__bar { display: flex; gap: 6px; margin-bottom: var(--s-md); }
+  .comp__bar span { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,0.28); }
+  .comp__panels { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--s-md); }
+  .comp__code { background: rgba(0,0,0,0.28); border-radius: var(--r-md); padding: var(--s-md); font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.7; }
+  .comp__code .k { color: var(--primary-soft); }
+  .comp__code .s { color: var(--magenta); }
+  .comp__code .n { color: #7fd6a8; }
+  .comp__card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r-md); padding: var(--s-md); }
+  .comp__card h4 { font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: .1px; color: rgba(255,255,255,0.55); margin-bottom: 6px; }
+  .comp__amt { font-size: 26px; font-weight: 300; color: #fff; letter-spacing: -0.4px; }
+  .comp__row { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+  .comp__row:first-of-type { border-top: 0; }
+  .up { color: #6fe0a5; }
+
+  /* ---------- Section ---------- */
+  section.block { padding: 96px 0; }
+  .section-head { max-width: 62ch; margin-bottom: var(--s-xxl); }
+  .section-head h2 { font-size: 40px; font-weight: 300; line-height: 1.1; letter-spacing: -0.8px; }
+  .section-head p { color: var(--ink-mute); margin-top: var(--s-md); font-size: 16px; }
+  .eyebrow { font-size: 10px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1px; color: var(--primary); margin-bottom: var(--s-sm); }
+
+  .band-soft { background: var(--canvas-soft); }
+  .band-cream { background: var(--canvas-cream); }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .feature {
+    background: var(--canvas); border: 1px solid var(--hairline);
+    border-radius: var(--r-lg); padding: var(--s-xxl); box-shadow: var(--lift-1);
+  }
+  .feature__ico { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--primary-sub); color: var(--primary-deep); display: grid; place-items: center; margin-bottom: var(--s-lg); }
+  .feature h3 { font-size: 20px; font-weight: 300; letter-spacing: -0.2px; margin-bottom: var(--s-sm); }
+  .feature p { color: var(--ink-mute); font-size: 15px; }
+
+  /* ---------- Cream band ---------- */
+  .cream-card { background: var(--canvas-cream); border-radius: var(--r-lg); padding: var(--s-huge); display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-xl); align-items: center; }
+  .cream-card h2 { font-size: 32px; font-weight: 300; letter-spacing: -0.64px; }
+  .cream-card p { color: var(--ink-2); margin-top: var(--s-md); }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-lg); }
+  .stat { background: rgba(255,255,255,0.6); border-radius: var(--r-md); padding: var(--s-lg); }
+  .stat b { display: block; font-size: 32px; font-weight: 300; letter-spacing: -0.5px; }
+  .stat span { color: var(--ink-mute); font-size: 13px; }
+
+  /* ---------- Pricing ---------- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .tier { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-xxl); display: flex; flex-direction: column; }
+  .tier--featured { background: var(--brand-dark-900); color: var(--on-primary); border-color: var(--brand-dark-900); }
+  .tier__name { font-size: 22px; font-weight: 300; letter-spacing: -0.22px; }
+  .tier__price { font-size: 26px; font-weight: 300; letter-spacing: -0.26px; margin: var(--s-md) 0 var(--s-lg); }
+  .tier__price small { font-size: 14px; color: var(--ink-mute); }
+  .tier--featured .tier__price small { color: rgba(255,255,255,0.6); }
+  .tier ul { list-style: none; display: grid; gap: 10px; margin-bottom: var(--s-xl); }
+  .tier li { display: flex; gap: 10px; font-size: 15px; color: var(--ink-2); }
+  .tier--featured li { color: rgba(255,255,255,0.85); }
+  .tier li svg { flex: none; color: var(--primary); margin-top: 2px; }
+  .tier--featured li svg { color: var(--primary-soft); }
+  .tier .btn { margin-top: auto; width: 100%; }
+
+  /* ---------- Form ---------- */
+  .form-card { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s-huge); max-width: 520px; margin: 0 auto; box-shadow: var(--lift-1); }
+  .field { margin-bottom: var(--s-lg); }
+  .field label { display: block; font-size: 13px; color: var(--ink-2); margin-bottom: 6px; }
+  .input { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 300; padding: 8px 12px; border: 1px solid var(--hairline-input); border-radius: var(--r-sm); background: var(--canvas); color: var(--ink); }
+  .input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-sub); }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--canvas); border-top: 1px solid var(--hairline); padding: var(--s-huge) 0 var(--s-xxl); color: var(--ink-mute); }
+  .foot__grid { display: grid; grid-template-columns: 1.4fr repeat(4,1fr); gap: var(--s-xl); }
+  .foot__col h4 { font-size: 10px; text-transform: uppercase; letter-spacing: .1px; color: var(--ink); font-weight: 400; margin-bottom: var(--s-md); }
+  .foot__col a { display: block; color: var(--ink-mute); font-size: 13px; padding: 5px 0; }
+  .foot__bottom { display: flex; justify-content: space-between; margin-top: var(--s-xxl); padding-top: var(--s-lg); border-top: 1px solid var(--hairline); font-size: 13px; }
+
+  @media (max-width: 1024px) {
+    .hero__grid, .cream-card { grid-template-columns: 1fr; }
+    .features, .pricing { grid-template-columns: 1fr; }
+    .foot__grid { grid-template-columns: 1fr 1fr 1fr; }
+    .comp__panels { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 36px; letter-spacing: -0.8px; }
+    .nav__links { display: none; }
+    .stat-grid { grid-template-columns: 1fr; }
+    .foot__grid { grid-template-columns: 1fr 1fr; }
+    .foot__bottom { flex-direction: column; gap: var(--s-sm); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="mesh">
+    <!-- ===================== NAV ===================== -->
+    <header class="nav">
+      <div class="wrap nav__inner">
+        <a class="brand" href="./DESIGN.md" aria-label="Stripi home">
+          <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="var(--primary)"/><path d="M7 9.2c0-1 1-1.5 2.4-1.5 1.3 0 2.6.4 3.6 1V6.1a8 8 0 0 0-3.6-.8C6.9 5.3 5 6.7 5 9.1c0 3.6 4.9 3 4.9 4.6 0 .6-.5.9-1.7.9-1.4 0-3.1-.6-4.2-1.4v2.7c1.2.5 2.6.8 4 .8 3 0 5-1.4 5-3.8 0-3.8-4.9-3.2-4.9-4.7z" fill="#fff"/></svg>
+          Stripi
+        </a>
+        <nav class="nav__links" aria-label="Primary">
+          <a href="./DESIGN.md">Products</a>
+          <a href="./DESIGN.md">Solutions</a>
+          <a href="./DESIGN.md">Developers</a>
+          <a href="./DESIGN.md">Pricing</a>
+        </nav>
+        <div class="nav__spacer">
+          <a href="./DESIGN.md">Sign in</a>
+          <a class="btn btn--primary" href="./DESIGN.md">Start now →</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div>
+          <span class="pill-tag">Payments infrastructure</span>
+          <h1>Financial infrastructure to grow your revenue</h1>
+          <p class="lead">Millions of businesses use Stripi to accept payments, send payouts, and manage their finances online.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--lg" href="./DESIGN.md">Start now →</a>
+            <a class="btn btn--secondary btn--lg" href="./DESIGN.md">Contact sales</a>
+          </div>
+        </div>
+
+        <!-- Composited dark dashboard mockup -->
+        <div class="composite" role="img" aria-label="Dashboard mockup with API code and revenue panel">
+          <div class="comp__bar" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="comp__panels">
+            <div class="comp__code">
+<span class="k">const</span> charge = <span class="k">await</span> stripi<br>
+&nbsp;&nbsp;.charges.<span class="k">create</span>({<br>
+&nbsp;&nbsp;&nbsp;&nbsp;amount: <span class="n">2400</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;currency: <span class="s">"usd"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;source: <span class="s">"tok_visa"</span>,<br>
+&nbsp;&nbsp;});
+            </div>
+            <div style="display:grid;gap:var(--s-md)">
+              <div class="comp__card">
+                <h4>Net volume</h4>
+                <div class="comp__amt tnum">$48,290.12</div>
+                <div class="comp__row"><span>Today</span><span class="up tnum">+12.4%</span></div>
+              </div>
+              <div class="comp__card">
+                <div class="comp__row"><span>Succeeded</span><span class="tnum">1,204</span></div>
+                <div class="comp__row"><span>Refunded</span><span class="tnum">18</span></div>
+                <div class="comp__row"><span>Disputed</span><span class="tnum">2</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <main>
+    <!-- ===================== FEATURES ===================== -->
+    <section class="block band-soft">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Why Stripi</p>
+          <h2>A fully integrated suite of financial products</h2>
+          <p>Reduce costs, grow revenue, and run your business more efficiently on a fully integrated platform.</p>
+        </div>
+        <div class="features">
+          <article class="feature">
+            <div class="feature__ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+            <h3>Payments</h3>
+            <p>Accept payments online and in person with a unified, developer-first API and tabular reporting.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+            <h3>Billing</h3>
+            <p>Manage subscriptions and recurring revenue with flexible pricing models and dunning built in.</p>
+          </article>
+          <article class="feature">
+            <div class="feature__ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10h6M9 14h6"/></svg></div>
+            <h3>Connect</h3>
+            <p>Route payments and manage payouts to a global network of sellers with programmatic control.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CREAM BAND ===================== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="cream-card">
+          <div>
+            <p class="eyebrow">Trusted at scale</p>
+            <h2>Purpose-built for the world's most ambitious companies</h2>
+            <p>From startups to public companies, Stripi powers commerce for businesses of every size across every continent.</p>
+          </div>
+          <div class="stat-grid">
+            <div class="stat"><b class="tnum">500M+</b><span>API requests / day</span></div>
+            <div class="stat"><b class="tnum">99.999%</b><span>Historical uptime</span></div>
+            <div class="stat"><b class="tnum">135+</b><span>Currencies</span></div>
+            <div class="stat"><b class="tnum">$1T+</b><span>Processed annually</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING ===================== -->
+    <section class="block band-soft">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Pricing</p>
+          <h2>Simple, usage-based pricing</h2>
+          <p>Only pay for what you use. No setup fees, no monthly minimums, no hidden costs.</p>
+        </div>
+        <div class="pricing">
+          <div class="tier">
+            <div class="tier__name">Integrated</div>
+            <div class="tier__price tnum">2.9%<small> + 30¢ per charge</small></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> No-code checkout</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Dashboard analytics</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> 135+ currencies</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Start now</a>
+          </div>
+          <div class="tier tier--featured">
+            <div class="tier__name">Custom</div>
+            <div class="tier__price">Let's talk<small></small></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Volume discounts</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Multi-product pricing</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Dedicated support</li>
+            </ul>
+            <a class="btn btn--primary" href="./DESIGN.md">Contact sales</a>
+          </div>
+          <div class="tier">
+            <div class="tier__name">Startups</div>
+            <div class="tier__price tnum">$0<small> for your first $1M</small></div>
+            <ul>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Waived processing</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Founder community</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg> Onboarding credits</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Apply now</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FORM ===================== -->
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head" style="text-align:center;margin-left:auto;margin-right:auto">
+          <p class="eyebrow">Get started</p>
+          <h2>Create your account</h2>
+        </div>
+        <form class="form-card" onsubmit="return false">
+          <div class="field">
+            <label for="s-name">Business name</label>
+            <input id="s-name" class="input" type="text" placeholder="Acme, Inc." />
+          </div>
+          <div class="field">
+            <label for="s-email">Work email</label>
+            <input id="s-email" class="input" type="email" placeholder="you@company.com" />
+          </div>
+          <div class="field">
+            <label for="s-country">Country</label>
+            <input id="s-country" class="input" type="text" placeholder="United States" />
+          </div>
+          <button class="btn btn--primary" type="submit" style="width:100%">Create account →</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="wrap">
+      <div class="foot__grid">
+        <div class="foot__col">
+          <a class="brand" href="./DESIGN.md" aria-label="Stripi home" style="margin-bottom:var(--s-md)">
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="var(--primary)"/><path d="M7 9.2c0-1 1-1.5 2.4-1.5 1.3 0 2.6.4 3.6 1V6.1a8 8 0 0 0-3.6-.8C6.9 5.3 5 6.7 5 9.1c0 3.6 4.9 3 4.9 4.6 0 .6-.5.9-1.7.9-1.4 0-3.1-.6-4.2-1.4v2.7c1.2.5 2.6.8 4 .8 3 0 5-1.4 5-3.8 0-3.8-4.9-3.2-4.9-4.7z" fill="#fff"/></svg>
+            Stripi
+          </a>
+          <p style="max-width:30ch;font-size:13px">Financial infrastructure for the internet.</p>
+        </div>
+        <div class="foot__col"><h4>Products</h4><a href="./DESIGN.md">Payments</a><a href="./DESIGN.md">Billing</a><a href="./DESIGN.md">Connect</a><a href="./DESIGN.md">Terminal</a></div>
+        <div class="foot__col"><h4>Developers</h4><a href="./DESIGN.md">Documentation</a><a href="./DESIGN.md">API reference</a><a href="./DESIGN.md">Status</a><a href="./DESIGN.md">Changelog</a></div>
+        <div class="foot__col"><h4>Company</h4><a href="./DESIGN.md">About</a><a href="./DESIGN.md">Customers</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Blog</a></div>
+        <div class="foot__col"><h4>Legal</h4><a href="./DESIGN.md">Privacy</a><a href="./DESIGN.md">Terms</a><a href="./DESIGN.md">Licenses</a></div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Stripi, Inc.</span>
+        <span>Design tokens sourced from <a href="./DESIGN.md">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

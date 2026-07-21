@@ -1,0 +1,379 @@
+<!-- source_content_hash: eb439dcc573401dc30583f40e7eef8a60b769232da59e524de6dce56d5c3593e -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WIRED — Component Preview</title>
+<style>
+  /* ============================================================
+     WIRED-inspired tokens — mapped from DESIGN.md.
+     A printed technology magazine ported to the web: strict
+     black-on-white duet, a tall narrow high-contrast display
+     serif for hero headlines, a humanist serif body for reading,
+     a clean sans for metadata, and square (0px) geometry.
+     Hairline borders carry all elevation — no drop shadows.
+     ============================================================ */
+  :root {
+    /* Brand & accent — the strict duet */
+    --primary: #000000;
+    --on-primary: #ffffff;
+    --ink: #000000;
+    --ink-soft: #1a1a1a;
+    --body: #757575;
+    --hairline: #e0e0e0;
+    --canvas: #ffffff;
+    --canvas-soft: #f5f5f5;
+    --link: #057dbc;              /* inline body-link blue — articles only */
+
+    /* Radius — square is the signature */
+    --r-none: 0px;
+    --r-full: 9999px;
+
+    /* Spacing — 4px base */
+    --sp-xxs: 2px;
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-lg: 16px;
+    --sp-xl: 20px;
+    --sp-2xl: 24px;
+    --sp-3xl: 32px;
+    --sp-4xl: 48px;
+
+    /* Type — WiredDisplay (Playfair Display fallback) tall-narrow
+       high-contrast serif; BreveText body (Source Serif); Apercu
+       sans metadata/labels/buttons (Inter). */
+    --font-display: "WiredDisplay", "Playfair Display", "Times New Roman", Georgia, serif;
+    --font-serif: "BreveText", "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+    --font-sans: "Apercu", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* ---- Type roles ---- */
+  .display-hero { font-family: var(--font-display); font-size: 64px; font-weight: 400; line-height: 0.93; letter-spacing: -0.5px; margin: 0; }
+  .display-lg { font-family: var(--font-display); font-size: 48px; font-weight: 400; line-height: 1.05; letter-spacing: -0.4px; margin: 0; }
+  .display-md { font-family: var(--font-display); font-size: 32px; font-weight: 400; line-height: 1.1; letter-spacing: -0.3px; margin: 0; }
+  .display-sm { font-family: var(--font-display); font-size: 26px; font-weight: 400; line-height: 1.08; margin: 0; }
+  .display-xs { font-family: var(--font-sans); font-size: 20px; font-weight: 700; line-height: 1.2; letter-spacing: -0.28px; margin: 0; }
+  .lead-serif { font-family: var(--font-serif); font-size: 19px; font-weight: 400; line-height: 1.47; letter-spacing: 0.108px; }
+  .body-serif { font-family: var(--font-serif); font-size: 16px; font-weight: 400; line-height: 1.5; letter-spacing: 0.09px; }
+  .body-sans { font-family: var(--font-sans); font-size: 17px; font-weight: 400; line-height: 1.18; }
+  .eyebrow { font-family: var(--font-sans); font-size: 14px; font-weight: 700; line-height: 1.28; letter-spacing: 0.4px; text-transform: uppercase; }
+  .byline { font-family: var(--font-serif); font-size: 12.73px; font-weight: 700; line-height: 2.2; letter-spacing: 0.108px; color: var(--body); }
+  .caption { font-family: var(--font-sans); font-size: 12px; font-weight: 400; line-height: 1.33; color: var(--body); }
+  .body-link { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+
+  /* ---- Buttons — square (0px) geometry ---- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    font-family: var(--font-sans); font-size: 16px; font-weight: 700; line-height: 1.25;
+    letter-spacing: 0.3px; padding: 12px 20px; border-radius: var(--r-none);
+    border: 1px solid transparent; transition: background-color 150ms ease, color 150ms ease;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--ink-soft); }
+  .btn-outline { background: var(--canvas); color: var(--ink); border-color: var(--ink); }
+  .btn-outline:hover { background: var(--ink); color: var(--on-primary); }
+  .btn-icon { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: var(--r-full); border: 1px solid var(--hairline); background: var(--canvas); color: var(--ink); cursor: pointer; }
+
+  /* ---- Masthead band ---- */
+  .masthead {
+    border-bottom: 1px solid var(--hairline);
+    display: flex; align-items: center; justify-content: center; position: relative;
+    padding: var(--sp-md) var(--sp-xl); background: var(--canvas);
+  }
+  .masthead .wordmark { font-family: var(--font-sans); font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+
+  /* ---- Nav ---- */
+  .nav {
+    position: sticky; top: 0; z-index: 20; background: var(--canvas);
+    border-bottom: 1px solid var(--hairline);
+    display: flex; align-items: center; gap: var(--sp-2xl);
+    padding: var(--sp-md) var(--sp-xl);
+  }
+  .nav .brand { font-family: var(--font-sans); font-size: 18px; font-weight: 700; }
+  .nav-links { display: flex; gap: var(--sp-xl); list-style: none; margin: 0; padding: 0; flex: 1; }
+  .nav-links a { font-family: var(--font-sans); font-size: 14px; font-weight: 700; letter-spacing: 0.4px; color: var(--ink); }
+  .nav-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 0 var(--sp-xl); }
+  section { padding: var(--sp-4xl) 0; }
+
+  /* ---- Cover-story grid ---- */
+  .cover-grid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--sp-4xl); align-items: start; }
+  .cover-photo { aspect-ratio: 16/9; background: linear-gradient(135deg,#2a2a2a,#8a8a8a); margin-bottom: var(--sp-lg); }
+  .cover-story .eyebrow { display: block; margin-bottom: var(--sp-sm); }
+  .cover-story .display-hero { margin-bottom: var(--sp-lg); }
+  .secondary-stack { display: flex; flex-direction: column; gap: var(--sp-2xl); }
+  .story-card .thumb { aspect-ratio: 4/3; background: linear-gradient(135deg,#3a3a3a,#9a9a9a); margin-bottom: var(--sp-md); }
+  .story-card .eyebrow { display: block; margin-bottom: var(--sp-xs); }
+  .story-card .display-xs { margin-bottom: var(--sp-sm); }
+
+  /* ---- Two-up secondary ---- */
+  .two-up { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4xl); }
+
+  /* ---- Bylined story rows ---- */
+  .story-rows { border-top: 1px solid var(--hairline); }
+  .story-row {
+    display: grid; grid-template-columns: 1fr auto; gap: var(--sp-xl);
+    align-items: baseline; padding: var(--sp-lg) 0; border-bottom: 1px solid var(--hairline);
+  }
+  .story-row:hover .display-sm { text-decoration: underline; text-underline-offset: 3px; }
+  .story-row .meta { text-align: right; white-space: nowrap; }
+
+  /* ---- Article excerpt with inline links + byline ---- */
+  .article { max-width: 680px; }
+  .byline-row { display: flex; align-items: center; gap: var(--sp-md); margin-bottom: var(--sp-lg); }
+  .avatar { width: 28px; height: 28px; border-radius: var(--r-full); background: var(--hairline); }
+
+  /* ---- Pricing / subscription tiers (illustrative) ---- */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2xl); }
+  .tier {
+    background: var(--canvas-soft); border: 1px solid var(--hairline);
+    border-radius: var(--r-none); padding: var(--sp-lg);
+  }
+  .tier.featured { background: var(--ink); color: var(--on-primary); }
+  .tier .price { font-family: var(--font-display); font-size: 32px; margin: var(--sp-sm) 0; }
+  .tier ul { list-style: none; margin: var(--sp-md) 0; padding: 0; }
+  .tier li { padding: var(--sp-xs) 0; border-bottom: 1px solid var(--hairline); font-family: var(--font-sans); font-size: 14px; }
+  .tier.featured li { border-color: rgba(255,255,255,0.2); }
+
+  /* ---- Newsletter form ---- */
+  .form-card { background: var(--canvas-soft); border: 1px solid var(--hairline); padding: var(--sp-2xl); max-width: 560px; }
+  .field { margin-bottom: var(--sp-lg); }
+  .field label { display: block; font-family: var(--font-sans); font-size: 14px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 12px 16px; border-radius: var(--r-none);
+    background: var(--canvas); border: 1px solid var(--ink); color: var(--ink);
+    font-family: var(--font-sans); font-size: 17px;
+  }
+  .field input::placeholder { color: var(--body); }
+  .field input:focus { outline: none; box-shadow: 0 0 0 1px var(--ink); }
+
+  /* ---- Footer ---- */
+  footer { background: var(--primary); color: var(--on-primary); padding: var(--sp-4xl) 0; }
+  .footer-top { display: flex; justify-content: space-between; gap: var(--sp-3xl); flex-wrap: wrap; align-items: flex-start; }
+  .footer-word { font-family: var(--font-sans); font-size: 24px; font-weight: 700; }
+  .footer-cols { display: flex; gap: var(--sp-4xl); flex-wrap: wrap; }
+  .footer-cols nav { display: flex; flex-direction: column; gap: var(--sp-sm); }
+  .footer-cols .eyebrow { color: var(--on-primary); margin-bottom: var(--sp-xs); }
+  .footer-cols a { font-family: var(--font-sans); font-size: 14px; color: rgba(255,255,255,0.85); }
+  .footer-cols a:hover { color: var(--on-primary); text-decoration: underline; }
+  .legal { margin-top: var(--sp-3xl); font-family: var(--font-sans); font-size: 14px; color: rgba(255,255,255,0.7); }
+  .legal a { color: var(--on-primary); text-decoration: underline; }
+
+  @media (max-width: 1023px) {
+    .cover-grid { grid-template-columns: 1fr; }
+    .tiers { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767px) {
+    .display-hero { font-size: 40px; }
+    .nav-links { display: none; }
+    .two-up { grid-template-columns: 1fr; }
+    .story-row { grid-template-columns: 1fr; }
+    .story-row .meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <a class="wordmark" href="./DESIGN.md">WIRED</a>
+</div>
+
+<nav class="nav" aria-label="Primary">
+  <button class="btn-icon" aria-label="Open menu">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <ul class="nav-links">
+    <li><a href="./DESIGN.md">Business</a></li>
+    <li><a href="./DESIGN.md">Culture</a></li>
+    <li><a href="./DESIGN.md">Gear</a></li>
+    <li><a href="./DESIGN.md">Ideas</a></li>
+    <li><a href="./DESIGN.md">Science</a></li>
+    <li><a href="./DESIGN.md">Security</a></li>
+  </ul>
+  <button class="btn btn-primary">Subscribe</button>
+</nav>
+
+<main class="wrap">
+  <!-- Cover-story grid -->
+  <section class="cover-grid" aria-labelledby="cover-h">
+    <article class="cover-story">
+      <div class="cover-photo" role="img" aria-label="Cover story photo"></div>
+      <span class="eyebrow">The Big Story</span>
+      <h1 id="cover-h" class="display-hero">The quiet engineers rebuilding the internet's plumbing</h1>
+      <p class="lead-serif">Deep inside the data centers, a small group of maintainers keeps the whole thing from falling over — and almost nobody knows their names.</p>
+      <p style="margin-top:var(--sp-lg)"><button class="btn btn-outline">Read the feature</button></p>
+    </article>
+    <div class="secondary-stack">
+      <article class="story-card">
+        <div class="thumb" role="img" aria-label="Story thumbnail"></div>
+        <span class="eyebrow">Gear</span>
+        <h2 class="display-xs">The laptop that finally gets the trackpad right</h2>
+        <p class="body-serif">A week with the machine reviewers keep calling boring — in the best way.</p>
+      </article>
+      <article class="story-card">
+        <div class="thumb" role="img" aria-label="Story thumbnail"></div>
+        <span class="eyebrow">Security</span>
+        <h2 class="display-xs">Inside the breach that no one reported</h2>
+        <p class="body-serif">How a routine audit uncovered a two-year-old intrusion.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Two-up secondary -->
+  <section class="two-up" aria-label="Featured stories">
+    <article class="story-card">
+      <div class="thumb" role="img" aria-label="Story thumbnail" style="aspect-ratio:16/9"></div>
+      <span class="eyebrow">Science</span>
+      <h2 class="display-md">The lab growing electronics from mushrooms</h2>
+      <p class="body-serif">Biodegradable circuits could rewrite how we think about e-waste.</p>
+    </article>
+    <article class="story-card">
+      <div class="thumb" role="img" aria-label="Story thumbnail" style="aspect-ratio:16/9"></div>
+      <span class="eyebrow">Business</span>
+      <h2 class="display-md">The startup selling silence as a service</h2>
+      <p class="body-serif">Noise cancellation is the new premium tier — and it's booming.</p>
+    </article>
+  </section>
+
+  <!-- Bylined story rows -->
+  <section aria-labelledby="latest-h">
+    <h2 id="latest-h" class="eyebrow" style="margin-bottom:var(--sp-lg); display:block;">Latest</h2>
+    <div class="story-rows">
+      <a class="story-row" href="./DESIGN.md">
+        <div>
+          <span class="eyebrow" style="display:block; margin-bottom:4px;">Ideas</span>
+          <h3 class="display-sm">Why the smartest AI still can't book a dentist appointment</h3>
+        </div>
+        <div class="meta"><p class="byline">By A. Rivera</p></div>
+      </a>
+      <a class="story-row" href="./DESIGN.md">
+        <div>
+          <span class="eyebrow" style="display:block; margin-bottom:4px;">Culture</span>
+          <h3 class="display-sm">The group chat is the last good place on the internet</h3>
+        </div>
+        <div class="meta"><p class="byline">By J. Okonkwo</p></div>
+      </a>
+      <a class="story-row" href="./DESIGN.md">
+        <div>
+          <span class="eyebrow" style="display:block; margin-bottom:4px;">Gear</span>
+          <h3 class="display-sm">We tested every e-bike under $1,500. One won.</h3>
+        </div>
+        <div class="meta"><p class="byline">By M. Chen</p></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Article excerpt with byline + inline link -->
+  <section aria-labelledby="excerpt-h">
+    <article class="article">
+      <div class="byline-row">
+        <span class="avatar" aria-hidden="true"></span>
+        <p class="byline">By S. Delacroix · July 6, 2026</p>
+      </div>
+      <h2 id="excerpt-h" class="display-lg" style="margin-bottom:var(--sp-lg)">The case for boring technology</h2>
+      <p class="lead-serif" style="margin-bottom:var(--sp-lg)">Every few years the industry falls in love with a new paradigm. And every few years, the systems that actually run the world stay exactly the same.</p>
+      <p class="body-serif">There is a quiet argument, made mostly by people who keep pagers, that the most radical thing you can do is choose the technology that already works. For more on the trade-offs, see our <a class="body-link" href="./DESIGN.md">full report on infrastructure resilience</a>.</p>
+    </article>
+  </section>
+
+  <!-- Subscription tiers (illustrative) -->
+  <section aria-labelledby="sub-h">
+    <h2 id="sub-h" class="display-md" style="margin-bottom:var(--sp-2xl)">Subscribe to WIRED</h2>
+    <div class="tiers">
+      <div class="tier">
+        <h3 class="display-xs">Digital</h3>
+        <p class="price">$5<span class="body-sans">/mo</span></p>
+        <ul>
+          <li>Unlimited articles</li>
+          <li>The daily newsletter</li>
+          <li>Ad-lite reading</li>
+        </ul>
+        <button class="btn btn-outline">Choose Digital</button>
+      </div>
+      <div class="tier featured">
+        <h3 class="display-xs">All Access</h3>
+        <p class="price">$8<span class="body-sans">/mo</span></p>
+        <ul>
+          <li>Everything in Digital</li>
+          <li>Print + digital archive</li>
+          <li>Subscriber-only events</li>
+        </ul>
+        <button class="btn btn-primary" style="background:var(--on-primary); color:var(--ink);">Choose All Access</button>
+      </div>
+      <div class="tier">
+        <h3 class="display-xs">Print</h3>
+        <p class="price">$3<span class="body-sans">/mo</span></p>
+        <ul>
+          <li>The magazine, monthly</li>
+          <li>Collector covers</li>
+          <li>Digital replica</li>
+        </ul>
+        <button class="btn btn-outline">Choose Print</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter form -->
+  <section aria-labelledby="news-h">
+    <div class="form-card">
+      <h2 id="news-h" class="display-md" style="margin-bottom:var(--sp-md)">The WIRED newsletter</h2>
+      <p class="body-serif" style="margin-bottom:var(--sp-lg)">The stories shaping the future, delivered every morning.</p>
+      <form novalidate>
+        <div class="field">
+          <label for="wired-email">Email address</label>
+          <input id="wired-email" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <button class="btn btn-primary" type="submit">Sign up</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer aria-label="Site footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <p class="footer-word">WIRED</p>
+      <div class="footer-cols">
+        <nav aria-label="Sections">
+          <span class="eyebrow">Sections</span>
+          <a href="./DESIGN.md">Business</a><a href="./DESIGN.md">Culture</a><a href="./DESIGN.md">Gear</a>
+        </nav>
+        <nav aria-label="More">
+          <span class="eyebrow">More</span>
+          <a href="./DESIGN.md">Newsletters</a><a href="./DESIGN.md">Podcasts</a><a href="./DESIGN.md">Video</a>
+        </nav>
+        <nav aria-label="About">
+          <span class="eyebrow">About</span>
+          <a href="./DESIGN.md">Masthead</a><a href="./DESIGN.md">Contact</a><a href="./DESIGN.md">Careers</a>
+        </nav>
+      </div>
+    </div>
+    <p class="legal">© 2026 Condé Nast · Design tokens sourced from <a href="./DESIGN.md">DESIGN.md</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

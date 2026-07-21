@@ -1,0 +1,738 @@
+<!-- source_content_hash: 1abd803a207fbe950a06e155adcd6013c2e149b13e7b88844f5069f9d3d99eb3 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clay — Component Preview</title>
+<style>
+  /* ============================================================
+     Clay — inspired design tokens
+     Cream-tinted white canvas (#fffaf0, warmth non-negotiable) +
+     dark-navy CTA + 6-color saturated feature cards (pink/teal/
+     lavender/peach/ochre/cream) + 3D claymation hero artifacts +
+     rounded Plain Black display at weight 500 (never 700). Depth
+     comes from color contrast, not shadows. Footer stays CREAM.
+     Source of truth: ./DESIGN.md
+     ============================================================ */
+  :root {
+    /* ── Primary / ink ────────────────────────────────────── */
+    --primary: #0a0a0a;
+    --primary-active: #1f1f1f;
+    --primary-disabled: #e5e5e5;
+    --ink: #0a0a0a;
+    --body: #3a3a3a;
+    --body-strong: #1a1a1a;
+    --muted: #6a6a6a;
+    --muted-soft: #9a9a9a;
+    --hairline: #e5e5e5;
+    --hairline-soft: #f0f0f0;
+
+    /* ── Cream surfaces (warm throughout) ─────────────────── */
+    --canvas: #fffaf0;
+    --surface-soft: #faf5e8;
+    --surface-card: #f5f0e0;
+    --surface-strong: #ebe6d6;
+    --surface-dark: #0a1a1a;
+    --surface-dark-elevated: #1a2a2a;
+
+    /* ── On-color text ────────────────────────────────────── */
+    --on-primary: #ffffff;
+    --on-dark: #ffffff;
+    --on-dark-soft: #a0a0a0;
+
+    /* ── 6-color saturated feature palette ────────────────── */
+    --brand-pink: #ff4d8b;
+    --brand-teal: #1a3a3a;
+    --brand-lavender: #b8a4ed;
+    --brand-peach: #ffb084;
+    --brand-ochre: #e8b94a;
+    --brand-mint: #a4d4c5;
+    --brand-coral: #ff6b5a;
+
+    /* ── Semantic ─────────────────────────────────────────── */
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #ef4444;
+
+    /* ── Type ─────────────────────────────────────────────── */
+    --font-display: "Plain Black", "Recoleta", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    /* ── Radius (generous, matches rounded display) ───────── */
+    --r-xs: 6px;
+    --r-sm: 8px;
+    --r-md: 12px;   /* buttons, inputs */
+    --r-lg: 16px;   /* content cards   */
+    --r-xl: 24px;   /* feature cards   */
+    --r-pill: 9999px;
+
+    /* ── Spacing (4px base) ───────────────────────────────── */
+    --sp-xxs: 4px;
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+    --sp-section: 96px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--body);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--brand-pink); color: #fff; }
+
+  h1, h2, h3, h4 { margin: 0; color: var(--ink); }
+  .display { font-family: var(--font-display); font-weight: 500; }
+  p { margin: 0; }
+
+  a { color: var(--ink); text-decoration: none; }
+
+  :focus-visible {
+    outline: 3px solid var(--brand-pink);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-inline: var(--sp-lg);
+  }
+
+  section { padding-block: var(--sp-section); }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 12px; font-weight: 600; line-height: 1.4;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: var(--sp-md);
+  }
+
+  .section-head { max-width: 680px; margin-bottom: var(--sp-xxl); }
+  .section-head h2 {
+    font-family: var(--font-display); font-weight: 500;
+    font-size: 56px; line-height: 1.05; letter-spacing: -2px;
+    color: var(--ink);
+  }
+  .section-head p { margin-top: var(--sp-md); font-size: 18px; color: var(--body); }
+
+  /* ── Buttons — 12px radius, friendly-not-pill ───────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-xs);
+    font-family: var(--font-body);
+    font-size: 14px; font-weight: 600; line-height: 1;
+    height: 44px;
+    padding: 12px 20px;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .12s ease, transform .12s ease, border-color .12s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn--primary { background: var(--primary); color: var(--on-primary); }
+  .btn--primary:hover { background: var(--primary-active); }
+  .btn--secondary { background: var(--canvas); color: var(--ink); border-color: var(--hairline); }
+  .btn--secondary:hover { border-color: var(--ink); }
+  .btn--on-color { background: var(--canvas); color: var(--ink); }
+  .btn--on-color:hover { background: #fff; }
+
+  /* ── Badge pill ─────────────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-card); color: var(--ink);
+    font-size: 13px; font-weight: 500;
+    padding: 4px 12px; border-radius: var(--r-pill);
+  }
+
+  /* ============================================================
+     NAV
+     ============================================================ */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    height: 64px;
+    background: color-mix(in srgb, var(--canvas) 88%, transparent);
+    backdrop-filter: saturate(160%) blur(12px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav__inner { display: flex; align-items: center; gap: var(--sp-lg); height: 100%; }
+  .brand {
+    display: inline-flex; align-items: center; gap: var(--sp-xs);
+    font-family: var(--font-display); font-weight: 500; font-size: 24px; letter-spacing: -0.5px; color: var(--ink);
+  }
+  .brand__mark { width: 30px; height: 30px; border-radius: var(--r-sm); display: grid; place-items: center; background: var(--brand-ochre); }
+  .nav__links { display: flex; gap: var(--sp-lg); margin-left: var(--sp-sm); }
+  .nav__links a { font-size: 14px; font-weight: 500; color: var(--muted); }
+  .nav__links a:hover { color: var(--ink); }
+  .nav__actions { display: flex; align-items: center; gap: var(--sp-sm); margin-left: auto; }
+  @media (max-width: 900px) { .nav__links { display: none; } }
+
+  /* ============================================================
+     HERO — 7/5 split with claymation artifact
+     ============================================================ */
+  .hero { padding-block: var(--sp-section); }
+  .hero__grid { display: grid; grid-template-columns: 7fr 5fr; gap: var(--sp-xxl); align-items: center; }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 500;
+    font-size: 72px; line-height: 1; letter-spacing: -2.5px;
+    color: var(--ink);
+    margin-top: var(--sp-md);
+  }
+  .hero .lead { margin-top: var(--sp-lg); font-size: 18px; line-height: 1.55; color: var(--body-strong); max-width: 44ch; }
+  .hero__cta { display: flex; gap: var(--sp-sm); margin-top: var(--sp-xl); flex-wrap: wrap; }
+
+  /* 3D claymation artifact (CSS-composed placeholder) */
+  .clay-art {
+    position: relative;
+    aspect-ratio: 4 / 3.4;
+    background: var(--surface-soft);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    display: grid; place-items: center;
+  }
+  .clay-art::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(120px 120px at 30% 30%, var(--brand-lavender), transparent 70%),
+      radial-gradient(150px 150px at 74% 26%, var(--brand-peach), transparent 72%),
+      radial-gradient(200px 160px at 50% 100%, var(--brand-mint), transparent 70%);
+  }
+  /* clay "mountains" */
+  .clay-art .mtn { position: absolute; bottom: 0; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+  .clay-art .mtn.a { left: 6%; width: 46%; height: 52%; background: var(--brand-ochre); }
+  .clay-art .mtn.b { right: 4%; width: 54%; height: 66%; background: var(--brand-coral); }
+  .clay-art .mtn.c { left: 30%; width: 44%; height: 44%; background: var(--brand-pink); }
+  .clay-art .sun { position: absolute; top: 16%; right: 18%; width: 74px; height: 74px; border-radius: 50%; background: var(--brand-ochre); box-shadow: 0 8px 0 rgba(0,0,0,.06) inset; }
+
+  @media (max-width: 900px) {
+    .hero__grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============================================================
+     LOGO STRIP
+     ============================================================ */
+  .logos { text-align: center; padding-block: var(--sp-xxl); }
+  .logos p { font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: var(--sp-lg); }
+  .logos__row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--sp-lg) var(--sp-xxl); }
+  .logos__row span { font-family: var(--font-display); font-weight: 500; font-size: 22px; letter-spacing: -0.5px; color: var(--muted-soft); }
+
+  /* ============================================================
+     FEATURES — 6-color saturated cards
+     ============================================================ */
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+  .fcard {
+    border-radius: var(--r-xl);
+    padding: var(--sp-xl);
+    display: flex; flex-direction: column;
+    min-height: 300px;
+  }
+  .fcard--pink { background: var(--brand-pink); color: var(--on-dark); }
+  .fcard--teal { background: var(--brand-teal); color: var(--on-dark); }
+  .fcard--lavender { background: var(--brand-lavender); color: var(--ink); }
+  .fcard--peach { background: var(--brand-peach); color: var(--ink); }
+  .fcard--ochre { background: var(--brand-ochre); color: var(--ink); }
+  .fcard--cream { background: var(--surface-card); color: var(--ink); }
+  .fcard h3 { font-size: 18px; font-weight: 600; margin-bottom: var(--sp-xs); color: inherit; }
+  .fcard p { font-size: 16px; color: inherit; opacity: .92; }
+  .fcard__mock {
+    margin-top: auto;
+    background: rgba(255,255,255,.85);
+    border-radius: var(--r-md);
+    padding: var(--sp-sm);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .fcard--lavender .fcard__mock, .fcard--peach .fcard__mock, .fcard--ochre .fcard__mock, .fcard--cream .fcard__mock { background: rgba(255,255,255,.7); }
+  .fcard__row { display: flex; align-items: center; gap: 8px; }
+  .fcard__dot { width: 18px; height: 18px; border-radius: 5px; flex: none; }
+  .fcard__bar { height: 8px; border-radius: 4px; background: rgba(10,10,10,.16); flex: 1; }
+  .fcard__bar.short { flex: .5; }
+
+  /* ============================================================
+     PRODUCT MOCKUP (split)
+     ============================================================ */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-xxl); align-items: center; }
+  .product-mockup {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-lg);
+  }
+  .product-mockup__head { display: flex; align-items: center; gap: 8px; margin-bottom: var(--sp-md); }
+  .product-mockup__head .t { font-family: var(--font-display); font-weight: 500; font-size: 16px; color: var(--ink); }
+  .pm-table { border: 1px solid var(--hairline); border-radius: var(--r-sm); overflow: hidden; }
+  .pm-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 0; border-bottom: 1px solid var(--hairline-soft); }
+  .pm-row:last-child { border-bottom: 0; }
+  .pm-row.head { background: var(--surface-card); font-weight: 600; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .pm-cell { padding: 10px 12px; font-size: 13px; color: var(--body); border-right: 1px solid var(--hairline-soft); }
+  .pm-cell:last-child { border-right: 0; }
+  .pm-cell .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--success); }
+  .pm-cell .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+
+  /* ============================================================
+     TESTIMONIALS
+     ============================================================ */
+  .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+  .testimonial { background: var(--surface-card); border-radius: var(--r-lg); padding: var(--sp-lg); }
+  .testimonial__quote { font-size: 16px; color: var(--body-strong); }
+  .testimonial__who { display: flex; align-items: center; gap: 10px; margin-top: var(--sp-md); }
+  .testimonial__avatar { width: 40px; height: 40px; border-radius: 50%; flex: none; }
+  .testimonial__name { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .testimonial__role { font-size: 13px; color: var(--muted); }
+
+  /* ============================================================
+     PRICING
+     ============================================================ */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); align-items: stretch; }
+  .price {
+    display: flex; flex-direction: column;
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xl);
+  }
+  .price--featured { background: var(--brand-teal); color: var(--on-dark); border-color: var(--brand-teal); }
+  .price--featured .price__name, .price--featured .price__amount { color: var(--on-dark); }
+  .price--featured .price__list li { color: rgba(255,255,255,.85); }
+  .price__cap { align-self: flex-start; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: var(--sp-sm); }
+  .price--featured .price__cap { color: var(--brand-mint); }
+  .price__name { font-family: var(--font-display); font-weight: 500; font-size: 24px; letter-spacing: -0.3px; color: var(--ink); }
+  .price__amount { font-family: var(--font-display); font-weight: 500; font-size: 40px; letter-spacing: -1px; color: var(--ink); margin-block: var(--sp-xs); }
+  .price__amount small { font-family: var(--font-body); font-size: 14px; font-weight: 400; color: var(--muted); }
+  .price--featured .price__amount small { color: var(--on-dark-soft); }
+  .price__list { list-style: none; margin: var(--sp-md) 0 var(--sp-lg); padding: 0; display: flex; flex-direction: column; gap: var(--sp-sm); }
+  .price__list li { display: flex; gap: var(--sp-xs); font-size: 14px; color: var(--body); }
+  .price__list svg { flex: none; margin-top: 2px; color: var(--success); }
+  .price--featured .price__list svg { color: var(--brand-mint); }
+  .price .btn { width: 100%; justify-content: center; margin-top: auto; }
+
+  /* ============================================================
+     SIGNUP
+     ============================================================ */
+  .signup {
+    background: var(--surface-card);
+    border-radius: var(--r-xl);
+    padding: var(--sp-xxl);
+    display: grid; grid-template-columns: 1.1fr .9fr; gap: var(--sp-xxl); align-items: center;
+  }
+  .signup h2 { font-family: var(--font-display); font-weight: 500; font-size: 40px; letter-spacing: -1px; }
+  .signup p { margin-top: var(--sp-sm); color: var(--body); }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--sp-md); }
+  .field label { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .input {
+    font-family: var(--font-body); font-size: 16px; color: var(--ink);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: 12px 16px; height: 44px;
+  }
+  .input::placeholder { color: var(--muted-soft); }
+  .input:focus-visible { outline: none; border: 2px solid var(--ink); }
+
+  /* ============================================================
+     CTA BAND (illustrated, cream)
+     ============================================================ */
+  .cta-band {
+    background: var(--surface-soft);
+    border-radius: var(--r-xl);
+    padding: 80px var(--sp-xl);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-band h2 { font-family: var(--font-display); font-weight: 500; font-size: 40px; letter-spacing: -1px; color: var(--ink); }
+  .cta-band p { margin-top: var(--sp-sm); color: var(--body); max-width: 40ch; margin-inline: auto; }
+  .cta-band .btn { margin-top: var(--sp-lg); }
+  .cta-band__blobs { position: absolute; inset: auto 0 0 0; height: 60px; display: flex; justify-content: center; gap: 12px; pointer-events: none; }
+  .cta-band__blobs i { width: 90px; height: 120px; border-radius: 50% 50% 0 0 / 100% 100% 0 0; align-self: flex-end; }
+  .cta-band__blobs i:nth-child(1) { background: var(--brand-lavender); height: 70px; }
+  .cta-band__blobs i:nth-child(2) { background: var(--brand-ochre); height: 110px; }
+  .cta-band__blobs i:nth-child(3) { background: var(--brand-coral); height: 84px; }
+
+  /* ============================================================
+     FOOTER — CREAM (not dark), signature mountain
+     ============================================================ */
+  .footer { background: var(--surface-soft); color: var(--body); padding: 80px 0 0; position: relative; }
+  .footer__grid { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: var(--sp-lg); }
+  .footer h4 { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink); margin-bottom: var(--sp-md); }
+  .footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-xs); }
+  .footer ul a { color: var(--muted); font-size: 14px; }
+  .footer ul a:hover { color: var(--ink); }
+  .footer__brand p { color: var(--muted); font-size: 14px; margin-top: var(--sp-sm); max-width: 34ch; }
+  .footer__bottom {
+    margin-top: var(--sp-xxl); padding: var(--sp-md) 0 var(--sp-lg);
+    border-top: 1px solid var(--surface-strong);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--sp-sm);
+    font-size: 13px; color: var(--muted-soft);
+  }
+  /* signature footer mountain horizon */
+  .footer__mtn { position: relative; height: 70px; margin-top: var(--sp-lg); }
+  .footer__mtn i { position: absolute; bottom: 0; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+  .footer__mtn i:nth-child(1) { left: 8%; width: 30%; height: 60px; background: var(--brand-ochre); opacity: .8; }
+  .footer__mtn i:nth-child(2) { left: 34%; width: 38%; height: 70px; background: var(--brand-peach); opacity: .85; }
+  .footer__mtn i:nth-child(3) { right: 10%; width: 34%; height: 54px; background: var(--brand-lavender); opacity: .8; }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 1024px) {
+    .feature-grid, .price-grid, .test-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer__grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 40px; letter-spacing: -1.5px; }
+    .section-head h2 { font-size: 34px; letter-spacing: -1px; }
+    .split { grid-template-columns: 1fr; }
+    .feature-grid, .price-grid, .test-grid { grid-template-columns: 1fr; }
+    .signup { grid-template-columns: 1fr; padding: var(--sp-xl); }
+    .footer__grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="./DESIGN.md" aria-label="Clay home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#0a0a0a"/><circle cx="12" cy="12" r="4" fill="#fffaf0"/></svg>
+        </span>
+        Clay
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Resources</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Customers</a>
+      </nav>
+      <div class="nav__actions">
+        <a class="btn btn--secondary" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn--primary" href="./DESIGN.md">Try free</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <div class="container hero__grid">
+        <div>
+          <span class="badge">GTM data orchestration</span>
+          <h1>Go to market with unique data</h1>
+          <p class="lead">Clay combines 100+ data providers, AI research agents, and your CRM into one canvas — so you can build lists, enrich records, and reach the right people, automatically.</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="./DESIGN.md">Start building free</a>
+            <a class="btn btn--secondary" href="./DESIGN.md">Book a demo</a>
+          </div>
+        </div>
+
+        <!-- 3D claymation artifact -->
+        <div class="clay-art" role="img" aria-label="Claymation landscape illustration">
+          <span class="sun" aria-hidden="true"></span>
+          <span class="mtn a" aria-hidden="true"></span>
+          <span class="mtn c" aria-hidden="true"></span>
+          <span class="mtn b" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LOGO STRIP ===================== -->
+    <section class="logos">
+      <div class="container">
+        <p>Powering GTM teams at</p>
+        <div class="logos__row">
+          <span>Anthropic</span><span>Verkada</span><span>Vanta</span><span>Notion</span><span>Ramp</span><span>OpenAI</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURES (6-color cards) ===================== -->
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">What you can build</span>
+          <h2>One canvas for every GTM motion</h2>
+          <p>Cycle through outbound, enrichment, and AI research — each workflow rendered as a living card of real product output.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="fcard fcard--pink">
+            <h3>Outbound sequencing</h3>
+            <p>Build personalized, multi-channel campaigns that fire on the signals that matter.</p>
+            <div class="fcard__mock" aria-hidden="true">
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-pink)"></span><span class="fcard__bar"></span></div>
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-ochre)"></span><span class="fcard__bar short"></span></div>
+            </div>
+          </article>
+
+          <article class="fcard fcard--teal">
+            <h3>Data enrichment</h3>
+            <p>Waterfall across 100+ providers to fill every column — email, phone, firmographics, and more.</p>
+            <div class="fcard__mock" aria-hidden="true">
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-mint)"></span><span class="fcard__bar"></span></div>
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-teal)"></span><span class="fcard__bar"></span></div>
+            </div>
+          </article>
+
+          <article class="fcard fcard--lavender">
+            <h3>Claygent AI research</h3>
+            <p>Deploy AI agents to browse the web and answer any question about a company or person.</p>
+            <div class="fcard__mock" aria-hidden="true">
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-lavender)"></span><span class="fcard__bar"></span></div>
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-coral)"></span><span class="fcard__bar short"></span></div>
+            </div>
+          </article>
+
+          <article class="fcard fcard--peach">
+            <h3>CRM sync</h3>
+            <p>Push clean, enriched records straight into Salesforce and HubSpot — bidirectionally.</p>
+            <div class="fcard__mock" aria-hidden="true">
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-peach)"></span><span class="fcard__bar"></span></div>
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-ochre)"></span><span class="fcard__bar short"></span></div>
+            </div>
+          </article>
+
+          <article class="fcard fcard--ochre">
+            <h3>Intent signals</h3>
+            <p>Track hiring, funding, and tech-stack changes to reach accounts at the perfect moment.</p>
+            <div class="fcard__mock" aria-hidden="true">
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-coral)"></span><span class="fcard__bar"></span></div>
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-teal)"></span><span class="fcard__bar short"></span></div>
+            </div>
+          </article>
+
+          <article class="fcard fcard--cream">
+            <h3>Templates &amp; experts</h3>
+            <p>Start from proven playbooks, or hire a Clay expert to build your workflow for you.</p>
+            <div class="fcard__mock" aria-hidden="true">
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-lavender)"></span><span class="fcard__bar"></span></div>
+              <div class="fcard__row"><span class="fcard__dot" style="background:var(--brand-pink)"></span><span class="fcard__bar short"></span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRODUCT MOCKUP (split) ===================== -->
+    <section style="background:var(--surface-soft)">
+      <div class="container">
+        <div class="split">
+          <div>
+            <span class="eyebrow">The canvas</span>
+            <h2 class="display" style="font-size:56px;line-height:1.05;letter-spacing:-2px;margin-bottom:var(--sp-md)">A spreadsheet with superpowers</h2>
+            <p style="font-size:18px;color:var(--body)">Every row is an account or person. Every column can call an enrichment provider, run an AI agent, or apply a formula. Build once and let it run.</p>
+            <div style="margin-top:var(--sp-lg)"><a class="btn btn--primary" href="./DESIGN.md">Explore the product</a></div>
+          </div>
+          <div class="product-mockup" aria-label="Clay enrichment table preview">
+            <div class="product-mockup__head">
+              <span class="brand__mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#0a0a0a"/><circle cx="12" cy="12" r="4" fill="#fffaf0"/></svg></span>
+              <span class="t">Target accounts</span>
+            </div>
+            <div class="pm-table" aria-hidden="true">
+              <div class="pm-row head"><div class="pm-cell">Company</div><div class="pm-cell">Email</div><div class="pm-cell">Status</div></div>
+              <div class="pm-row"><div class="pm-cell">Northwind</div><div class="pm-cell">found</div><div class="pm-cell"><span class="pill">Enriched</span></div></div>
+              <div class="pm-row"><div class="pm-cell">Contoso</div><div class="pm-cell">found</div><div class="pm-cell"><span class="pill">Enriched</span></div></div>
+              <div class="pm-row"><div class="pm-cell">Fabrikam</div><div class="pm-cell">found</div><div class="pm-cell"><span class="pill">Enriched</span></div></div>
+              <div class="pm-row"><div class="pm-cell">Tailspin</div><div class="pm-cell">running…</div><div class="pm-cell"><span class="pill" style="color:var(--warning)">Working</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TESTIMONIALS ===================== -->
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Loved by GTM teams</span>
+          <h2>The tool that pays for itself</h2>
+        </div>
+        <div class="test-grid">
+          <article class="testimonial">
+            <p class="testimonial__quote">"Clay replaced five separate tools and cut our list-building time by 80%. It's the backbone of our outbound."</p>
+            <div class="testimonial__who">
+              <span class="testimonial__avatar" style="background:var(--brand-pink)" aria-hidden="true"></span>
+              <span><span class="testimonial__name">Maya Chen</span><br /><span class="testimonial__role">Head of Growth, Northwind</span></span>
+            </div>
+          </article>
+          <article class="testimonial">
+            <p class="testimonial__quote">"The Claygent agents do research that used to take an SDR an entire afternoon — in seconds."</p>
+            <div class="testimonial__who">
+              <span class="testimonial__avatar" style="background:var(--brand-teal)" aria-hidden="true"></span>
+              <span><span class="testimonial__name">Dev Patel</span><br /><span class="testimonial__role">RevOps Lead, Contoso</span></span>
+            </div>
+          </article>
+          <article class="testimonial">
+            <p class="testimonial__quote">"Warm, playful, and ridiculously powerful. Our whole team actually enjoys using it."</p>
+            <div class="testimonial__who">
+              <span class="testimonial__avatar" style="background:var(--brand-ochre)" aria-hidden="true"></span>
+              <span><span class="testimonial__name">Sofia Rossi</span><br /><span class="testimonial__role">Founder, Tailspin</span></span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRICING ===================== -->
+    <section style="background:var(--surface-soft)">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Pricing</span>
+          <h2>Start free. Scale with credits.</h2>
+          <p>Every plan includes the full canvas and 100+ integrations. Pay for the enrichment credits you use.</p>
+        </div>
+        <div class="price-grid">
+          <div class="price">
+            <span class="price__cap">Starter</span>
+            <div class="price__name">Free</div>
+            <div class="price__amount">$0<small> / mo</small></div>
+            <ul class="price__list">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 100 credits / month</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlimited tables</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Core integrations</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Get started</a>
+          </div>
+
+          <div class="price price--featured">
+            <span class="price__cap">Most popular</span>
+            <div class="price__name">Pro</div>
+            <div class="price__amount">$349<small> / mo</small></div>
+            <ul class="price__list">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> 10,000 credits / month</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Claygent AI research</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> CRM sync &amp; webhooks</li>
+            </ul>
+            <a class="btn btn--on-color" href="./DESIGN.md">Start free trial</a>
+          </div>
+
+          <div class="price">
+            <span class="price__cap">Enterprise</span>
+            <div class="price__name">Custom</div>
+            <div class="price__amount">Let's talk</div>
+            <ul class="price__list">
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlimited credits</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> SSO &amp; SAML</li>
+              <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4 10-11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Dedicated expert</li>
+            </ul>
+            <a class="btn btn--secondary" href="./DESIGN.md">Contact sales</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SIGNUP ===================== -->
+    <section>
+      <div class="container">
+        <div class="signup">
+          <div>
+            <span class="eyebrow">Get started</span>
+            <h2>Build your first workflow today</h2>
+            <p>Sign up in seconds — no credit card required. Start with 100 free credits.</p>
+          </div>
+          <form onsubmit="return false">
+            <div class="field">
+              <label for="email">Work email</label>
+              <input class="input" id="email" type="email" placeholder="you@company.com" autocomplete="email" />
+            </div>
+            <div class="field">
+              <label for="company">Company</label>
+              <input class="input" id="company" type="text" placeholder="Acme Inc." autocomplete="organization" />
+            </div>
+            <button class="btn btn--primary" type="submit" style="width:100%;justify-content:center">Create free account</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CTA BAND ===================== -->
+    <section>
+      <div class="container">
+        <div class="cta-band">
+          <span class="eyebrow">Ready to grow?</span>
+          <h2>Turn your growth ideas into reality today</h2>
+          <p>Join thousands of GTM teams building their pipeline on Clay.</p>
+          <div><a class="btn btn--primary" href="./DESIGN.md">Start building free</a></div>
+          <div class="cta-band__blobs" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER (cream) ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a class="brand" href="./DESIGN.md">
+            <span class="brand__mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#0a0a0a"/><circle cx="12" cy="12" r="4" fill="#fffaf0"/></svg></span>
+            Clay
+          </a>
+          <p>Go to market with unique data. Clay is the GTM canvas for modern revenue teams.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Enrichment</a></li>
+            <li><a href="./DESIGN.md">Claygent</a></li>
+            <li><a href="./DESIGN.md">Integrations</a></li>
+            <li><a href="./DESIGN.md">Templates</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Solutions</h4>
+          <ul>
+            <li><a href="./DESIGN.md">Outbound</a></li>
+            <li><a href="./DESIGN.md">Inbound</a></li>
+            <li><a href="./DESIGN.md">RevOps</a></li>
+            <li><a href="./DESIGN.md">Recruiting</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="./DESIGN.md">University</a></li>
+            <li><a href="./DESIGN.md">Experts</a></li>
+            <li><a href="./DESIGN.md">Blog</a></li>
+            <li><a href="./DESIGN.md">Community</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="./DESIGN.md">About</a></li>
+            <li><a href="./DESIGN.md">Careers</a></li>
+            <li><a href="./DESIGN.md">Customers</a></li>
+            <li><a href="./DESIGN.md">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Clay. Inspired design preview.</span>
+        <span>Tokens sourced from <a href="./DESIGN.md" style="text-decoration:underline;color:var(--muted)">DESIGN.md</a></span>
+      </div>
+    </div>
+    <!-- signature footer mountain horizon -->
+    <div class="footer__mtn" aria-hidden="true"><i></i><i></i><i></i></div>
+  </footer>
+
+</body>
+</html>

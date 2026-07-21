@@ -1,0 +1,509 @@
+<!-- source_content_hash: add34130d67209ad105346d60fe2b290728b9711683969db4b7760e29477a5fe -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Airbnb — reference components</title>
+    <meta
+      name="description"
+      content="Reference fixture for design-md/airbnb. White canvas, near-black ink,
+        a single Rausch (#ff385c) voltage, Airbnb Cereal type at modest weights, pill
+        search bar, softly rounded property cards, and the 64px rating display moment."
+    />
+
+    <style>
+      /* ─── Tokens — mapped 1:1 from DESIGN.md (colors / typography / rounded / spacing) ─
+         Airbnb runs one voltage: Rausch (#ff385c). Everything else is white + ink.
+         The system trusts photography and whitespace over typographic muscle. */
+      :root {
+        /* Brand & accent — the single Rausch voltage, used scarcely */
+        --primary: #ff385c;
+        --primary-active: #e00b41;
+        --primary-disabled: #ffd1da;
+        --error-text: #c13515;
+        --error-text-hover: #b32505;
+        --luxe: #460479;      /* sub-brand only — never mainline */
+        --plus: #92174d;      /* sub-brand only — never mainline */
+
+        /* Text — never pure black */
+        --ink: #222222;
+        --body: #3f3f3f;
+        --muted: #6a6a6a;
+        --muted-soft: #929292;
+        --legal-link: #428bff;
+
+        /* Surface — Airbnb has no dark mode on the public web */
+        --canvas: #ffffff;
+        --surface-soft: #f7f7f7;
+        --surface-card: #ffffff;
+        --surface-strong: #f2f2f2;
+        --on-primary: #ffffff;
+        --on-dark: #ffffff;
+
+        /* Hairlines & borders */
+        --hairline: #dddddd;
+        --hairline-soft: #ebebeb;
+        --border-strong: #c1c1c1;
+
+        /* Type — Airbnb Cereal VF, Circular fallback; Inter is the OSS substitute */
+        --font: "Airbnb Cereal VF", Circular, -apple-system, system-ui, Roboto,
+          "Helvetica Neue", Inter, sans-serif;
+
+        /* Type scale (size / weight) straight from the DESIGN.md table */
+        --rating-size: 64px;   /* the one loud moment */
+        --display-xl: 28px;    /* homepage h1 — deliberately small */
+        --display-lg: 22px;
+        --display-md: 21px;
+        --display-sm: 20px;
+        --title: 16px;
+        --body-md: 16px;
+        --body-sm: 14px;
+        --caption: 14px;
+        --caption-sm: 13px;
+        --badge: 11px;
+        --uppercase-tag: 8px;
+
+        /* Rounded — soft everywhere; only the body grid has hard corners */
+        --r-none: 0px;
+        --r-xs: 4px;
+        --r-sm: 8px;    /* buttons */
+        --r-md: 14px;   /* cards */
+        --r-lg: 20px;
+        --r-xl: 32px;
+        --r-full: 9999px; /* search bar, orb, hearts */
+
+        /* Spacing — 4px base with a 2px micro-step; sections at 64px */
+        --sp-xxs: 2px;
+        --sp-xs: 4px;
+        --sp-sm: 8px;
+        --sp-md: 12px;
+        --sp-base: 16px;
+        --sp-lg: 24px;
+        --sp-xl: 32px;
+        --sp-xxl: 48px;
+        --sp-section: 64px;
+
+        /* The system's single shadow tier + focus ring */
+        --elev-card:
+          rgba(0, 0, 0, 0.02) 0 0 0 1px,
+          rgba(0, 0, 0, 0.04) 0 2px 6px 0,
+          rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+        --focus-ring: 0 0 0 2px var(--ink);
+
+        --motion: 200ms;
+        --ease: cubic-bezier(0.2, 0, 0, 1);
+
+        --container-max: 1280px;
+        --gutter: 24px;
+      }
+
+      /* ─── Reset ─────────────────────────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--canvas);
+        color: var(--body);
+        font-family: var(--font);
+        font-size: var(--body-md);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ─── Layout ─────────────────────────────────────────────── */
+      .container { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--gutter); }
+      section { padding-block: var(--sp-section); }
+      section + section { border-top: 1px solid var(--hairline-soft); }
+      @media (max-width: 743px) { .container { padding-inline: var(--sp-base); } section { padding-block: var(--sp-xxl); } }
+
+      /* ─── Typography — modest display weights, ink headings ──── */
+      h1, h2, h3 { color: var(--ink); margin: 0; font-family: var(--font); }
+      h1 { font-size: var(--display-xl); font-weight: 700; line-height: 1.43; }
+      h2 { font-size: var(--display-md); font-weight: 700; line-height: 1.43; }
+      h3 { font-size: var(--display-sm); font-weight: 600; line-height: 1.2; letter-spacing: -0.18px; }
+      p { margin: 0; }
+      .lead { font-size: var(--display-lg); font-weight: 500; line-height: 1.18; letter-spacing: -0.44px; color: var(--ink); }
+      .body-muted { color: var(--muted); }
+      .body-sm { font-size: var(--body-sm); }
+      .eyebrow {
+        font-size: var(--uppercase-tag); font-weight: 700; letter-spacing: 0.32px;
+        text-transform: uppercase; color: var(--primary);
+      }
+      .stack-2 > * + * { margin-block-start: var(--sp-sm); }
+      .stack-3 > * + * { margin-block-start: var(--sp-md); }
+      .stack-4 > * + * { margin-block-start: var(--sp-base); }
+      .stack-6 > * + * { margin-block-start: var(--sp-lg); }
+
+      /* ─── Buttons — 8px radius, weight 500 labels ───────────── */
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-sm);
+        min-height: 48px; padding: 14px 24px;
+        border-radius: var(--r-sm);
+        font-family: var(--font); font-size: var(--body-md); font-weight: 500; line-height: 1.25;
+        cursor: pointer; border: 1px solid transparent; text-decoration: none;
+        transition: background-color var(--motion) var(--ease), border-color var(--motion) var(--ease);
+      }
+      .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .btn-primary { background: var(--primary); color: var(--on-primary); }
+      .btn-primary:hover { background: var(--primary-active); }
+      .btn-primary:active { background: var(--primary-active); }
+      .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--ink); }
+      .btn-tertiary { background: transparent; color: var(--ink); padding-inline: 0; min-height: 0; }
+      .btn-tertiary:hover { text-decoration: underline; text-underline-offset: 3px; }
+      /* Pill Rausch CTA — 9999px radius, smaller label */
+      .btn-pill { border-radius: var(--r-full); padding: 10px 20px; min-height: 0; font-size: var(--body-sm); }
+
+      /* ─── Search bar — the signature pill surface ───────────── */
+      .searchbar {
+        display: flex; align-items: stretch;
+        background: var(--canvas); border: 1px solid var(--hairline);
+        border-radius: var(--r-full); box-shadow: var(--elev-card);
+        max-width: 720px;
+      }
+      .search-seg {
+        display: flex; flex-direction: column; gap: 2px;
+        padding: 12px 24px; justify-content: center; flex: 1;
+        border: none; background: transparent; text-align: left; cursor: pointer;
+        border-radius: var(--r-full);
+      }
+      .search-seg:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .search-seg + .search-seg { border-left: 1px solid var(--hairline); }
+      .search-seg .seg-label { font-size: var(--caption); font-weight: 500; color: var(--ink); }
+      .search-seg .seg-value { font-size: var(--caption); color: var(--muted); }
+      .search-orb {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 48px; height: 48px; margin: 8px; align-self: center;
+        border: none; border-radius: var(--r-full);
+        background: var(--primary); color: var(--on-primary); cursor: pointer;
+      }
+      .search-orb:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+      /* ─── Property cards — photo-first, 14px clip ───────────── */
+      .card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-base); }
+      @media (max-width: 1127px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 743px) { .card-grid { grid-template-columns: 1fr; } }
+      .property-card { display: flex; flex-direction: column; gap: var(--sp-sm); }
+      .property-photo {
+        position: relative; aspect-ratio: 1 / 1; border-radius: var(--r-md); overflow: hidden;
+        /* CSS-gradient placeholder standing in for property photography */
+        background: linear-gradient(135deg, #ffdde3 0%, #ffb3c1 45%, #ff8aa3 100%);
+      }
+      .property-photo::after {
+        content: ""; position: absolute; inset: 0;
+        background: radial-gradient(circle at 70% 80%, rgba(255,56,92,0.25), transparent 60%);
+      }
+      .fav-badge {
+        position: absolute; top: var(--sp-md); left: var(--sp-md);
+        background: var(--canvas); color: var(--ink);
+        font-size: var(--badge); font-weight: 600; line-height: 1.18;
+        padding: 4px 10px; border-radius: var(--r-full); box-shadow: var(--elev-card);
+      }
+      .heart {
+        position: absolute; top: var(--sp-md); right: var(--sp-md);
+        width: 32px; height: 32px; border: none; border-radius: var(--r-full);
+        background: rgba(0,0,0,0.08); color: var(--on-dark);
+        display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+      }
+      .heart[aria-pressed="true"] { color: var(--primary); }
+      .heart:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .property-title { font-size: var(--title); font-weight: 600; color: var(--ink); }
+      .rate-inline { display: inline-flex; align-items: center; gap: 4px; color: var(--ink); font-size: var(--body-sm); }
+      .price { color: var(--ink); }
+      .price b { font-weight: 600; }
+
+      /* ─── Category strip ────────────────────────────────────── */
+      .cat-strip { display: flex; gap: var(--sp-lg); flex-wrap: wrap; }
+      .cat-tab {
+        border: none; background: transparent; cursor: pointer;
+        font-size: var(--body-sm); font-weight: 500; color: var(--muted);
+        padding-block: var(--sp-sm); border-bottom: 2px solid transparent;
+      }
+      .cat-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+      .cat-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--r-xs); }
+
+      /* ─── Rating display — the single loud typographic moment ── */
+      .rating-display {
+        display: inline-flex; align-items: center; gap: var(--sp-lg);
+        font-size: var(--rating-size); font-weight: 700; line-height: 1.1;
+        letter-spacing: -1px; color: var(--ink);
+      }
+      .laurel { width: 40px; height: 64px; color: var(--ink); }
+
+      /* ─── Cards / reservation ───────────────────────────────── */
+      .reservation-card {
+        background: var(--surface-card); border: 1px solid var(--hairline);
+        border-radius: var(--r-md); box-shadow: var(--elev-card);
+        padding: var(--sp-lg); display: flex; flex-direction: column; gap: var(--sp-base);
+      }
+      .price-lg { font-size: var(--display-md); font-weight: 700; color: var(--ink); }
+
+      /* ─── Inputs — 8px radius, 2px ink focus (no glow) ──────── */
+      .field { display: flex; flex-direction: column; gap: var(--sp-sm); }
+      .field label { font-size: var(--caption); font-weight: 500; color: var(--muted); }
+      .field input {
+        min-height: 56px; padding: 14px 12px;
+        border: 1px solid var(--hairline); border-radius: var(--r-sm);
+        background: var(--canvas); color: var(--ink);
+        font-family: var(--font); font-size: var(--body-md); outline: none;
+      }
+      .field input::placeholder { color: var(--muted); }
+      .field input:focus-visible { border-width: 2px; border-color: var(--ink); padding: 13px 11px; }
+      .field-help { font-size: var(--caption-sm); color: var(--muted); }
+
+      /* ─── Misc ──────────────────────────────────────────────── */
+      a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+      a.brand-link { color: var(--primary); text-decoration: none; }
+      kbd {
+        font-family: var(--font); font-size: var(--caption-sm);
+        padding: 2px 6px; border-radius: var(--r-xs);
+        border: 1px solid var(--hairline); background: var(--surface-soft); color: var(--body);
+      }
+      .icon { width: 18px; height: 18px; flex-shrink: 0; }
+      .row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-md); }
+      .divider { height: 1px; background: var(--hairline-soft); }
+
+      /* ─── Nav ───────────────────────────────────────────────── */
+      .top-nav {
+        display: flex; align-items: center; justify-content: space-between; gap: var(--sp-lg);
+        height: 80px; border-bottom: 1px solid var(--hairline);
+      }
+      .wordmark { color: var(--primary); font-weight: 700; font-size: var(--display-sm); }
+      .product-tabs { display: flex; gap: var(--sp-lg); }
+      .product-tab {
+        position: relative; border: none; background: transparent; cursor: pointer;
+        font-size: var(--title); font-weight: 600; color: var(--muted);
+        padding-block: var(--sp-sm); border-bottom: 2px solid transparent;
+      }
+      .product-tab[aria-current="page"] { color: var(--ink); border-bottom-color: var(--ink); }
+      .product-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--r-xs); }
+      .new-tag {
+        margin-left: 6px; vertical-align: super;
+        font-size: var(--uppercase-tag); font-weight: 700; letter-spacing: 0.32px; text-transform: uppercase;
+        color: var(--ink); background: var(--canvas); border: 1px solid var(--hairline);
+        border-radius: var(--r-full); padding: 2px 6px;
+      }
+      @media (max-width: 743px) { .product-tabs { display: none; } }
+
+      .hero-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--sp-xxl); align-items: center; }
+      @media (max-width: 1023px) { .hero-grid { grid-template-columns: 1fr; gap: var(--sp-xl); } }
+      .detail-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: var(--sp-xxl); align-items: start; }
+      @media (max-width: 1023px) { .detail-grid { grid-template-columns: 1fr; } }
+      .amenity { display: flex; gap: var(--sp-md); align-items: center; padding-block: var(--sp-md); color: var(--ink); font-size: var(--body-md); }
+      .amenity + .amenity { border-top: 1px solid var(--hairline-soft); }
+      .footer-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg); }
+      @media (max-width: 743px) { .footer-cols { grid-template-columns: 1fr; } }
+      .footer-col h4 { font-size: var(--title); font-weight: 500; color: var(--ink); margin: 0 0 var(--sp-md); }
+      .footer-col a { display: block; color: var(--ink); text-decoration: none; font-size: var(--body-sm); margin-block: var(--sp-sm); }
+      .footer-col a:hover { text-decoration: underline; }
+      .legal-band { color: var(--muted); font-size: var(--caption-sm); }
+    </style>
+  </head>
+  <body>
+    <!-- Top nav: wordmark left, three product tabs center, utilities right -->
+    <nav class="container top-nav" aria-label="Primary">
+      <span class="wordmark">airbnb</span>
+      <div class="product-tabs" role="tablist" aria-label="Products">
+        <button class="product-tab" role="tab" aria-current="page">Homes</button>
+        <button class="product-tab" role="tab">Experiences<span class="new-tag">New</span></button>
+        <button class="product-tab" role="tab">Services<span class="new-tag">New</span></button>
+      </div>
+      <a href="./DESIGN.md" class="btn btn-tertiary">Become a host</a>
+    </nav>
+
+    <main class="container">
+      <!-- Hero: modest 28px h1 tucked under the pill search bar (see Typography · Principles) -->
+      <section aria-labelledby="hero-h">
+        <div class="hero-grid">
+          <div class="stack-4">
+            <p class="eyebrow">Reference fixture · airbnb</p>
+            <h1 id="hero-h">Inspiration for future getaways</h1>
+            <p class="lead" style="max-width: 24ch">Find homes, experiences, and services — all in one place.</p>
+            <!-- search-bar-pill + search-orb: the hottest single color moment -->
+            <form class="searchbar" role="search" aria-label="Search stays" onsubmit="event.preventDefault();">
+              <button class="search-seg" type="button">
+                <span class="seg-label">Where</span>
+                <span class="seg-value">Search destinations</span>
+              </button>
+              <button class="search-seg" type="button">
+                <span class="seg-label">When</span>
+                <span class="seg-value">Add dates</span>
+              </button>
+              <button class="search-seg" type="button">
+                <span class="seg-label">Who</span>
+                <span class="seg-value">Add guests</span>
+              </button>
+              <button class="search-orb" type="submit" aria-label="Search">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+                </svg>
+              </button>
+            </form>
+            <p class="body-sm body-muted">Trusted by millions of guests · Free to browse</p>
+          </div>
+          <aside class="reservation-card" aria-label="Trip summary">
+            <div class="row-between">
+              <span class="body-sm" style="color: var(--ink); font-weight: 600">Guest favorite</span>
+              <span class="fav-badge" style="position: static; box-shadow: none; border: 1px solid var(--hairline)">Top 5%</span>
+            </div>
+            <div class="divider"></div>
+            <p class="price-lg">$168 <span class="body-sm body-muted" style="font-weight: 400">night</span></p>
+            <button class="btn btn-primary" style="width: 100%">Reserve</button>
+            <p class="body-sm body-muted" style="text-align: center">You won't be charged yet</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Category strip + property cards: dense marketplace grid, 16px gutters -->
+      <section aria-labelledby="stays-h">
+        <div class="stack-4">
+          <h2 id="stays-h">Popular homes near you</h2>
+          <div class="cat-strip" role="tablist" aria-label="Categories">
+            <button class="cat-tab" role="tab" aria-selected="true">Beachfront</button>
+            <button class="cat-tab" role="tab" aria-selected="false">Cabins</button>
+            <button class="cat-tab" role="tab" aria-selected="false">Trending</button>
+            <button class="cat-tab" role="tab" aria-selected="false">Amazing views</button>
+            <button class="cat-tab" role="tab" aria-selected="false">Tiny homes</button>
+          </div>
+        </div>
+        <div class="card-grid" style="margin-block-start: var(--sp-lg)">
+          <!-- property-card ×4 -->
+          <article class="property-card">
+            <div class="property-photo">
+              <span class="fav-badge">Guest favorite</span>
+              <button class="heart" aria-pressed="true" aria-label="Save to wishlist">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.9-10-9.3C.4 8.3 2 4.7 5.4 4.7c2 0 3.3 1.2 4.6 3 1.3-1.8 2.6-3 4.6-3 3.4 0 5 3.6 3.4 7C19.5 16.1 12 21 12 21z"/></svg>
+              </button>
+            </div>
+            <div class="row-between"><span class="property-title">Malibu, California</span><span class="rate-inline">★ 4.98</span></div>
+            <p class="body-sm body-muted">Beachfront · 320 miles away</p>
+            <p class="price"><b>$248</b> night</p>
+          </article>
+          <article class="property-card">
+            <div class="property-photo" style="background: linear-gradient(135deg,#ffe9ec,#ffc2cd,#ff9aae)">
+              <span class="fav-badge">Guest favorite</span>
+              <button class="heart" aria-pressed="false" aria-label="Save to wishlist">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.9-10-9.3C.4 8.3 2 4.7 5.4 4.7c2 0 3.3 1.2 4.6 3 1.3-1.8 2.6-3 4.6-3 3.4 0 5 3.6 3.4 7C19.5 16.1 12 21 12 21z"/></svg>
+              </button>
+            </div>
+            <div class="row-between"><span class="property-title">Aspen, Colorado</span><span class="rate-inline">★ 4.91</span></div>
+            <p class="body-sm body-muted">Cabin · 1,120 miles away</p>
+            <p class="price"><b>$312</b> night</p>
+          </article>
+          <article class="property-card">
+            <div class="property-photo" style="background: linear-gradient(135deg,#fff0f2,#ffcdd6,#ff8fa5)">
+              <button class="heart" aria-pressed="false" aria-label="Save to wishlist">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.9-10-9.3C.4 8.3 2 4.7 5.4 4.7c2 0 3.3 1.2 4.6 3 1.3-1.8 2.6-3 4.6-3 3.4 0 5 3.6 3.4 7C19.5 16.1 12 21 12 21z"/></svg>
+              </button>
+            </div>
+            <div class="row-between"><span class="property-title">Lake Tahoe</span><span class="rate-inline">★ 4.87</span></div>
+            <p class="body-sm body-muted">Amazing views · 540 miles away</p>
+            <p class="price"><b>$196</b> night</p>
+          </article>
+          <article class="property-card">
+            <div class="property-photo" style="background: linear-gradient(135deg,#ffe4e8,#ffb8c4,#ff7d97)">
+              <span class="fav-badge">Guest favorite</span>
+              <button class="heart" aria-pressed="false" aria-label="Save to wishlist">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7.5-4.9-10-9.3C.4 8.3 2 4.7 5.4 4.7c2 0 3.3 1.2 4.6 3 1.3-1.8 2.6-3 4.6-3 3.4 0 5 3.6 3.4 7C19.5 16.1 12 21 12 21z"/></svg>
+              </button>
+            </div>
+            <div class="row-between"><span class="property-title">Joshua Tree</span><span class="rate-inline">★ 4.95</span></div>
+            <p class="body-sm body-muted">Tiny home · 210 miles away</p>
+            <p class="price"><b>$142</b> night</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Listing detail: rating-display (the loud moment) + amenity rows -->
+      <section aria-labelledby="detail-h">
+        <div class="detail-grid">
+          <div class="stack-6">
+            <div class="stack-3">
+              <h2 id="detail-h">Guest favorite</h2>
+              <!-- rating-display-card — 64px / 700, laurel ornaments left & right -->
+              <div class="rating-display" role="img" aria-label="Rated 4.81 out of 5, a guest favorite">
+                <svg class="laurel" viewBox="0 0 40 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M32 4C18 10 12 24 14 44M32 16C22 20 18 30 20 44M32 28C26 30 24 36 26 44" />
+                </svg>
+                4.81
+                <svg class="laurel" viewBox="0 0 40 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="transform: scaleX(-1)">
+                  <path d="M32 4C18 10 12 24 14 44M32 16C22 20 18 30 20 44M32 28C26 30 24 36 26 44" />
+                </svg>
+              </div>
+              <p class="body-muted" style="max-width: 52ch">
+                One of the most loved homes on Airbnb, according to guests — based on
+                ratings, reviews, and reliability.
+              </p>
+            </div>
+            <div>
+              <h3>What this place offers</h3>
+              <div style="margin-block-start: var(--sp-base)">
+                <div class="amenity"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M3 12h18M12 3v18"/></svg> Ocean view</div>
+                <div class="amenity"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/></svg> Fast wifi — 400 Mbps</div>
+                <div class="amenity"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M4 20V8l8-5 8 5v12"/></svg> Free parking on premises</div>
+              </div>
+            </div>
+          </div>
+          <aside class="reservation-card" aria-label="Reserve this stay">
+            <p class="price-lg">$248 <span class="body-sm body-muted" style="font-weight: 400">night</span></p>
+            <div class="field"><label for="checkin">Check-in</label><input id="checkin" type="text" placeholder="Add date" /></div>
+            <div class="field"><label for="guests">Guests</label><input id="guests" type="text" placeholder="1 guest" /></div>
+            <button class="btn btn-primary" style="width: 100%">Reserve</button>
+            <div class="divider"></div>
+            <div class="row-between body-sm"><span class="body-muted">$248 × 5 nights</span><span style="color: var(--ink)">$1,240</span></div>
+            <div class="row-between body-sm"><span class="body-muted">Cleaning fee</span><span style="color: var(--ink)">$85</span></div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Buttons & pill CTA specimen -->
+      <section aria-labelledby="btn-h">
+        <h2 id="btn-h">Buttons</h2>
+        <div class="stack-4" style="margin-block-start: var(--sp-lg)">
+          <div style="display:flex; gap: var(--sp-md); flex-wrap: wrap; align-items: center">
+            <button class="btn btn-primary">Reserve</button>
+            <button class="btn btn-secondary">Save</button>
+            <button class="btn btn-tertiary">Show more</button>
+            <button class="btn btn-primary btn-pill">Become a host</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sign-up form: 8px inputs, 2px ink focus (no glow, no ring) -->
+      <section aria-labelledby="form-h">
+        <div class="detail-grid">
+          <div class="stack-4">
+            <p class="eyebrow">Host with Airbnb</p>
+            <h2 id="form-h">Earn on your terms.</h2>
+            <p class="body-muted" style="max-width: 46ch; font-size: var(--display-lg); font-weight: 400; line-height: 1.4">
+              Tell us where you'd host, and we'll estimate what your space could earn.
+            </p>
+          </div>
+          <form class="reservation-card" onsubmit="event.preventDefault();" aria-label="Host estimate">
+            <div class="field">
+              <label for="loc">Location</label>
+              <input id="loc" type="text" placeholder="City or region" autocomplete="address-level2" required />
+              <p class="field-help">We use this to estimate nightly demand nearby.</p>
+            </div>
+            <div class="field">
+              <label for="type">Place type</label>
+              <input id="type" type="text" placeholder="Entire home, room…" />
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%">Estimate earnings</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer: white surface (no contrast footer) + legal band -->
+    <footer class="container" style="padding-block: var(--sp-xxl)">
+      <div class="footer-cols">
+        <div class="footer-col"><h4>Support</h4><a href="./DESIGN.md">Help Center</a><a href="./DESIGN.md">Cancellation options</a><a href="./DESIGN.md">Safety information</a></div>
+        <div class="footer-col"><h4>Hosting</h4><a href="./DESIGN.md">Airbnb your home</a><a href="./DESIGN.md">Hosting resources</a><a href="./DESIGN.md">Community forum</a></div>
+        <div class="footer-col"><h4>Airbnb</h4><a href="./DESIGN.md">Newsroom</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Investors</a></div>
+      </div>
+      <div class="divider" style="margin-block: var(--sp-lg)"></div>
+      <p class="legal-band">© 2026 Airbnb, Inc. · <a href="./DESIGN.md" style="color: var(--muted)">Privacy</a> · <a href="./DESIGN.md" style="color: var(--muted)">Terms</a> · English (US) · $ USD</p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,522 @@
+<!-- source_content_hash: 3d972f34f8d4f33b442fa28220cf3b7ca2f13c0a97c468e3988148f82521f9df -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude — Component Preview</title>
+<style>
+  /* ============================================================
+     CLAUDE (Anthropic) design tokens — mapped from DESIGN.md
+     Warm cream canvas + slab-serif display + coral CTA +
+     dark navy product surfaces. Editorial, humanist, literary.
+     ============================================================ */
+  :root {
+    /* Brand & accent — the cream/coral pairing */
+    --primary: #cc785c;
+    --primary-active: #a9583e;
+    --primary-disabled: #e6dfd8;
+    --accent-teal: #5db8a6;
+    --accent-amber: #e8a55a;
+
+    /* Text */
+    --ink: #141413;
+    --body: #3d3d3a;
+    --body-strong: #252523;
+    --muted: #6c6a64;
+    --muted-soft: #8e8b82;
+
+    /* Surface — cream trinity + dark navy */
+    --canvas: #faf9f5;
+    --surface-soft: #f5f0e8;
+    --surface-card: #efe9de;
+    --surface-cream-strong: #e8e0d2;
+    --surface-dark: #181715;
+    --surface-dark-elevated: #252320;
+    --surface-dark-soft: #1f1e1b;
+    --hairline: #e6dfd8;
+    --hairline-soft: #ebe6df;
+
+    /* On-color */
+    --on-primary: #ffffff;
+    --on-dark: #faf9f5;
+    --on-dark-soft: #a09d96;
+
+    /* Semantic */
+    --success: #5db872;
+    --warning: #d4a017;
+    --error: #c64545;
+
+    /* Type — Copernicus serif display / StyreneB sans / mono */
+    --font-display: "Copernicus", "Tiempos Headline", "Cormorant Garamond", "EB Garamond", Georgia, serif;
+    --font-body: "StyreneB", "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    /* Radius */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-pill: 9999px;
+
+    /* Spacing — base 4 */
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-md: 16px;
+    --s-lg: 24px;
+    --s-xl: 32px;
+    --s-xxl: 48px;
+    --s-section: 96px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--body);
+    background: var(--canvas);
+  }
+
+  h1, h2, h3, h4 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--ink);
+  }
+  p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 3px solid rgba(204, 120, 92, 0.5);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+  }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--s-lg); }
+
+  .spike { color: var(--ink); }
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .serif-inline { font-family: var(--font-display); }
+
+  /* ---------- Top nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    height: 64px;
+    background: var(--canvas);
+    display: flex; align-items: center;
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .nav .wrap { display: flex; align-items: center; gap: var(--s-lg); width: 100%; }
+  .brand { display: flex; align-items: center; gap: var(--s-xs); font-family: var(--font-body); font-weight: 500; font-size: 18px; color: var(--ink); }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-lg); }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--body); }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-md); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: var(--r-md);
+    padding: 12px 20px;
+    min-height: 40px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s-xs);
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-active); }
+  .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--hairline); }
+  .btn-on-coral { background: var(--canvas); color: var(--ink); }
+  .btn-on-dark { background: var(--surface-dark-elevated); color: var(--on-dark); }
+  .link-coral { color: var(--primary); font-weight: 500; }
+  .link-coral:hover { text-decoration: underline; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-block: var(--s-section); }
+  .hero .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-xxl); align-items: center; }
+  .hero h1 { font-size: clamp(40px, 6vw, 64px); line-height: 1.05; letter-spacing: -1.5px; margin-block: var(--s-md); }
+  .hero p.sub { font-size: 18px; color: var(--body); max-width: 46ch; margin-bottom: var(--s-lg); }
+  .hero-btns { display: flex; gap: var(--s-sm); flex-wrap: wrap; }
+
+  /* code window card (dark) */
+  .code-window {
+    background: var(--surface-dark);
+    border-radius: var(--r-xl);
+    padding: var(--s-lg);
+    color: var(--on-dark);
+  }
+  .code-chrome { display: flex; gap: var(--s-xs); margin-bottom: var(--s-md); }
+  .code-chrome i { width: 11px; height: 11px; border-radius: var(--r-pill); background: var(--surface-dark-elevated); display: block; }
+  .code-body {
+    background: var(--surface-dark-soft);
+    border-radius: var(--r-md);
+    padding: var(--s-md);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--on-dark-soft);
+    overflow-x: auto;
+  }
+  .code-body .k { color: var(--accent-amber); }
+  .code-body .s { color: var(--accent-teal); }
+  .code-body .c { color: var(--muted-soft); }
+
+  /* ---------- Sections ---------- */
+  section { padding-block: var(--s-section); }
+  .section-head { max-width: 60ch; margin-bottom: var(--s-xl); }
+  .section-head h2 { font-size: 48px; line-height: 1.1; letter-spacing: -1px; margin-top: var(--s-sm); }
+
+  /* ---------- Feature cards (cream) ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .feature-card {
+    background: var(--surface-card);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .feature-card .ico {
+    width: 40px; height: 40px; border-radius: var(--r-md);
+    background: var(--canvas);
+    display: grid; place-items: center; color: var(--primary);
+    margin-bottom: var(--s-md);
+  }
+  .feature-card h3 { font-family: var(--font-body); font-weight: 500; font-size: 18px; color: var(--ink); margin-bottom: var(--s-xs); }
+  .feature-card p { font-size: 16px; }
+
+  /* ---------- Model comparison (cream cards, hairline) ---------- */
+  .model-band { background: var(--surface-soft); }
+  .model-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+  }
+  .model-card h3 { font-size: 36px; line-height: 1.15; letter-spacing: -0.5px; }
+  .model-card .role { color: var(--muted); margin: var(--s-xs) 0 var(--s-md); }
+
+  /* ---------- Coral callout ---------- */
+  .callout-coral {
+    background: var(--primary);
+    color: var(--on-primary);
+    border-radius: var(--r-lg);
+    padding: var(--s-xxl);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-lg);
+  }
+  .callout-coral h2 { color: var(--on-primary); font-size: 28px; line-height: 1.2; letter-spacing: -0.3px; max-width: 22ch; }
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .tier {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+    display: flex; flex-direction: column; gap: var(--s-md);
+  }
+  .tier.featured { background: var(--surface-dark); color: var(--on-dark); border-color: transparent; }
+  .tier.featured h3, .tier.featured .price { color: var(--on-dark); }
+  .tier h3 { font-family: var(--font-body); font-weight: 500; font-size: 22px; }
+  .tier .price { font-family: var(--font-display); font-size: 28px; letter-spacing: -0.3px; color: var(--ink); }
+  .tier ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-xs); font-size: 14px; }
+  .tier li { display: flex; gap: var(--s-xs); align-items: flex-start; }
+  .tier li svg { flex: 0 0 auto; margin-top: 3px; color: var(--primary); }
+  .tier.featured li svg { color: var(--accent-teal); }
+  .tier .btn { margin-top: auto; }
+
+  /* ---------- Contact form ---------- */
+  .form-card {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--s-xl);
+    max-width: 640px;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-md); }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 13px; font-weight: 500; color: var(--body-strong); }
+  .field input, .field textarea {
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+  }
+  .field input:focus-visible, .field textarea:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+  }
+  .field .err { color: var(--error); font-size: 13px; }
+  .badges { display: flex; gap: var(--s-xs); flex-wrap: wrap; margin-top: var(--s-md); }
+  .badge-pill { background: var(--surface-card); color: var(--ink); font-size: 13px; font-weight: 500; border-radius: var(--r-pill); padding: 4px 12px; }
+  .badge-coral { background: var(--primary); color: var(--on-primary); font-size: 12px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; border-radius: var(--r-pill); padding: 4px 12px; }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--surface-dark); color: var(--on-dark-soft); padding: 64px 0; }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: var(--s-xl); }
+  .foot-brand { display: flex; align-items: center; gap: var(--s-xs); color: var(--on-dark); font-family: var(--font-body); font-weight: 500; font-size: 18px; }
+  footer h4 { font-family: var(--font-body); font-weight: 500; font-size: 14px; color: var(--on-dark); margin-bottom: var(--s-md); }
+  footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-xs); }
+  footer a { color: var(--on-dark-soft); font-size: 14px; }
+  footer a:hover { color: var(--on-dark); }
+  .foot-bottom { margin-top: var(--s-xl); padding-top: var(--s-md); border-top: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .grid-3, .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 767px) {
+    section, .hero { padding-block: var(--s-xxl); }
+    .hero .wrap { grid-template-columns: 1fr; }
+    .grid-3, .pricing-grid, .form-grid, .foot-grid { grid-template-columns: 1fr; }
+    .section-head h2 { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- svg spike-mark reused -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="spike" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 2l1.6 7.2L21 8l-5.4 4.8L21 16l-7.4-1.2L12 22l-1.6-7.2L3 16l5.4-3.2L3 8l7.4 1.2z"/>
+    </symbol>
+  </svg>
+
+  <!-- Top nav -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./DESIGN.md" aria-label="Claude home">
+        <svg class="spike" width="20" height="20" aria-hidden="true"><use href="#spike"/></svg>
+        Claude
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Product</a>
+        <a href="./DESIGN.md">Solutions</a>
+        <a href="./DESIGN.md">Research</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Company</a>
+      </nav>
+      <div class="nav-right">
+        <a class="link-coral" href="./DESIGN.md">Sign in</a>
+        <button class="btn btn-primary">Try Claude</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Anthropic</span>
+        <h1>Meet your thinking partner</h1>
+        <p class="sub">Claude is a next-generation AI assistant built to be safe, accurate, and secure — a warm, considered voice in a category of cool blue.</p>
+        <div class="hero-btns">
+          <button class="btn btn-primary">Start building</button>
+          <button class="btn btn-secondary">Talk to sales</button>
+        </div>
+      </div>
+      <div class="code-window" role="img" aria-label="Code editor mockup">
+        <div class="code-chrome"><i></i><i></i><i></i></div>
+        <div class="code-body"><span class="c"># ask Claude to refactor</span>
+<span class="k">import</span> anthropic
+
+client = anthropic.<span class="k">Client</span>()
+msg = client.messages.<span class="k">create</span>(
+  model=<span class="s">"claude-opus"</span>,
+  max_tokens=<span class="s">1024</span>,
+  messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>,
+             <span class="s">"content"</span>: <span class="s">"Explain this diff"</span>}]
+)
+<span class="k">print</span>(msg.content)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature cards -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Capabilities</span>
+        <h2>Built for considered work</h2>
+      </div>
+      <div class="grid-3">
+        <article class="feature-card">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+          <h3>Long-context reasoning</h3>
+          <p>Work across entire codebases and documents with a context window that holds the whole picture.</p>
+        </article>
+        <article class="feature-card">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 4-9 4-9-4 9-4zM3 12l9 4 9-4M3 17l9 4 9-4"/></svg></div>
+          <h3>Agentic tools</h3>
+          <p>Give Claude tools and let it plan, act, and verify — from browsing to running your code.</p>
+        </article>
+        <article class="feature-card">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg></div>
+          <h3>Enterprise-grade safety</h3>
+          <p>Constitutional AI keeps outputs helpful, honest, and harmless at production scale.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Model comparison -->
+  <section class="model-band">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">The Claude family</span>
+        <h2>Which problem are you up against?</h2>
+      </div>
+      <div class="grid-3">
+        <article class="model-card">
+          <h3>Opus</h3>
+          <p class="role">Deepest reasoning</p>
+          <p>The most capable model for complex analysis, long-horizon tasks, and research.</p>
+          <p style="margin-top:var(--s-md)"><a class="link-coral" href="./DESIGN.md">Learn more →</a></p>
+        </article>
+        <article class="model-card">
+          <h3>Sonnet</h3>
+          <p class="role">Balanced intelligence</p>
+          <p>The everyday workhorse — high intelligence at speed for most production use cases.</p>
+          <p style="margin-top:var(--s-md)"><a class="link-coral" href="./DESIGN.md">Learn more →</a></p>
+        </article>
+        <article class="model-card">
+          <h3>Haiku</h3>
+          <p class="role">Fast and light</p>
+          <p>Near-instant responses for high-volume, latency-sensitive workloads.</p>
+          <p style="margin-top:var(--s-md)"><a class="link-coral" href="./DESIGN.md">Learn more →</a></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Coral callout -->
+  <section style="padding-block:0;">
+    <div class="wrap">
+      <div class="callout-coral">
+        <h2>Start building with Claude today</h2>
+        <button class="btn btn-on-coral">Get API access</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Pricing</span>
+        <h2>Simple plans for every team</h2>
+      </div>
+      <div class="pricing-grid">
+        <article class="tier">
+          <h3>Free</h3>
+          <div class="price">$0</div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Chat with Claude</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Web and mobile apps</li>
+          </ul>
+          <button class="btn btn-secondary">Get started</button>
+        </article>
+        <article class="tier featured">
+          <span class="badge-coral">Popular</span>
+          <h3>Pro</h3>
+          <div class="price">$20<span style="font-size:14px;font-family:var(--font-body)">/mo</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>5× more usage</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Priority access</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Early features</li>
+          </ul>
+          <button class="btn btn-primary">Upgrade</button>
+        </article>
+        <article class="tier">
+          <h3>Team</h3>
+          <div class="price">$30<span style="font-size:14px;font-family:var(--font-body)">/mo</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Central billing</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Admin tools</li>
+          </ul>
+          <button class="btn btn-secondary">Contact us</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact form -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Contact</span>
+        <h2>Talk to our team</h2>
+      </div>
+      <div class="form-card">
+        <form class="form-grid" novalidate>
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" type="text" placeholder="Ada Lovelace" />
+          </div>
+          <div class="field">
+            <label for="email">Work email</label>
+            <input id="email" type="email" placeholder="you@company.com" aria-describedby="err" />
+            <span class="err" id="err">Enter a valid work email.</span>
+          </div>
+          <div class="field full">
+            <label for="msg">How can we help?</label>
+            <textarea id="msg" rows="3" placeholder="Tell us about your use case"></textarea>
+          </div>
+          <div class="field full">
+            <button class="btn btn-primary" type="submit">Send message</button>
+            <div class="badges">
+              <span class="badge-pill">SOC 2</span>
+              <span class="badge-pill">Enterprise</span>
+              <span class="badge-coral">New</span>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <div class="foot-brand"><svg width="20" height="20" style="color:var(--on-dark)" aria-hidden="true"><use href="#spike"/></svg> Anthropic</div>
+          <p style="margin-top:var(--s-md);max-width:32ch;font-size:14px;">Component preview rendered from the Claude DESIGN.md token set.</p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul><li><a href="./DESIGN.md">Claude</a></li><li><a href="./DESIGN.md">API</a></li><li><a href="./DESIGN.md">Pricing</a></li></ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul><li><a href="./DESIGN.md">About</a></li><li><a href="./DESIGN.md">Research</a></li><li><a href="./DESIGN.md">Careers</a></li></ul>
+        </div>
+        <div>
+          <h4>Resources</h4>
+          <ul><li><a href="./DESIGN.md">Docs</a></li><li><a href="./DESIGN.md">Support</a></li><li><a href="./DESIGN.md">Status</a></li></ul>
+        </div>
+      </div>
+      <div class="foot-bottom">© 2026 Anthropic. Component preview generated from DESIGN.md.</div>
+    </div>
+  </footer>
+
+</body>
+</html>

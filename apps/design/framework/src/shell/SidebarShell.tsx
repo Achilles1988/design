@@ -66,6 +66,20 @@ function CanvasIcon() {
   )
 }
 
+function AssetsIcon() {
+  return (
+    <svg
+      className="sidebar-shell__icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path d="M4 7l8-4 8 4-8 4-8-4z" />
+      <path d="M4 12l8 4 8-4" />
+      <path d="M4 17l8 4 8-4" />
+    </svg>
+  )
+}
+
 function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
@@ -148,6 +162,16 @@ export function SidebarShell({ children }: SidebarShellProps) {
           <NavLink to="/" end className={navLinkClassName}>
             <AppsIcon />
             <span className="sidebar-shell__nav-link-text">Apps</span>
+          </NavLink>
+
+          <div className="sidebar-shell__group-label">Assets</div>
+          <NavLink to="/assets/rule" className={navLinkClassName}>
+            <AssetsIcon />
+            <span className="sidebar-shell__nav-link-text">Rule</span>
+          </NavLink>
+          <NavLink to="/assets/layout" className={navLinkClassName}>
+            <AssetsIcon />
+            <span className="sidebar-shell__nav-link-text">Layout</span>
           </NavLink>
 
           {nodes.length > 0 ? (

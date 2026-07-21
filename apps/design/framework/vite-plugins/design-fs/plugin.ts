@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin } from 'vite'
+import { createAssetsStore, isAssetKind } from './assets'
 import { createContentStore } from './store'
 
 const DESIGN_FS_NOT_FOUND = 'Not found'
@@ -49,6 +50,19 @@ function sendJson(
   res.end(JSON.stringify(body))
 }
 
+function sendBinary(
+  res: ServerResponse,
+  status: number,
+  body: Buffer,
+  headers: Record<string, string>,
+): void {
+  res.statusCode = status
+  for (const [key, value] of Object.entries(headers)) {
+    res.setHeader(key, value)
+  }
+  res.end(body)
+}
+
 async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
   const raw = await readBody(req)
   if (!raw.trim()) return {}
@@ -59,8 +73,12 @@ async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
   }
 }
 
-export function designFsPlugin(options: { contentRoot: string }): Plugin {
+export function designFsPlugin(options: {
+  contentRoot: string
+  assetsRoot: string
+}): Plugin {
   const store = createContentStore(options.contentRoot)
+  const assets = createAssetsStore(options.assetsRoot)
   return {
     name: 'design-fs',
     configureServer(server) {
@@ -72,8 +90,51 @@ export function designFsPlugin(options: { contentRoot: string }): Plugin {
           const pathname = new URL(rawUrl, 'http://localhost').pathname
           const method = (req.method ?? 'GET').toUpperCase()
           const parts = pathname.split('/').filter(Boolean)
-          // parts: ['__design_fs', 'apps', ...]
-          if (parts[0] !== '__design_fs' || parts[1] !== 'apps') {
+          // parts: ['__design_fs', ...]
+          if (parts[0] !== '__design_fs') {
+            sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
+            return
+          }
+
+          // GET /__design_fs/assets/:kind
+          // GET /__design_fs/assets/:kind/:id/download
+          if (parts[1] === 'assets') {
+            const kind = parts[2]
+            if (!kind || !isAssetKind(kind)) {
+              sendJson(res, 400, {
+                error: 'kind must be designmd or layoutmd',
+              })
+              return
+            }
+
+            if (parts.length === 3 && method === 'GET') {
+              sendJson(res, 200, await assets.listAssets(kind))
+              return
+            }
+
+            if (
+              parts.length === 5 &&
+              parts[4] === 'download' &&
+              method === 'GET'
+            ) {
+              const id = decodeURIComponent(parts[3] ?? '')
+              if (!id) {
+                sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
+                return
+              }
+              const zip = await assets.downloadPackage(kind, id)
+              sendBinary(res, 200, zip, {
+                'Content-Type': 'application/zip',
+                'Content-Disposition': `attachment; filename="${id}.zip"`,
+              })
+              return
+            }
+
+            sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
+            return
+          }
+
+          if (parts[1] !== 'apps') {
             sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
             return
           }

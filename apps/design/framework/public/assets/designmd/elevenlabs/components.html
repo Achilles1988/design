@@ -1,0 +1,375 @@
+<!-- source_content_hash: 3b359acfaafadbb499c7ed3eebe813a76e0be497a7157b77de207fe275068a66 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ElevenLabs — Component Preview</title>
+<style>
+  /* ============================================================
+     ELEVENLABS design tokens — mapped from DESIGN.md
+     Quietly editorial print-magazine voice-AI brand. Off-white
+     canvas, warm near-black ink, Waldenburg Light 300 display,
+     pastel atmospheric gradient orbs as the only "color".
+     ============================================================ */
+  :root {
+    /* Brand — ink pill is the only CTA color */
+    --primary: #292524;
+    --primary-active: #0c0a09;
+
+    /* Text */
+    --ink: #0c0a09;
+    --body: #4e4e4e;
+    --body-strong: #292524;
+    --muted: #777169;
+    --muted-soft: #a8a29e;
+
+    /* Surface */
+    --canvas: #f5f5f5;
+    --canvas-soft: #fafafa;
+    --canvas-deep: #0c0a09;
+    --surface-card: #ffffff;
+    --surface-strong: #f0efed;
+    --surface-dark: #0c0a09;
+    --surface-dark-elevated: #1c1917;
+
+    /* Hairlines */
+    --hairline: #e7e5e4;
+    --hairline-soft: #f0efed;
+    --hairline-strong: #d6d3d1;
+
+    /* On-color */
+    --on-primary: #ffffff;
+    --on-dark: #ffffff;
+    --on-dark-soft: #a8a29e;
+
+    /* Atmospheric gradient stops (signature) */
+    --g-mint: #a7e5d3;
+    --g-peach: #f4c5a8;
+    --g-lavender: #c8b8e0;
+    --g-sky: #a8c8e8;
+    --g-rose: #e8b8c4;
+
+    /* Semantic */
+    --success: #16a34a;
+    --error: #dc2626;
+
+    /* Type — Waldenburg Light display / Inter body */
+    --font-display: "Waldenburg", "GT Sectra", "EB Garamond", "Times New Roman", serif;
+    --font-body: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+
+    /* Radius */
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-xxl: 24px;
+    --r-pill: 9999px;
+
+    /* Spacing — base 4 */
+    --s-xxs: 4px;
+    --s-xs: 8px;
+    --s-sm: 12px;
+    --s-base: 16px;
+    --s-md: 20px;
+    --s-lg: 24px;
+    --s-xl: 32px;
+    --s-xxl: 48px;
+    --s-section: 96px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.16px;
+    color: var(--body);
+    background: var(--canvas);
+  }
+
+  h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 300; color: var(--ink); }
+  p { margin: 0; }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: var(--r-md); }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--s-lg); }
+
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.96px; text-transform: uppercase; color: var(--muted); }
+
+  /* ---------- Top nav ---------- */
+  .nav { position: sticky; top: 0; z-index: 20; height: 64px; background: var(--canvas); display: flex; align-items: center; border-bottom: 1px solid var(--hairline); }
+  .nav .wrap { display: flex; align-items: center; gap: var(--s-lg); width: 100%; }
+  .brand { display: flex; align-items: center; gap: var(--s-xs); font-weight: 600; font-size: 17px; color: var(--ink); letter-spacing: 0; }
+  .brand .mark { display: flex; gap: 2px; align-items: flex-end; height: 18px; }
+  .brand .mark i { width: 3px; background: var(--ink); border-radius: var(--r-pill); display: block; }
+  .nav-links { display: flex; gap: var(--s-lg); margin-left: var(--s-lg); }
+  .nav-links a { font-size: 15px; font-weight: 500; color: var(--body); letter-spacing: 0; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-md); }
+
+  /* ---------- Buttons ---------- */
+  .btn { font-family: var(--font-body); font-size: 15px; font-weight: 500; line-height: 1; border-radius: var(--r-pill); padding: 10px 20px; min-height: 40px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--s-xs); }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-active); }
+  .btn-outline { background: transparent; color: var(--ink); border-color: var(--hairline-strong); }
+  .btn-text { background: transparent; border: 0; color: var(--ink); font-size: 15px; font-weight: 500; cursor: pointer; }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; padding-block: var(--s-section); text-align: center; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(40% 50% at 30% 30%, rgba(167,229,211,0.5), transparent 70%), radial-gradient(35% 45% at 72% 28%, rgba(244,197,168,0.45), transparent 70%), radial-gradient(40% 50% at 55% 75%, rgba(200,184,224,0.4), transparent 70%); pointer-events: none; }
+  .hero .wrap { position: relative; }
+  .hero h1 { font-size: clamp(40px, 8vw, 64px); line-height: 1.05; letter-spacing: -1.92px; margin: var(--s-md) auto var(--s-lg); max-width: 16ch; }
+  .hero p.sub { font-size: 18px; color: var(--body); max-width: 52ch; margin: 0 auto var(--s-lg); }
+  .hero-btns { display: flex; gap: var(--s-sm); justify-content: center; flex-wrap: wrap; }
+
+  /* ---------- Sections ---------- */
+  section { padding-block: var(--s-section); }
+  .section-head { max-width: 60ch; margin: 0 auto var(--s-xl); text-align: center; }
+  .section-head h2 { font-size: 36px; line-height: 1.17; letter-spacing: -0.36px; margin-top: var(--s-xs); }
+
+  /* ---------- Gradient orb cards ---------- */
+  .orb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .orb-card { position: relative; background: var(--canvas-soft); border-radius: var(--r-xxl); padding: var(--s-xl); overflow: hidden; border: 1px solid var(--hairline); min-height: 200px; }
+  .orb-card .orb { position: absolute; width: 180px; height: 180px; border-radius: var(--r-pill); filter: blur(8px); top: -40px; right: -30px; opacity: 0.75; }
+  .orb-card.mint .orb { background: radial-gradient(circle, var(--g-mint), transparent 70%); }
+  .orb-card.peach .orb { background: radial-gradient(circle, var(--g-peach), transparent 70%); }
+  .orb-card.lavender .orb { background: radial-gradient(circle, var(--g-lavender), transparent 70%); }
+  .orb-card h3 { position: relative; font-size: 24px; line-height: 1.2; margin-bottom: var(--s-xs); }
+  .orb-card p { position: relative; }
+
+  /* ---------- Feature cards ---------- */
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .feature-card { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-xl); padding: var(--s-lg); }
+  .feature-card .ico { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--surface-strong); display: grid; place-items: center; color: var(--ink); margin-bottom: var(--s-sm); }
+  .feature-card h3 { font-family: var(--font-body); font-weight: 500; font-size: 20px; color: var(--ink); margin-bottom: var(--s-xxs); }
+
+  /* ---------- Voice library ---------- */
+  .voice-band { background: var(--canvas-soft); }
+  .voice-card { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-xl); padding: var(--s-lg) var(--s-xl); }
+  .voice-row { display: flex; align-items: center; gap: var(--s-md); padding: var(--s-sm) 0; border-bottom: 1px solid var(--hairline); }
+  .voice-row:last-child { border-bottom: 0; }
+  .voice-ico { width: 32px; height: 32px; border-radius: var(--r-pill); background: var(--surface-strong); display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--ink); flex: 0 0 auto; }
+  .voice-meta { flex: 1; }
+  .voice-meta strong { color: var(--ink); font-weight: 500; display: block; }
+  .voice-meta span { font-size: 14px; color: var(--muted); }
+  .waveform { display: flex; align-items: center; gap: 3px; height: 24px; }
+  .waveform i { width: 3px; background: var(--muted-soft); border-radius: var(--r-pill); display: block; }
+  .play { width: 32px; height: 32px; border-radius: var(--r-pill); border: 1px solid var(--hairline-strong); background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--ink); }
+
+  /* ---------- Pricing ---------- */
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-lg); }
+  .tier { background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-xl); padding: var(--s-xl); display: flex; flex-direction: column; gap: var(--s-sm); }
+  .tier.featured { background: var(--surface-dark); color: var(--on-dark); border-color: transparent; }
+  .tier.featured h3, .tier.featured .price { color: var(--on-dark); }
+  .tier h3 { font-family: var(--font-body); font-weight: 500; font-size: 20px; color: var(--ink); }
+  .tier .price { font-family: var(--font-display); font-weight: 300; font-size: 40px; color: var(--ink); }
+  .tier ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-xs); font-size: 15px; }
+  .tier li { display: flex; gap: var(--s-xs); align-items: flex-start; }
+  .tier li svg { flex: 0 0 auto; margin-top: 3px; }
+  .tier .btn { margin-top: auto; }
+  .badge-pill { align-self: flex-start; background: var(--surface-strong); color: var(--ink); font-size: 12px; font-weight: 600; letter-spacing: 0.96px; text-transform: uppercase; border-radius: var(--r-pill); padding: 4px 10px; }
+
+  /* ---------- CTA + form ---------- */
+  .cta-band { text-align: center; }
+  .cta-band h2 { font-size: 36px; line-height: 1.17; letter-spacing: -0.36px; margin-bottom: var(--s-lg); }
+  .signup { display: flex; gap: var(--s-sm); max-width: 460px; margin: 0 auto; }
+  .signup input { flex: 1; background: var(--surface-card); border: 1px solid var(--hairline-strong); border-radius: var(--r-md); padding: 12px 16px; height: 44px; font-family: var(--font-body); font-size: 16px; color: var(--ink); }
+  .signup input:focus-visible { outline: none; border: 2px solid var(--ink); }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--canvas); padding: 64px 0; border-top: 1px solid var(--hairline); }
+  .foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; gap: var(--s-lg); }
+  footer h4 { font-family: var(--font-body); font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: var(--s-sm); }
+  footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-xs); }
+  footer a { color: var(--body); font-size: 15px; }
+  footer a:hover { color: var(--ink); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) { .orb-grid, .feat-grid, .price-grid { grid-template-columns: repeat(2, 1fr); } .nav-links { display: none; } .foot-grid { grid-template-columns: 1fr 1fr 1fr; } }
+  @media (max-width: 767px) { section, .hero { padding-block: var(--s-xxl); } .orb-grid, .feat-grid, .price-grid, .foot-grid { grid-template-columns: 1fr; } .hero h1 { font-size: 32px; } }
+</style>
+</head>
+<body>
+
+  <!-- Top nav -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="./DESIGN.md" aria-label="ElevenLabs home">
+        <span class="mark"><i style="height:8px"></i><i style="height:16px"></i><i style="height:11px"></i><i style="height:18px"></i></span>
+        ElevenLabs
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Creative</a>
+        <a href="./DESIGN.md">Agents</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Enterprise</a>
+        <a href="./DESIGN.md">Docs</a>
+      </nav>
+      <div class="nav-right">
+        <button class="btn-text">Sign in</button>
+        <button class="btn btn-primary">Try free</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow">Voice AI</span>
+      <h1>The most realistic voice AI platform</h1>
+      <p class="sub">Turn text into lifelike speech, build conversational agents, and give every product a voice — in any language.</p>
+      <div class="hero-btns">
+        <button class="btn btn-primary">Get started free</button>
+        <button class="btn btn-outline">Contact sales</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gradient orb cards -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Products</span>
+        <h2>A studio for every sound</h2>
+      </div>
+      <div class="orb-grid">
+        <article class="orb-card mint"><span class="orb"></span><h3>Text to Speech</h3><p>Generate natural narration in 70+ languages with fine control over emotion and pacing.</p></article>
+        <article class="orb-card peach"><span class="orb"></span><h3>Conversational AI</h3><p>Deploy low-latency voice agents that listen, reason, and respond in real time.</p></article>
+        <article class="orb-card lavender"><span class="orb"></span><h3>Voice Cloning</h3><p>Craft a signature voice from a short sample, ethically and securely.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature cards -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Why ElevenLabs</span>
+        <h2>Built for creators and developers</h2>
+      </div>
+      <div class="feat-grid">
+        <article class="feature-card">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+          <h3>Lifelike quality</h3>
+          <p style="font-size:15px">State-of-the-art models capture breath, emphasis, and emotion.</p>
+        </article>
+        <article class="feature-card">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18"/></svg></div>
+          <h3>70+ languages</h3>
+          <p style="font-size:15px">Reach a global audience with authentic accents and localization.</p>
+        </article>
+        <article class="feature-card">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 0 0-2 2v3m0 8v3a2 2 0 0 0 2 2h3m8-18h3a2 2 0 0 1 2 2v3m0 8v3a2 2 0 0 1-2 2h-3"/></svg></div>
+          <h3>Developer API</h3>
+          <p style="font-size:15px">A clean, documented API that ships to production in minutes.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Voice library -->
+  <section class="voice-band" style="padding-top:0;padding-bottom:var(--s-section)">
+    <div class="wrap" style="padding-top:var(--s-section)">
+      <div class="section-head">
+        <span class="eyebrow">Voice library</span>
+        <h2>Thousands of voices, one library</h2>
+      </div>
+      <div class="voice-card">
+        <div class="voice-row">
+          <span class="voice-ico">AR</span>
+          <div class="voice-meta"><strong>Aria</strong><span>Warm · Narration · English (US)</span></div>
+          <div class="waveform" aria-hidden="true"><i style="height:10px"></i><i style="height:20px"></i><i style="height:14px"></i><i style="height:24px"></i><i style="height:8px"></i><i style="height:16px"></i></div>
+          <button class="play" aria-label="Preview Aria"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+        </div>
+        <div class="voice-row">
+          <span class="voice-ico">RO</span>
+          <div class="voice-meta"><strong>Roger</strong><span>Confident · Ads · English (UK)</span></div>
+          <div class="waveform" aria-hidden="true"><i style="height:16px"></i><i style="height:8px"></i><i style="height:22px"></i><i style="height:12px"></i><i style="height:18px"></i><i style="height:10px"></i></div>
+          <button class="play" aria-label="Preview Roger"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+        </div>
+        <div class="voice-row">
+          <span class="voice-ico">SA</span>
+          <div class="voice-meta"><strong>Sarah</strong><span>Calm · Audiobook · Multilingual</span></div>
+          <div class="waveform" aria-hidden="true"><i style="height:12px"></i><i style="height:24px"></i><i style="height:9px"></i><i style="height:18px"></i><i style="height:14px"></i><i style="height:20px"></i></div>
+          <button class="play" aria-label="Preview Sarah"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Pricing</span>
+        <h2>Start free, scale as you grow</h2>
+      </div>
+      <div class="price-grid">
+        <article class="tier">
+          <h3>Free</h3>
+          <div class="price">$0</div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>10k characters / mo</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Community voices</li>
+          </ul>
+          <button class="btn btn-outline">Start free</button>
+        </article>
+        <article class="tier featured">
+          <span class="badge-pill">Popular</span>
+          <h3>Creator</h3>
+          <div class="price">$22<span style="font-size:15px;font-family:var(--font-body)">/mo</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--g-mint)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>500k characters</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--g-mint)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Voice cloning</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--g-mint)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Commercial license</li>
+          </ul>
+          <button class="btn btn-primary" style="background:var(--surface-dark-elevated)">Choose Creator</button>
+        </article>
+        <article class="tier">
+          <h3>Enterprise</h3>
+          <div class="price">Custom</div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>SSO &amp; SLAs</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Dedicated support</li>
+          </ul>
+          <button class="btn btn-outline">Contact us</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA + signup -->
+  <section class="cta-band" style="padding-top:0;">
+    <div class="wrap">
+      <h2>Give your product a voice</h2>
+      <form class="signup" novalidate>
+        <input type="email" placeholder="Enter your email" aria-label="Email" />
+        <button class="btn btn-primary" type="submit">Get started</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <a class="brand" href="./DESIGN.md"><span class="mark"><i style="height:8px"></i><i style="height:16px"></i><i style="height:11px"></i><i style="height:18px"></i></span> ElevenLabs</a>
+          <p style="margin-top:var(--s-sm);max-width:30ch;font-size:15px;">Component preview rendered from the ElevenLabs DESIGN.md token set.</p>
+        </div>
+        <div><h4>Product</h4><ul><li><a href="./DESIGN.md">Text to Speech</a></li><li><a href="./DESIGN.md">Agents</a></li><li><a href="./DESIGN.md">Voices</a></li></ul></div>
+        <div><h4>Developers</h4><ul><li><a href="./DESIGN.md">API</a></li><li><a href="./DESIGN.md">Docs</a></li><li><a href="./DESIGN.md">Status</a></li></ul></div>
+        <div><h4>Company</h4><ul><li><a href="./DESIGN.md">About</a></li><li><a href="./DESIGN.md">Careers</a></li><li><a href="./DESIGN.md">Blog</a></li></ul></div>
+        <div><h4>Legal</h4><ul><li><a href="./DESIGN.md">Privacy</a></li><li><a href="./DESIGN.md">Terms</a></li></ul></div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

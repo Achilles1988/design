@@ -1,0 +1,534 @@
+<!-- source_content_hash: e20338ee10226c63cf2588207288c08e12d60754a53f681657adaf364dfe8fa7 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Starbucks — Design System Component Preview</title>
+<style>
+  /* ============================================================
+     Starbucks design tokens — mapped verbatim from DESIGN.md
+     A warm retail flagship wearing apron green over café-material
+     creams. Four calibrated greens each mapped to a surface role,
+     gold reserved for Rewards ceremony, universal 50px pill buttons
+     with scale(0.95) press, and the signature floating Frap CTA.
+     Page rhythm: cream hero → white cards → dark-green band → footer.
+     ============================================================ */
+  :root {
+    /* Four-tier green system — each a distinct surface role */
+    --green-starbucks: #006241;  /* h1 / brand signal */
+    --green-accent: #00754A;     /* primary filled CTA + Frap */
+    --green-house: #1E3932;      /* deep bands + footer */
+    --green-uplift: #2b5148;     /* decorative dark accents */
+    --green-light: #d4e9e2;      /* pale mint valid-state wash */
+
+    /* Gold — Rewards ceremony only, never general accent */
+    --gold: #cba258;
+    --gold-light: #dfc49d;
+    --gold-lightest: #faf6ee;
+
+    /* Surfaces — warm café materials, not cold white */
+    --white: #ffffff;
+    --neutral-cool: #f9f9f9;
+    --neutral-warm: #f2f0eb;     /* primary page canvas */
+    --ceramic: #edebe9;
+    --black: #000000;
+
+    /* Text — never pure black on light */
+    --text-black: rgba(0, 0, 0, 0.87);
+    --text-black-soft: rgba(0, 0, 0, 0.58);
+    --text-white: #ffffff;
+    --text-white-soft: rgba(255, 255, 255, 0.70);
+    --rewards-green: #33433d;
+
+    /* Semantic */
+    --red: #c82014;
+    --yellow: #fbbc05;
+    --input-border: #d6dbde;
+    --hairline: #e7e7e7;
+
+    /* Type — SoDoSans (proprietary) → Inter; Rewards serif; tight tracking */
+    --font-sans: SoDoSans, Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-serif: "Lander Tall", "Iowan Old Style", "Lora", Georgia, serif;
+    --tracking: -0.01em;
+
+    /* Radius */
+    --r-card: 12px;
+    --r-input: 4px;
+    --r-pill: 50px;
+    --r-circle: 50%;
+
+    /* Spacing (rem anchored 1rem=10px → px here) */
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 16px;
+    --s-4: 24px;
+    --s-5: 32px;
+    --s-6: 40px;
+    --s-7: 48px;
+    --s-8: 56px;
+    --s-9: 64px;
+
+    /* Elevation — whisper-soft layered shadows */
+    --shadow-card: 0 0 0.5px rgba(0,0,0,0.14), 0 1px 1px rgba(0,0,0,0.24);
+    --shadow-nav: 0 1px 3px rgba(0,0,0,0.1), 0 2px 2px rgba(0,0,0,0.06), 0 0 2px rgba(0,0,0,0.07);
+    --shadow-frap: 0 0 6px rgba(0,0,0,0.24), 0 8px 12px rgba(0,0,0,0.14);
+
+    --maxw: 1200px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--neutral-warm);
+    color: var(--text-black);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: var(--tracking);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--green-accent); color: var(--white); }
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible { outline: 2px solid var(--green-accent); outline-offset: 3px; border-radius: var(--r-input); }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s-6); }
+
+  h1, h2, h3 { margin: 0; letter-spacing: -0.16px; }
+  .h1 { font-size: 24px; font-weight: 600; color: var(--green-starbucks); line-height: 1.5; }
+  .h2 { font-size: 24px; font-weight: 400; color: var(--text-black); line-height: 1.5; }
+  .hero-lg { font-size: 45px; font-weight: 600; color: var(--green-starbucks); line-height: 1.2; }
+  .jumbo { font-size: 58px; font-weight: 600; line-height: 1.2; }
+  .body-lg { font-size: 19px; line-height: 1.75; }
+  .body-md { font-size: 16px; line-height: 1.5; }
+  .small { font-size: 14px; }
+  .muted { color: var(--text-black-soft); }
+
+  /* ---------- Buttons (universal 50px pill, scale(0.95) press) ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+    font-family: var(--font-sans);
+    font-size: 16px; font-weight: 600; line-height: 1.2;
+    letter-spacing: var(--tracking);
+    padding: 10px 20px;
+    border-radius: var(--r-pill);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-filled { background: var(--green-accent); color: var(--white); border-color: var(--green-accent); }
+  .btn-outline { background: transparent; color: var(--green-accent); border-color: var(--green-accent); }
+  .btn-black { background: var(--black); color: var(--white); border-color: var(--black); font-size: 14px; }
+  .btn-dark-outline { background: transparent; color: var(--text-black); border-color: var(--text-black); font-size: 14px; }
+  .btn-inverted { background: var(--white); color: var(--green-accent); border-color: var(--white); } /* on dark-green */
+  .btn-on-dark { background: transparent; color: var(--white); border-color: var(--white); }
+
+  /* ---------- Global nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 30;
+    background: var(--white);
+    box-shadow: var(--shadow-nav);
+    height: 83px;
+  }
+  .nav-inner { display: flex; align-items: center; gap: var(--s-5); height: 83px; }
+  .logo { width: 44px; height: 44px; border-radius: var(--r-circle); background: var(--green-starbucks); display: inline-flex; align-items: center; justify-content: center; color: var(--white); flex: none; }
+  .nav-links { display: flex; gap: var(--s-4); }
+  .nav-links a { font-size: 16px; font-weight: 600; color: var(--text-black); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-3); }
+  .nav-right .find { font-size: 14px; font-weight: 600; }
+
+  /* ---------- Hero (cream, 40/60 split) ---------- */
+  .hero { display: grid; grid-template-columns: 6fr 4fr; gap: var(--s-7); align-items: center; padding: var(--s-9) 0; }
+  .hero p { margin: var(--s-4) 0 var(--s-5); max-width: 46ch; color: var(--text-black-soft); }
+  .hero-actions { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+  .hero-photo {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--r-card);
+    background: radial-gradient(70% 70% at 50% 35%, #f7c9b8, #e8896d 65%, #c15d43);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-photo .cup {
+    position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%);
+    width: 42%; height: 62%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.5));
+    border-radius: 12px 12px 40px 40px;
+  }
+
+  /* ---------- Sections ---------- */
+  section { padding: var(--s-9) 0; }
+  .sec-head { max-width: 640px; margin: 0 0 var(--s-6); }
+  .sec-head .body-md { margin-top: var(--s-3); color: var(--text-black-soft); }
+
+  /* ---------- Content cards ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  .card {
+    background: var(--white);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-card);
+    padding: var(--s-4);
+  }
+  .card__thumb {
+    aspect-ratio: 4 / 3;
+    border-radius: 8px;
+    margin-bottom: var(--s-3);
+    background: radial-gradient(60% 60% at 50% 40%, #cfe6dc, #a9cdbe);
+  }
+  .card h3 { font-size: 19px; font-weight: 600; margin-bottom: var(--s-2); }
+  .card p { margin: 0 0 var(--s-3); color: var(--text-black-soft); font-size: 15px; }
+
+  /* ---------- Dark-green feature band ---------- */
+  .feature-band { background: var(--green-house); color: var(--text-white); }
+  .feature-inner { display: grid; grid-template-columns: 5fr 5fr; gap: var(--s-7); align-items: center; }
+  .feature-band h2 { color: var(--text-white); font-size: 32px; font-weight: 600; }
+  .feature-band p { color: var(--text-white-soft); margin: var(--s-4) 0 var(--s-5); font-size: 19px; }
+  .feature-actions { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+  .feature-photo {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--r-card);
+    background: radial-gradient(70% 70% at 50% 40%, #d9b98a, #b07f4a 70%);
+  }
+
+  /* ---------- Rewards status cards (gold ceremony) ---------- */
+  .rewards { background: var(--gold-lightest); }
+  .reward-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+  .reward-card {
+    background: var(--green-house);
+    color: var(--text-white);
+    border-radius: var(--r-card);
+    padding: var(--s-5);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  .reward-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; }
+  .reward-card.bronze::before { background: linear-gradient(90deg, #b87333, #e0a15e); }
+  .reward-card.gold::before { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .reward-card.silver::before { background: linear-gradient(90deg, #9aa3a0, #cfd6d3); }
+  .reward-card .level { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-white-soft); }
+  .reward-card h3 { color: var(--text-white); font-size: 24px; font-weight: 600; margin: var(--s-2) 0 var(--s-3); }
+  .reward-card ul { list-style: none; margin: 0 0 var(--s-3); padding: 0; display: flex; flex-direction: column; gap: var(--s-2); }
+  .reward-card li { display: flex; gap: var(--s-2); align-items: center; font-size: 14px; color: var(--text-white-soft); }
+  .star { color: var(--gold); }
+  .cost-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    border: 1px solid var(--gold); color: var(--gold);
+    font-size: 13px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: var(--r-pill);
+  }
+
+  /* ---------- Gift card tiles (photographed physical product) ---------- */
+  .gift-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-4); }
+  .gift-tile {
+    aspect-ratio: 16 / 10;
+    border-radius: var(--r-card);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    display: flex; align-items: flex-end; padding: var(--s-3);
+    color: var(--white); font-weight: 600; font-size: 15px;
+  }
+  .gift-tile:nth-child(1) { background: linear-gradient(135deg, #f2c1d1, #e88aa8); }
+  .gift-tile:nth-child(2) { background: linear-gradient(135deg, #c9e2d3, #7fb89b); }
+  .gift-tile:nth-child(3) { background: linear-gradient(135deg, #f4dcae, var(--gold-light)); color: var(--green-house); }
+  .gift-tile:nth-child(4) { background: linear-gradient(135deg, #b7cfe6, #7fa4cc); }
+
+  /* ---------- Form (floating-label + PDP customize row) ---------- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-7); align-items: start; }
+  .form-card { background: var(--neutral-cool); border-radius: var(--r-card); padding: var(--s-5); box-shadow: var(--shadow-card); }
+  .field { display: flex; flex-direction: column; gap: var(--s-2); margin-bottom: var(--s-4); }
+  .field label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.325px; color: var(--text-black); }
+  .input {
+    height: 48px;
+    padding: 12px;
+    background: var(--white);
+    border: 1px solid var(--input-border);
+    border-radius: var(--r-input);
+    font-family: var(--font-sans); font-size: 16px; color: var(--text-black);
+  }
+  .input:focus { outline: none; border-color: var(--green-accent); background: hsl(160 32% 87% / 0.33); }
+  .input.invalid { border-color: var(--red); background: hsl(4 82% 43% / 0.05); }
+
+  .size-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); margin-bottom: var(--s-4); }
+  .size {
+    text-align: center; padding: var(--s-3) 0;
+    border-radius: var(--r-card);
+  }
+  .size .cup { width: 40px; height: 52px; margin: 0 auto var(--s-2); border-radius: 4px 4px 14px 14px; background: var(--ceramic); border: 2px solid transparent; }
+  .size.sel .cup { border-color: var(--green-accent); }
+  .size .name { font-size: 16px; font-weight: 700; color: var(--green-starbucks); }
+  .size .oz { font-size: 13px; color: var(--text-black-soft); }
+
+  /* ---------- CTA / palette swatches ---------- */
+  .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s-3); }
+  .sw { display: flex; flex-direction: column; gap: var(--s-2); }
+  .sw .chip { height: 56px; border-radius: 8px; border: 1px solid var(--hairline); }
+  .row { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
+
+  /* ---------- Footer (House Green, gold + white text) ---------- */
+  .footer { background: var(--green-house); color: var(--text-white-soft); padding: var(--s-9) 0 var(--s-5); }
+  .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-6); margin-bottom: var(--s-6); }
+  .footer h4 { color: var(--text-white); font-size: 16px; font-weight: 600; margin: 0 0 var(--s-3); }
+  .footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-2); }
+  .footer ul a { font-size: 14px; color: var(--text-white-soft); }
+  .footer ul a:hover { color: var(--text-white); }
+  .footer-bottom { display: flex; justify-content: space-between; gap: var(--s-3); padding-top: var(--s-4); border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
+  .footer-bottom .gold { color: var(--gold); }
+
+  /* ---------- Frap floating CTA ---------- */
+  .frap {
+    position: fixed; right: 24px; bottom: 24px; z-index: 40;
+    width: 56px; height: 56px;
+    border-radius: var(--r-circle);
+    background: var(--green-accent);
+    color: var(--white);
+    border: none; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-frap);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .frap:active { transform: scale(0.95); box-shadow: 0 0 6px rgba(0,0,0,0.24), 0 8px 12px rgba(0,0,0,0); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .gift-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 767px) {
+    .nav-links { display: none; }
+    .hero, .feature-inner, .split { grid-template-columns: 1fr; gap: var(--s-5); }
+    .grid-3, .reward-grid { grid-template-columns: 1fr; }
+    .gift-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; }
+    .jumbo { font-size: 40px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Global nav -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="./DESIGN.md" aria-label="Starbucks home">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Menu</a>
+        <a href="./DESIGN.md">Rewards</a>
+        <a href="./DESIGN.md">Gift Cards</a>
+      </nav>
+      <div class="nav-right">
+        <a class="find" href="./DESIGN.md">Find a store</a>
+        <a class="btn btn-dark-outline" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn-black" href="./DESIGN.md">Join now</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero (cream canvas, 40/60 split) -->
+    <section style="padding-top:0;padding-bottom:0" aria-labelledby="hero-h">
+      <div class="wrap hero">
+        <div>
+          <h1 class="hero-lg" id="hero-h">Spring is calling.<br/>So is your usual.</h1>
+          <p class="body-lg">Say hello to warmer days with a cup that meets the moment. Cool, bright, and made just the way you like it.</p>
+          <div class="hero-actions">
+            <a class="btn btn-filled" href="./DESIGN.md">See the spring menu</a>
+            <a class="btn btn-outline" href="./DESIGN.md">Start an order</a>
+          </div>
+        </div>
+        <div class="hero-photo" aria-hidden="true"><span class="cup"></span></div>
+      </div>
+    </section>
+
+    <!-- White content cards -->
+    <section style="background:var(--white)" aria-labelledby="feat-h">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="h1" id="feat-h">There's a menu for every mood</h2>
+          <p class="body-md">Explore handcrafted drinks, brewed coffee, and food made to go with your day.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card">
+            <div class="card__thumb" aria-hidden="true"></div>
+            <h3>Handcrafted drinks</h3>
+            <p>Lattes, cold brews, refreshers and more — customized exactly your way.</p>
+            <a class="btn btn-outline" href="./DESIGN.md">Explore the menu</a>
+          </article>
+          <article class="card">
+            <div class="card__thumb" aria-hidden="true"></div>
+            <h3>Food to pair</h3>
+            <p>Warm sandwiches, bakery favorites, and snacks for on the go.</p>
+            <a class="btn btn-outline" href="./DESIGN.md">Browse food</a>
+          </article>
+          <article class="card">
+            <div class="card__thumb" aria-hidden="true"></div>
+            <h3>At home</h3>
+            <p>Bring the café home with whole-bean coffee and ready-to-drink favorites.</p>
+            <a class="btn btn-outline" href="./DESIGN.md">Shop coffee</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dark-green feature band -->
+    <section class="feature-band" aria-labelledby="band-h">
+      <div class="wrap feature-inner">
+        <div>
+          <h2 id="band-h">Free coffee is just the beginning</h2>
+          <p>Join Starbucks Rewards to earn Stars for free drinks and food, order ahead, and more.</p>
+          <div class="feature-actions">
+            <a class="btn btn-inverted" href="./DESIGN.md">Join now</a>
+            <a class="btn btn-on-dark" href="./DESIGN.md">Learn more</a>
+          </div>
+        </div>
+        <div class="feature-photo" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- Rewards status cards (gold ceremony) -->
+    <section class="rewards" aria-labelledby="rewards-h">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2 class="hero-lg" id="rewards-h" style="font-family:var(--font-serif);color:var(--green-house)">Getting rewarded is easy</h2>
+          <p class="body-md" style="color:var(--rewards-green)">The more you visit, the more Stars you earn toward the things you love.</p>
+        </div>
+        <div class="reward-grid">
+          <article class="reward-card bronze">
+            <span class="level">Level 1</span>
+            <h3>25 Stars</h3>
+            <ul>
+              <li><span class="star">★</span> Customize your drink</li>
+              <li><span class="star">★</span> Extra espresso shot</li>
+            </ul>
+            <span class="cost-pill">25★ item</span>
+          </article>
+          <article class="reward-card gold">
+            <span class="level">Level 2</span>
+            <h3>100 Stars</h3>
+            <ul>
+              <li><span class="star">★</span> Brewed hot coffee or tea</li>
+              <li><span class="star">★</span> Bakery item</li>
+            </ul>
+            <span class="cost-pill">100★ item</span>
+          </article>
+          <article class="reward-card silver">
+            <span class="level">Level 3</span>
+            <h3>200 Stars</h3>
+            <ul>
+              <li><span class="star">★</span> Handcrafted drink</li>
+              <li><span class="star">★</span> Hot breakfast</li>
+            </ul>
+            <span class="cost-pill">200★ item</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gift card tiles -->
+    <section style="background:var(--ceramic)" aria-labelledby="gift-h">
+      <div class="wrap">
+        <div class="sec-head"><h2 class="h2" id="gift-h" style="font-weight:400">Gift cards for every occasion</h2></div>
+        <div class="gift-grid">
+          <div class="gift-tile">Birthday</div>
+          <div class="gift-tile">Thank You</div>
+          <div class="gift-tile">Celebration</div>
+          <div class="gift-tile">Anytime</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PDP customize + form + palette -->
+    <section style="background:var(--white)" aria-labelledby="pdp-h">
+      <div class="wrap split">
+        <div>
+          <div class="sec-head"><h2 class="h1" id="pdp-h">Make it yours</h2></div>
+          <div class="size-row" role="group" aria-label="Size">
+            <div class="size"><div class="cup" aria-hidden="true" style="height:40px"></div><div class="name">Tall</div><div class="oz">12 fl oz</div></div>
+            <div class="size sel"><div class="cup" aria-hidden="true"></div><div class="name">Grande</div><div class="oz">16 fl oz</div></div>
+            <div class="size"><div class="cup" aria-hidden="true" style="height:60px"></div><div class="name">Venti</div><div class="oz">24 fl oz</div></div>
+            <div class="size"><div class="cup" aria-hidden="true" style="height:66px"></div><div class="name">Trenta</div><div class="oz">30 fl oz</div></div>
+          </div>
+          <div class="row">
+            <a class="btn btn-outline" href="./DESIGN.md" style="border-width:1.5px;padding:14px 40px"><span aria-hidden="true">✨</span> Customize</a>
+            <a class="btn btn-filled" href="./DESIGN.md" style="padding:14px 32px">Add to Order</a>
+          </div>
+        </div>
+        <div>
+          <div class="sec-head"><h2 class="h1">Join Starbucks Rewards</h2></div>
+          <form class="form-card" aria-label="Sign up">
+            <div class="field">
+              <label for="name">First name</label>
+              <input class="input" id="name" type="text" placeholder="Alex" />
+            </div>
+            <div class="field">
+              <label for="email">Email address</label>
+              <input class="input" id="email" type="email" placeholder="alex@email.com" />
+            </div>
+            <button class="btn btn-filled" type="submit" style="width:100%">Sign up for free</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Palette + buttons reference -->
+    <section aria-labelledby="tokens-h">
+      <div class="wrap">
+        <div class="sec-head"><h2 class="h2" id="tokens-h" style="font-weight:400">Design tokens</h2></div>
+        <div class="row" style="margin-bottom:var(--s-6)">
+          <a class="btn btn-filled" href="./DESIGN.md">Filled</a>
+          <a class="btn btn-outline" href="./DESIGN.md">Outlined</a>
+          <a class="btn btn-black" href="./DESIGN.md">Join now</a>
+          <a class="btn btn-dark-outline" href="./DESIGN.md">Sign in</a>
+        </div>
+        <div class="swatches">
+          <div class="sw"><span class="chip" style="background:var(--green-starbucks)"></span><span class="small muted">Starbucks</span></div>
+          <div class="sw"><span class="chip" style="background:var(--green-accent)"></span><span class="small muted">Accent</span></div>
+          <div class="sw"><span class="chip" style="background:var(--green-house)"></span><span class="small muted">House</span></div>
+          <div class="sw"><span class="chip" style="background:var(--gold)"></span><span class="small muted">Gold</span></div>
+          <div class="sw"><span class="chip" style="background:var(--neutral-warm)"></span><span class="small muted">Canvas</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (House Green) -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <h4>About Us</h4>
+          <ul><li><a href="./DESIGN.md">Our Company</a></li><li><a href="./DESIGN.md">Our Coffee</a></li><li><a href="./DESIGN.md">Stories &amp; News</a></li><li><a href="./DESIGN.md">Careers</a></li></ul>
+        </div>
+        <div>
+          <h4>Customer Service</h4>
+          <ul><li><a href="./DESIGN.md">Contact Us</a></li><li><a href="./DESIGN.md">FAQs</a></li><li><a href="./DESIGN.md">Store Locator</a></li></ul>
+        </div>
+        <div>
+          <h4>Order &amp; Pickup</h4>
+          <ul><li><a href="./DESIGN.md">Order on the App</a></li><li><a href="./DESIGN.md">Order on the Web</a></li><li><a href="./DESIGN.md">Delivery</a></li></ul>
+        </div>
+        <div>
+          <h4>Rewards</h4>
+          <ul><li><a href="./DESIGN.md">Join Now</a></li><li><a href="./DESIGN.md">Gift Cards</a></li><li><a href="./DESIGN.md">Starbucks Card</a></li></ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Starbucks Coffee Company. All rights reserved.</span>
+        <span class="gold">Rewards preview built from DESIGN.md.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Frap floating CTA (signature elevation) -->
+  <button class="frap" aria-label="Start an order">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2l-1 4h14l-1-4"/><path d="M4 6h16l-1.2 13a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z"/><path d="M9 11h6"/></svg>
+  </button>
+
+</body>
+</html>

@@ -1,0 +1,598 @@
+<!-- source_content_hash: 99536f1b2380511a539f7f3466d46d351e4bf35a5af0c0df395bdc20af05c9be -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resend — Component Preview</title>
+<style>
+  /* ============================================================
+     RESEND design tokens — mapped from DESIGN.md
+     A developer tool with the typography of an editorial:
+     pure-black canvas, off-white ink, a single white "accent",
+     serif hero mark, translucent-white hairlines, atmospheric glows.
+     ============================================================ */
+  :root {
+    /* Brand & accent — white IS the brand on black */
+    --primary: #fcfdff;            /* de facto accent: white pill, hero serif, active text */
+    --primary-on: #000000;         /* black label on white pill (the CTA pattern) */
+    --surface-light: #f1f7fe;      /* button-primary pressed (blue-tinted off-white) */
+
+    /* Surface — depth via temperature/luminance, never shadow */
+    --canvas: #000000;             /* true black, never near-black */
+    --surface-card: #0a0a0c;       /* standard inset card, one step up */
+    --surface-elevated: #101012;   /* featured tier / ghost button */
+    --surface-deep: #06060a;       /* code well, cooler + darker than canvas */
+
+    /* Hairlines — replace all shadows */
+    --hairline: rgba(255,255,255,0.06);        /* soft row/card divider */
+    --hairline-strong: rgba(255,255,255,0.14); /* structural card/input border */
+    --divider-soft: rgba(255,255,255,0.04);    /* footer column dividers */
+
+    /* Text */
+    --ink: #fcfdff;                 /* primary text, faintly blue-cool like paper */
+    --body: rgba(252,253,255,0.86); /* long-form body */
+    --charcoal: rgba(252,253,255,0.7); /* captions, secondary nav */
+    --mute: #a1a4a5;                /* supporting / inactive */
+    --ash: #888e90;                 /* tertiary, footer */
+    --stone: #464a4d;               /* disabled */
+    --on-light: #000000;            /* label inside white email inset */
+    --on-light-mute: rgba(0,0,51,0.7); /* secondary inside email inset */
+
+    /* Semantic accents — atmospheric washes / inline only, never solid buttons */
+    --accent-orange: #ff801f;
+    --accent-orange-glow: rgba(255,89,0,0.22);
+    --accent-yellow: #ffc53d;
+    --accent-blue: #3b9eff;
+    --accent-blue-glow: rgba(0,117,255,0.34);
+    --accent-green: #11ff99;
+    --accent-green-glow: rgba(34,255,153,0.18);
+    --accent-red: #ff2047;
+    --accent-red-glow: rgba(255,32,71,0.34);
+    --link: #3b9eff;
+
+    /* Radius */
+    --r-none: 0px;
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;    /* buttons, inputs */
+    --r-lg: 12px;   /* cards, code wells, email mockups */
+    --r-xl: 16px;
+    --r-full: 9999px;
+
+    /* Spacing (4px base) */
+    --s-xxs: 2px;
+    --s-xs: 4px;
+    --s-sm: 8px;
+    --s-md: 12px;
+    --s-lg: 16px;
+    --s-xl: 24px;
+    --s-xxl: 32px;
+    --s-xxxl: 48px;
+    --s-section: 96px;
+    --s-band: 128px;
+
+    /* Type families — proprietary → open fallbacks per DESIGN.md
+       Domaine Display → Söhne/Tiempos → serif; ABC Favorit → Geist/Inter Tight */
+    --font-serif: "Tiempos Headline", "Söhne", Georgia, "Times New Roman", serif;
+    --font-favorit: "Geist", "Inter Tight", Inter, system-ui, sans-serif;
+    --font-ui: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "Geist Mono", "SF Mono", ui-monospace, Menlo, monospace;
+
+    --maxw: 1200px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--primary); color: var(--primary-on); }
+
+  a { color: inherit; text-decoration: none; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s-xxl); }
+
+  /* ---------- Type helpers ---------- */
+  .display-xxl {
+    font-family: var(--font-serif);
+    font-size: clamp(44px, 8vw, 96px);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -0.96px;
+    font-feature-settings: "ss01", "liga";
+  }
+  .display-xl {
+    font-family: var(--font-serif);
+    font-size: clamp(40px, 6vw, 76.8px);
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -0.768px;
+    font-feature-settings: "ss01", "liga";
+  }
+  .display-lg {
+    font-family: var(--font-favorit);
+    font-size: clamp(38px, 5vw, 56px);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -2px;
+  }
+  .heading-md { font-size: 24px; font-weight: 500; line-height: 1.5; letter-spacing: -0.4px; }
+  .heading-sm { font-size: 20px; font-weight: 500; line-height: 1.3; letter-spacing: -0.3px; }
+  .subtitle  { font-family: var(--font-favorit); font-size: 20px; font-weight: 400; line-height: 1.3; color: var(--body); }
+  .body-lg   { font-size: 18px; line-height: 1.5; color: var(--body); }
+  .body-md   { font-family: var(--font-favorit); font-size: 16px; line-height: 1.5; letter-spacing: -0.4px; color: var(--body); }
+  .caption   { font-size: 12px; color: var(--charcoal); }
+  .eyebrow {
+    font-family: var(--font-favorit);
+    font-size: 14px; font-weight: 500; letter-spacing: 0.35px;
+    color: var(--mute); text-transform: uppercase;
+  }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    height: 64px;
+    display: flex; align-items: center;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav .wrap { display: flex; align-items: center; gap: var(--s-xl); width: 100%; }
+  .logo { display: flex; align-items: center; gap: var(--s-sm); font-family: var(--font-favorit); font-size: 18px; font-weight: 500; letter-spacing: -0.4px; }
+  .logo svg { display: block; }
+  .nav-links { display: flex; gap: var(--s-xl); margin-left: var(--s-lg); }
+  .nav-links a { font-size: 14px; color: var(--charcoal); transition: color .15s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s-lg); }
+  .nav-right .signin { font-size: 14px; color: var(--charcoal); }
+  .nav-right .signin:hover { color: var(--ink); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 36px; padding: 8px 16px;
+    font-family: var(--font-ui); font-size: 14px; font-weight: 500;
+    border-radius: var(--r-md); border: 1px solid transparent;
+    cursor: pointer; transition: background .15s, border-color .15s, transform .05s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--primary); color: var(--primary-on); } /* brightest pixel */
+  .btn-primary:hover { background: var(--surface-light); }
+  .btn-ghost { background: var(--surface-elevated); color: var(--ink); border-color: var(--hairline-strong); }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.28); }
+  .btn-outline { background: var(--canvas); color: var(--ink); border-color: var(--hairline-strong); }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.28); }
+
+  /* ---------- Section scaffold ---------- */
+  section { padding: var(--s-section) 0; position: relative; overflow: hidden; }
+  .band { padding: var(--s-band) 0; }
+  .section-head { max-width: 720px; margin-bottom: var(--s-xxxl); }
+  .section-head p { color: var(--body); font-family: var(--font-favorit); font-size: 18px; margin: var(--s-md) 0 0; }
+
+  /* Atmospheric glow — single radial wash anchored to section top */
+  .glow::before {
+    content: "";
+    position: absolute; top: -220px; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 600px; pointer-events: none; z-index: 0;
+    filter: blur(20px);
+  }
+  .glow > * { position: relative; z-index: 1; }
+  .glow-blue::before   { background: radial-gradient(closest-side, var(--accent-blue-glow), transparent 72%); }
+  .glow-orange::before { background: radial-gradient(closest-side, var(--accent-orange-glow), transparent 72%); }
+  .glow-green::before  { background: radial-gradient(closest-side, var(--accent-green-glow), transparent 72%); }
+  .glow-red::before    { background: radial-gradient(closest-side, var(--accent-red-glow), transparent 72%); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: var(--s-band) 0 var(--s-section); text-align: center; }
+  .hero .badge-pill { margin-bottom: var(--s-xl); }
+  .hero h1 { margin: 0 auto var(--s-xl); max-width: 12ch; }
+  .hero .subtitle { max-width: 46ch; margin: 0 auto var(--s-xxl); }
+  .hero-cta { display: flex; gap: var(--s-md); justify-content: center; flex-wrap: wrap; }
+
+  .badge-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-elevated); color: var(--body);
+    border: 1px solid var(--hairline);
+    font-size: 12px; border-radius: var(--r-full); padding: 4px 10px;
+  }
+  .badge-pill .chip {
+    background: var(--surface-card); color: var(--mute);
+    border-radius: var(--r-full); padding: 1px 8px; font-size: 11px;
+  }
+
+  /* ---------- Code story split ---------- */
+  .code-story { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-xxxl); align-items: center; }
+  .code-window {
+    background: var(--surface-deep);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 13px; line-height: 1.6;
+  }
+  .cw-bar { display: flex; align-items: center; gap: var(--s-sm); padding: 12px 16px; border-bottom: 1px solid var(--hairline); }
+  .dot { width: 12px; height: 12px; border-radius: var(--r-full); }
+  .dot.r { background: var(--accent-red); }
+  .dot.y { background: var(--accent-yellow); }
+  .dot.g { background: var(--accent-green); }
+  .cw-tabs { display: flex; gap: 6px; margin-left: var(--s-md); }
+  .cw-tab { font-family: var(--font-mono); font-size: 12px; color: var(--charcoal); background: var(--surface-card); border-radius: var(--r-sm); padding: 4px 10px; }
+  .cw-tab.active { color: var(--ink); border-bottom: 1px solid var(--hairline-strong); }
+  .cw-body { padding: var(--s-xl); overflow-x: auto; color: var(--body); }
+  .cw-body pre { margin: 0; white-space: pre; }
+  .tok-key { color: var(--accent-blue); }
+  .tok-str { color: var(--accent-green); }
+  .tok-fn  { color: var(--accent-yellow); }
+  .tok-com { color: var(--ash); }
+  .code-inline { font-family: var(--font-mono); font-size: 13px; background: var(--surface-card); border: 1px solid var(--hairline); border-radius: var(--r-xs); padding: 1px 6px; color: var(--ink); }
+
+  /* ---------- Feature grid ---------- */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); }
+  .feature-card {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-lg);
+    padding: var(--s-xxl);
+  }
+  .feature-card .ico {
+    width: 40px; height: 40px; border-radius: var(--r-md);
+    display: grid; place-items: center; margin-bottom: var(--s-lg);
+    background: var(--surface-elevated); border: 1px solid var(--hairline);
+  }
+  .feature-card h3 { margin: 0 0 var(--s-sm); font-size: 18px; font-weight: 500; letter-spacing: -0.3px; }
+  .feature-card p { margin: 0; }
+
+  /* ---------- Email mockup inset (the only light island) ---------- */
+  .email-band { text-align: center; }
+  .email-mockup {
+    max-width: 560px; margin: var(--s-xxxl) auto 0;
+    background: #ffffff; color: var(--on-light);
+    border-radius: var(--r-lg);
+    overflow: hidden; text-align: left;
+  }
+  .em-head { padding: 20px 24px; border-bottom: 1px solid rgba(0,0,51,0.08); display: flex; align-items: center; gap: 12px; }
+  .em-avatar { width: 40px; height: 40px; border-radius: var(--r-full); background: linear-gradient(135deg, #111, #444); }
+  .em-from { font-family: var(--font-ui); }
+  .em-from .name { font-weight: 600; font-size: 14px; color: var(--on-light); }
+  .em-from .addr { font-size: 12px; color: var(--on-light-mute); }
+  .em-body { padding: 24px; }
+  .em-body h4 { font-family: var(--font-serif); font-size: 24px; font-weight: 400; margin: 0 0 12px; letter-spacing: -0.4px; }
+  .em-body p { font-family: var(--font-ui); font-size: 14px; line-height: 1.6; color: var(--on-light-mute); margin: 0 0 16px; }
+  .em-btn { display: inline-block; background: #000; color: #fff; font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: var(--r-md); }
+
+  /* ---------- Pricing ---------- */
+  .pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-xl); align-items: stretch; }
+  .tier {
+    background: var(--surface-card);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--r-lg);
+    padding: var(--s-xxl);
+    display: flex; flex-direction: column;
+  }
+  .tier.featured { background: var(--surface-elevated); }
+  .tier .tname { font-size: 24px; font-weight: 500; letter-spacing: -0.4px; margin: 0 0 var(--s-sm); }
+  .tier .tprice { font-family: var(--font-favorit); font-size: 56px; font-weight: 400; letter-spacing: -2.8px; line-height: 1.1; margin: 0 0 var(--s-lg); }
+  .tier .tprice span { font-size: 15px; color: var(--mute); letter-spacing: 0; }
+  .tier ul { list-style: none; padding: 0; margin: 0 0 var(--s-xl); flex: 1; }
+  .tier li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; font-family: var(--font-favorit); font-size: 15px; color: var(--body); border-top: 1px solid var(--hairline); }
+  .tier li:first-child { border-top: 0; }
+  .tier li svg { flex: none; margin-top: 3px; }
+
+  /* ---------- Form ---------- */
+  .waitlist { max-width: 520px; margin: var(--s-xxxl) auto 0; text-align: center; }
+  .field-row { display: flex; gap: var(--s-md); margin-top: var(--s-lg); }
+  .text-input {
+    flex: 1; height: 40px; padding: 10px 14px;
+    background: var(--surface-card); color: var(--ink);
+    border: 1px solid var(--hairline-strong); border-radius: var(--r-md);
+    font-family: var(--font-ui); font-size: 14px;
+  }
+  .text-input::placeholder { color: var(--mute); }
+  .text-input:focus { outline: none; border-color: var(--ink); }
+
+  /* ---------- Logo strip ---------- */
+  .logostrip { display: flex; flex-wrap: wrap; gap: var(--s-xxl); justify-content: center; align-items: center; opacity: .6; }
+  .logostrip span { font-family: var(--font-favorit); font-size: 18px; font-weight: 500; letter-spacing: -0.5px; color: var(--mute); }
+
+  /* ---------- Status row ---------- */
+  .status-row { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--charcoal); }
+  .status-dot { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green-glow); }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--canvas); border-top: 1px solid var(--hairline); padding: 64px 0 var(--s-xxl); }
+  .foot-grid { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: var(--s-xl); }
+  .foot-col h5 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--mute); margin: 0 0 var(--s-md); }
+  .foot-col a { display: block; font-size: 14px; color: var(--charcoal); padding: 5px 0; }
+  .foot-col a:hover { color: var(--ink); }
+  .foot-brand p { color: var(--ash); font-family: var(--font-favorit); font-size: 14px; max-width: 30ch; margin: var(--s-md) 0 var(--s-lg); }
+  .foot-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s-xxxl); padding-top: var(--s-xl); border-top: 1px solid var(--divider-soft); }
+  .foot-bottom .caption { color: var(--ash); }
+
+  .divider { height: 1px; background: var(--hairline); border: 0; margin: 0; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1023px) {
+    .code-story { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .pricing { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 767px) {
+    .wrap { padding: 0 var(--s-lg); }
+    section { padding: 64px 0; }
+    .band { padding: 80px 0; }
+    .nav-links { display: none; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .field-row { flex-direction: column; }
+    .foot-grid { grid-template-columns: 1fr; }
+    .foot-bottom { flex-direction: column; gap: var(--s-md); align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="logo" href="./DESIGN.md" aria-label="Resend home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 4h9a5 5 0 0 1 1.5 9.78L18 20h-4.2l-3-6H8v6H4V4Zm4 3v4h4.6a2 2 0 0 0 0-4H8Z" fill="var(--ink)"/>
+        </svg>
+        Resend
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="./DESIGN.md">Features</a>
+        <a href="./DESIGN.md">Pricing</a>
+        <a href="./DESIGN.md">Docs</a>
+        <a href="./DESIGN.md">Customers</a>
+      </nav>
+      <div class="nav-right">
+        <a class="signin" href="./DESIGN.md">Sign in</a>
+        <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="badge-pill">Resend v3.0 <span class="chip">New</span></span>
+      <h1 class="display-xxl">Email for developers</h1>
+      <p class="subtitle">The best way to reach humans instead of spam folders. Build, test, and deliver transactional email at scale.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+        <a class="btn btn-ghost" href="./DESIGN.md">Documentation</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LOGO STRIP ============ -->
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <p class="eyebrow" style="text-align:center; margin-bottom:var(--s-xl);">Trusted by fast-moving teams</p>
+      <div class="logostrip">
+        <span>Vercel</span><span>Payload</span><span>Warp</span><span>Loops</span><span>Cal.com</span><span>Resend</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CODE STORY (blue glow) ============ -->
+  <section class="glow glow-blue">
+    <div class="wrap code-story">
+      <div>
+        <p class="eyebrow">Integrate this weekend</p>
+        <h2 class="display-xl">Send with a single call</h2>
+        <p class="body-lg" style="margin:var(--s-lg) 0 var(--s-xl);">A first-class developer experience: type-safe SDKs, a clean REST API, and native support for React email templates. Ship your first email in <span class="code-inline">under 5 minutes</span>.</p>
+        <a class="btn btn-outline" href="./DESIGN.md">Read the quickstart →</a>
+      </div>
+      <div class="code-window" role="group" aria-label="Code example">
+        <div class="cw-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <div class="cw-tabs">
+            <span class="cw-tab active">Node.js</span>
+            <span class="cw-tab">Python</span>
+            <span class="cw-tab">cURL</span>
+          </div>
+        </div>
+        <div class="cw-body">
+<pre><span class="tok-com">// send a transactional email</span>
+<span class="tok-key">import</span> { Resend } <span class="tok-key">from</span> <span class="tok-str">'resend'</span>;
+
+<span class="tok-key">const</span> resend = <span class="tok-key">new</span> <span class="tok-fn">Resend</span>(<span class="tok-str">'re_xxxxxxxx'</span>);
+
+<span class="tok-key">await</span> resend.emails.<span class="tok-fn">send</span>({
+  from: <span class="tok-str">'you@company.com'</span>,
+  to:   <span class="tok-str">'user@example.com'</span>,
+  subject: <span class="tok-str">'Welcome aboard'</span>,
+  react: <span class="tok-fn">WelcomeEmail</span>({ name: <span class="tok-str">'Ada'</span> }),
+});</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURE GRID ============ -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Everything you need</p>
+        <h2 class="display-lg">Built for the whole team</h2>
+        <p>From engineers writing React to marketers reviewing broadcasts — one platform, consistent deliverability.</p>
+      </div>
+      <div class="grid-3">
+        <article class="feature-card">
+          <div class="ico" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="var(--accent-blue)" stroke-width="1.6"/><path d="M4 7l8 6 8-6" stroke="var(--accent-blue)" stroke-width="1.6"/></svg>
+          </div>
+          <h3>React Email</h3>
+          <p class="body-md">Compose emails with components you already know. Preview locally, render server-side, ship confidently.</p>
+        </article>
+        <article class="feature-card">
+          <div class="ico" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z" stroke="var(--accent-green)" stroke-width="1.6"/><path d="M9 12l2 2 4-4" stroke="var(--accent-green)" stroke-width="1.6"/></svg>
+          </div>
+          <h3>Deliverability</h3>
+          <p class="body-md">Dedicated IPs, automatic DKIM &amp; SPF, and real-time monitoring so your mail reaches humans, not spam folders.</p>
+        </article>
+        <article class="feature-card">
+          <div class="ico" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 18V9m6 9V5m6 13v-6" stroke="var(--accent-yellow)" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Analytics</h3>
+          <p class="body-md">Track opens, clicks, bounces, and complaints with a live dashboard and webhook events for every send.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ============ EMAIL MOCKUP INSET (orange glow) ============ -->
+  <section class="glow glow-orange email-band">
+    <div class="wrap">
+      <p class="eyebrow">Beyond experience</p>
+      <h2 class="display-xl" style="max-width:16ch; margin:var(--s-md) auto 0;">Email reimagined</h2>
+      <div class="email-mockup" role="img" aria-label="Rendered email preview">
+        <div class="em-head">
+          <div class="em-avatar" aria-hidden="true"></div>
+          <div class="em-from">
+            <div class="name">Resend</div>
+            <div class="addr">hello@resend.com</div>
+          </div>
+        </div>
+        <div class="em-body">
+          <h4>Welcome to Resend</h4>
+          <p>Thanks for joining. We built Resend so that a single line of code can deliver a beautifully rendered, reliably delivered email — every time.</p>
+          <a class="em-btn" href="./DESIGN.md">Verify your account</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section>
+    <div class="wrap">
+      <div class="section-head" style="text-align:center; margin-left:auto; margin-right:auto;">
+        <p class="eyebrow">Pricing</p>
+        <h2 class="display-lg">Priced on quality</h2>
+        <p>Start free. Scale when you're ready. No surprises.</p>
+      </div>
+      <div class="pricing">
+        <article class="tier">
+          <h3 class="tname">Free</h3>
+          <div class="tprice">$0<span> /mo</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>3,000 emails / month</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>1 domain</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>Community support</li>
+          </ul>
+          <a class="btn btn-outline" href="./DESIGN.md">Start free</a>
+        </article>
+        <article class="tier featured">
+          <h3 class="tname">Pro</h3>
+          <div class="tprice">$20<span> /mo</span></div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>50,000 emails / month</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>10 domains</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>Priority support</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>Dedicated IP add-on</li>
+          </ul>
+          <a class="btn btn-primary" href="./DESIGN.md">Get started</a>
+        </article>
+        <article class="tier">
+          <h3 class="tname">Enterprise</h3>
+          <div class="tprice">Custom</div>
+          <ul>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>Unlimited volume</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>SSO &amp; SAML</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="var(--accent-green)" stroke-width="2"/></svg>Dedicated support</li>
+          </ul>
+          <a class="btn btn-ghost" href="./DESIGN.md">Contact sales</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WAITLIST / CTA (green glow) ============ -->
+  <section class="glow glow-green band">
+    <div class="wrap waitlist">
+      <h2 class="display-xl">Available today</h2>
+      <p class="subtitle" style="margin-top:var(--s-md);">Join thousands of developers sending better email.</p>
+      <form class="field-row" onsubmit="return false">
+        <label for="email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Email address</label>
+        <input class="text-input" id="email" type="email" placeholder="you@company.com" />
+        <button class="btn btn-primary" type="submit">Get started</button>
+      </form>
+      <p class="status-row" style="margin-top:var(--s-lg);">
+        <span class="status-dot" aria-hidden="true"></span> All systems operational
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-col foot-brand">
+          <a class="logo" href="./DESIGN.md">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h9a5 5 0 0 1 1.5 9.78L18 20h-4.2l-3-6H8v6H4V4Zm4 3v4h4.6a2 2 0 0 0 0-4H8Z" fill="var(--ink)"/></svg>
+            Resend
+          </a>
+          <p>Email for developers. Built with type, code, and atmospheric depth.</p>
+          <span class="status-row"><span class="status-dot" aria-hidden="true"></span> Status: Operational</span>
+        </div>
+        <div class="foot-col">
+          <h5>Product</h5>
+          <a href="./DESIGN.md">Features</a>
+          <a href="./DESIGN.md">Pricing</a>
+          <a href="./DESIGN.md">Docs</a>
+          <a href="./DESIGN.md">Changelog</a>
+        </div>
+        <div class="foot-col">
+          <h5>Developers</h5>
+          <a href="./DESIGN.md">API Reference</a>
+          <a href="./DESIGN.md">SDKs</a>
+          <a href="./DESIGN.md">React Email</a>
+          <a href="./DESIGN.md">Status</a>
+        </div>
+        <div class="foot-col">
+          <h5>Company</h5>
+          <a href="./DESIGN.md">About</a>
+          <a href="./DESIGN.md">Customers</a>
+          <a href="./DESIGN.md">Blog</a>
+          <a href="./DESIGN.md">Careers</a>
+        </div>
+        <div class="foot-col">
+          <h5>Legal</h5>
+          <a href="./DESIGN.md">Privacy</a>
+          <a href="./DESIGN.md">Terms</a>
+          <a href="./DESIGN.md">DPA</a>
+          <a href="./DESIGN.md">Security</a>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span class="caption">© 2026 Resend, Inc. All rights reserved.</span>
+        <span class="caption">Design tokens · <a href="./DESIGN.md" style="color:var(--link);">DESIGN.md</a></span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

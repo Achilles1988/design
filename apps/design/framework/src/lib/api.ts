@@ -1,4 +1,4 @@
-import type { AppConfig, CanvasEntry } from './types'
+import type { AppConfig, AssetEntry, AssetKind, CanvasEntry } from './types'
 
 /** Shown when `/__design_fs` is missing (e.g. `vite preview` / production). */
 export const DESIGN_FS_UNAVAILABLE =
@@ -58,4 +58,8 @@ export const designApi = {
     request<{ ok: true }>(`/__design_fs/apps/${appId}/canvases/${canvasId}`, {
       method: 'DELETE',
     }),
+  listAssets: (kind: AssetKind) =>
+    request<AssetEntry[]>(`/__design_fs/assets/${kind}`),
+  downloadAssetUrl: (kind: AssetKind, id: string) =>
+    `/__design_fs/assets/${kind}/${encodeURIComponent(id)}/download`,
 }

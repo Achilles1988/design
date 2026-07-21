@@ -1,0 +1,402 @@
+<!-- source_content_hash: b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BMW — reference components</title>
+    <meta
+      name="description"
+      content="Reference fixture for design-md/bmw. A measured corporate-automotive interface on a
+        light canvas: BMW Blue (#1c69d4) as the single primary action, rectangular 0px-radius
+        buttons, BMW Type Next Latin at 700/300 weight contrast, dark navy hero bands, 4-up model
+        card grids, and the M tricolor stripe reserved for M contexts only."
+    />
+
+    <style>
+      /* ─── Tokens — mapped 1:1 from DESIGN.md ───────────────────
+         BMW corporate is measured and settled: a light canvas, one blue action color, and
+         rectangular 0px buttons (the engineered-precision dialect, distinct from M's sportier
+         radii). Type is BMW Type Next Latin at a fixed 700 display / 300 body contrast —
+         weight 500 is deliberately absent. Page rhythm alternates light bands with a single
+         dark-navy hero. Depth comes from color-block contrast + photography — never shadows.
+         The M tricolor stripe appears only in M contexts, never as a CTA fill. */
+      :root {
+        /* Brand — single blue action; M tricolor is divider-only */
+        --primary: #1c69d4;          /* BMW Blue */
+        --primary-active: #0653b6;
+        --primary-disabled: #d6d6d6;
+        --m-blue-light: #0066b1;
+        --m-blue-dark: #1c69d4;
+        --m-red: #e22718;
+
+        /* Text */
+        --ink: #262626;              /* display + primary text, soft black */
+        --body: #3c3c3c;
+        --body-strong: #1a1a1a;
+        --muted: #6b6b6b;
+        --muted-soft: #9a9a9a;
+        --on-primary: #ffffff;
+        --on-dark: #ffffff;
+        --on-dark-soft: #bbbbbb;
+
+        /* Surface */
+        --canvas: #ffffff;
+        --surface-soft: #f7f7f7;     /* footer + sub-nav */
+        --surface-card: #fafafa;     /* model card photo plate */
+        --surface-strong: #ebebeb;
+        --surface-dark: #1a2129;     /* hero bands only */
+        --surface-dark-elevated: #262e38;
+
+        /* Hairlines */
+        --hairline: #e6e6e6;
+        --hairline-strong: #cccccc;
+
+        /* Semantic */
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --error: #dc2626;
+
+        /* Type — BMW Type Next Latin; Inter is the OSS substitute (tracking 0) */
+        --font: "BMW Type Next Latin", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+        --display-xl: 64px;
+        --display-lg: 48px;
+        --display-md: 32px;
+        --display-sm: 24px;
+        --title-lg: 20px;
+        --title-md: 18px;
+        --title-sm: 16px;
+        --body-md: 16px;
+        --body-sm: 14px;
+        --caption: 12px;
+        --label-uppercase: 13px;
+        --button: 14px;
+        --nav-link: 14px;
+
+        /* Rounded — binary: 0px everything, circular only for icon buttons */
+        --r-none: 0px;
+        --r-xs: 2px;
+        --r-sm: 4px;
+        --r-md: 8px;
+        --r-lg: 12px;
+        --r-pill: 9999px;
+        --r-full: 9999px;
+
+        /* Spacing — 8px base, 80px section (tighter than BMW M's 96px) */
+        --sp-xxs: 4px;
+        --sp-xs: 8px;
+        --sp-sm: 12px;
+        --sp-md: 16px;
+        --sp-lg: 24px;
+        --sp-xl: 32px;
+        --sp-xxl: 48px;
+        --sp-section: 80px;
+
+        --focus-ring: 0 0 0 3px color-mix(in srgb, var(--primary) 40%, transparent);
+        --container-max: 1440px;
+        --motion: 150ms ease;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--canvas); color: var(--body);
+        font-family: var(--font); font-size: var(--body-md); font-weight: 300; line-height: 1.55;
+        letter-spacing: 0; -webkit-font-smoothing: antialiased;
+      }
+
+      .band { padding-block: var(--sp-section); }
+      .band-inner { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--sp-lg); }
+      .band-dark { background: var(--surface-dark); color: var(--on-dark); }
+      .band-soft { background: var(--surface-soft); }
+
+      /* Typography — 700 display / 300 body is the non-negotiable contrast; no negative tracking */
+      h1, h2, h3, h4 { margin: 0; font-family: var(--font); font-weight: 700; letter-spacing: 0; }
+      h1 { font-size: var(--display-xl); line-height: 1.05; }
+      h2 { font-size: var(--display-lg); line-height: 1.1; }
+      h3 { font-size: var(--display-md); line-height: 1.15; }
+      h4 { font-size: var(--title-md); line-height: 1.4; }
+      p { margin: 0; }
+      .display-sm { font-size: var(--display-sm); font-weight: 700; line-height: 1.25; }
+      .lead { font-size: var(--body-md); font-weight: 300; line-height: 1.55; }
+      .muted { color: var(--muted); }
+      .on-dark-soft { color: var(--on-dark-soft); }
+      .stack-3 > * + * { margin-block-start: var(--sp-sm); }
+      .stack-4 > * + * { margin-block-start: var(--sp-md); }
+      .stack-6 > * + * { margin-block-start: var(--sp-lg); }
+
+      /* Label — UPPERCASE 1.5px tracking, the "machined precision" voice */
+      .label-uc {
+        font-size: var(--label-uppercase); font-weight: 700; line-height: 1.3;
+        letter-spacing: 1.5px; text-transform: uppercase;
+      }
+
+      /* Buttons — rectangular 0px IS the brand button */
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-xs);
+        font-family: var(--font); font-size: var(--button); font-weight: 700; line-height: 1;
+        letter-spacing: 0.5px; height: 48px; padding: 14px 32px; border-radius: var(--r-none);
+        border: 1px solid transparent; cursor: pointer; text-decoration: none;
+        transition: background-color var(--motion), color var(--motion);
+      }
+      .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .btn-primary { background: var(--primary); color: var(--on-primary); }
+      .btn-primary:hover, .btn-primary:active { background: var(--primary-active); }
+      .btn-primary[disabled] { background: var(--primary-disabled); color: var(--muted); cursor: not-allowed; }
+      .btn-secondary { background: var(--canvas); color: var(--ink); border-color: var(--hairline-strong); padding: 13px 31px; }
+      .btn-secondary:hover { border-color: var(--ink); }
+      .btn-secondary-dark { background: transparent; color: var(--on-dark); border-color: var(--on-dark); padding: 13px 31px; }
+      .btn-secondary-dark:hover { background: var(--on-dark); color: var(--ink); }
+      /* button-text-link: UPPERCASE inline link terminated by a chevron */
+      .btn-text { background: none; border: none; color: var(--ink); cursor: pointer; padding: 0; display: inline-flex; align-items: center; gap: var(--sp-xs); }
+      .btn-text::after { content: "›"; font-weight: 400; }
+      .btn-text:hover { color: var(--primary); }
+      .btn-text.on-dark { color: var(--on-dark); }
+      .text-link { color: var(--ink); text-decoration: none; }
+      .text-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+      /* Top nav — 64px white sticky bar */
+      .top-nav {
+        position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: var(--sp-lg);
+        height: 64px; background: var(--canvas); padding-inline: var(--sp-lg);
+        border-bottom: 1px solid var(--hairline);
+      }
+      .badge { width: 36px; height: 36px; border-radius: var(--r-full); border: 2px solid var(--ink); display: grid; place-items: center; font-weight: 700; font-size: var(--caption); color: var(--ink); flex-shrink: 0; }
+      .nav-links { display: flex; gap: var(--sp-lg); flex: 1; }
+      .nav-links a { color: var(--ink); text-decoration: none; font-size: var(--nav-link); font-weight: 400; letter-spacing: 0.3px; }
+      .nav-links a:hover { color: var(--primary); }
+      .nav-cluster { display: flex; gap: var(--sp-md); align-items: center; }
+      .icon-btn { width: 40px; height: 40px; border-radius: var(--r-full); display: grid; place-items: center; color: var(--ink); border: none; background: none; cursor: pointer; }
+      @media (max-width: 833px) { .nav-links { display: none; } }
+
+      /* M tricolor stripe — M contexts only, divider role, never a CTA */
+      .m-stripe { height: 4px; width: 120px; background: linear-gradient(90deg,
+        var(--m-blue-light) 0 33.3%, var(--m-blue-dark) 33.3% 66.6%, var(--m-red) 66.6% 100%); }
+
+      /* Hero — dark navy band framing a model render */
+      .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-xxl); align-items: center; }
+      @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
+      .render {
+        aspect-ratio: 16 / 10; border-radius: var(--r-none);
+        background: linear-gradient(135deg, #3a4552 0%, #2a333d 60%, #1f272f 100%);
+      }
+      .band-dark .render { background: linear-gradient(135deg, #2f3946 0%, #232b34 60%, #1a2129 100%); }
+      .render-light { background: linear-gradient(135deg, #f2f2f2 0%, #e6e6e6 60%, #dcdcdc 100%); }
+
+      /* Model card grid — 4-up, white plate + soft-grey photo + title + LEARN MORE */
+      .model-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-lg); }
+      @media (max-width: 1024px) { .model-grid { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 560px) { .model-grid { grid-template-columns: 1fr; } }
+      .model-card { background: var(--canvas); border-radius: var(--r-none); display: flex; flex-direction: column; }
+      .model-card .plate { background: var(--surface-card); aspect-ratio: 16 / 10; border-radius: var(--r-none); }
+      .model-card .body { padding: var(--sp-lg) 0; display: flex; flex-direction: column; gap: var(--sp-xs); }
+      .model-card .name { font-size: var(--title-md); font-weight: 700; color: var(--ink); }
+      .model-card .tag { font-size: var(--body-sm); font-weight: 300; color: var(--muted); }
+
+      /* Spec cells — value over uppercase label, hairline dividers */
+      .spec-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--hairline); }
+      @media (max-width: 768px) { .spec-grid { grid-template-columns: repeat(2, 1fr); } }
+      .spec-cell { padding: var(--sp-lg); border-inline-end: 1px solid var(--hairline); border-block-end: 1px solid var(--hairline); }
+      .spec-cell .value { font-size: var(--display-sm); font-weight: 700; color: var(--ink); }
+      .spec-cell .label { color: var(--muted); margin-block-start: var(--sp-xs); }
+
+      /* Filter chips + configurator tiles — rectangular, active = ink fill / blue border */
+      .chip-row { display: flex; gap: var(--sp-sm); flex-wrap: wrap; }
+      .chip {
+        background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline-strong);
+        border-radius: var(--r-none); padding: 8px 14px; font-size: var(--caption); font-weight: 300; cursor: pointer;
+      }
+      .chip[aria-pressed="true"] { background: var(--ink); color: var(--on-dark); border-color: var(--ink); }
+      .chip:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .config-row { display: flex; gap: var(--sp-md); flex-wrap: wrap; margin-block-start: var(--sp-lg); }
+      .config-tile {
+        display: flex; align-items: center; gap: var(--sp-sm); background: var(--canvas); color: var(--ink);
+        border: 1px solid var(--hairline); border-radius: var(--r-none); padding: 16px 24px; cursor: pointer;
+      }
+      .config-tile[aria-pressed="true"] { border: 2px solid var(--primary); padding: 15px 23px; }
+      .config-tile:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .swatch { width: 18px; height: 18px; border-radius: var(--r-full); flex-shrink: 0; }
+
+      /* Category tabs — UPPERCASE, active = ink + 2px underline */
+      .cat-tabs { display: flex; gap: var(--sp-lg); border-bottom: 1px solid var(--hairline); }
+      .cat-tab { background: none; border: none; cursor: pointer; padding: 12px 0; color: var(--muted); }
+      .cat-tab[aria-selected="true"] { color: var(--ink); border-bottom: 2px solid var(--ink); }
+      .cat-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+      /* Text input — rectangular, focus thickens border to ink */
+      .field { display: flex; flex-direction: column; gap: var(--sp-xs); max-width: 380px; }
+      .field .label-uc { color: var(--muted); }
+      .text-input {
+        height: 48px; background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline);
+        border-radius: var(--r-none); padding: 14px 16px; font: inherit; font-weight: 300;
+      }
+      .text-input:focus { outline: none; border: 2px solid var(--ink); padding: 13px 15px; }
+
+      /* Cookie consent card */
+      .cookie { background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-none); padding: var(--sp-lg); max-width: 440px; }
+
+      .eyebrow { font-size: var(--caption); letter-spacing: 1.5px; text-transform: uppercase; color: var(--primary); font-weight: 700; }
+      .icon { width: 20px; height: 20px; }
+
+      /* Footer — soft grey, 4-column, 64px */
+      .footer { background: var(--surface-soft); color: var(--body); padding-block: 64px; }
+      .footer-inner { max-width: var(--container-max); margin-inline: auto; padding-inline: var(--sp-lg); }
+      .footer-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-lg); }
+      @media (max-width: 768px) { .footer-cols { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 480px) { .footer-cols { grid-template-columns: 1fr; } }
+      .footer-col h4 { font-size: var(--title-sm); font-weight: 700; color: var(--ink); margin: 0 0 var(--sp-sm); }
+      .footer-col a { display: block; color: var(--muted); text-decoration: none; font-size: var(--body-sm); font-weight: 300; line-height: 2; }
+      .footer-col a:hover { color: var(--ink); }
+      .footer-legal { border-top: 1px solid var(--hairline-strong); margin-block-start: var(--sp-lg); padding-block-start: var(--sp-md); font-size: var(--body-sm); font-weight: 300; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <!-- top-nav: white sticky, circular badge logo, 400-weight menu -->
+    <nav class="top-nav" aria-label="Primary">
+      <span class="badge" aria-label="BMW">BMW</span>
+      <div class="nav-links">
+        <a href="./DESIGN.md">Models</a>
+        <a href="./DESIGN.md">Next Generation</a>
+        <a href="./DESIGN.md">Pre-Owned</a>
+        <a href="./DESIGN.md">Dealers</a>
+        <a href="./DESIGN.md">Test Drive</a>
+      </div>
+      <div class="nav-cluster">
+        <button class="icon-btn" aria-label="Search"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+        <button class="icon-btn" aria-label="Profile"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
+      </div>
+    </nav>
+
+    <main>
+      <!-- hero-band-dark: dark navy frames the lead model render -->
+      <section class="band band-dark" aria-labelledby="hero-h">
+        <div class="band-inner hero-grid">
+          <div class="stack-6">
+            <p class="eyebrow" style="color: var(--on-dark-soft)">Reference fixture · bmw</p>
+            <h1 id="hero-h">The BMW iX3</h1>
+            <p class="lead on-dark-soft" style="max-width: 46ch">
+              Electric performance, engineered. Heavy 700 display against Light 300 body —
+              the corporate editorial signature.
+            </p>
+            <div style="display:flex; gap: var(--sp-md); flex-wrap: wrap">
+              <a href="./DESIGN.md" class="btn btn-primary">Build Your Own</a>
+              <a href="./DESIGN.md" class="btn btn-secondary-dark">Book a Test Drive</a>
+            </div>
+          </div>
+          <div class="render" role="img" aria-label="BMW iX3 model render"></div>
+        </div>
+      </section>
+
+      <!-- model-card grid: 4-up, white plate + soft-grey photo + LEARN MORE -->
+      <section class="band" aria-labelledby="models-h">
+        <div class="band-inner">
+          <div class="cat-tabs" role="tablist" aria-label="Model categories" style="margin-block-end: var(--sp-xl)">
+            <button class="cat-tab label-uc" role="tab" aria-selected="true">Electric</button>
+            <button class="cat-tab label-uc" role="tab" aria-selected="false">Sedans</button>
+            <button class="cat-tab label-uc" role="tab" aria-selected="false">SUVs</button>
+            <button class="cat-tab label-uc" role="tab" aria-selected="false">M Models</button>
+          </div>
+          <div class="model-grid">
+            <article class="model-card"><div class="plate" role="img" aria-label="BMW iX3"></div><div class="body"><span class="name">BMW iX3</span><span class="tag">Electric Sports Activity Vehicle</span><button class="btn-text label-uc">Learn More</button></div></article>
+            <article class="model-card"><div class="plate" role="img" aria-label="BMW iX"></div><div class="body"><span class="name">BMW iX</span><span class="tag">Flagship electric SAV</span><button class="btn-text label-uc">Learn More</button></div></article>
+            <article class="model-card"><div class="plate" role="img" aria-label="BMW 5 Series"></div><div class="body"><span class="name">BMW 5 Series</span><span class="tag">Business sedan</span><button class="btn-text label-uc">Learn More</button></div></article>
+            <article class="model-card"><div class="plate" role="img" aria-label="BMW i4"></div><div class="body"><span class="name">BMW i4</span><span class="tag">Electric Gran Coupé</span><button class="btn-text label-uc">Learn More</button></div></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- hero-photo-band (light): showcase render + spec cells -->
+      <section class="band band-soft" aria-labelledby="showcase-h">
+        <div class="band-inner hero-grid">
+          <div class="render render-light" role="img" aria-label="BMW iX3 studio render"></div>
+          <div class="stack-6">
+            <h2 id="showcase-h">Precision, measured.</h2>
+            <p class="lead">Depth comes from color-block contrast and photography — never a drop shadow.</p>
+            <div class="spec-grid" style="border-top-color: var(--hairline-strong)">
+              <div class="spec-cell"><div class="value">460</div><div class="label label-uc">km range</div></div>
+              <div class="spec-cell"><div class="value">4.9s</div><div class="label label-uc">0–100 km/h</div></div>
+              <div class="spec-cell"><div class="value">286</div><div class="label label-uc">hp</div></div>
+              <div class="spec-cell"><div class="value">10min</div><div class="label label-uc">fast charge</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Configurator + inventory filters -->
+      <section class="band" aria-labelledby="config-h">
+        <div class="band-inner">
+          <h3 id="config-h" style="margin-block-end: var(--sp-lg)">Configure your BMW</h3>
+          <p class="label-uc muted">Filter inventory</p>
+          <div class="chip-row" style="margin-block: var(--sp-sm) var(--sp-xl)">
+            <button class="chip" aria-pressed="true">All Models</button>
+            <button class="chip" aria-pressed="false">2026</button>
+            <button class="chip" aria-pressed="false">Electric</button>
+            <button class="chip" aria-pressed="false">Under €60,000</button>
+          </div>
+
+          <p class="label-uc muted">Exterior colour</p>
+          <div class="config-row">
+            <button class="config-tile" aria-pressed="true"><span class="swatch" style="background:#1a2129"></span> Black Sapphire</button>
+            <button class="config-tile" aria-pressed="false"><span class="swatch" style="background:#e6e6e6; border:1px solid var(--hairline-strong)"></span> Alpine White</button>
+            <button class="config-tile" aria-pressed="false"><span class="swatch" style="background:#1c69d4"></span> Phytonic Blue</button>
+          </div>
+
+          <div class="field" style="margin-block-start: var(--sp-xl)">
+            <label class="label-uc" for="postcode">Find a dealer</label>
+            <input class="text-input" id="postcode" type="text" placeholder="Enter postcode" />
+          </div>
+
+          <!-- M-context divider: tricolor stripe used only here -->
+          <div style="margin-block-start: var(--sp-xl)">
+            <div class="m-stripe" aria-hidden="true"></div>
+            <p class="label-uc" style="margin-block-start: var(--sp-sm); color: var(--ink)">M Performance</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- cta-band-photo: dark navy pre-footer -->
+      <section class="band band-dark" aria-labelledby="cta-h">
+        <div class="band-inner" style="text-align:center">
+          <h3 id="cta-h">Discover the New iX3</h3>
+          <p class="lead on-dark-soft" style="margin-block: var(--sp-md) var(--sp-lg)">Book your test drive today.</p>
+          <a href="./DESIGN.md" class="btn btn-secondary-dark">Book a Test Drive</a>
+        </div>
+      </section>
+
+      <!-- Buttons specimen -->
+      <section class="band" style="padding-block: var(--sp-xl)" aria-labelledby="btn-h">
+        <div class="band-inner">
+          <h3 id="btn-h" style="margin-block-end: var(--sp-lg)">Buttons</h3>
+          <div style="display:flex; gap: var(--sp-md); flex-wrap: wrap; align-items: center">
+            <button class="btn btn-primary">Build Your Own</button>
+            <button class="btn btn-secondary">Learn More</button>
+            <button class="btn-text label-uc">Learn More</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+
+          <div class="cookie" style="margin-block-start: var(--sp-xl)">
+            <p style="font-weight:300">We use cookies to give you the best experience. Light 300 even in legal copy.</p>
+            <div style="display:flex; gap: var(--sp-sm); margin-block-start: var(--sp-md)">
+              <button class="btn btn-primary">Accept All</button>
+              <button class="btn btn-secondary">Manage</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- footer: soft grey, 4-column -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-cols">
+          <div class="footer-col"><h4>Models</h4><a href="./DESIGN.md">Electric</a><a href="./DESIGN.md">Sedans</a><a href="./DESIGN.md">SUVs</a><a href="./DESIGN.md">M Models</a></div>
+          <div class="footer-col"><h4>Services</h4><a href="./DESIGN.md">Financing</a><a href="./DESIGN.md">Insurance</a><a href="./DESIGN.md">Maintenance</a></div>
+          <div class="footer-col"><h4>Dealers</h4><a href="./DESIGN.md">Find a Dealer</a><a href="./DESIGN.md">Book Service</a><a href="./DESIGN.md">Test Drive</a></div>
+          <div class="footer-col"><h4>About</h4><a href="./DESIGN.md">Company</a><a href="./DESIGN.md">Careers</a><a href="./DESIGN.md">Innovation</a></div>
+        </div>
+        <p class="footer-legal">BMW AG © 2026 · Reference fixture. <a class="text-link" href="./DESIGN.md" style="color: var(--muted)">Privacy Policy</a> · <a class="text-link" href="./DESIGN.md" style="color: var(--muted)">Legal Notice</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
