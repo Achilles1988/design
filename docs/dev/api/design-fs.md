@@ -48,9 +48,9 @@ that kind. Download returns a ZIP of the whole package directory (STORE format).
 ### Provenance and refresh
 
 These packages are a **browser library** for Rule / Layout pages — not the
-authoritative style/layout contracts for an App. Installed contracts for
-implementation remain under `docs/design/<app>/rules/` and
-`docs/design/<app>/layouts/`.
+authoritative style/layout contracts for an App. Authoritative App contracts
+live under `<designRoot>/<stylesRoot|layoutsRoot>/…` as defined in
+[Design project marker and contract resolution](design-project.md).
 
 The current tree was seeded by copying from the local crawl cache
 `temp/designmd` and `temp/layoutmd` (gitignored Playwright / crawl output). To
@@ -66,7 +66,8 @@ rsync -a --delete --exclude '.DS_Store' --exclude '_template' \
 ```
 
 Re-run after regenerating `temp/` from the crawl pipeline. Do not treat
-`public/assets` as the source of truth for `docs/design/` contracts.
+`public/assets` as App contract truth; use `styles/` and `layouts/` under the
+design project root instead.
 
 See also: [Design project marker and contract resolution](design-project.md).
 

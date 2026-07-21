@@ -1,6 +1,6 @@
 # Design engineering (Phase 1)
 
-Local Vite + React app for managing design packages on disk: create apps, add blank canvases, and preview canvas modules. The management shell follows the dashboard visual rules and `sidebar-shell` layout under `docs/design/design`.
+Local Vite + React app for managing design packages on disk: create apps, add blank canvases, and preview canvas modules. The management shell follows the dashboard visual rules and `sidebar-shell` layout resolved via `design.project.json` under this tree.
 
 ## Setup
 
@@ -36,4 +36,7 @@ apps/design/
 
 - Design spec: [`docs/dev/superpowers/specs/2026-07-20-design-engineering-framework-design.md`](../../docs/dev/superpowers/specs/2026-07-20-design-engineering-framework-design.md)
 - HTTP API: [`docs/dev/api/design-fs.md`](../../docs/dev/api/design-fs.md)
-- Visual rules / layout: [`docs/design/design/rules/design.md`](../../docs/design/design/rules/design.md), [`docs/design/design/layouts/sidebar-shell/LAYOUT.md`](../../docs/design/design/layouts/sidebar-shell/LAYOUT.md)
+- Design project marker: [`design.project.json`](design.project.json)
+- Style example: [`styles/dashboard/design.md`](styles/dashboard/design.md)
+- Layout example: [`layouts/sidebar-shell/LAYOUT.md`](layouts/sidebar-shell/LAYOUT.md)
+- Assets browser packages under `framework/public/assets/` are a library for Rule/Layout pages, not App contracts
