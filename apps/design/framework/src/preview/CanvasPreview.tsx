@@ -1,22 +1,22 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
-import { loadPageModule } from './loadPageModule'
+import { loadCanvasModule } from './loadCanvasModule'
 import '../features/apps/apps.css'
 
 type PreviewState =
   | { status: 'loading' }
   | { status: 'error'; message: string }
-  | { status: 'ready'; Page: ComponentType }
+  | { status: 'ready'; Canvas: ComponentType }
 
 const GLOB_MISS_HINT =
-  'Page not found / restart dev server after adding files if glob cache stale'
-const PAGE_ENTRY_MISSING = 'Page entry not found in pages.json'
+  'Canvas not found / restart dev server after adding files if glob cache stale'
+const CANVAS_ENTRY_MISSING = 'Canvas entry not found in canvases.json'
 
-export function PagePreview() {
-  const { id: appId = '', pageId = '' } = useParams<{
+export function CanvasPreview() {
+  const { id: appId = '', canvasId = '' } = useParams<{
     id: string
-    pageId: string
+    canvasId: string
   }>()
   const [state, setState] = useState<PreviewState>({ status: 'loading' })
 
@@ -24,29 +24,29 @@ export function PagePreview() {
     let cancelled = false
     setState({ status: 'loading' })
 
-    if (!appId || !pageId) {
-      setState({ status: 'error', message: PAGE_ENTRY_MISSING })
+    if (!appId || !canvasId) {
+      setState({ status: 'error', message: CANVAS_ENTRY_MISSING })
       return
     }
 
     ;(async () => {
       try {
-        const pages = await designApi.listPages(appId)
-        const entry = pages.find((p) => p.id === pageId)
+        const canvases = await designApi.listCanvases(appId)
+        const entry = canvases.find((c) => c.id === canvasId)
         if (!entry) {
           if (!cancelled) {
-            setState({ status: 'error', message: PAGE_ENTRY_MISSING })
+            setState({ status: 'error', message: CANVAS_ENTRY_MISSING })
           }
           return
         }
 
-        const Page = await loadPageModule(appId, entry.component)
+        const Canvas = await loadCanvasModule(appId, entry.component)
         if (cancelled) return
-        if (!Page) {
+        if (!Canvas) {
           setState({ status: 'error', message: GLOB_MISS_HINT })
           return
         }
-        setState({ status: 'ready', Page })
+        setState({ status: 'ready', Canvas })
       } catch (err: unknown) {
         if (!cancelled) {
           setState({
@@ -60,7 +60,7 @@ export function PagePreview() {
     return () => {
       cancelled = true
     }
-  }, [appId, pageId])
+  }, [appId, canvasId])
 
   if (state.status === 'loading') {
     return <p className="apps-muted">Loading preview…</p>
@@ -81,6 +81,6 @@ export function PagePreview() {
     )
   }
 
-  const { Page } = state
-  return <Page />
+  const { Canvas } = state
+  return <Canvas />
 }

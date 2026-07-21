@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppCreatePage } from './features/apps/AppCreatePage'
 import { AppDetailPage } from './features/apps/AppDetailPage'
 import { AppListPage } from './features/apps/AppListPage'
-import { PagePreview } from './preview/PagePreview'
+import { CanvasPreview } from './preview/CanvasPreview'
 import { SidebarShell } from './shell/SidebarShell'
 
 export function App() {
@@ -13,7 +13,10 @@ export function App() {
           <Route path="/" element={<AppListPage />} />
           <Route path="/apps/new" element={<AppCreatePage />} />
           <Route path="/apps/:id" element={<AppDetailPage />} />
-          <Route path="/apps/:id/pages/:pageId" element={<PagePreview />} />
+          <Route
+            path="/apps/:id/canvases/:canvasId"
+            element={<CanvasPreview />}
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </SidebarShell>
