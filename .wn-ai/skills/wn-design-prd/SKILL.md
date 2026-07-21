@@ -40,6 +40,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 7. **Design review is a mandatory gate** (Step 7), judged from screenshots of the running Canvas preview.
 8. **No hardcoded design-root path.** Discover `<designRoot>` via `design.project.json` (Step 0b).
 9. **Re-read the pack.** Before Step 5 and before Step 7, Read the approved pack file from disk. TodoWrite tracks pipeline steps only — it does not replace the pack.
+10. **Worktree pack handoff.** When Step 4 isolates into a worktree, that worktree does not see this tree's uncommitted/untracked files. Copy (or rewrite) the approved pack into the worktree at the same relative path, and copy or re-apply any interrogation-time `app.json` style/layout edits there — before Step 5. Read and implement only inside that worktree for the rest of the pipeline.
 
 ## Vocabulary
 
@@ -103,7 +104,7 @@ Do **not** present "Canvas vs edit framework" as a routine choice for ordinary p
 | 0c | shell check → Exit ramp if host UI | same |
 | 2 | interrogate + contracts + non-UI | same |
 | 3 | section confirms → write pack → self-review → **user approve (HARD-GATE)** | same (pack = plan input) |
-| 4 | `using-git-worktrees` (**always isolate**, do not ask) | no branch |
+| 4 | `using-git-worktrees` (**always isolate**, do not ask) → copy pack + `app.json` edits into worktree | no branch |
 | 5 | **Read pack** → implement Canvas drafts | plan → approve → **Read pack** → implement |
 | 6 | `requesting-code-review` + fix | skip |
 | 7 | **Read pack** → `design-review` + fix | same |
@@ -134,6 +135,7 @@ Lock down **one item at a time**:
 1. If `<layoutsRoot>/<id>/LAYOUT.md` exists → use it.
 2. Else offer **"AI improvise"** and/or a stock layout id; on confirm, append to `app.json.layouts` if missing.
 3. Recommend only existing layout directory ids. Do not create or copy layout packages.
+4. **AI improvise convention:** record the layout as `AI improvise` with path `n/a` (or equivalent) in the pack (Step 3) — no `LAYOUT.md` is required for this case.
 
 **Approaches:** Only when there is a real fork (how to split Canvases, stock layout vs AI improvise, etc.), propose 2–3 options with a recommendation. Do not force approaches every run.
 
@@ -161,7 +163,7 @@ Purpose: same-session anchor so execution does not drift. Not primarily cross-co
 - App id
 - Canvas list (add / modify / delete)
 - style id + resolved repo-relative contract path
-- layout id(s) + resolved contract path(s)
+- layout id(s) + resolved contract path(s) (`AI improvise` / `n/a` when no layout file is used)
 - Page intent per Canvas (3–8 bullets)
 - Fake-data rules
 - Explicitly out of UI scope
@@ -172,9 +174,10 @@ Purpose: same-session anchor so execution does not drift. Not primarily cross-co
 
 1. No TBD / TODO / vague placeholders
 2. Canvas list internally consistent
-3. style/layout files exist on disk
-4. UI vs non-UI not mixed
-5. Scope fits one delivery batch (else decompose first)
+3. style file exists on disk (mandatory)
+4. layout file exists on disk — unless layout is `AI improvise` (path `n/a`; skip this check only for that case)
+5. UI vs non-UI not mixed
+6. Scope fits one delivery batch (else decompose first)
 
 ### Approval
 
@@ -186,9 +189,21 @@ Ask the user to review the pack file and approve before implementation. Until ex
 
 If the pack changes after approval: edit file → self-review → re-approve.
 
+## Step 4 — Worktree isolation (pack handoff)
+
+When `using-git-worktrees` creates the isolated worktree, it does **not** see this tree's uncommitted/untracked files — the approved pack and any interrogation-time `app.json` edits are invisible there until copied.
+
+Before Step 5, inside the isolation flow:
+
+1. Copy (or rewrite) the approved pack file into the worktree at the **same relative path** (`docs/dev/superpowers/specs/...-canvas-pack.md`).
+2. Ensure interrogation-time `app.json` style/layout edits are present in the worktree copy — copy the file or re-apply the same edits.
+3. From here on, **Read and implement only inside that worktree** (Step 5 pack re-read, Step 7 dev server, etc.) for the remainder of the pipeline.
+
+If no worktree isolation was used (anchor missing, or `plan` runner), skip this step — everything already lives in the current tree.
+
 ## Step 5 — Implement
 
-**Always Read the approved pack first.**
+**Always Read the approved pack first** (from inside the worktree, per Step 4, when isolation was used).
 
 Read 1–3 existing Canvas files; match tech stack. Export a component only. Keep `canvases.json` in sync on delete. **After ADDING any new Canvas, restart** `npm run dev` from `<designRoot>` before Step 7.
 
