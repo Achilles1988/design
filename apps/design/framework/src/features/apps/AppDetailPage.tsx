@@ -103,11 +103,11 @@ export function AppDetailPage() {
         id: canvasId,
         name: canvasName.trim(),
       })
+      emitCanvasesChanged()
       setCanvasName('')
       setCanvasId('')
       setCanvasIdDirty(false)
       await reload(loadRun.current)
-      emitCanvasesChanged()
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'Failed to add canvas')
     } finally {
@@ -121,8 +121,8 @@ export function AppDetailPage() {
     setFormError(null)
     try {
       await designApi.deleteCanvas(appId, canvas.id)
-      await reload(loadRun.current)
       emitCanvasesChanged()
+      await reload(loadRun.current)
     } catch (err: unknown) {
       setFormError(
         err instanceof Error ? err.message : 'Failed to delete canvas',
