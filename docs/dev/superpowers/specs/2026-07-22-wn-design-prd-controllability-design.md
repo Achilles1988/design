@@ -77,7 +77,7 @@ Ordering (detected): approve pack → implement → CR → design review → fin
 - App id
 - Canvas list (add / modify / delete)
 - style id + resolved repo-relative contract path
-- layout id(s) + resolved contract path(s)
+- layout id(s) + resolved contract path(s) (`AI improvise` / `n/a` when no layout file is used)
 - Page intent per Canvas (3–8 bullets)
 - Fake-data rules
 - Explicitly out of UI scope
@@ -88,9 +88,10 @@ Ordering (detected): approve pack → implement → CR → design review → fin
 
 1. No TBD / TODO / vague placeholders  
 2. Canvas list internally consistent  
-3. style/layout files exist on disk  
-4. UI vs non-UI not mixed  
-5. Scope fits one delivery batch (else decompose first)
+3. style file exists on disk (mandatory)  
+4. layout file exists on disk — unless layout is `AI improvise` (path `n/a`; skip this check only for that case)  
+5. UI vs non-UI not mixed  
+6. Scope fits one delivery batch (else decompose first)
 
 ### HARD-GATE
 

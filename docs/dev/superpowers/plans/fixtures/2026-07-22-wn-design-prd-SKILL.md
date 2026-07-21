@@ -133,9 +133,9 @@ Lock down **one item at a time**:
 **Layout (preferred):**
 
 1. If `<layoutsRoot>/<id>/LAYOUT.md` exists → use it.
-2. Else offer **"AI improvise"** and/or a stock layout id; on confirm, append to `app.json.layouts` if missing.
+2. Else offer **"AI improvise"** and/or a stock layout id. On confirm of a **stock layout directory id**, append that id to `app.json.layouts` if missing. **Never** write `AI improvise` (or any non-directory-id string) into `app.json.layouts` — only stock layout directory ids are appended there.
 3. Recommend only existing layout directory ids. Do not create or copy layout packages.
-4. **AI improvise convention:** record the layout as `AI improvise` with path `n/a` (or equivalent) in the pack (Step 3) — no `LAYOUT.md` is required for this case.
+4. **AI improvise convention:** record the layout as `AI improvise` with path `n/a` (or equivalent) in the requirement pack (Step 3) only — never in `app.json.layouts`. No `LAYOUT.md` is required for this case.
 
 **Approaches:** Only when there is a real fork (how to split Canvases, stock layout vs AI improvise, etc.), propose 2–3 options with a recommendation. Do not force approaches every run.
 
