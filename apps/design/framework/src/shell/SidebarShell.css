@@ -100,6 +100,49 @@
   grid-row: 2;
   overflow-y: auto;
   padding: calc(var(--space) * 2.5) calc(var(--space) * 3) calc(var(--space) * 5);
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar-shell__app-node {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-shell__app-row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) * 0.5);
+}
+
+.sidebar-shell__app-row .sidebar-shell__nav-link {
+  flex: 1;
+}
+
+.sidebar-shell__toggle {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.sidebar-shell__toggle:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.sidebar-shell__nav-link--canvas {
+  padding: 7px 12px 7px calc(var(--space) * 1.5 + 20px);
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .sidebar-shell__main h1 {
