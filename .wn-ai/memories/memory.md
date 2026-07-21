@@ -36,18 +36,6 @@ Related module work must read module docs first.
 docs/product
 ```
 
-## **Design Spec**
-
-Locate the design-engineering project by finding `design.project.json` (see `docs/dev/api/design-project.md`). For any App UI work:
-
-1. Read `<designRoot>/<contentRoot>/<appId>/app.json` for `style` / `layouts` ids.
-2. Style contract (required): `<designRoot>/<stylesRoot>/<styleId>/design.md`
-3. Layout contracts (preferred): `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md` for each id in `app.json.layouts`
-
-Default App id is `design.project.json` → `defaultAppId` (this repo: `design`, style `dashboard`, layouts include `sidebar-shell` and `split-screen`).
-
-Do **not** use retired repo-level contract trees or deprecated spec-install skills.
-
 ## Commands
 
 ```shell
