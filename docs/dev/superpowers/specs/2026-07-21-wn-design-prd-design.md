@@ -1,5 +1,7 @@
 # `/wn-design-prd` — PRD-to-Canvas Design Skill
 
+> **Controllability update (2026-07-22):** Shell track parity, handoff trigger, and pre-implement approval are superseded by `docs/dev/superpowers/specs/2026-07-22-wn-design-prd-controllability-design.md`. Treat that document as authoritative for canvas-only flow, requirement pack HARD-GATE, curated handoff ask, and Shell Exit ramp.
+
 > **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Obsolete host-repo contract paths and deprecated spec-install skill guidance in this document have been rewritten to match that protocol.
 
 Date: 2026-07-21
