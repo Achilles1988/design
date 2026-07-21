@@ -1,6 +1,6 @@
 ## Overview
 
-
+This repo hosts `apps/design`, a local Vite + React (TS) engineering app for managing design packages on disk — creating apps, adding pages, and previewing page modules via a `design-fs` dev-only filesystem API. UI/behavior conventions live under `docs/dev`, `docs/design`, and `docs/product`, which the project guidance requires reading before development work.
 
 ## Lessons
 
@@ -44,4 +44,15 @@ For any page design or UI development, follow that app's visual rules at `docs/d
 ```shell
 docs/design
 └── design/                      # style: dashboard · layouts: sidebar-shell, split-screen
+```
+
+## Commands
+
+```shell
+# Design App
+apps/design    # location
+npm run dev       # dev
+npm run test      # test
+npm run preview   # prod
+npm run build     # package
 ```
