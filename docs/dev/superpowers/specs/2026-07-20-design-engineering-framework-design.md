@@ -1,7 +1,9 @@
 # Design Engineering Framework (Phase 1)
 
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Ignore any `docs/design/**` or `wn-design-spec` guidance below. Style/layout files now live under the design project (`design.project.json`); `docs/design/` is retired.
+
 Date: 2026-07-20  
-Status: Approved for implementation planning
+Status: Approved for implementation planning (contract paths superseded — see note above)
 
 ## Goal
 

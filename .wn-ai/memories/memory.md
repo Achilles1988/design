@@ -1,6 +1,6 @@
 ## Overview
 
-This repo hosts `apps/design`, a local Vite + React (TS) engineering app for managing design packages on disk — creating apps, adding pages, and previewing page modules via a `design-fs` dev-only filesystem API. UI/behavior conventions live under `docs/dev`, `docs/design`, and `docs/product`, which the project guidance requires reading before development work.
+This repo hosts `apps/design`, a local Vite + React (TS) engineering app for managing design packages on disk — creating apps, adding pages, and previewing page modules via a `design-fs` dev-only filesystem API. UI/behavior conventions live under the design project on disk and `docs/dev`, plus `docs/product`; project guidance requires reading these before development work.
 
 ## Lessons
 
@@ -39,18 +39,21 @@ docs/product
 
 ## **Design Spec**
 
-For any page design or UI development, follow that app's visual rules at `docs/design/<app>/rules/design.md` and prefer the installed layout contracts under `docs/design/<app>/layouts/<id>/LAYOUT.md`. The tree below maps each app to its style id and preferred layout id(s).
+Locate the design-engineering project by finding `design.project.json` (see `docs/dev/api/design-project.md`). For any App UI work:
 
-```shell
-docs/design
-└── design/                      # style: dashboard · layouts: sidebar-shell, split-screen
-```
+1. Read `<designRoot>/<contentRoot>/<appId>/app.json` for `style` / `layout` ids.
+2. Style contract (required): `<designRoot>/<stylesRoot>/<styleId>/design.md`
+3. Layout contract (preferred): `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md`
+
+Default App id is `design.project.json` → `defaultAppId` (this repo: `design`, style `dashboard`, layouts include `sidebar-shell` and `split-screen`).
+
+Do **not** use retired repo-level contract trees or deprecated spec-install skills.
 
 ## Commands
 
 ```shell
-# Design App
-apps/design    # location
+# Design App — discover via design.project.json marker; path may differ when installed elsewhere
+apps/design    # location in this repo
 npm run dev       # dev
 npm run test      # test
 npm run preview   # prod

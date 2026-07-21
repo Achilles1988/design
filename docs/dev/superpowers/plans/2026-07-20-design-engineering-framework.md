@@ -1,5 +1,7 @@
 # Design Engineering Framework (Phase 1) Implementation Plan
 
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Ignore any `docs/design/**` or `wn-design-spec` guidance below. **Superseded in part by** `2026-07-21-design-project-contract-protocol` for contract-path bullets.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a runnable Vite/React design engineering app under `apps/design` with a dashboard sidebar-shell management UI that creates/lists/deletes apps and blank design pages on disk under `apps/design/apps/`.
@@ -12,7 +14,7 @@
 
 - Follow `docs/dev/conventions/coding-standards.md` (no requirement-ID comments; reuse shared units; fix warnings in touched files).
 - Follow `docs/dev/conventions/mandatory.md` (clarify before guessing; agree new dependencies with user — this plan pins the stack below).
-- Shell visuals must follow `docs/design/design/rules/design.md` (dashboard tokens) and `docs/design/design/layouts/sidebar-shell/LAYOUT.md`.
+- Shell visuals must follow `apps/design/styles/dashboard/design.md` (dashboard tokens) and `apps/design/layouts/sidebar-shell/LAYOUT.md` (resolved via `design.project.json`; see `docs/dev/api/design-project.md`).
 - Never write outside `apps/design/apps/` from the file API; never create/delete target-repo business source paths.
 - Phase-1 defaults: `style: "dashboard"`, `layout: "sidebar-shell"`.
 - Do not implement install/sync scripts, style/layout pickers, or skill invocation UI.

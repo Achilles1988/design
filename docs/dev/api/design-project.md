@@ -73,8 +73,7 @@ engineering app’s routing (e.g. `/apps/<appId>/canvases/<canvasId>`).
 - `framework/public/assets/` (including `designmd/` and `layoutmd/` packages exposed via
   design-fs) is a browser preview library only. It is **not** the authoritative App
   style/layout contract source. See [design-fs](design-fs.md) provenance notes.
-- `docs/design/` is **retired**. Do not resolve contracts under `docs/design/**`; use
-  `<designRoot>/<stylesRoot>/` and `<designRoot>/<layoutsRoot>/` after migration.
+- The retired repo-level design contract directory (removed with the 2026-07-21 protocol) must not be used. Resolve contracts only under `<designRoot>/<stylesRoot>/` and `<designRoot>/<layoutsRoot>/` per this document.
 
 ## See also
 

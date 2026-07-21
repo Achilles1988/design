@@ -1,7 +1,9 @@
 # `/wn-design-prd` — PRD-to-Canvas Design Skill
 
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Ignore any `docs/design/**` or `wn-design-spec` guidance below.
+
 Date: 2026-07-21
-Status: Approved for implementation planning
+Status: Approved for implementation planning (contract paths superseded — see note above)
 
 ## Goal
 
@@ -11,10 +13,10 @@ Status: Approved for implementation planning
 
 ## Context
 
-- 该 skill 随安装脚本装到目标仓，**不绑定本仓**；所有路径口径以设计应用为准：
-  - style 规则：`docs/design/<app>/rules/design.md`
-  - layout 契约：`docs/design/<app>/layouts/<id>/LAYOUT.md`
-  - （与仓库 `CODEBUDDY.md` 的权威口径一致）
+- 该 skill 随安装脚本装到目标仓，**不绑定本仓**；契约路径以 `design.project.json` 为准（见 `docs/dev/api/design-project.md`）：
+  - style：`<designRoot>/<stylesRoot>/<styleId>/design.md`（由 App `app.json` 的 `style` 决定）
+  - layout：`<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md`（由 App `app.json` 的 `layout` 决定）
+  - （与仓库 `CODEBUDDY.md` / memory 的权威口径一致）
 - Canvas 概念见 `docs/dev/conventions/glossary.md`（"空白设计画布"，非浏览器/路由的 page）。
 - design review agent 由 `temp/agents/ui-visual-validator.md` 改造而来，注入 style/layout 契约感知与 Playwright 截 Canvas 预览的能力。
 - **不再引用/依赖 `wn-brainstorm`（将废弃）**：需求收集由本 skill 第 2 步的"拷问"自行完成。
@@ -35,7 +37,7 @@ Status: Approved for implementation planning
 | 第 1 步作用 | 探测用户已装了哪些开发工作流 skill；没装 → 走 plan 模式；装了 → 后续各步骤按映射**调用其对应子技能** |
 | 路由 | 自动探测 + 不确定时问用户 + 用户可手动覆盖 |
 | 需求收集 | 由第 2 步拷问自行完成，不外挂 brainstorming；detected 时**只调用实现/CR/收尾类子技能，绕过其自带的头脑风暴/需求收集入口**，避免二次澄清 |
-| 缺 style/layout | 停下来，让用户先跑 `wn-design-spec`（不自造） |
+| 缺 style/layout | 停下来，让用户按 `docs/dev/api/design-project.md` 补齐 style/layout 契约（不自造） |
 | 无合适 layout | 让用户"新增 layout" 或选 "AI 自由发挥" |
 | design review（#7） | 内置 `design-review` agent，**两条 runner 都跑**（skill 自身质量兜底） |
 | detected 分支保序 | `wn-design-prd` 调用实现子技能时**明确指示"不要自动收尾"**；CR（#6）后**先跑 #7 design review + 修**，最后（#8）才调用对方 finish。全程主控在本 skill，无"交还控制权"回调 |

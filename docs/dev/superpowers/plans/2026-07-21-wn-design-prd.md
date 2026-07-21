@@ -1,5 +1,7 @@
 # 实现计划：`wn-design-prd` skill
 
+> **Contract-path update (2026-07-21):** Authoritative style/layout contracts and discovery are defined by `docs/dev/superpowers/specs/2026-07-21-design-project-contract-protocol-design.md` and `docs/dev/api/design-project.md`. Ignore any `docs/design/**` or `wn-design-spec` guidance below. **Superseded in part by** `2026-07-21-design-project-contract-protocol` for contract-path bullets.
+
 - Spec: `docs/dev/superpowers/specs/2026-07-21-wn-design-prd-design.md`
 - 日期: 2026-07-21
 - 产物: 项目级 skill `.wn-ai/skills/wn-design-prd/`（`SKILL.md` + `README.md` + `agents/design-review.md`）
@@ -26,7 +28,7 @@
    - 删除 Canvas：`DELETE /apps/:id/canvases/:canvasId`。
    - 客户端封装：`apps/design/framework/src/lib/api.ts`（`designApi`）。
 5. **Vite glob 缓存**：新增 `.tsx` 文件后，`import.meta.glob` 收集是构建期静态的，**必须重启 dev server** 才能预览新 Canvas（否则预览 404，代码内有 `GLOB_MISS_HINT`）。→ 这是 design review 预览前置的**硬前提**。
-6. **契约位置**：`docs/design/<app>/rules/design.md`（style）、`docs/design/<app>/layouts/<id>/LAYOUT.md`（layout）。当前磁盘上 `<app>` = `design`。
+6. **契约位置**：见 `docs/dev/api/design-project.md` — style 为 `<designRoot>/<stylesRoot>/<styleId>/design.md`，layout 为 `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md`（本仓 `<designRoot>` = `apps/design`，默认 App `design`）。
 7. **技术栈现状**：React 19 + Vite 6 + `react-router-dom` 7；Canvas 为 `.tsx`。**框架无关铁律**：实现以既有 Canvas 的技术栈为准，skill 正文严禁硬编码框架写法。
 
 ### 探测锚点（Step 0 路由依据）
