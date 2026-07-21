@@ -5,7 +5,7 @@ description: Use when turning a PRD or design requirement into real design-page 
 
 # wn-design-prd
 
-Turn a PRD / design requirement into **real, previewable Canvas design drafts** inside the `apps/design` engineering app, strictly following the target App's installed **style** and **layout** contracts. This skill is the "product + design first pass": it produces a design prototype, and always hands back any non-UI requirements it did not implement.
+Turn a PRD / design requirement into **real, previewable Canvas design drafts** inside a **design-engineering project** (located via `design.project.json`), strictly following the target App's **style** and **layout** contracts resolved from that project. This skill is the "product + design first pass": it produces a design prototype, and always hands back any non-UI requirements it did not implement.
 
 ## Iron rules (non-negotiable)
 
@@ -13,12 +13,15 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 2. **Framework-agnostic.** You are given instructions, and YOU write the code. Implement by reading the target App's contracts + its EXISTING Canvas files and matching their tech stack. NEVER assume a framework. This file contains no framework-specific code on purpose.
 3. **Requirement conservation.** A PRD often mixes UI and non-UI requirements. Implement only the UI part; separate the non-UI part and ALWAYS return it to the user (Step 9), even if nothing else consumes it.
 4. **Design review is a mandatory gate** on BOTH runners (Step 7), judged from screenshots of the running preview.
+5. **No hardcoded design-root path.** Never assume the design project lives at `apps/design`. Discover `<designRoot>` via `design.project.json` (see Step 0b).
 
 ## Vocabulary
 
-- **App**: a design package under `apps/design/apps/<appId>/` (`app.json`, `canvases.json`, `canvases/*`).
+- **Design root (`<designRoot>`):** directory containing `design.project.json`.
+- **App**: a design package under `<designRoot>/<contentRoot>/<appId>/` (`app.json`, `canvases.json`, `canvases/*`).
 - **Canvas**: one previewable page component (`canvases/<Component>.<ext>`, where `<ext>` follows the App's existing tech stack), listed in `canvases.json`.
-- **Style contract**: `docs/design/<app>/rules/design.md`. **Layout contract**: `docs/design/<app>/layouts/<id>/LAYOUT.md`.
+- **Style contract**: `<designRoot>/<stylesRoot>/<styleId>/design.md` where `<styleId>` is `app.json.style`.
+- **Layout contract**: `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md` (preferred; may be absent → AI improvise).
 - **Runner**: `detected` (a dev workflow is installed) or `plan` (none installed).
 
 ## Step 0 — Detect & route
@@ -36,81 +39,99 @@ Probe `.wn-ai/skills/` for anchor skills and map them to steps:
 - If detection is ambiguous, ASK the user. The user may override the runner at any time.
 - Do NOT hardcode a workflow's internal steps; only call its entry skill by name.
 
+## Step 0b — Locate design project (blocking)
+
+Before interrogation:
+
+1. From the repository root, search for `design.project.json` (ignore `node_modules`).
+2. **0 found** → STOP and tell the user a design-engineering project marker is required.
+3. **>1 found** → ASK which `<designRoot>` to use.
+4. **1 found** → that directory is `<designRoot>`. Read `contentRoot`, `stylesRoot`, `layoutsRoot`, `defaultAppId`.
+5. All later paths (apps, contracts, `npm run dev`) are relative to this `<designRoot>`.
+
 ## Pipeline
 
 | # | detected | plan |
 | --- | --- | --- |
 | 1 | detect & route (ask if unsure; user can override) | detect → no anchors → plan |
-| 2 | interrogate design details **and separate non-UI requirements** | interrogate design details **and separate non-UI requirements** |
-| 3 | assemble internal requirement pack (do NOT trigger the external workflow's brainstorming/requirement intake) | assemble as plan input |
-| 4 | call `using-git-worktrees` (else degrade) | no branch |
-| 5 | implement Canvas drafts (this skill implements; delegate to `executing-plans`/`subagent-driven-development` if installed and **tell it NOT to auto-finish and NOT to re-collect/clarify requirements** — the Step 3 pack is authoritative) | use the IDE's built-in **plan mode**: produce a plan → user approves → exit plan mode → implement |
+| 1b | locate design project (Step 0b) | locate design project (Step 0b) |
+| 2 | interrogate + separate non-UI + **configure style/layout ids** | same |
+| 3 | assemble internal requirement pack (do NOT trigger external brainstorming) | assemble as plan input |
+| 4 | call `using-git-worktrees` with **declared preference: always isolate** (do not ask) | no branch |
+| 5 | implement Canvas drafts (self or delegate; tell delegates NOT to auto-finish / re-clarify) | IDE plan mode → approve → implement |
 | 6 | call `requesting-code-review` + fix (else skip) | skip |
 | 7 | run `design-review` agent + fix | run `design-review` agent |
 | 8 | call `finishing-a-development-branch` (else prompt manual) | skip |
-| 9 | **non-UI requirement receipt (unconditional)** | **non-UI requirement receipt (unconditional)** |
-| 10 | optional handoff prompt (if user wants) | optional handoff prompt (if user wants) |
+| 9 | **non-UI requirement receipt (unconditional)** | same |
+| 10 | optional handoff prompt | same |
 
-**Ordering (detected):** implement → CR → **design review + fix** → finish. design review MUST land before finish. When delegating implementation, explicitly instruct the sub-skill "implement only; do not auto-finish/merge and do not re-collect or re-clarify requirements". Step 9 runs on BOTH runners regardless of Step 10.
+**Ordering (detected):** implement → CR → **design review + fix** → finish. When calling `using-git-worktrees`, treat isolation as already consented for this skill — create/enter a worktree without asking.
 
-## Step 2 — Interrogation checklist
+## Step 2 — Interrogation & contract configuration
 
 Lock down, one item at a time:
 
-- Target **App** (`docs/design/<app>/` exists and has `rules/design.md`).
-- Which Canvases to **add / modify / delete** (list each).
-- Which **layout** each Canvas follows (reference `docs/design/<app>/layouts/<id>/LAYOUT.md`).
-- Fake-data rules for each Canvas (realistic placeholder content).
-- **Separate non-UI requirements**: pull every requirement unrelated to UI/Canvas (backend logic, data/storage rules, business constraints, permissions, integrations…) and record them verbatim. This skill does NOT implement them; they are returned in Step 9. If unsure whether an item is UI, ask the user to classify it.
+- Target **App** under `<contentRoot>/` (default suggestion: `defaultAppId` when sensible).
+- Which Canvases to **add / modify / delete**.
+- Which **layout id** each Canvas should follow as design intent (App-level `app.json.layout` is the default; per-canvas intent may differ for review only — do not invent new JSON fields).
+- Fake-data rules.
+- **Separate non-UI requirements** (verbatim); return in Step 9.
 
-**Blocking conditions:**
+**Style (required):**
 
-- Missing style/layout contract for the App → **STOP** and tell the user to run `wn-design-spec` first. Do not invent contracts.
-- No suitable layout exists for a Canvas → offer two paths: (a) user adds a new layout via `wn-design-spec`, or (b) mark the Canvas **"AI improvise the layout"** (design review then judges against style rules + general layout soundness only).
+1. Read `app.json.style`. Valid iff `<stylesRoot>/<style>/design.md` exists.
+2. If invalid/missing: list stock ids (subdirectories of `<stylesRoot>` that contain `design.md`). Recommend one. After user confirms, write `app.json.style` to that id.
+3. If the stock list is empty → STOP (do not create contract files).
+
+**Layout (preferred, not required):**
+
+1. If `<layoutsRoot>/<id>/LAYOUT.md` exists for the chosen id → use it.
+2. If missing/unsuitable: offer **"AI improvise the layout"** and/or recommend a better stock layout id; on confirm, write `app.json.layout`.
+3. Recommendations may only use existing layout directory ids. Do not create layout packages.
+
+**Never** mention or invoke legacy external design-spec skills. Never read design contracts outside `<designRoot>` `styles/` and `layouts/` trees.
 
 ## Step 5 — Implement (framework-agnostic)
 
-- **Read 1–3 existing Canvas files of the target App first** to learn its tech stack, imports, and conventions. Match them. Never introduce a different framework.
-- Note: `app.json.style`/`app.json.layout` are App-level. A Canvas component does not declare style/layout; it just exports a component. Per-Canvas layout is a design intent — implement the component to match the chosen `LAYOUT.md`; do not change the data model.
-- Mechanics (via the dev-only design-fs API / files):
-  - **Add** a Canvas: call the design-fs add API to create it (placeholder file), then edit that file with the real design code.
-  - **Modify** a Canvas: edit its Canvas file directly (no dedicated API).
-  - **Delete** a Canvas: call the design-fs delete API (it removes the `canvases.json` entry and the file together — do not desync them by hand).
-- **After ADDING any new Canvas file, the dev server must be restarted** before it can be previewed (the build-time file glob is static; a stale glob returns 404). Do this before Step 7.
+- Read 1–3 existing Canvas files of the target App first; match their tech stack.
+- `app.json.style` / `app.json.layout` are App-level ids. Canvas files export a component only.
+- Add / modify / delete Canvases via design-fs (or equivalent files under `<contentRoot>`). Keep `canvases.json` in sync on delete.
+- **After ADDING any new Canvas file, restart the design-project dev server** before Step 7.
 
 ## Step 7 — Design review
 
-Delegate to the bundled `agents/design-review.md` on both runners. **Preview prerequisites (or review cannot capture screenshots):**
+Delegate to `agents/design-review.md`. Prerequisites:
 
-- The target design app's dev server is running (`cd apps/design && npm run dev`). In `detected` with a worktree, run it **inside that worktree**; in `plan`, the current tree.
-- **If any new Canvas was added, the dev server has been restarted** (see Step 5).
-- Resolve each reviewed Canvas's preview URL: `http://localhost:5173/apps/<appId>/canvases/<canvasId>`.
-- If the server is unreachable or a URL can't be resolved, the review step must ERROR and explain how to start/restart the preview — never silently skip.
+- Dev server running from `<designRoot>` (`npm run dev`). In a worktree, run it inside that worktree.
+- Restarted after any new Canvas add.
+- Preview URL pattern for this engineering app (commonly `http://localhost:5173/apps/<appId>/canvases/<canvasId>` — confirm from the project's router if unsure).
+- Pass the resolved absolute-from-repo contract paths for style/layout to the reviewer.
 
-Fix every FAIL/PARTIAL, then re-review until PASS. Only then proceed to finish (detected).
+If preview is unreachable → ERROR; never skip silently. Fix until PASS before finish (detected).
 
 ## Step 9 — Non-UI requirement receipt (unconditional)
 
-Always output, to the user, the non-UI requirements separated in Step 2 (verbatim, itemized), labeled: "The following non-UI requirements were NOT covered by this design prototype — hand them to downstream development." If the PRD had none, state explicitly "No uncovered non-UI requirements." This runs on both runners and is independent of Step 10.
+Always output separated non-UI requirements (or explicitly "No uncovered non-UI requirements.").
 
 ## Step 10 — Optional handoff prompt
 
-Ask whether to emit a minimal handoff prompt. If yes, output exactly:
+If yes, output exactly:
 
 ```
 Implement: <one-line requirement summary>
 Key notes: <points locked in interrogation — target App, chosen layout, key interactions/data rules>
-Design reference: <stable Canvas source paths, e.g. apps/design/apps/<app>/canvases/<id>.tsx; plus docs/design/<app>/rules|layouts contract paths>
+Design reference: <stable Canvas source paths under <designRoot>/<contentRoot>/…; plus resolved styles/layouts contract paths>
 Non-UI requirements (to implement): <the Step 2 items; "none" if empty>
 ```
 
-Give **stable file paths, not `localhost` URLs** — this prompt is copied into a real product repo where dev URLs are meaningless. No bug lists; keep it minimal.
+Stable file paths only — no `localhost` URLs.
 
 ## Red flags — stop and fix
 
-- Handing the whole task to an external workflow and hoping it calls back. (Use the orchestrator model.)
-- design review running after merge, or being skipped. (It must precede finish.)
-- Hardcoding React/Vue specifics instead of matching existing Canvases.
-- Dropping non-UI requirements because "this skill doesn't implement them".
+- Hardcoding a design-root path instead of using `design.project.json`.
+- Handing the whole task to an external workflow and hoping it calls back.
+- design review after merge, or skipped.
+- Hardcoding framework specifics instead of matching existing Canvases.
+- Dropping non-UI requirements.
 - Previewing a newly added Canvas without restarting the dev server.
-- Inventing a style/layout contract instead of stopping for `wn-design-spec`.
+- Inventing style/layout contract files, or guiding the user to legacy spec skills or off-root design doc paths.
