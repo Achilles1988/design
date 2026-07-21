@@ -67,6 +67,9 @@ rsync -a --delete --exclude '.DS_Store' --exclude '_template' \
 
 Re-run after regenerating `temp/` from the crawl pipeline. Do not treat
 `public/assets` as the source of truth for `docs/design/` contracts.
+
+See also: [Design project marker and contract resolution](design-project.md).
+
 ## On-disk schemas
 
 ### `app.json`

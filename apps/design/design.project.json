@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "contentRoot": "apps",
+  "stylesRoot": "styles",
+  "layoutsRoot": "layouts",
+  "defaultAppId": "design"
+}
