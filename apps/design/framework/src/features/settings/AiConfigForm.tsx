@@ -10,11 +10,10 @@ import './settings.css'
 const DEFAULT_BASE_URL = 'https://api.openai.com/v1'
 
 export function AiConfigForm() {
-  const initial = readAiConfig()
-  const [provider, setProvider] = useState<AiProvider>(initial?.provider ?? 'anthropic')
-  const [baseURL, setBaseURL] = useState<string>(initial?.baseURL ?? DEFAULT_BASE_URL)
-  const [apiKey, setApiKey] = useState<string>(initial?.apiKey ?? '')
-  const [model, setModel] = useState<string>(initial?.model ?? '')
+  const [provider, setProvider] = useState<AiProvider>(() => readAiConfig()?.provider ?? 'anthropic')
+  const [baseURL, setBaseURL] = useState<string>(() => readAiConfig()?.baseURL ?? DEFAULT_BASE_URL)
+  const [apiKey, setApiKey] = useState<string>(() => readAiConfig()?.apiKey ?? '')
+  const [model, setModel] = useState<string>(() => readAiConfig()?.model ?? '')
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState<boolean>(false)
 

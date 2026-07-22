@@ -6,7 +6,7 @@ import { ReplySchema, type Reply } from './schema'
 
 export type ChatMessage = { role: 'user' | 'assistant'; content: string }
 
-export type AiClientErrorKind = 'auth' | 'network' | 'schema' | 'unknown'
+export type AiClientErrorKind = 'auth' | 'rate-limit' | 'network' | 'schema' | 'unknown'
 
 export class AiClientError extends Error {
   readonly kind: AiClientErrorKind
@@ -22,8 +22,17 @@ function classify(err: unknown): AiClientError {
   const message =
     err instanceof Error ? err.message : typeof err === 'string' ? err : 'AI request failed'
   const lower = message.toLowerCase()
-  if (lower.includes('401') || lower.includes('unauthor') || lower.includes('api key')) {
+  if (
+    lower.includes('401') ||
+    lower.includes('403') ||
+    lower.includes('forbidden') ||
+    lower.includes('unauthor') ||
+    lower.includes('api key')
+  ) {
     return new AiClientError('auth', message)
+  }
+  if (lower.includes('429') || lower.includes('rate limit') || lower.includes('retry-after')) {
+    return new AiClientError('rate-limit', message)
   }
   if (lower.includes('fetch') || lower.includes('network') || lower.includes('failed to fetch')) {
     return new AiClientError('network', message)
@@ -57,7 +66,7 @@ export async function runAssetSearchTurn(input: RunAssetSearchTurnInput): Promis
       messages,
       schema: ReplySchema,
     })
-    return result.object as Reply
+    return result.object
   } catch (err) {
     throw classify(err)
   }

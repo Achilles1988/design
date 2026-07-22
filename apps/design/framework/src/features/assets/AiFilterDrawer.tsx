@@ -148,6 +148,7 @@ export function AiFilterDrawer({
             placeholder="Tell me what you're looking for…"
             disabled={!configured || sending}
             rows={2}
+            autoFocus
           />
           <button
             type="button"

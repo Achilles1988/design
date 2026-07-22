@@ -369,7 +369,7 @@ export function AssetBrowserPage({
 
   const filteredIds = new Set(applyFilter(assetIndex, filter).map((m) => m.id))
   const visibleItems = items
-    ? filter.chips.length === 0
+    ? filter.chips.length === 0 || assetIndex.length === 0
       ? items
       : items.filter((e) => filteredIds.has(e.id))
     : null

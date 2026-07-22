@@ -121,18 +121,20 @@ export function useAssetSearchAgent(options: UseAssetSearchAgentOptions): UseAss
         setEntries([...nextEntries, assistant])
         if (reply.is_relevant) {
           const nextFilter = mergeFilterDelta(options.filter, reply.filter_delta, 'ai')
-          if (nextFilter !== options.filter) options.onFilterChange(nextFilter)
+          options.onFilterChange(nextFilter)
         }
       } catch (err) {
         const message =
           err instanceof AiClientError
             ? err.kind === 'auth'
               ? '鉴权失败，请检查 API Key。'
-              : err.kind === 'network'
-                ? '网络请求失败，稍后重试。'
-                : err.kind === 'schema'
-                  ? 'AI 返回格式异常，请重试。'
-                  : err.message
+              : err.kind === 'rate-limit'
+                ? '请求被限流，稍后重试。'
+                : err.kind === 'network'
+                  ? '网络请求失败，稍后重试。'
+                  : err.kind === 'schema'
+                    ? 'AI 返回格式异常，请重试。'
+                    : err.message
             : err instanceof Error
               ? err.message
               : 'Unknown error'

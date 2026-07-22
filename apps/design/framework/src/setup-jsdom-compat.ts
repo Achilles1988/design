@@ -4,13 +4,13 @@
 // We re-expose it as globalThis.localStorage so tests can use the standard API.
 if (
   typeof globalThis !== 'undefined' &&
-  // @ts-ignore
+  // @ts-expect-error project-specific: globalThis.jsdom is populated by vitest jsdom environment
   typeof globalThis.jsdom !== 'undefined' &&
-  // @ts-ignore
+  // @ts-expect-error project-specific: globalThis.jsdom is populated by vitest jsdom environment
   typeof globalThis.jsdom?.window?.localStorage?.setItem === 'function'
 ) {
   Object.defineProperty(globalThis, 'localStorage', {
-    // @ts-ignore
+    // @ts-expect-error project-specific: globalThis.jsdom is populated by vitest jsdom environment
     value: globalThis.jsdom.window.localStorage,
     writable: true,
     configurable: true,
