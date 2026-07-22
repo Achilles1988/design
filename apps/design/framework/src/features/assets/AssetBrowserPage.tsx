@@ -10,6 +10,8 @@ import {
   type ThemeMode,
 } from '@/lib/theme'
 import type { AppConfig, AssetEntry, AssetKind } from '@/lib/types'
+import { emptyFilter, applyFilter, type Filter } from '@/lib/ai/filterState'
+import { AssetFilterChips } from './AssetFilterChips'
 import './assets.css'
 
 type AssetBrowserPageProps = {
@@ -134,6 +136,7 @@ export function AssetBrowserPage({
   const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
   const [pickerFor, setPickerFor] = useState<AssetEntry | null>(null)
   const [pickerAppId, setPickerAppId] = useState('')
+  const [filter, setFilter] = useState<Filter>(emptyFilter())
   const busyLock = useRef(false)
   const lightboxFrameRef = useRef<HTMLIFrameElement>(null)
 
@@ -330,6 +333,8 @@ export function AssetBrowserPage({
     )
   }
 
+  const visibleItems = items ? (applyFilter(items as never[], filter) as AssetEntry[]) : null
+
   return (
     <div className="assets-page">
       <div className="assets-page__header">
@@ -343,19 +348,21 @@ export function AssetBrowserPage({
           ) : null}
         </div>
         <p className="assets-page__count">
-          {items === null ? '…' : `${items.length} packages`}
+          {items === null
+            ? '…'
+            : filter.chips.length > 0
+              ? `${visibleItems?.length ?? 0} / ${items.length} packages`
+              : `${items.length} packages`}
         </p>
       </div>
 
-      <div className="assets-ai-slot">
-        <div className="assets-ai-slot__field">
-          <span className="assets-ai-slot__prompt">Ask about assets…</span>
-          <span className="assets-ai-slot__hint">AI search coming later</span>
-        </div>
-        <button type="button" className="assets-ai-slot__btn" disabled>
-          Ask
-        </button>
-      </div>
+      <AssetFilterChips
+        filter={filter}
+        onRemove={(id) =>
+          setFilter((prev) => ({ chips: prev.chips.filter((c) => c.id !== id) }))
+        }
+        onReset={() => setFilter(emptyFilter())}
+      />
 
       {error ? <p className="assets-error">{error}</p> : null}
       {notice ? <p className="assets-notice">{notice}</p> : null}
@@ -368,9 +375,13 @@ export function AssetBrowserPage({
         <p className="assets-empty">No packages found under this library.</p>
       ) : null}
 
-      {items !== null && items.length > 0 ? (
+      {items !== null && items.length > 0 && visibleItems && visibleItems.length === 0 ? (
+        <p className="assets-empty">No packages match the current filters.</p>
+      ) : null}
+
+      {items !== null && items.length > 0 && visibleItems && visibleItems.length > 0 ? (
         <div className="assets-masonry" role="list" aria-labelledby={titleId}>
-          {items.map((entry) => {
+          {visibleItems.map((entry) => {
             const height = hashHeight(entry.id)
             return (
               <article className="assets-card" role="listitem" key={entry.id}>
