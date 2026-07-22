@@ -10,6 +10,10 @@ import {
   type ThemeMode,
 } from '@/lib/theme'
 import type { AppConfig, AssetEntry, AssetKind } from '@/lib/types'
+import { applyFilter, emptyFilter, type Filter } from '@/lib/ai/filterState'
+import { fetchAssetIndex, type AssetMeta } from '@/lib/ai/assetIndex'
+import { AssetFilterChips } from './AssetFilterChips'
+import { AiFilterDrawer } from './AiFilterDrawer'
 import './assets.css'
 
 type AssetBrowserPageProps = {
@@ -134,6 +138,10 @@ export function AssetBrowserPage({
   const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
   const [pickerFor, setPickerFor] = useState<AssetEntry | null>(null)
   const [pickerAppId, setPickerAppId] = useState('')
+  const [filter, setFilter] = useState<Filter>(emptyFilter())
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [assetIndex, setAssetIndex] = useState<AssetMeta[]>([])
+  const [basePrompt, setBasePrompt] = useState<string>('')
   const busyLock = useRef(false)
   const lightboxFrameRef = useRef<HTMLIFrameElement>(null)
 
@@ -173,6 +181,35 @@ export function AssetBrowserPage({
       })
       .catch(() => {
         if (!cancelled) setApps([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    fetchAssetIndex(kind)
+      .then((data) => {
+        if (!cancelled) setAssetIndex(data)
+      })
+      .catch(() => {
+        if (!cancelled) setAssetIndex([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [kind])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/prompts/asset-search.md')
+      .then((res) => (res.ok ? res.text() : ''))
+      .then((text) => {
+        if (!cancelled) setBasePrompt(text)
+      })
+      .catch(() => {
+        if (!cancelled) setBasePrompt('')
       })
     return () => {
       cancelled = true
@@ -330,6 +367,13 @@ export function AssetBrowserPage({
     )
   }
 
+  const filteredIds = new Set(applyFilter(assetIndex, filter).map((m) => m.id))
+  const visibleItems = items
+    ? filter.chips.length === 0 || assetIndex.length === 0
+      ? items
+      : items.filter((e) => filteredIds.has(e.id))
+    : null
+
   return (
     <div className="assets-page">
       <div className="assets-page__header">
@@ -342,20 +386,31 @@ export function AssetBrowserPage({
             </p>
           ) : null}
         </div>
-        <p className="assets-page__count">
-          {items === null ? '…' : `${items.length} packages`}
-        </p>
+        <div className="assets-page__header-actions">
+          <p className="assets-page__count">
+            {items === null
+              ? '…'
+              : filter.chips.length > 0
+                ? `${visibleItems?.length ?? 0} / ${items.length} packages`
+                : `${items.length} packages`}
+          </p>
+          <button
+            type="button"
+            className="assets-btn"
+            onClick={() => setDrawerOpen(true)}
+          >
+            AI 筛选
+          </button>
+        </div>
       </div>
 
-      <div className="assets-ai-slot">
-        <div className="assets-ai-slot__field">
-          <span className="assets-ai-slot__prompt">Ask about assets…</span>
-          <span className="assets-ai-slot__hint">AI search coming later</span>
-        </div>
-        <button type="button" className="assets-ai-slot__btn" disabled>
-          Ask
-        </button>
-      </div>
+      <AssetFilterChips
+        filter={filter}
+        onRemove={(id) =>
+          setFilter((prev) => ({ chips: prev.chips.filter((c) => c.id !== id) }))
+        }
+        onReset={() => setFilter(emptyFilter())}
+      />
 
       {error ? <p className="assets-error">{error}</p> : null}
       {notice ? <p className="assets-notice">{notice}</p> : null}
@@ -368,9 +423,13 @@ export function AssetBrowserPage({
         <p className="assets-empty">No packages found under this library.</p>
       ) : null}
 
-      {items !== null && items.length > 0 ? (
+      {items !== null && items.length > 0 && visibleItems && visibleItems.length === 0 ? (
+        <p className="assets-empty">No packages match the current filters.</p>
+      ) : null}
+
+      {items !== null && items.length > 0 && visibleItems && visibleItems.length > 0 ? (
         <div className="assets-masonry" role="list" aria-labelledby={titleId}>
-          {items.map((entry) => {
+          {visibleItems.map((entry) => {
             const height = hashHeight(entry.id)
             return (
               <article className="assets-card" role="listitem" key={entry.id}>
@@ -509,6 +568,18 @@ export function AssetBrowserPage({
           </div>
         </div>
       ) : null}
+
+      <AiFilterDrawer
+        open={drawerOpen}
+        kind={kind}
+        index={assetIndex}
+        filter={filter}
+        onFilterChange={setFilter}
+        basePrompt={basePrompt}
+        matchCount={visibleItems?.length ?? 0}
+        totalCount={items?.length ?? 0}
+        onClose={() => setDrawerOpen(false)}
+      />
     </div>
   )
 }

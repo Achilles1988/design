@@ -6,6 +6,7 @@ import {
   AssetsLayoutPage,
   AssetsRulePage,
 } from './features/assets/AssetBrowserPage'
+import { SettingsPage } from './features/settings/SettingsPage'
 import { CanvasPreview } from './preview/CanvasPreview'
 import { SidebarShell } from './shell/SidebarShell'
 import { ConfirmTipHost } from './ui/ConfirmTipHost'
@@ -24,6 +25,7 @@ export function App() {
           />
           <Route path="/assets/rule" element={<AssetsRulePage />} />
           <Route path="/assets/layout" element={<AssetsLayoutPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </SidebarShell>
