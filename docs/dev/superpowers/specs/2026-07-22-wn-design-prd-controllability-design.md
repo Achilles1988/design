@@ -55,7 +55,7 @@ Make `/wn-design-prd` outputs more controllable by borrowing brainstorming’s a
 | 0c | **Shell check** — if host UI in scope → Exit ramp (may end skill for that work) | same |
 | 2 | interrogate (one item at a time) + contracts + non-UI split | same |
 | 3 | section confirms → write canvas-pack → self-review → **user approve (HARD-GATE)** | same (pack = plan input) |
-| 4 | `using-git-worktrees` (always isolate when present) | skip |
+| 4 | `using-git-worktrees` + **pack/`app.json` handoff** (always isolate when present) | skip |
 | 5 | **Read pack** → implement Canvas drafts | plan → approve → **Read pack** → implement |
 | 6 | `requesting-code-review` + fix | skip |
 | 7 | **Read pack** → `design-review` + fix | same (canvas) |
@@ -86,22 +86,31 @@ Ordering (detected): approve pack → implement → CR → design review → fin
 
 ### Self-review (before asking approval)
 
-1. No TBD / TODO / vague placeholders  
-2. Canvas list internally consistent  
-3. style file exists on disk (mandatory)  
-4. layout file exists on disk — unless layout is `AI improvise` (path `n/a`; skip this check only for that case)  
-5. UI vs non-UI not mixed  
+1. No TBD / TODO / vague placeholders
+2. Canvas list internally consistent
+3. style file exists on disk (mandatory)
+4. layout file exists on disk — unless layout is `AI improvise` (path `n/a`; skip this check only for that case)
+5. UI vs non-UI not mixed
 6. Scope fits one delivery batch (else decompose first)
 
 ### HARD-GATE
 
 Until the user explicitly approves the pack file:
 
-- Do not implement Canvas code  
-- Do not start implement inside a worktree  
+- Do not implement Canvas code
+- Do not start implement inside a worktree
 - Interrogation-time writes to `app.json` style/layout after user confirm remain allowed (they are part of locking contracts, not “implementation of the PRD UI”)
 
 If the pack changes after approval: edit file → self-review → re-approve.
+
+### Worktree handoff (Step 4, when isolating)
+
+Untracked/uncommitted files written before isolation are invisible in the new worktree. After `using-git-worktrees` isolates:
+
+1. **Canonical owner:** the worktree for the rest of the Canvas pipeline (Read / implement / design-review / finish).
+2. **Pack:** Move the approved pack into the worktree at the same relative path, or copy then **delete** the origin-tree duplicate. Do not leave an untracked/uncommitted pack at that path in the origin tree (blocks merge/cleanup).
+3. **`app.json`:** Re-apply only skill-owned fields (`style`, stock `layouts` directory ids this skill appended). Never wholesale-copy `app.json` (avoids smuggling unrelated local edits).
+4. If the pack was already written only inside the eventual worktree, skip the move — keep a single owner.
 
 ## Curated handoff (Step 10)
 

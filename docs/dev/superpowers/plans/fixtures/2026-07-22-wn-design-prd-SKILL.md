@@ -40,7 +40,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 7. **Design review is a mandatory gate** (Step 7), judged from screenshots of the running Canvas preview.
 8. **No hardcoded design-root path.** Discover `<designRoot>` via `design.project.json` (Step 0b).
 9. **Re-read the pack.** Before Step 5 and before Step 7, Read the approved pack file from disk. TodoWrite tracks pipeline steps only — it does not replace the pack.
-10. **Worktree pack handoff.** When Step 4 isolates into a worktree, that worktree does not see this tree's uncommitted/untracked files. Copy (or rewrite) the approved pack into the worktree at the same relative path, and copy or re-apply any interrogation-time `app.json` style/layout edits there — before Step 5. Read and implement only inside that worktree for the rest of the pipeline.
+10. **Worktree pack handoff.** When Step 4 isolates into a worktree, that worktree does not see this tree's uncommitted/untracked files. Move (or copy-then-delete) the approved pack into the worktree at the same relative path, re-apply only skill-owned `app.json` fields (`style` / stock `layouts` ids) — never wholesale-copy `app.json` — then make the worktree the sole owner for Read/implement. Do not leave a duplicate untracked pack in the origin tree.
 
 ## Vocabulary
 
@@ -191,13 +191,17 @@ If the pack changes after approval: edit file → self-review → re-approve.
 
 ## Step 4 — Worktree isolation (pack handoff)
 
-When `using-git-worktrees` creates the isolated worktree, it does **not** see this tree's uncommitted/untracked files — the approved pack and any interrogation-time `app.json` edits are invisible there until copied.
+When `using-git-worktrees` creates the isolated worktree, it does **not** see this tree's uncommitted/untracked files — the approved pack and interrogation-time `app.json` field edits are invisible there until handed off.
+
+**Canonical owner after isolation:** the worktree. Finish / merge / cleanup must not depend on a leftover pack (or dirty `app.json`) in the origin tree.
 
 Before Step 5, inside the isolation flow:
 
-1. Copy (or rewrite) the approved pack file into the worktree at the **same relative path** (`docs/dev/superpowers/specs/...-canvas-pack.md`).
-2. Ensure interrogation-time `app.json` style/layout edits are present in the worktree copy — copy the file or re-apply the same edits.
-3. From here on, **Read and implement only inside that worktree** (Step 5 pack re-read, Step 7 dev server, etc.) for the remainder of the pipeline.
+1. **Pack:** Move the approved pack into the worktree at the **same relative path** (`docs/dev/superpowers/specs/...-canvas-pack.md`), or copy then **delete** the origin-tree duplicate. After handoff, the origin working tree must not retain an untracked/uncommitted file at that pack path (avoids blocked merges and failed worktree cleanup).
+2. **`app.json`:** Re-apply **only** fields this skill locked during interrogation — `style`, and any **stock** layout directory ids appended to `layouts`. Do **not** wholesale-copy `app.json` (that can smuggle unrelated local edits). Prefer patching those fields in the worktree file to match the pack.
+3. From here on, **Read and implement only inside that worktree** (Step 5 pack re-read, Step 7 dev server, finish, etc.).
+
+If Step 3 already wrote the pack inside the eventual worktree (no pre-isolation copy), skip the move — keep a single pack owner.
 
 If no worktree isolation was used (anchor missing, or `plan` runner), skip this step — everything already lives in the current tree.
 
