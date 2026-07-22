@@ -10,7 +10,7 @@ import {
   type ThemeMode,
 } from '@/lib/theme'
 import type { AppConfig, AssetEntry, AssetKind } from '@/lib/types'
-import { emptyFilter, applyFilter, type Filter } from '@/lib/ai/filterState'
+import { emptyFilter, type Filter } from '@/lib/ai/filterState'
 import { AssetFilterChips } from './AssetFilterChips'
 import './assets.css'
 
@@ -333,7 +333,7 @@ export function AssetBrowserPage({
     )
   }
 
-  const visibleItems = items ? (applyFilter(items as never[], filter) as AssetEntry[]) : null
+  const visibleItems = items
 
   return (
     <div className="assets-page">
