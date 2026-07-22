@@ -23,5 +23,6 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['framework/**/*.test.ts', 'framework/**/*.test.tsx'],
+    setupFiles: ['framework/src/setup-jsdom-compat.ts'],
   },
 })
