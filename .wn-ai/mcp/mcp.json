@@ -6,7 +6,7 @@
       "args": [
         "@playwright/mcp@latest",
         "--output-dir",
-        "/Users/wanderain/_my_git/desgin/temp/playwright/output"
+        "/Users/wanderain/_my_git/design/temp/playwright/output"
       ],
       "env": {}
     }

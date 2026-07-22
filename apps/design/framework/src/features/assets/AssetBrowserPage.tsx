@@ -518,7 +518,7 @@ export function AssetsRulePage() {
     <AssetBrowserPage
       kind="designmd"
       title="Rule"
-      lead="Pick a design-rule package, copy its id, or replace the style id on a target App. Shell theme sync applies only when a package’s preview honors data-theme."
+      lead="Pick a design-rule package, copy its id, or replace the style id on a target App. "
       applyLabel="Replace style"
     />
   )
@@ -529,7 +529,7 @@ export function AssetsLayoutPage() {
     <AssetBrowserPage
       kind="layoutmd"
       title="Layout"
-      lead="Pick a layout package, copy its id, or add it to a target App’s layouts list. Previews follow the shell light/dark theme."
+      lead="Pick a layout package, copy its id, or add it to a target App’s layouts list. "
       applyLabel="Install layout"
     />
   )
