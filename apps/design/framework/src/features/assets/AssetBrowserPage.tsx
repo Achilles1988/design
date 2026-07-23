@@ -12,8 +12,10 @@ import {
 import type { AppConfig, AssetEntry, AssetKind } from '@/lib/types'
 import { applyFilter, emptyFilter, type Filter } from '@/lib/ai/filterState'
 import { fetchAssetIndex, type AssetMeta } from '@/lib/ai/assetIndex'
+import { buildSystemPrompt } from '@/lib/ai/promptBuild'
+import { usePageAssistant } from '@/shell/assistant/usePageAssistant'
 import { AssetFilterChips } from './AssetFilterChips'
-import { AiFilterDrawer } from './AiFilterDrawer'
+import { AssetFilterTool } from './assistantFilterTool'
 import './assets.css'
 
 type AssetBrowserPageProps = {
@@ -139,11 +141,21 @@ export function AssetBrowserPage({
   const [pickerFor, setPickerFor] = useState<AssetEntry | null>(null)
   const [pickerAppId, setPickerAppId] = useState('')
   const [filter, setFilter] = useState<Filter>(emptyFilter())
-  const [drawerOpen, setDrawerOpen] = useState(false)
   const [assetIndex, setAssetIndex] = useState<AssetMeta[]>([])
   const [basePrompt, setBasePrompt] = useState<string>('')
   const busyLock = useRef(false)
   const lightboxFrameRef = useRef<HTMLIFrameElement>(null)
+  const filterRef = useRef(filter)
+  filterRef.current = filter
+
+  usePageAssistant({
+    instructions: buildSystemPrompt({
+      basePrompt,
+      kind,
+      filter,
+      candidates: applyFilter(assetIndex, filter),
+    }),
+  })
 
   useEffect(() => subscribeTheme(setThemeState), [])
 
@@ -394,15 +406,10 @@ export function AssetBrowserPage({
                 ? `${visibleItems?.length ?? 0} / ${items.length} packages`
                 : `${items.length} packages`}
           </p>
-          <button
-            type="button"
-            className="assets-btn"
-            onClick={() => setDrawerOpen(true)}
-          >
-            AI 筛选
-          </button>
         </div>
       </div>
+
+      <AssetFilterTool index={assetIndex} filterRef={filterRef} onFilterChange={setFilter} />
 
       <AssetFilterChips
         filter={filter}
@@ -569,17 +576,6 @@ export function AssetBrowserPage({
         </div>
       ) : null}
 
-      <AiFilterDrawer
-        open={drawerOpen}
-        kind={kind}
-        index={assetIndex}
-        filter={filter}
-        onFilterChange={setFilter}
-        basePrompt={basePrompt}
-        matchCount={visibleItems?.length ?? 0}
-        totalCount={items?.length ?? 0}
-        onClose={() => setDrawerOpen(false)}
-      />
     </div>
   )
 }
