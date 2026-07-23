@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { createStreamTextAdapter, toCoreMessages } from './streamTextAdapter'
+import { z } from 'zod'
+import { createStreamTextAdapter, toAiToolParameters, toCoreMessages } from './streamTextAdapter'
 import { AiClientError } from '@/lib/ai/client'
+
+describe('toAiToolParameters', () => {
+  it('passes a zod/standard schema through unchanged', () => {
+    const schema = z.object({ a: z.string() })
+    expect(toAiToolParameters(schema)).toBe(schema)
+  })
+  it('wraps a plain JSON schema object (not the same reference)', () => {
+    const jsonS = { type: 'object', properties: { a: { type: 'string' } } }
+    const out = toAiToolParameters(jsonS)
+    expect(out).not.toBe(jsonS)
+    expect(out).toBeTypeOf('object')
+  })
+})
 
 describe('toCoreMessages', () => {
   it('extracts and joins text parts per message', () => {

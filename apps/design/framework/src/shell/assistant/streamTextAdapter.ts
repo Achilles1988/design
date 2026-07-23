@@ -45,6 +45,22 @@ export type AdapterDeps = {
   readConfig?: () => AiConfig | null
 }
 
+/**
+ * assistant-ui tools store `parameters` as either a StandardSchema (e.g. zod)
+ * or a plain JSONSchema7. ai-sdk `tool()` accepts a zod/StandardSchema directly
+ * but needs a `jsonSchema()` wrapper for plain JSON schema objects.
+ */
+export function toAiToolParameters(parameters: unknown): unknown {
+  if (parameters && typeof parameters === 'object') {
+    const p = parameters as Record<string, unknown>
+    const isStandardOrZod =
+      '~standard' in p || '_def' in p || typeof p.safeParse === 'function'
+    if (isStandardOrZod) return parameters
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return jsonSchema((parameters ?? { type: 'object', properties: {} }) as any)
+}
+
 function buildTools(tools: AdapterContext['tools']) {
   if (!tools) return undefined
   const out: Record<string, unknown> = {}
@@ -52,7 +68,7 @@ function buildTools(tools: AdapterContext['tools']) {
     out[name] = aiTool({
       description: def.description ?? '',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      parameters: jsonSchema((def.parameters ?? { type: 'object', properties: {} }) as any),
+      parameters: toAiToolParameters(def.parameters) as any,
       // no execute: assistant-ui runtime executes the registered tool
     })
   }
