@@ -20,6 +20,17 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'framework/src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-assistant-ui': ['@assistant-ui/react'],
+          'vendor-ai-sdk': ['ai', '@ai-sdk/anthropic', '@ai-sdk/openai'],
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
+    },
+  },
   test: {
     environment: 'node',
     include: ['framework/**/*.test.ts', 'framework/**/*.test.tsx'],
