@@ -1,6 +1,6 @@
 import { createAnthropic } from '@ai-sdk/anthropic'
 import { createOpenAI } from '@ai-sdk/openai'
-import { generateObject } from 'ai'
+import { generateObject, type LanguageModelV1 } from 'ai'
 import type { AiConfig } from './config'
 import { ReplySchema, type Reply } from './schema'
 
@@ -17,7 +17,7 @@ export class AiClientError extends Error {
   }
 }
 
-function classify(err: unknown): AiClientError {
+export function classify(err: unknown): AiClientError {
   if (err instanceof AiClientError) return err
   const message =
     err instanceof Error ? err.message : typeof err === 'string' ? err : 'AI request failed'
@@ -43,6 +43,12 @@ function classify(err: unknown): AiClientError {
   return new AiClientError('unknown', message)
 }
 
+export function createModel(config: AiConfig): LanguageModelV1 {
+  return config.provider === 'anthropic'
+    ? createAnthropic({ apiKey: config.apiKey })(config.model)
+    : createOpenAI({ apiKey: config.apiKey, baseURL: config.baseURL })(config.model)
+}
+
 export type RunAssetSearchTurnInput = {
   config: AiConfig
   systemPrompt: string
@@ -50,20 +56,11 @@ export type RunAssetSearchTurnInput = {
 }
 
 export async function runAssetSearchTurn(input: RunAssetSearchTurnInput): Promise<Reply> {
-  const { config, systemPrompt, messages } = input
   try {
-    const model =
-      config.provider === 'anthropic'
-        ? createAnthropic({ apiKey: config.apiKey })(config.model)
-        : createOpenAI({
-            apiKey: config.apiKey,
-            baseURL: config.baseURL,
-          })(config.model)
-
     const result = await generateObject({
-      model,
-      system: systemPrompt,
-      messages,
+      model: createModel(input.config),
+      system: input.systemPrompt,
+      messages: input.messages,
       schema: ReplySchema,
     })
     return result.object
