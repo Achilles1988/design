@@ -45,7 +45,9 @@ useAssistantTool({
 
 - 工具**执行由运行时托管**：模型发起 tool-call → 运行时按 `parameters` 校验 → 调 `execute`
   （浏览器端）→ 结果回传模型 → 受 `maxSteps` 约束继续。
-- `execute` 出错应 catch 并**作为结果返回**（如 `{ success:false, error }`），让模型可解释。
+- 若某工具的 `execute` **可能失败**（网络、外部调用等），应 catch 并**作为结果返回**（如
+  `{ success:false, error }`），让模型可解释；对纯粹、参数已由 `parameters` 校验的确定性
+  `execute`（如 `apply_filter`），无需额外防御分支。
 - 工具组件必须渲染在 `AssistantProvider` 内。
 
 ## adapter 契约（`createStreamTextAdapter`）

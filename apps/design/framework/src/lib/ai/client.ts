@@ -1,10 +1,7 @@
 import { createAnthropic } from '@ai-sdk/anthropic'
 import { createOpenAI } from '@ai-sdk/openai'
-import { generateObject, type LanguageModelV1 } from 'ai'
+import { type LanguageModelV1 } from 'ai'
 import type { AiConfig } from './config'
-import { ReplySchema, type Reply } from './schema'
-
-export type ChatMessage = { role: 'user' | 'assistant'; content: string }
 
 export type AiClientErrorKind = 'auth' | 'rate-limit' | 'network' | 'schema' | 'unknown'
 
@@ -47,24 +44,4 @@ export function createModel(config: AiConfig): LanguageModelV1 {
   return config.provider === 'anthropic'
     ? createAnthropic({ apiKey: config.apiKey })(config.model)
     : createOpenAI({ apiKey: config.apiKey, baseURL: config.baseURL })(config.model)
-}
-
-export type RunAssetSearchTurnInput = {
-  config: AiConfig
-  systemPrompt: string
-  messages: ChatMessage[]
-}
-
-export async function runAssetSearchTurn(input: RunAssetSearchTurnInput): Promise<Reply> {
-  try {
-    const result = await generateObject({
-      model: createModel(input.config),
-      system: input.systemPrompt,
-      messages: input.messages,
-      schema: ReplySchema,
-    })
-    return result.object
-  } catch (err) {
-    throw classify(err)
-  }
 }

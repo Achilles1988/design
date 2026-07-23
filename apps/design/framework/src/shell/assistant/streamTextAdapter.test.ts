@@ -99,6 +99,19 @@ describe('createStreamTextAdapter.run', () => {
     expect(content.find((c) => c.type === 'text')!.text).toBe('ok!')
   })
 
+  it('classifies an error part emitted by the stream', async () => {
+    const adapter = createStreamTextAdapter({
+      streamTextImpl: () => fakeStream([{ type: 'error', error: new Error('429 rate limit') }]),
+      createModelImpl: () => ({}) as never,
+      readConfig: () => ({ provider: 'openai', apiKey: 'k', model: 'm' }),
+    })
+    await expect(async () => {
+      for await (const _ of adapter.run({ messages: [], ...baseCtx })) {
+        void _
+      }
+    }).rejects.toMatchObject({ kind: 'rate-limit' })
+  })
+
   it('throws classified AiClientError when config missing', async () => {
     const adapter = createStreamTextAdapter({
       streamTextImpl: () => fakeStream([]),
