@@ -4,6 +4,9 @@ import { designApi } from '@/lib/api'
 import { subscribeCanvasesChanged } from '@/lib/canvasEvents'
 import { getTheme, setTheme, subscribeTheme, type ThemeMode } from '@/lib/theme'
 import type { AppConfig, CanvasEntry } from '@/lib/types'
+import { AssistantProvider } from './assistant/AssistantProvider'
+import { AssistantLauncher } from './assistant/AssistantLauncher'
+import { AssistantPanel } from './assistant/AssistantPanel'
 import './SidebarShell.css'
 
 type SidebarShellProps = {
@@ -150,6 +153,7 @@ export function SidebarShell({ children }: SidebarShellProps) {
   const [nodes, setNodes] = useState<AppNode[]>([])
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
+  const [assistantOpen, setAssistantOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -188,6 +192,7 @@ export function SidebarShell({ children }: SidebarShellProps) {
   }
 
   return (
+    <AssistantProvider>
     <div className="sidebar-shell">
       <header className="sidebar-shell__header">
         <div className="sidebar-shell__brand">
@@ -197,6 +202,10 @@ export function SidebarShell({ children }: SidebarShellProps) {
           <span className="sidebar-shell__title">Design Engineering</span>
         </div>
         <div className="sidebar-shell__header-spacer" />
+        <AssistantLauncher
+          open={assistantOpen}
+          onToggle={() => setAssistantOpen((v) => !v)}
+        />
         <button
           type="button"
           className="sidebar-shell__theme-toggle"
@@ -282,6 +291,9 @@ export function SidebarShell({ children }: SidebarShellProps) {
       </aside>
 
       <main className="sidebar-shell__main">{children}</main>
+
+      <AssistantPanel open={assistantOpen} onClose={() => setAssistantOpen(false)} />
     </div>
+    </AssistantProvider>
   )
 }
