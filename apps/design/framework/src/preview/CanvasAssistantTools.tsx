@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   useAssistantToolUI,
   type ToolCallMessagePartProps,
@@ -35,9 +35,15 @@ function LayoutRecommendationCard({
 }) {
   const [pending, setPending] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
+  const [focusRequest, setFocusRequest] = useState(0)
   const settledRef = useRef(result !== undefined)
   const pendingRef = useRef(false)
+  const statusRef = useRef<HTMLSpanElement>(null)
   const settled = settledRef.current || result !== undefined
+
+  useEffect(() => {
+    if (focusRequest > 0) statusRef.current?.focus()
+  }, [focusRequest])
 
   async function install() {
     if (pendingRef.current || settledRef.current) return
@@ -48,11 +54,13 @@ function LayoutRecommendationCard({
       await designApi.applyAsset('layoutmd', args.layoutId, appId)
       settledRef.current = true
       addResult({ status: 'installed', layoutId: args.layoutId })
+      setFocusRequest((current) => current + 1)
     } catch (error) {
       const message = errorMessage(error, 'Layout installation failed.')
       settledRef.current = true
       setLocalError(message)
       addResult({ status: 'failed', error: message })
+      setFocusRequest((current) => current + 1)
     } finally {
       pendingRef.current = false
       setPending(false)
@@ -66,6 +74,7 @@ function LayoutRecommendationCard({
       status: 'rejected',
       reason: 'User declined the Layout.',
     })
+    setFocusRequest((current) => current + 1)
   }
 
   const failure = localError ?? resultError(result)
@@ -92,9 +101,14 @@ function LayoutRecommendationCard({
           <h3>{args.title}</h3>
         </div>
         <span
+          ref={statusRef}
           className="canvas-assistant-card__status"
           data-state={state}
           role="status"
+          aria-label="Layout installation status"
+          aria-live="polite"
+          aria-atomic="true"
+          tabIndex={-1}
         >
           {installed
             ? 'Installed'
@@ -185,11 +199,17 @@ function CanvasProposalCard({
   const [statuses, setStatuses] = useState<ApplyStatus[]>([])
   const [outcome, setOutcome] = useState<'applied' | 'failed' | null>(null)
   const [localError, setLocalError] = useState<string | null>(null)
+  const [focusRequest, setFocusRequest] = useState(0)
   const settledRef = useRef(result !== undefined)
   const pendingRef = useRef(false)
+  const statusRef = useRef<HTMLSpanElement>(null)
   const settled = settledRef.current || result !== undefined
   const layoutLabel =
     args.layout.kind === 'installed' ? args.layout.id : 'AI temporary Layout'
+
+  useEffect(() => {
+    if (focusRequest > 0) statusRef.current?.focus()
+  }, [focusRequest])
 
   async function apply() {
     if (pendingRef.current || settledRef.current) return
@@ -211,6 +231,7 @@ function CanvasProposalCard({
           status: 'applied',
           proposalId: args.proposalId,
         })
+        setFocusRequest((current) => current + 1)
         return
       }
       const message = applyResult.rolledBack
@@ -223,6 +244,7 @@ function CanvasProposalCard({
         proposalId: args.proposalId,
         error: message,
       })
+      setFocusRequest((current) => current + 1)
     } catch (error) {
       const message = errorMessage(error, 'Canvas proposal apply failed.')
       settledRef.current = true
@@ -233,6 +255,7 @@ function CanvasProposalCard({
         proposalId: args.proposalId,
         error: message,
       })
+      setFocusRequest((current) => current + 1)
     } finally {
       pendingRef.current = false
       setPending(false)
@@ -246,6 +269,7 @@ function CanvasProposalCard({
       status: 'rejected',
       reason: 'User declined the Canvas proposal.',
     })
+    setFocusRequest((current) => current + 1)
   }
 
   const failure = localError ?? resultError(result)
@@ -271,7 +295,16 @@ function CanvasProposalCard({
           </p>
           <h3>{args.mode === 'create' ? 'Create Canvas' : 'Update Canvas'}</h3>
         </div>
-        <span className="canvas-assistant-card__status" data-state={state}>
+        <span
+          ref={statusRef}
+          className="canvas-assistant-card__status"
+          data-state={state}
+          role="status"
+          aria-label="Canvas proposal status"
+          aria-live="polite"
+          aria-atomic="true"
+          tabIndex={-1}
+        >
           {applied
             ? 'Applied'
             : rejected
@@ -313,7 +346,13 @@ function CanvasProposalCard({
           {statuses.map((status, index) => (
             <p
               className="canvas-assistant-card__status"
-              data-state="pending"
+              data-state={
+                outcome === 'applied'
+                  ? 'success'
+                  : outcome === 'failed'
+                    ? 'error'
+                    : 'pending'
+              }
               role="status"
               key={`${status.phase}-${status.attempt ?? 0}-${index}`}
             >

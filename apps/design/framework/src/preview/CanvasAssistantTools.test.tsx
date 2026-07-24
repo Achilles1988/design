@@ -115,6 +115,15 @@ function registerTools() {
   ])
 }
 
+function expectFocusedStatus(name: string, text: string) {
+  const status = screen.getByRole('status', { name })
+  expect(status.textContent).toBe(text)
+  expect(status.getAttribute('aria-live')).toBe('polite')
+  expect(status.getAttribute('aria-atomic')).toBe('true')
+  expect(status.getAttribute('tabindex')).toBe('-1')
+  expect(document.activeElement).toBe(status)
+}
+
 describe('CanvasAssistantTools', () => {
   afterEach(cleanup)
 
@@ -153,7 +162,9 @@ describe('CanvasAssistantTools', () => {
         layoutId: 'sidebar-shell',
       }),
     )
-    expect(screen.getByText('Installed')).toBeTruthy()
+    await waitFor(() =>
+      expectFocusedStatus('Layout installation status', 'Installed'),
+    )
   })
 
   it('adds an installed result only after designApi.applyAsset succeeds', async () => {
@@ -206,6 +217,9 @@ describe('CanvasAssistantTools', () => {
     )
     expect(screen.getByRole('alert').textContent).toContain(
       'Layout archive is invalid.',
+    )
+    await waitFor(() =>
+      expectFocusedStatus('Layout installation status', 'Install failed'),
     )
     expect(mocks.applyCanvasProposal).not.toHaveBeenCalled()
   })
@@ -273,24 +287,32 @@ describe('CanvasAssistantTools', () => {
         proposalId: 'proposal-1',
       }),
     )
+    await waitFor(() =>
+      expectFocusedStatus('Canvas proposal status', 'Applied'),
+    )
   })
 
-  it('renders every streamed apply status in order', async () => {
+  it('renders streamed phases as pending, then settles them as success', async () => {
+    let resolveApply:
+      | ((value: {
+          ok: true
+          proposalId: string
+          repairAttempts: number
+        }) => void)
+      | undefined
     mocks.applyCanvasProposal.mockImplementation(
-      async ({ onEvent }: { onEvent: (event: unknown) => void }) => {
+      ({ onEvent }: { onEvent: (event: unknown) => void }) => {
         onEvent({ type: 'status', phase: 'checking' })
         onEvent({ type: 'status', phase: 'writing' })
         onEvent({ type: 'status', phase: 'validating' })
         onEvent({ type: 'status', phase: 'repairing', attempt: 1 })
-        return {
-          ok: true,
-          proposalId: 'proposal-1',
-          repairAttempts: 1,
-        }
+        return new Promise((resolve) => {
+          resolveApply = resolve
+        })
       },
     )
     registerTools()
-    render(
+    const view = render(
       <ToolHarness
         toolName="propose_canvas_change"
         args={proposalArgs}
@@ -301,7 +323,34 @@ describe('CanvasAssistantTools', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Apply changes' }))
 
     await waitFor(() => {
-      const statuses = screen.getAllByRole('status')
+      const statuses = Array.from(
+        view.container.querySelectorAll<HTMLElement>(
+          '.canvas-assistant-card__progress [role="status"]',
+        ),
+      )
+      expect(statuses.map((status) => status.textContent)).toEqual([
+        'Checking files',
+        'Writing files',
+        'Validating changes',
+        'Repairing · attempt 1',
+      ])
+      expect(statuses.every((status) => status.dataset.state === 'pending')).toBe(
+        true,
+      )
+    })
+
+    resolveApply?.({
+      ok: true,
+      proposalId: 'proposal-1',
+      repairAttempts: 1,
+    })
+
+    await waitFor(() => {
+      const statuses = Array.from(
+        view.container.querySelectorAll<HTMLElement>(
+          '.canvas-assistant-card__progress [role="status"]',
+        ),
+      )
       expect(statuses.map((status) => status.textContent)).toEqual([
         'Checking files',
         'Writing files',
@@ -309,6 +358,9 @@ describe('CanvasAssistantTools', () => {
         'Repairing · attempt 1',
         'Applied',
       ])
+      expect(statuses.every((status) => status.dataset.state === 'success')).toBe(
+        true,
+      )
     })
   })
 
@@ -334,16 +386,24 @@ describe('CanvasAssistantTools', () => {
         proposalId: 'proposal-1',
       }),
     )
+    await waitFor(() =>
+      expectFocusedStatus('Canvas proposal status', 'Applied'),
+    )
     success.unmount()
 
     const addFailure = vi.fn()
-    mocks.applyCanvasProposal.mockResolvedValueOnce({
-      ok: false,
-      proposalId: 'proposal-1',
-      error: 'Rollback could not restore every file.',
-      rolledBack: false,
-    })
-    render(
+    mocks.applyCanvasProposal.mockImplementationOnce(
+      async ({ onEvent }: { onEvent: (event: unknown) => void }) => {
+        onEvent({ type: 'status', phase: 'writing' })
+        return {
+          ok: false,
+          proposalId: 'proposal-1',
+          error: 'Rollback could not restore every file.',
+          rolledBack: false,
+        }
+      },
+    )
+    const failure = render(
       <ToolHarness
         toolName="propose_canvas_change"
         args={proposalArgs}
@@ -362,6 +422,47 @@ describe('CanvasAssistantTools', () => {
     )
     expect(screen.getByRole('alert').textContent).toContain(
       'Manual file inspection is required',
+    )
+    await waitFor(() =>
+      expectFocusedStatus('Canvas proposal status', 'Apply failed'),
+    )
+    expect(
+      Array.from(
+        failure.container.querySelectorAll<HTMLElement>(
+          '.canvas-assistant-card__progress [role="status"]',
+        ),
+      ).every((status) => status.dataset.state === 'error'),
+    ).toBe(true)
+  })
+
+  it('announces and focuses a generic proposal failure', async () => {
+    mocks.applyCanvasProposal.mockRejectedValue(
+      new Error('Apply request failed.'),
+    )
+    const addResult = vi.fn()
+    registerTools()
+    render(
+      <ToolHarness
+        toolName="propose_canvas_change"
+        args={proposalArgs}
+        addResult={addResult}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Apply changes' }))
+
+    await waitFor(() =>
+      expect(addResult).toHaveBeenCalledWith({
+        status: 'failed',
+        proposalId: 'proposal-1',
+        error: 'Apply request failed.',
+      }),
+    )
+    expect(screen.getByRole('alert').textContent).toContain(
+      'Apply request failed.',
+    )
+    await waitFor(() =>
+      expectFocusedStatus('Canvas proposal status', 'Apply failed'),
     )
   })
 
@@ -384,10 +485,12 @@ describe('CanvasAssistantTools', () => {
         reason: 'User declined the Canvas proposal.',
       }),
     )
-    expect(screen.getByText('Rejected')).toBeTruthy()
+    await waitFor(() =>
+      expectFocusedStatus('Canvas proposal status', 'Rejected'),
+    )
   })
 
-  it('uses English labels and focus-visible buttons', () => {
+  it('keeps readable card text, 14px controls, and complete interaction states', () => {
     registerTools()
     render(
       <ToolHarness
@@ -407,7 +510,43 @@ describe('CanvasAssistantTools', () => {
       '.canvas-assistant-card__actions button:focus-visible',
     )
     expect(assistantStyles).toContain(
-      '.canvas-assistant-card__status[data-state',
+      '.canvas-assistant-card__actions button:active:not(:disabled)',
+    )
+    expect(assistantStyles).toContain(
+      '.canvas-assistant-card__actions button:disabled',
+    )
+    expect(assistantStyles).toContain(
+      '@media (prefers-reduced-motion: reduce)',
+    )
+    expect(assistantStyles).toMatch(
+      /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.canvas-assistant-card__actions button \{\s*transition: none;\s*\}[\s\S]*?\}/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card \{[\s\S]*?font-size: 14px;/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card h4,[\s\S]*?\.canvas-assistant-card__eyebrow \{[\s\S]*?color: var\(--color-text\);[\s\S]*?font-size: 12px;/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card__reason \{\s*color: var\(--color-text\);/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card__empty \{\s*color: var\(--color-text\);/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card__actions button \{[\s\S]*?font-size: 14px;/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card__actions \.canvas-assistant-card__primary:active:not\(:disabled\) \{\s*border-color: var\(--color-primary\);\s*background: var\(--color-primary\);\s*transform: translateY\(1px\);\s*\}/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card__status \{[\s\S]*?color: var\(--color-text\);/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card__status\[data-state='success'\]::before \{\s*background: var\(--color-success\);/,
+    )
+    expect(assistantStyles).toMatch(
+      /\.canvas-assistant-card__error \{\s*color: var\(--color-text\);/,
     )
   })
 })
