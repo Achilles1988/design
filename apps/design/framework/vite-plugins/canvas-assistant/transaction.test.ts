@@ -427,28 +427,41 @@ describe('applyProposalTransaction', () => {
   })
 
   const credentialLabels = [
-    { name: 'authorization', text: 'Authorization:' },
-    { name: 'camel-case API key', text: 'apiKey=' },
-    { name: 'underscore API key', text: 'api_key=' },
-    { name: 'hyphenated API key', text: 'api-key=' },
-    { name: 'spaced API key', text: 'api key=' },
-    { name: 'environment API key', text: 'OPENAI_API_KEY=' },
+    { name: 'authorization', text: 'Authorization', separator: ':' },
+    { name: 'camel-case API key', text: 'apiKey', separator: '=' },
+    { name: 'underscore API key', text: 'api_key', separator: '=' },
+    { name: 'hyphenated API key', text: 'api-key', separator: '=' },
+    { name: 'spaced API key', text: 'api key', separator: '=' },
+    {
+      name: 'environment API key',
+      text: 'OPENAI_API_KEY',
+      separator: '=',
+    },
     {
       name: 'environment access token',
-      text: 'OPENAI_ACCESS_TOKEN=',
+      text: 'OPENAI_ACCESS_TOKEN',
+      separator: '=',
     },
     {
       name: 'environment auth token',
-      text: 'OPENAI_AUTH_TOKEN=',
+      text: 'OPENAI_AUTH_TOKEN',
+      separator: '=',
     },
     {
       name: 'underscore-prefixed environment auth token',
-      text: '_OPENAI_AUTH_TOKEN=',
+      text: '_OPENAI_AUTH_TOKEN',
+      separator: '=',
     },
     {
       name: 'environment secret key',
-      text: 'OPENAI_SECRET_KEY=',
+      text: 'OPENAI_SECRET_KEY',
+      separator: '=',
     },
+  ]
+  const credentialLabelForms = [
+    { name: 'unquoted label', quote: null },
+    { name: 'single quoted label', quote: "'" },
+    { name: 'double quoted label', quote: '"' },
   ]
   const credentialValues = [
     { name: 'unquoted', text: 'abc.def.ghi' },
@@ -465,10 +478,18 @@ describe('applyProposalTransaction', () => {
     },
   ]
   const credentialCases = credentialLabels.flatMap((label) =>
-    credentialValues.map((value) => ({
-      name: `${label.name}, ${value.name}`,
-      diagnostic: `Request failed; ${label.text}${value.text}`,
-    })),
+    credentialLabelForms.flatMap((labelForm) =>
+      credentialValues.map((value) => {
+        const assignment =
+          labelForm.quote === null
+            ? `${label.text}${label.separator}${value.text}`
+            : `{${labelForm.quote}${label.text}${labelForm.quote}:${value.text}}`
+        return {
+          name: `${label.name}, ${labelForm.name}, ${value.name}`,
+          diagnostic: `Request failed; ${assignment}`,
+        }
+      }),
+    ),
   )
 
   it.each(credentialCases)(
@@ -481,6 +502,27 @@ describe('applyProposalTransaction', () => {
       expect(diagnostic).not.toContain('Bearer')
     },
   )
+
+  it('preserves HTTP URLs while removing absolute paths', async () => {
+    const diagnostic = await repairDiagnostic(
+      [
+        'Docs: http://example.com/docs/error',
+        'Secure docs: https://example.com/docs/error',
+        'Unix source: /Users/Alice/project/Home.tsx',
+        String.raw`Windows source: C:\Users\Alice\project\Home.tsx`,
+        String.raw`Joined Windows source: joined=xC:\Users\Alice\project\Home.tsx`,
+      ].join('\n'),
+    )
+
+    expect(diagnostic).toContain('http://example.com/docs/error')
+    expect(diagnostic).toContain('https://example.com/docs/error')
+    expect(diagnostic).not.toContain(
+      '/Users/Alice/project/Home.tsx',
+    )
+    expect(diagnostic).not.toContain(
+      String.raw`C:\Users\Alice\project\Home.tsx`,
+    )
+  })
 
   it('keeps a compiler reason after redacting Prompt content', async () => {
     const diagnostic = await repairDiagnostic(

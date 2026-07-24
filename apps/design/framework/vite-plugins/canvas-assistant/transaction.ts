@@ -22,10 +22,12 @@ const APPLY_FAILED_ERROR = 'Canvas proposal could not be applied.'
 const MAX_DIAGNOSTIC_LENGTH = 8_000
 const CREDENTIAL_LABEL =
   String.raw`(?:[A-Za-z_][A-Za-z0-9_]*(?:API_KEY|ACCESS_TOKEN|AUTH_TOKEN|SECRET_KEY)|api[-_ ]?key|authorization)`
+const CREDENTIAL_LABEL_FORM =
+  String.raw`(?:"${CREDENTIAL_LABEL}"|'${CREDENTIAL_LABEL}'|\b${CREDENTIAL_LABEL}\b)`
 const CREDENTIAL_VALUE =
   String.raw`(?:"(?:Bearer\s+)?[^"\r\n]*"|'(?:Bearer\s+)?[^'\r\n]*'|Bearer\s+[^\s,;]+|[^\s,;]+)`
 const CREDENTIAL_ASSIGNMENT_PATTERN = new RegExp(
-  String.raw`\b${CREDENTIAL_LABEL}\b\s*[:=]\s*${CREDENTIAL_VALUE}`,
+  String.raw`${CREDENTIAL_LABEL_FORM}\s*[:=]\s*${CREDENTIAL_VALUE}`,
   'gi',
 )
 const DIAGNOSTIC_BOUNDARY =
@@ -34,6 +36,7 @@ const PROMPT_BLOCK_PATTERN = new RegExp(
   String.raw`\bPrompt\s*:[^\r\n]*(?:\r?\n(?!\s*${DIAGNOSTIC_BOUNDARY})[^\r\n]*)*`,
   'gi',
 )
+const HTTP_URL_PATTERN = /\bhttps?:\/\/[^\s,;)"']+/gi
 
 export type CandidateFile = StoredProposal['candidateFiles'][number]
 
@@ -109,20 +112,8 @@ function assertCandidateSet(
   }
 }
 
-function compactDiagnostic(error: unknown): string {
-  const raw =
-    error instanceof Error
-      ? `${error.name}: ${error.message}`
-      : String(error)
-  const withoutStackFrames = raw
-    .split(/\r?\n/)
-    .filter((line) => !/^\s*at\s/.test(line))
-    .join('\n')
-  const sanitized = withoutStackFrames
-    .replace(CREDENTIAL_ASSIGNMENT_PATTERN, '[credential]')
-    .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, '[credential]')
-    .replace(/\bsk-[A-Za-z0-9_-]+\b/g, '[credential]')
-    .replace(PROMPT_BLOCK_PATTERN, 'Prompt: [redacted]')
+function redactAbsolutePaths(value: string): string {
+  return value
     .replace(
       /(["'])(?:[A-Za-z]:[\\/]|\/)[^\r\n]*?\1/g,
       '[absolute path]',
@@ -139,7 +130,37 @@ function compactDiagnostic(error: unknown): string {
       /(?:[A-Za-z]:[\\/]|(?<![.:/\\\w])\/)[^\s\r\n,;:)"']+/g,
       '[absolute path]',
     )
-  return sanitized.slice(0, MAX_DIAGNOSTIC_LENGTH)
+}
+
+function redactPathsOutsideHttpUrls(value: string): string {
+  let result = ''
+  let cursor = 0
+  for (const match of value.matchAll(HTTP_URL_PATTERN)) {
+    result += redactAbsolutePaths(value.slice(cursor, match.index))
+    result += match[0]
+    cursor = match.index + match[0].length
+  }
+  return result + redactAbsolutePaths(value.slice(cursor))
+}
+
+function compactDiagnostic(error: unknown): string {
+  const raw =
+    error instanceof Error
+      ? `${error.name}: ${error.message}`
+      : String(error)
+  const withoutStackFrames = raw
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*at\s/.test(line))
+    .join('\n')
+  const sanitized = withoutStackFrames
+    .replace(CREDENTIAL_ASSIGNMENT_PATTERN, '[credential]')
+    .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, '[credential]')
+    .replace(/\bsk-[A-Za-z0-9_-]+\b/g, '[credential]')
+    .replace(PROMPT_BLOCK_PATTERN, 'Prompt: [redacted]')
+  return redactPathsOutsideHttpUrls(sanitized).slice(
+    0,
+    MAX_DIAGNOSTIC_LENGTH,
+  )
 }
 
 function baselineTargets(
