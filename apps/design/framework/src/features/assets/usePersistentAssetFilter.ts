@@ -11,13 +11,26 @@ import {
   sanitizeFilterForIndex,
   type Filter,
 } from '@/lib/ai/filterState'
-import { useAssistantPageSession } from '@/shell/assistant/pageSession'
+import {
+  useAssistantPageSession,
+  type AssistantPageOwner,
+} from '@/shell/assistant/pageSession'
 
 type FilterUpdate = Filter | ((previous: Filter) => Filter)
 
+function isSameOwner(
+  left: AssistantPageOwner | null,
+  right: AssistantPageOwner,
+): boolean {
+  return (
+    left?.pageKey === right.pageKey &&
+    left.generation === right.generation
+  )
+}
+
 export function usePersistentAssetFilter(index: AssetMeta[] | null) {
   const {
-    pageKey,
+    owner,
     pageState,
     ready,
     setPageFilter,
@@ -25,60 +38,60 @@ export function usePersistentAssetFilter(index: AssetMeta[] | null) {
   const [filter, setFilterState] = useState<Filter>(emptyFilter)
   const filterRef = useRef(filter)
   const inactiveFilterRef = useRef<Filter>(emptyFilter())
-  const hydratedKeyRef = useRef<string | null>(null)
-  const latestPageKeyRef = useRef(pageKey)
+  const hydratedOwnerRef = useRef<AssistantPageOwner | null>(null)
+  const latestOwnerRef = useRef(owner)
   const latestReadyRef = useRef(ready)
   const mountedRef = useRef(false)
-  latestPageKeyRef.current = pageKey
+  latestOwnerRef.current = owner
   latestReadyRef.current = ready
 
   useLayoutEffect(() => {
     mountedRef.current = true
     return () => {
       mountedRef.current = false
-      hydratedKeyRef.current = null
+      hydratedOwnerRef.current = null
       filterRef.current = emptyFilter()
     }
   }, [])
 
-  const ownsCurrentPage = ready && hydratedKeyRef.current === pageKey
+  const ownsCurrentPage = ready && isSameOwner(hydratedOwnerRef.current, owner)
   const exposedFilter = ownsCurrentPage ? filter : inactiveFilterRef.current
   filterRef.current = exposedFilter
 
   useEffect(() => {
-    if (!ready || !index || hydratedKeyRef.current === pageKey) return
+    if (!ready || !index || isSameOwner(hydratedOwnerRef.current, owner)) return
     const restored = sanitizeFilterForIndex(
       pageState.filter ?? emptyFilter(),
       index,
     )
-    hydratedKeyRef.current = pageKey
+    hydratedOwnerRef.current = owner
     filterRef.current = restored
     setFilterState(restored)
-    setPageFilter(pageKey, restored)
-  }, [index, pageKey, pageState.filter, ready, setPageFilter])
+    if (pageState.filter) setPageFilter(owner, restored)
+  }, [index, owner, pageState.filter, ready, setPageFilter])
 
   const setFilter = useCallback((
     update: FilterUpdate,
-    ownerPageKey = pageKey,
+    mutationOwner = owner,
   ) => {
     if (
       !mountedRef.current ||
-      ownerPageKey !== latestPageKeyRef.current ||
+      !isSameOwner(mutationOwner, latestOwnerRef.current) ||
       !latestReadyRef.current ||
-      hydratedKeyRef.current !== ownerPageKey
+      !isSameOwner(hydratedOwnerRef.current, mutationOwner)
     ) return false
     const next =
       typeof update === 'function' ? update(filterRef.current) : update
-    const result = setPageFilter(ownerPageKey, next)
+    const result = setPageFilter(mutationOwner, next)
     if (!result.accepted) return false
     filterRef.current = next
     setFilterState(next)
     return true
-  }, [pageKey, setPageFilter])
+  }, [owner, setPageFilter])
 
   const resetFilter = useCallback(() => {
     const next = emptyFilter()
-    hydratedKeyRef.current = latestPageKeyRef.current
+    hydratedOwnerRef.current = latestOwnerRef.current
     filterRef.current = next
     setFilterState(next)
   }, [])
@@ -86,7 +99,7 @@ export function usePersistentAssetFilter(index: AssetMeta[] | null) {
   return {
     filter: exposedFilter,
     filterRef,
-    ownerPageKey: pageKey,
+    owner,
     setFilter,
     resetFilter,
   }

@@ -145,7 +145,7 @@ export function AssetBrowserPage({
   const {
     filter,
     filterRef,
-    ownerPageKey,
+    owner,
     setFilter,
     resetFilter,
   } = usePersistentAssetFilter(assetIndex)
@@ -444,7 +444,7 @@ export function AssetBrowserPage({
         <AssetFilterTool
           index={assetIndex}
           filterRef={filterRef}
-          ownerPageKey={ownerPageKey}
+          owner={owner}
           onFilterChange={setFilter}
         />
       ) : null}

@@ -176,7 +176,7 @@ describe('applyFilterExecute', () => {
       <AssetFilterTool
         index={index}
         filterRef={filterRef}
-        ownerPageKey="/owner-source"
+        owner={{ pageKey: '/owner-source', generation: 1 }}
         onFilterChange={onFilterChange}
       />,
     )
@@ -186,7 +186,7 @@ describe('applyFilterExecute', () => {
       <AssetFilterTool
         index={index}
         filterRef={filterRef}
-        ownerPageKey="/owner-destination"
+        owner={{ pageKey: '/owner-destination', generation: 2 }}
         onFilterChange={onFilterChange}
       />,
     )
@@ -199,7 +199,7 @@ describe('applyFilterExecute', () => {
       expect.objectContaining({
         chips: [expect.objectContaining({ id: 'tag:dark' })],
       }),
-      '/owner-source',
+      { pageKey: '/owner-source', generation: 1 },
     )
   })
 })

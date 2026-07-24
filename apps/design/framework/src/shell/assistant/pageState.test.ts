@@ -106,6 +106,24 @@ describe('assistant page state store', () => {
       toolName: 'apply_filter',
       args: [],
     }]],
+    ['an apply_filter call with malformed add', 'assistant', [{
+      type: 'tool-call',
+      toolCallId: 't1',
+      toolName: 'apply_filter',
+      args: { add: {}, remove: [] },
+    }]],
+    ['an apply_filter call with a malformed result', 'assistant', [{
+      type: 'tool-call',
+      toolCallId: 't1',
+      toolName: 'apply_filter',
+      args: { add: [], remove: [] },
+      result: {
+        success: true,
+        changed: true,
+        matchCount: 1,
+        applied: { add: {}, remove: [] },
+      },
+    }]],
   ])('removes a page containing %s without deleting healthy pages', (
     _description,
     role,
@@ -279,6 +297,165 @@ describe('assistant page state store', () => {
     ])
   })
 
+  it('does not repair or overwrite a healthy envelope when getItem is unavailable', () => {
+    const rawEnvelope = JSON.stringify({
+      version: 1,
+      pages: {
+        '/healthy': {
+          version: 1,
+          messages: [{
+            id: 'healthy-message',
+            role: 'user',
+            content: 'healthy',
+            createdAt: '2026-07-24T00:00:00.000Z',
+          }],
+          updatedAt: '2026-07-24T00:00:00.000Z',
+        },
+      },
+    })
+    const values = new Map([[ASSISTANT_PAGE_STATE_STORAGE_KEY, rawEnvelope]])
+    let unavailable = true
+    const setItem = vi.fn((key: string, value: string) => {
+      values.set(key, value)
+    })
+    const storage = createStorageView(values, setItem)
+    storage.getItem = (key) => {
+      if (unavailable) {
+        unavailable = false
+        throw new DOMException('read blocked', 'SecurityError')
+      }
+      return values.get(key) ?? null
+    }
+
+    expect(readAssistantPageState('/healthy', storage).messages).toEqual([])
+    expect(setItem).not.toHaveBeenCalled()
+    expect(values.get(ASSISTANT_PAGE_STATE_STORAGE_KEY)).toBe(rawEnvelope)
+
+    expect(readAssistantPageState('/healthy', storage).messages).toEqual([
+      expect.objectContaining({ id: 'healthy-message' }),
+    ])
+    expect(setItem).not.toHaveBeenCalled()
+  })
+
+  it('keeps dirty state in memory when persist cannot read the durable envelope', () => {
+    const values = new Map([[
+      ASSISTANT_PAGE_STATE_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        pages: {
+          '/healthy': {
+            version: 1,
+            messages: [{
+              id: 'healthy-message',
+              role: 'user',
+              content: 'healthy',
+              createdAt: '2026-07-24T00:00:00.000Z',
+            }],
+            updatedAt: '2026-07-24T00:00:00.000Z',
+          },
+        },
+      }),
+    ]])
+    let reads = 0
+    const setItem = vi.fn((key: string, value: string) => {
+      values.set(key, value)
+    })
+    const storage = createStorageView(values, setItem)
+    storage.getItem = (key) => {
+      reads += 1
+      if (reads === 2) throw new DOMException('read blocked', 'SecurityError')
+      return values.get(key) ?? null
+    }
+
+    const failed = patchAssistantPageState('/dirty', {
+      filter: {
+        chips: [{
+          id: 'tag:dirty',
+          kind: 'tag',
+          label: 'dirty',
+          value: 'dirty',
+          addedBy: 'ai',
+        }],
+      },
+    }, storage)
+
+    expect(failed.ok).toBe(false)
+    expect(setItem).not.toHaveBeenCalled()
+    expect(readAssistantPageState('/dirty', storage).filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:dirty' })],
+    })
+
+    const retried = patchAssistantPageState('/retry', { messages: [] }, storage)
+    expect(retried.ok).toBe(true)
+    const reloaded = createStorageView(values)
+    expect(readAssistantPageState('/healthy', reloaded).messages).toEqual([
+      expect.objectContaining({ id: 'healthy-message' }),
+    ])
+    expect(readAssistantPageState('/dirty', reloaded).filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:dirty' })],
+    })
+  })
+
+  it('merges dirty overlays and tombstones when repairing invalid durable content', () => {
+    const values = new Map([[
+      ASSISTANT_PAGE_STATE_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        pages: {
+          '/healthy': {
+            version: 1,
+            messages: [],
+            updatedAt: '2026-07-24T00:00:00.000Z',
+          },
+          '/clear-me': {
+            version: 1,
+            messages: [{
+              id: 'stale',
+              role: 'user',
+              content: 'stale',
+              createdAt: '2026-07-24T00:00:00.000Z',
+            }],
+            updatedAt: '2026-07-24T00:00:00.000Z',
+          },
+          '/broken': {
+            version: 1,
+            messages: [{ id: 'broken', role: 'assistant', content: [null] }],
+            updatedAt: '2026-07-24T00:00:00.000Z',
+          },
+        },
+      }),
+    ]])
+    let failWrites = true
+    const storage = createStorageView(values, (key, value) => {
+      if (failWrites) throw new DOMException('quota exceeded', 'QuotaExceededError')
+      values.set(key, value)
+    })
+
+    patchAssistantPageState('/dirty', {
+      messages: [{
+        id: 'dirty-message',
+        role: 'user',
+        content: 'dirty',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    }, storage)
+    clearAssistantPageState('/clear-me', storage)
+    failWrites = false
+
+    readAssistantPageState('/healthy', storage)
+
+    const reloaded = createStorageView(values)
+    expect(readAssistantPageState('/dirty', reloaded).messages).toEqual([
+      expect.objectContaining({ id: 'dirty-message' }),
+    ])
+    expect(readAssistantPageState('/clear-me', reloaded).messages).toEqual([])
+    const persisted = JSON.parse(
+      values.get(ASSISTANT_PAGE_STATE_STORAGE_KEY) ?? 'null',
+    ) as { pages: Record<string, unknown> }
+    expect(persisted.pages).not.toHaveProperty('/broken')
+    expect(persisted.pages).not.toHaveProperty('/clear-me')
+  })
+
   it('reports volatile fallback writes and clears as non-durable', () => {
     const localStorageAccess = vi.spyOn(window, 'localStorage', 'get')
       .mockImplementation(() => {
@@ -311,6 +488,63 @@ describe('assistant page state store', () => {
     } finally {
       localStorageAccess.mockRestore()
     }
+  })
+
+  it('migrates volatile patches and tombstones when localStorage access recovers', () => {
+    localStorage.setItem(ASSISTANT_PAGE_STATE_STORAGE_KEY, JSON.stringify({
+      version: 1,
+      pages: {
+        '/durable-other': {
+          version: 1,
+          messages: [{
+            id: 'durable-message',
+            role: 'user',
+            content: 'durable',
+            createdAt: '2026-07-24T00:00:00.000Z',
+          }],
+          updatedAt: '2026-07-24T00:00:00.000Z',
+        },
+        '/volatile-clear': {
+          version: 1,
+          messages: [{
+            id: 'remove-me',
+            role: 'user',
+            content: 'remove me',
+            createdAt: '2026-07-24T00:00:00.000Z',
+          }],
+          updatedAt: '2026-07-24T00:00:00.000Z',
+        },
+      },
+    }))
+    const localStorageAccess = vi.spyOn(window, 'localStorage', 'get')
+      .mockImplementation(() => {
+        throw new DOMException('blocked', 'SecurityError')
+      })
+
+    const patched = patchAssistantPageState('/volatile-patch', {
+      filter: {
+        chips: [{
+          id: 'tag:volatile',
+          kind: 'tag',
+          label: 'volatile',
+          value: 'volatile',
+          addedBy: 'ai',
+        }],
+      },
+    })
+    const cleared = clearAssistantPageState('/volatile-clear')
+    expect(patched.ok).toBe(false)
+    expect(cleared.ok).toBe(false)
+
+    localStorageAccess.mockRestore()
+
+    expect(readAssistantPageState('/volatile-patch').filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:volatile' })],
+    })
+    expect(readAssistantPageState('/volatile-clear').messages).toEqual([])
+    expect(readAssistantPageState('/durable-other').messages).toEqual([
+      expect.objectContaining({ id: 'durable-message' }),
+    ])
   })
 })
 

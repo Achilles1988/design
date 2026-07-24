@@ -3,30 +3,17 @@ import { z } from 'zod'
 import { useAssistantTool } from '@assistant-ui/react'
 import type { AssetMeta } from '@/lib/ai/assetIndex'
 import { applyFilter, mergeFilterDelta, type Filter } from '@/lib/ai/filterState'
-import { FilterDeltaAddSchema } from '@/lib/ai/schema'
-import { STALE_PAGE_FILTER_ERROR } from '@/shell/assistant/pageSession'
+import {
+  ApplyFilterArgsSchema,
+  ApplyFilterResultSchema,
+} from '@/lib/ai/schema'
+import {
+  STALE_PAGE_FILTER_ERROR,
+  type AssistantPageOwner,
+} from '@/shell/assistant/pageSession'
 
-export type ApplyFilterArgs = {
-  add: Array<{ kind: 'tag' | 'origin' | 'freeform'; label: string; value: string }>
-  remove: string[]
-}
-
-type ApplyFilterSuccess = {
-  success: true
-  applied: { add: ApplyFilterArgs['add']; remove: string[] }
-  matchCount: number
-  changed: boolean
-}
-
-type ApplyFilterFailure = {
-  success: false
-  applied: { add: []; remove: [] }
-  matchCount: number
-  changed: false
-  error: string
-}
-
-export type ApplyFilterResult = ApplyFilterSuccess | ApplyFilterFailure
+export type ApplyFilterArgs = z.infer<typeof ApplyFilterArgsSchema>
+export type ApplyFilterResult = z.infer<typeof ApplyFilterResultSchema>
 
 export type ApplyFilterCtx = {
   index: AssetMeta[]
@@ -37,10 +24,10 @@ export type ApplyFilterCtx = {
 type AssetFilterToolProps = {
   index: AssetMeta[]
   filterRef: MutableRefObject<Filter>
-  ownerPageKey: string
+  owner: AssistantPageOwner
   onFilterChange: (
     filter: Filter,
-    ownerPageKey: string,
+    owner: AssistantPageOwner,
   ) => boolean | void
 }
 
@@ -114,10 +101,7 @@ export function applyFilterSafely(
   }
 }
 
-const parameters = z.object({
-  add: z.array(FilterDeltaAddSchema).default([]),
-  remove: z.array(z.string()).default([]),
-})
+const parameters = ApplyFilterArgsSchema
 
 function FilterDeltaCard({
   args,
@@ -157,7 +141,7 @@ function FilterDeltaCard({
 export function AssetFilterTool({
   index,
   filterRef,
-  ownerPageKey,
+  owner,
   onFilterChange,
 }: AssetFilterToolProps) {
   // Keep mutable inputs in refs so the tool object / execute stay referentially
@@ -174,9 +158,9 @@ export function AssetFilterTool({
         index: indexRef.current,
         filterRef,
         onFilterChange: (f) =>
-          onFilterChangeRef.current(f, ownerPageKey),
+          onFilterChangeRef.current(f, owner),
       }),
-    [filterRef, ownerPageKey],
+    [filterRef, owner],
   )
 
   const tool = useMemo(

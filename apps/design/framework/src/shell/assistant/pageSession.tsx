@@ -26,15 +26,21 @@ import {
 export const STALE_PAGE_FILTER_ERROR =
   'Filter update ignored because its page is no longer active.'
 
+export type AssistantPageOwner = {
+  pageKey: string
+  generation: number
+}
+
 export type AssistantPageSessionValue = {
   pageKey: string
+  owner: AssistantPageOwner
   pageState: AssistantPageStateV1
   ready: boolean
   hasState: boolean
   persistenceError: string | null
   registerResetHandler: (handler: () => void) => () => void
   setPageFilter: (
-    ownerPageKey: string,
+    owner: AssistantPageOwner,
     filter: Filter,
   ) => PageFilterWriteResult
   startNewChat: () => void
@@ -112,6 +118,7 @@ export function AssistantPageSessionProvider({
   const hydratingRef = useRef(true)
   const clearingPageKeysRef = useRef(new Set<string>())
   const resetHandlerRef = useRef<() => void>(() => {})
+  const [generation, setGeneration] = useState(activeEpochRef.current)
   const [hydratedPageKey, setHydratedPageKey] = useState<string | null>(null)
   const [pageState, setPageState] = useState(() =>
     readAssistantPageState(pageKey),
@@ -143,6 +150,7 @@ export function AssistantPageSessionProvider({
   useLayoutEffect(() => {
     activeEpochRef.current += 1
     const transitionEpoch = activeEpochRef.current
+    setGeneration(transitionEpoch)
     const previousPageKey = activeKeyRef.current
     if (previousPageKey !== pageKey) saveSnapshot(previousPageKey)
     hydratingRef.current = true
@@ -185,25 +193,29 @@ export function AssistantPageSessionProvider({
   }, [])
 
   const setPageFilter = useCallback((
-    ownerPageKey: string,
+    owner: AssistantPageOwner,
     filter: Filter,
   ): PageFilterWriteResult => {
-    if (ownerPageKey !== latestRouteKeyRef.current) {
+    if (
+      owner.pageKey !== latestRouteKeyRef.current ||
+      owner.generation !== activeEpochRef.current
+    ) {
       return {
         accepted: false,
         ok: false,
-        state: readAssistantPageState(ownerPageKey),
+        state: readAssistantPageState(owner.pageKey),
         error: STALE_PAGE_FILTER_ERROR,
       }
     }
-    const result = patchAssistantPageState(latestRouteKeyRef.current, { filter })
+    const result = patchAssistantPageState(owner.pageKey, { filter })
     setPageState(result.state)
     setPersistenceError(result.ok ? null : result.error)
     return { accepted: true, ...result }
-  }, [])
+  }, [activeEpochRef])
 
   const startNewChat = useCallback(() => {
     activeEpochRef.current += 1
+    setGeneration(activeEpochRef.current)
     const targetPageKey = latestRouteKeyRef.current
     clearingPageKeysRef.current.add(targetPageKey)
     hydratingRef.current = true
@@ -212,22 +224,37 @@ export function AssistantPageSessionProvider({
     cancelRunAndWaitForIdle(runtime, () => {
       const result = clearAssistantPageState(targetPageKey)
       setPersistenceError(result.ok ? null : result.error)
-      if (latestRouteKeyRef.current === targetPageKey) {
-        activeKeyRef.current = targetPageKey
-        runtime.thread.reset([])
-        setMessageCount(0)
-        resetHandlerRef.current()
-        setPageState(result.state)
-        hydratingRef.current = false
-        setHydratedPageKey(targetPageKey)
+      const isCurrentPage = latestRouteKeyRef.current === targetPageKey
+      try {
+        if (isCurrentPage) {
+          activeKeyRef.current = targetPageKey
+          runtime.thread.reset([])
+          try {
+            resetHandlerRef.current()
+          } catch {
+            // Page-owned cleanup cannot prevent the session reset from settling.
+          }
+        }
+      } finally {
+        if (isCurrentPage) {
+          setMessageCount(0)
+          setPageState(result.state)
+          hydratingRef.current = false
+          setHydratedPageKey(targetPageKey)
+        }
+        clearingPageKeysRef.current.delete(targetPageKey)
       }
-      clearingPageKeysRef.current.delete(targetPageKey)
     })
   }, [activeEpochRef, runtime])
 
   const ready = hydratedPageKey === pageKey
+  const owner = useMemo<AssistantPageOwner>(() => ({
+    pageKey,
+    generation,
+  }), [generation, pageKey])
   const value = useMemo<AssistantPageSessionValue>(() => ({
     pageKey,
+    owner,
     pageState,
     ready,
     hasState:
@@ -238,6 +265,7 @@ export function AssistantPageSessionProvider({
     startNewChat,
   }), [
     pageKey,
+    owner,
     pageState,
     messageCount,
     persistenceError,

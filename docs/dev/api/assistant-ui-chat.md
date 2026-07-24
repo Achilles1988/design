@@ -70,6 +70,8 @@ type AssistantPageStateEnvelopeV1 = {
 system 仅允许单一文本，user 与 assistant 只允许各自支持的 part 类型且必填字段必须存在；
 tool-call 的 `toolName`、可选 `toolCallId`、`args` 与 `result` 必须是安全的 JSON 形态。无效消息会
 删除对应页面的持久条目，其他健康页面不受影响；`filter` 结构无效时仅忽略该筛选，保留有效消息。
+已知工具还按自身 schema 深校验：`apply_filter.args` 必须满足共享的 filter delta schema，
+`result` 必须满足成功/失败联合结构；因此旧缓存中的畸形 `add/remove` 不会进入 Tool Card。
 `patchAssistantPageState` 合并目标页面的 `messages` 或 `filter`；`clearAssistantPageState` 删除
 目标页面的整个 state，因而同时删除消息和筛选，不影响其他页面。
 
@@ -86,10 +88,15 @@ overlay 或 clear tombstone。后续读取会优先使用该回退，避免旧�
 durable 写入成功后只清除该次实际包含且未被更新的 dirty 项。因此 A 写失败后 B 写成功会同时
 持久化 A 的最新状态，A clear 失败后 B 写成功也会同时持久化 A 的删除。
 
+Store 明确区分“已读取但内容 invalid”和“Storage I/O unavailable”。只有前者会触发 repair；
+`getItem` 抛错时绝不尝试写入空 envelope，patch/clear 也保留 dirty 状态并返回失败。真实 repair
+与正常写入使用同一合并路径，必须包含该 Storage 的全部 dirty overlay 与 tombstone。
+
 访问 `window.localStorage` 本身被浏览器拒绝时，Store 使用 volatile storage 保持当前内存可用，
 但 patch/clear 固定返回 `ok:false` 与英文错误，绝不把内存写声称为 durable success。clear 写入
 失败时 tombstone 仍让当前页面保持为空，并持续通过 session 暴露 persistence warning，直到后续
-写入把全部 dirty 状态成功持久化。
+写入把全部 dirty 状态成功持久化。getter 后续恢复时，Store 会把 volatile 的全部 overlay 与
+tombstone 合并进 durable envelope；当前会话更新优先，同时保留 durable 中未触及的其他页面。
 
 ## 页面级会话（`pageSession.tsx`）
 
@@ -113,19 +120,22 @@ Store 写入失败时，`persistenceError` 暴露英文错误提示。
 页面通过 `useAssistantPageSession()` 使用以下基础命令：
 
 - `registerResetHandler(handler)` 注册当前页面的重置函数，并返回注销函数。
-- `setPageFilter(ownerPageKey, filter)` 要求 mutation 显式携带 owner。只有 owner 与最新路由键一致
-  才写入 Store；否则返回 `accepted:false`，不修改任一页面且不制造 persistence warning。接受的
-  mutation 返回 `accepted:true` 加 Store 的 durable 结果。
+- `setPageFilter(owner, filter)` 要求 mutation 显式携带 `{ pageKey, generation }`。只有 pageKey
+  与最新路由键一致、generation 也等于当前 session generation 才写入 Store；否则返回
+  `accepted:false`，不修改任一页面且不制造 persistence warning。generation 在路由 hydration
+  和每次 New chat 时推进，因此同页迟到工具和 A→B→A 的旧 A 工具也会被拒绝。接受的 mutation
+  返回 `accepted:true` 加 Store 的 durable 结果。
 - `startNewChat()` 增加 epoch、取消运行，并捕获命令发起时的目标页。该页的 Store clear 不受后续
   hydration epoch 或导航影响，等待旧 run idle 后必须最终执行；导航保存旧快照时也会跳过正在清理
   的页面，不能复活旧消息。只有目标页届时仍是当前页，才清空共享 Runtime 并调用当前页面 reset
   handler。其他页面正常 hydration 且状态不受影响。资产页重置回调必须同时清空 React filter state
-  和 `filterRef`。
+  和 `filterRef`。页面 reset handler 即使抛错，session 也必须通过 `finally` 恢复 ready、同步空
+  page state 并删除 clearing 标记，避免永久 Loading 或后续快照一直被跳过。
 
 ## 资产筛选恢复与持久化
 
 `usePersistentAssetFilter(index)` 是资产页对页面会话筛选状态的唯一适配层，返回
-`{ filter, filterRef, ownerPageKey, setFilter, resetFilter }`。它直接消费 `useAssistantPageSession()` 的
+`{ filter, filterRef, owner, setFilter, resetFilter }`。它直接消费 `useAssistantPageSession()` 的
 `pageKey`、`pageState`、`ready` 与 `setPageFilter()`，不会创建第二套页面键。
 
 - 只有页面会话 `ready=true` 且资产索引已加载时才恢复筛选。筛选带有已 hydration 的页面键归属；
@@ -137,8 +147,9 @@ Store 写入失败时，`persistenceError` 暴露英文错误提示。
 - `setFilter` 同时接受完整 `Filter` 和 functional update。它解析下一状态并调用带 owner 的
   `setPageFilter()`，mutation 被接受后同步更新 `filterRef` 与 React state；AI 工具、手动删除 chip
   与 `Reset all` 均使用此入口。工具执行会先同步更新 ref 以支持同一渲染周期的连续 delta。每个
-  setter 与工具 execute 都携带创建时的 owner；页面切换或 hook 卸载后旧 setter 失效，owner 被
-  session 拒绝时工具会回滚 `filterRef` 并返回结构化失败。
+  setter 与工具 execute 都携带创建时的 `{ pageKey, generation }` owner；New chat、页面切换、
+  A→B→A 或 hook 卸载后旧 setter 失效，owner 被 session 拒绝时工具会回滚 `filterRef` 并返回
+  结构化失败。
 - `resetFilter` 仅同步清空 React state 与 `filterRef`，不自行写 Store。它只作为
   `usePageAssistant({ onResetPageState })` 的 New chat 重置回调使用；随后
   `startNewChat()` 删除整个当前页面状态。重置会以 session 提供的最新 `pageKey` 标记已清理页面；

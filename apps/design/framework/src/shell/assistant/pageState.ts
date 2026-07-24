@@ -1,5 +1,9 @@
 import type { ThreadMessage, ThreadMessageLike } from '@assistant-ui/react'
 import type { Filter } from '@/lib/ai/filterState'
+import {
+  ApplyFilterArgsSchema,
+  ApplyFilterResultSchema,
+} from '@/lib/ai/schema'
 
 export const ASSISTANT_PAGE_STATE_STORAGE_KEY = 'wn.assistant.page-state.v1'
 const CONTEXT_QUERY_KEYS = new Set(['appId'])
@@ -173,7 +177,7 @@ function isMessagePart(
   if (value.type === 'generative-ui') return isRecord(value.spec)
   if (value.type !== 'tool-call') return false
 
-  return (
+  const validToolCall = (
     typeof value.toolName === 'string' &&
     value.toolName.length > 0 &&
     (
@@ -184,6 +188,16 @@ function isMessagePart(
     (value.result === undefined || isJsonValue(value.result)) &&
     hasOptionalString(value, 'argsText') &&
     (value.isError === undefined || typeof value.isError === 'boolean')
+  )
+  if (!validToolCall) return false
+  if (value.toolName !== 'apply_filter') return true
+  return (
+    value.args !== undefined &&
+    ApplyFilterArgsSchema.safeParse(value.args).success &&
+    (
+      value.result === undefined ||
+      ApplyFilterResultSchema.safeParse(value.result).success
+    )
   )
 }
 
@@ -237,16 +251,30 @@ const volatileStorage: Storage = {
   },
 }
 
-function parseEnvelope(storage: Storage): {
-  envelope: AssistantPageStateEnvelopeV1
-  needsRepair: boolean
-} {
+type ParseEnvelopeResult =
+  | {
+      status: 'available'
+      envelope: AssistantPageStateEnvelopeV1
+      needsRepair: boolean
+    }
+  | { status: 'unavailable' }
+
+function parseEnvelope(storage: Storage): ParseEnvelopeResult {
+  let raw: string | null
   try {
-    const parsed = JSON.parse(
-      storage.getItem(ASSISTANT_PAGE_STATE_STORAGE_KEY) ?? 'null',
-    ) as { version?: unknown; pages?: unknown } | null
+    raw = storage.getItem(ASSISTANT_PAGE_STATE_STORAGE_KEY)
+  } catch {
+    return { status: 'unavailable' }
+  }
+
+  try {
+    const parsed = JSON.parse(raw ?? 'null') as {
+      version?: unknown
+      pages?: unknown
+    } | null
     if (parsed?.version !== 1 || !parsed.pages || typeof parsed.pages !== 'object') {
       return {
+        status: 'available',
         envelope: { version: 1, pages: {} },
         needsRepair: parsed !== null,
       }
@@ -278,11 +306,13 @@ function parseEnvelope(storage: Storage): {
       }
     }
     return {
+      status: 'available',
       envelope: { version: 1, pages },
       needsRepair,
     }
   } catch {
     return {
+      status: 'available',
       envelope: { version: 1, pages: {} },
       needsRepair: true,
     }
@@ -292,7 +322,10 @@ function parseEnvelope(storage: Storage): {
 function resolveStorage(storage?: Storage): Storage {
   if (storage) return storage
   try {
-    return window.localStorage
+    const durableStorage = window.localStorage
+    return migrateVolatilePages(durableStorage)
+      ? durableStorage
+      : volatileStorage
   } catch {
     return volatileStorage
   }
@@ -307,13 +340,10 @@ function memoryPages(storage: Storage) {
   return pages
 }
 
-function persistDirtyPages(
-  storage: Storage,
-  fallbackError: string,
-): { ok: true } | { ok: false; error: string } {
-  const overlays = memoryPages(storage)
-  const included = [...overlays.entries()]
-  const envelope = parseEnvelope(storage).envelope
+function applyOverlays(
+  envelope: AssistantPageStateEnvelopeV1,
+  included: Array<[string, MemoryPageOverlay]>,
+): void {
   for (const [pageKey, overlay] of included) {
     if (overlay.state === null) {
       delete envelope.pages[pageKey]
@@ -321,21 +351,85 @@ function persistDirtyPages(
       envelope.pages[pageKey] = overlay.state
     }
   }
+}
 
+function clearPersistedOverlays(
+  overlays: Map<string, MemoryPageOverlay>,
+  included: Array<[string, MemoryPageOverlay]>,
+): void {
+  for (const [pageKey, overlay] of included) {
+    if (overlays.get(pageKey) === overlay) overlays.delete(pageKey)
+  }
+}
+
+function persistEnvelopeWithOverlays(
+  storage: Storage,
+  envelope: AssistantPageStateEnvelopeV1,
+  fallbackError: string,
+): { ok: true } | { ok: false; error: string } {
+  const overlays = memoryPages(storage)
+  const included = [...overlays.entries()]
+  applyOverlays(envelope, included)
   try {
     storage.setItem(
       ASSISTANT_PAGE_STATE_STORAGE_KEY,
       JSON.stringify(envelope),
     )
-    for (const [pageKey, overlay] of included) {
-      if (overlays.get(pageKey) === overlay) overlays.delete(pageKey)
-    }
+    clearPersistedOverlays(overlays, included)
     return { ok: true }
   } catch (error) {
     return {
       ok: false,
       error: error instanceof Error ? error.message : fallbackError,
     }
+  }
+}
+
+function persistDirtyPages(
+  storage: Storage,
+  fallbackError: string,
+): { ok: true } | { ok: false; error: string } {
+  const parsed = parseEnvelope(storage)
+  if (parsed.status === 'unavailable') {
+    return { ok: false, error: fallbackError }
+  }
+  return persistEnvelopeWithOverlays(
+    storage,
+    parsed.envelope,
+    fallbackError,
+  )
+}
+
+function migrateVolatilePages(storage: Storage): boolean {
+  const volatileOverlays = memoryPages(volatileStorage)
+  const volatileParsed = parseEnvelope(volatileStorage)
+  const volatilePages = volatileParsed.status === 'available'
+    ? volatileParsed.envelope.pages
+    : {}
+  if (
+    volatileOverlays.size === 0 &&
+    Object.keys(volatilePages).length === 0
+  ) return true
+
+  const durableParsed = parseEnvelope(storage)
+  if (durableParsed.status === 'unavailable') return false
+  const durableOverlays = memoryPages(storage)
+  const includedDurable = [...durableOverlays.entries()]
+  const includedVolatile = [...volatileOverlays.entries()]
+  applyOverlays(durableParsed.envelope, includedDurable)
+  Object.assign(durableParsed.envelope.pages, volatilePages)
+  applyOverlays(durableParsed.envelope, includedVolatile)
+  try {
+    storage.setItem(
+      ASSISTANT_PAGE_STATE_STORAGE_KEY,
+      JSON.stringify(durableParsed.envelope),
+    )
+    clearPersistedOverlays(durableOverlays, includedDurable)
+    clearPersistedOverlays(volatileOverlays, includedVolatile)
+    volatileStorage.removeItem(ASSISTANT_PAGE_STATE_STORAGE_KEY)
+    return true
+  } catch {
+    return false
   }
 }
 
@@ -347,18 +441,18 @@ export function readAssistantPageState(
     const target = resolveStorage(storage)
     const fallback = memoryPages(target)
     const overlay = fallback.get(pageKey)
-    if (overlay) return overlay.state ?? emptyState()
     const parsed = parseEnvelope(target)
-    if (parsed.needsRepair) {
-      try {
-        target.setItem(
-          ASSISTANT_PAGE_STATE_STORAGE_KEY,
-          JSON.stringify(parsed.envelope),
-        )
-      } catch {
-        // Read recovery remains best-effort; callers still receive empty state.
-      }
+    if (parsed.status === 'unavailable') {
+      return overlay ? overlay.state ?? emptyState() : emptyState()
     }
+    if (parsed.needsRepair) {
+      persistEnvelopeWithOverlays(
+        target,
+        parsed.envelope,
+        'Conversation cache could not be repaired.',
+      )
+    }
+    if (overlay) return overlay.state ?? emptyState()
     return parsed.envelope.pages[pageKey] ?? emptyState()
   } catch {
     return emptyState()
@@ -378,10 +472,6 @@ export function patchAssistantPageState(
     updatedAt: new Date().toISOString(),
   }
   memoryPages(target).set(pageKey, { state })
-  const persisted = persistDirtyPages(
-    target,
-    'Conversation could not be saved.',
-  )
   if (target === volatileStorage) {
     return {
       ok: false,
@@ -389,6 +479,10 @@ export function patchAssistantPageState(
       error: 'Browser storage is unavailable.',
     }
   }
+  const persisted = persistDirtyPages(
+    target,
+    'Conversation could not be saved.',
+  )
   if (persisted.ok) {
     return { ok: true, state }
   }
@@ -402,10 +496,6 @@ export function clearAssistantPageState(
   const target = resolveStorage(storage)
   const state = emptyState()
   memoryPages(target).set(pageKey, { state: null })
-  const persisted = persistDirtyPages(
-    target,
-    'Conversation could not be cleared.',
-  )
   if (target === volatileStorage) {
     return {
       ok: false,
@@ -413,6 +503,10 @@ export function clearAssistantPageState(
       error: 'Browser storage is unavailable.',
     }
   }
+  const persisted = persistDirtyPages(
+    target,
+    'Conversation could not be cleared.',
+  )
   if (persisted.ok) {
     return { ok: true, state }
   }

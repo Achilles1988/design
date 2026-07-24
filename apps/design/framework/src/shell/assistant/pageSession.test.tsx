@@ -12,6 +12,7 @@ import type {
   ChatModelRunResult,
   ThreadMessageLike,
 } from '@assistant-ui/react'
+import type { Filter } from '@/lib/ai/filterState'
 import {
   AssistantPageSessionProvider,
   useAssistantPageSession,
@@ -493,7 +494,7 @@ describe('AssistantPageSessionProvider', () => {
     expect(result.current.session.ready).toBe(false)
 
     act(() => {
-      result.current.session.setPageFilter('/filter-destination', {
+      result.current.session.setPageFilter(result.current.session.owner, {
         chips: [{
           id: 'tag:destination',
           kind: 'tag',
@@ -544,13 +545,14 @@ describe('AssistantPageSessionProvider', () => {
     }), {
       wrapper: createWrapper(fake, '/owner-source'),
     })
+    const sourceOwner = result.current.session.owner
 
     act(() => result.current.navigate('/owner-destination'))
     let writeResult:
       | ReturnType<typeof result.current.session.setPageFilter>
       | undefined
     act(() => {
-      writeResult = result.current.session.setPageFilter('/owner-source', {
+      writeResult = result.current.session.setPageFilter(sourceOwner, {
         chips: [{
           id: 'tag:late',
           kind: 'tag',
@@ -575,6 +577,93 @@ describe('AssistantPageSessionProvider', () => {
     expect(result.current.session.persistenceError).toBeNull()
   })
 
+  it('rejects a filter mutation from the previous generation after same-page New chat', () => {
+    const fake = createRuntime()
+    const { result } = renderHook(useAssistantPageSession, {
+      wrapper: createWrapper(fake, '/same-page-generation'),
+    })
+    type Owner = { pageKey: string; generation: number }
+    const sessionWithOwner = result.current as typeof result.current & {
+      owner?: Owner
+    }
+    const owner = sessionWithOwner.owner
+    const setOwnedFilter = result.current.setPageFilter as unknown as (
+      owner: Owner | undefined,
+      filter: Filter,
+    ) => ReturnType<typeof result.current.setPageFilter>
+
+    expect(owner).toEqual({
+      pageKey: '/same-page-generation',
+      generation: expect.any(Number),
+    })
+
+    act(() => result.current.startNewChat())
+    let writeResult: ReturnType<typeof result.current.setPageFilter> | undefined
+    act(() => {
+      writeResult = setOwnedFilter(owner, {
+        chips: [{
+          id: 'tag:late',
+          kind: 'tag',
+          label: 'late',
+          value: 'late',
+          addedBy: 'ai',
+        }],
+      })
+    })
+
+    expect(writeResult).toMatchObject({ accepted: false, ok: false })
+    expect(readAssistantPageState('/same-page-generation').filter).toBeUndefined()
+  })
+
+  it('rejects an old A owner after navigating A to B to A', () => {
+    const fake = createRuntime()
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/aba-a'),
+    })
+    type Owner = { pageKey: string; generation: number }
+    const sourceOwner = (
+      result.current.session as typeof result.current.session & {
+        owner?: Owner
+      }
+    ).owner
+
+    act(() => result.current.navigate('/aba-b'))
+    act(() => result.current.navigate('/aba-a'))
+    const currentOwner = (
+      result.current.session as typeof result.current.session & {
+        owner?: Owner
+      }
+    ).owner
+    let writeResult: ReturnType<
+      typeof result.current.session.setPageFilter
+    > | undefined
+    act(() => {
+      writeResult = (
+        result.current.session.setPageFilter as unknown as (
+          owner: Owner | undefined,
+          filter: Filter,
+        ) => ReturnType<typeof result.current.session.setPageFilter>
+      )(sourceOwner, {
+        chips: [{
+          id: 'tag:late-a',
+          kind: 'tag',
+          label: 'late A',
+          value: 'late-a',
+          addedBy: 'ai',
+        }],
+      })
+    })
+
+    expect(sourceOwner?.pageKey).toBe('/aba-a')
+    expect(currentOwner?.pageKey).toBe('/aba-a')
+    expect(currentOwner?.generation).not.toBe(sourceOwner?.generation)
+    expect(writeResult).toMatchObject({ accepted: false, ok: false })
+    expect(readAssistantPageState('/aba-a').filter).toBeUndefined()
+  })
+
   it('returns a failed filter write and exposes its English persistence error', () => {
     const fake = createRuntime()
     const { result } = renderHook(useAssistantPageSession, {
@@ -588,7 +677,7 @@ describe('AssistantPageSessionProvider', () => {
     try {
       let writeResult: ReturnType<typeof result.current.setPageFilter>
       act(() => {
-        writeResult = result.current.setPageFilter('/storage-failure', {
+        writeResult = result.current.setPageFilter(result.current.owner, {
           chips: [{
             id: 'tag:dark',
             kind: 'tag',
@@ -667,6 +756,51 @@ describe('AssistantPageSessionProvider', () => {
     expect(readAssistantPageState('/assets/rule').filter).toBeUndefined()
     expect(readAssistantPageState('/assets/layout').messages).toHaveLength(1)
     expect(result.current.hasState).toBe(false)
+  })
+
+  it('restores ready state and snapshot persistence when the page reset handler throws', () => {
+    patchAssistantPageState('/reset-handler-failure', {
+      messages: [{
+        id: 'before-reset',
+        role: 'user',
+        content: 'before',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    const fake = createRuntime()
+    const resetPage = vi.fn(() => {
+      throw new Error('page reset failed')
+    })
+    const { result } = renderHook(() => {
+      const session = useAssistantPageSession()
+      useEffect(
+        () => session.registerResetHandler(resetPage),
+        [session.registerResetHandler],
+      )
+      return session
+    }, {
+      wrapper: createWrapper(fake, '/reset-handler-failure'),
+    })
+
+    expect(() => {
+      act(() => result.current.startNewChat())
+    }).not.toThrow()
+
+    expect(result.current.ready).toBe(true)
+    expect(result.current.hasState).toBe(false)
+    expect(readAssistantPageState('/reset-handler-failure')).toMatchObject({
+      messages: [],
+    })
+
+    act(() => fake.setMessages([{
+      id: 'after-reset',
+      role: 'user',
+      content: 'after',
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+    }]))
+    expect(readAssistantPageState('/reset-handler-failure').messages).toEqual([
+      expect.objectContaining({ id: 'after-reset' }),
+    ])
   })
 
   it('keeps the page empty and persistence warning visible when clear is not durable', () => {

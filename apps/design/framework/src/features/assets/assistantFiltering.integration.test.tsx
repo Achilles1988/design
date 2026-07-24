@@ -15,7 +15,6 @@ import {
 } from '@assistant-ui/react'
 import {
   MemoryRouter,
-  useLocation,
   useNavigate,
 } from 'react-router-dom'
 import {
@@ -204,7 +203,7 @@ function Harness({ probe }: { probe: IntegrationProbe }) {
       <AssetFilterTool
         index={index}
         filterRef={filterRef}
-        ownerPageKey="/integration"
+        owner={{ pageKey: '/integration', generation: 1 }}
         onFilterChange={setFilter}
       />
       <output aria-label="active filters">
@@ -228,14 +227,14 @@ type LateToolControl = {
 }
 
 function DelayedOwnedFilterTool({
-  ownerPageKey,
+  owner,
   setFilter,
   control,
 }: {
-  ownerPageKey: string
+  owner: { pageKey: string; generation: number }
   setFilter: (
     filter: Filter,
-    ownerPageKey?: string,
+    owner?: { pageKey: string; generation: number },
   ) => boolean | undefined
   control: LateToolControl
 }) {
@@ -258,7 +257,7 @@ function DelayedOwnedFilterTool({
           value: 'dark',
           addedBy: 'ai',
         }],
-      }, ownerPageKey) === true
+      }, owner) === true
       control.markCompleted(accepted)
       return { success: accepted }
     },
@@ -270,7 +269,7 @@ function LateToolPage({ control }: { control: LateToolControl }) {
   const session = useAssistantPageSession()
   const {
     filter,
-    ownerPageKey,
+    owner,
     setFilter,
   } = usePersistentAssetFilter(index)
   const navigate = useNavigate()
@@ -279,7 +278,7 @@ function LateToolPage({ control }: { control: LateToolControl }) {
   return (
     <>
       <DelayedOwnedFilterTool
-        ownerPageKey={ownerPageKey}
+        owner={owner}
         setFilter={setFilter}
         control={control}
       />
@@ -293,6 +292,13 @@ function LateToolPage({ control }: { control: LateToolControl }) {
       <button type="button" onClick={() => navigate('/late-target')}>
         Navigate target
       </button>
+      <button type="button" onClick={() => navigate('/late-source')}>
+        Navigate source
+      </button>
+      <button type="button" onClick={session.startNewChat}>
+        Start new chat
+      </button>
+      <output aria-label="late session ready">{String(session.ready)}</output>
       {session.ready ? <AssistantThread /> : null}
     </>
   )
@@ -300,7 +306,6 @@ function LateToolPage({ control }: { control: LateToolControl }) {
 
 function LateToolHarness({ control }: { control: LateToolControl }) {
   const epochRef = useRef(0)
-  const location = useLocation()
   const streamAdapter = useMemo(() => createStreamTextAdapter({
     streamTextImpl: (options) => {
       const tools = options.tools as Record<string, {
@@ -357,7 +362,7 @@ function LateToolHarness({ control }: { control: LateToolControl }) {
   return (
     <AssistantPageSessionProvider runtime={runtime} epochRef={epochRef}>
       <AssistantRuntimeProvider runtime={runtime}>
-        <LateToolPage key={location.pathname} control={control} />
+        <LateToolPage control={control} />
       </AssistantRuntimeProvider>
     </AssistantPageSessionProvider>
   )
@@ -462,5 +467,120 @@ describe('assistant filtering integration', () => {
       chips: [expect.objectContaining({ id: 'tag:light' })],
     })
     expect(readAssistantPageState('/late-source').filter?.chips ?? []).toEqual([])
+  })
+
+  it('does not revive a same-page filter when an abort-ignoring tool completes after New chat', async () => {
+    let releaseTool = () => {}
+    const waitUntilReleased = new Promise<void>((resolve) => {
+      releaseTool = resolve
+    })
+    let markStarted = () => {}
+    const started = new Promise<void>((resolve) => {
+      markStarted = resolve
+    })
+    let markCompleted = (_accepted: boolean) => {}
+    const completed = new Promise<boolean>((resolve) => {
+      markCompleted = resolve
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/late-source']}>
+        <LateToolHarness control={{
+          waitUntilReleased,
+          markStarted,
+          markCompleted,
+        }} />
+      </MemoryRouter>,
+    )
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Describe what you need…')).toBeTruthy()
+    })
+    fireEvent.change(screen.getByPlaceholderText('Describe what you need…'), {
+      target: { value: 'Show dark designs' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+    await started
+
+    fireEvent.click(screen.getByRole('button', { name: 'Start new chat' }))
+    await waitFor(() => {
+      expect(screen.getByLabelText('late session ready').textContent).toBe(
+        'true',
+      )
+    })
+
+    releaseTool()
+    await expect(completed).resolves.toBe(false)
+
+    expect(screen.getByLabelText('late active filters').textContent).toBe('')
+    expect(screen.getByLabelText('late match count').textContent).toBe('2')
+    expect(readAssistantPageState('/late-source').filter).toBeUndefined()
+  })
+
+  it('does not revive an A filter when an old A tool completes after A to B to A navigation', async () => {
+    patchAssistantPageState('/late-target', {
+      filter: {
+        chips: [{
+          id: 'tag:light',
+          kind: 'tag',
+          label: 'light',
+          value: 'light',
+          addedBy: 'user',
+        }],
+      },
+    })
+    let releaseTool = () => {}
+    const waitUntilReleased = new Promise<void>((resolve) => {
+      releaseTool = resolve
+    })
+    let markStarted = () => {}
+    const started = new Promise<void>((resolve) => {
+      markStarted = resolve
+    })
+    let markCompleted = (_accepted: boolean) => {}
+    const completed = new Promise<boolean>((resolve) => {
+      markCompleted = resolve
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/late-source']}>
+        <LateToolHarness control={{
+          waitUntilReleased,
+          markStarted,
+          markCompleted,
+        }} />
+      </MemoryRouter>,
+    )
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Describe what you need…')).toBeTruthy()
+    })
+    fireEvent.change(screen.getByPlaceholderText('Describe what you need…'), {
+      target: { value: 'Show dark designs' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+    await started
+
+    fireEvent.click(screen.getByRole('button', { name: 'Navigate target' }))
+    await waitFor(() => {
+      expect(screen.getByLabelText('late active filters').textContent).toBe(
+        'light',
+      )
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Navigate source' }))
+    await waitFor(() => {
+      expect(screen.getByLabelText('late session ready').textContent).toBe(
+        'true',
+      )
+      expect(screen.getByLabelText('late active filters').textContent).toBe('')
+    })
+
+    releaseTool()
+    await expect(completed).resolves.toBe(false)
+
+    expect(screen.getByLabelText('late active filters').textContent).toBe('')
+    expect(screen.getByLabelText('late match count').textContent).toBe('2')
+    expect(readAssistantPageState('/late-source').filter).toBeUndefined()
+    expect(readAssistantPageState('/late-target').filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:light' })],
+    })
   })
 })
