@@ -1,0 +1,64 @@
+import { describe, expect, it } from 'vitest'
+import {
+  CanvasApplyRequestSchema,
+  CanvasChatRequestSchema,
+  CanvasProposalCardArgsSchema,
+} from './canvasAssistantProtocol'
+
+describe('Canvas Assistant protocol', () => {
+  it('accepts a bounded text chat request', () => {
+    expect(
+      CanvasChatRequestSchema.parse({
+        appId: 'design',
+        canvasId: 'home',
+        aiConfig: {
+          provider: 'openai',
+          apiKey: 'secret',
+          model: 'gpt-test',
+        },
+        messages: [
+          { role: 'user', content: [{ type: 'text', text: 'Create it' }] },
+        ],
+      }).messages,
+    ).toHaveLength(1)
+  })
+
+  it('rejects more than forty stable messages', () => {
+    expect(() =>
+      CanvasChatRequestSchema.parse({
+        appId: 'design',
+        canvasId: 'home',
+        aiConfig: {
+          provider: 'openai',
+          apiKey: 'secret',
+          model: 'gpt-test',
+        },
+        messages: Array.from({ length: 41 }, () => ({
+          role: 'user',
+          content: [{ type: 'text', text: 'x' }],
+        })),
+      }),
+    ).toThrow()
+  })
+
+  it('keeps candidate source out of proposal card args', () => {
+    const parsed = CanvasProposalCardArgsSchema.parse({
+      proposalId: 'proposal-1',
+      mode: 'update',
+      summary: ['Add account menu'],
+      styleId: 'dashboard',
+      layout: { kind: 'installed', id: 'sidebar-shell', reason: 'Fits' },
+      changedFiles: ['canvases/Home.tsx'],
+      reusedComponents: [],
+      newSharedComponents: [],
+      preserved: ['Existing navigation'],
+      validationChecks: ['Vite transform'],
+      expiresAt: '2026-07-24T12:30:00.000Z',
+    })
+    expect(parsed).not.toHaveProperty('files')
+  })
+
+  it('requires AI config for repair during apply', () => {
+    expect(() => CanvasApplyRequestSchema.parse({})).toThrow()
+  })
+})

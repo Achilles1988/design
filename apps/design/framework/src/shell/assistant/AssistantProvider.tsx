@@ -8,17 +8,26 @@ import {
 } from '@assistant-ui/react'
 import { AssistantAvailabilityProvider } from './availability'
 import { AssistantPageSessionProvider } from './pageSession'
+import { createStreamTextAdapter } from './streamTextAdapter'
 import {
-  createStreamTextAdapter,
-  type AdapterContext,
-} from './streamTextAdapter'
+  AssistantModelModeProvider,
+  createDelegatingChatModelAdapter,
+  useModelModeApi,
+} from './modelAdapterMode'
 
-const adapter = createStreamTextAdapter({
+const streamTextAdapter = createStreamTextAdapter({
   streamTextImpl: (opts) =>
     streamText(opts as Parameters<typeof streamText>[0]) as unknown as {
       fullStream: AsyncIterable<Record<string, unknown>>
   },
 })
+const adapter: ChatModelAdapter = {
+  run(options) {
+    return streamTextAdapter.run(
+      options as unknown as Parameters<typeof streamTextAdapter.run>[0],
+    ) as unknown as AsyncGenerator<ChatModelRunResult, void>
+  },
+}
 
 function createAbortError(): Error {
   const error = new Error('Tool execution was aborted.')
@@ -74,28 +83,37 @@ function executeWithAbortRace<T>(
 }
 
 export function createPageScopedModelAdapter(
-  runAdapter: ReturnType<typeof createStreamTextAdapter>,
+  runAdapter:
+    | ReturnType<typeof createStreamTextAdapter>
+    | ChatModelAdapter,
   getEpoch: () => number,
 ): ChatModelAdapter {
   return {
-    async *run({ messages, abortSignal, context, unstable_getMessage }) {
+    async *run(options) {
+      const {
+        abortSignal,
+        context,
+        unstable_getMessage,
+      } = options
       const epoch = getEpoch()
       const currentMessage = unstable_getMessage()
       const hasCompletedTool = currentMessage.content.some(
         (part) => part.type === 'tool-call' && part.result !== undefined,
       )
-      const adapterContext = context as unknown as AdapterContext
-      const guardedContext: AdapterContext = {
-        ...adapterContext,
-        ...(adapterContext.tools
+      const guardedContext = {
+        ...context,
+        ...(context.tools
           ? {
               tools: Object.fromEntries(
-                Object.entries(adapterContext.tools).map(([name, tool]) => {
+                Object.entries(context.tools).map(([name, tool]) => {
                   if (!tool.execute) return [name, tool]
                   const execute = tool.execute
                   return [name, {
                     ...tool,
-                    execute: (args, toolContext) =>
+                    execute: (
+                      args: Parameters<typeof execute>[0],
+                      toolContext: Parameters<typeof execute>[1],
+                    ) =>
                       executeWithAbortRace(
                         () => execute(args, {
                           ...toolContext,
@@ -111,16 +129,30 @@ export function createPageScopedModelAdapter(
           : {}),
       }
       try {
-        for await (const chunk of runAdapter.run({
-          messages: messages as never,
+        const run = runAdapter.run as unknown as (
+          runOptions: typeof options & {
+            currentMessage?: typeof currentMessage
+          },
+        ) =>
+          | Promise<ChatModelRunResult>
+          | AsyncGenerator<ChatModelRunResult, void>
+        const result = run({
+          ...options,
           abortSignal,
           context: guardedContext,
           currentMessage: hasCompletedTool
-            ? (currentMessage as never)
+            ? currentMessage
             : undefined,
-        })) {
+        })
+        if (!(Symbol.asyncIterator in result)) {
+          const chunk = await result
           if (abortSignal.aborted || getEpoch() !== epoch) return
-          yield chunk as unknown as ChatModelRunResult
+          yield chunk
+          return
+        }
+        for await (const chunk of result) {
+          if (abortSignal.aborted || getEpoch() !== epoch) return
+          yield chunk
         }
       } catch (error) {
         if (abortSignal.aborted || getEpoch() !== epoch) return
@@ -132,17 +164,38 @@ export function createPageScopedModelAdapter(
 
 export function AssistantProvider({ children }: { children: ReactNode }) {
   const epochRef = useRef(0)
-  const modelAdapter = useMemo(
-    () => createPageScopedModelAdapter(adapter, () => epochRef.current),
-    [],
+  const modelMode = useModelModeApi()
+  const delegatingAdapter = useMemo(
+    () =>
+      createDelegatingChatModelAdapter(
+        adapter,
+        modelMode.getPageAdapter,
+      ),
+    [modelMode],
   )
-  const runtime = useLocalRuntime(modelAdapter, { maxSteps: 2 })
+  const modelAdapter = useMemo(
+    () =>
+      createPageScopedModelAdapter(
+        delegatingAdapter,
+        () => epochRef.current,
+      ),
+    [delegatingAdapter],
+  )
+  const runtime = useLocalRuntime(modelAdapter, {
+    maxSteps: 2,
+    unstable_humanToolNames: [
+      'recommend_canvas_layout',
+      'propose_canvas_change',
+    ],
+  })
   return (
     <AssistantAvailabilityProvider>
       <AssistantPageSessionProvider runtime={runtime} epochRef={epochRef}>
-        <AssistantRuntimeProvider runtime={runtime}>
-          {children}
-        </AssistantRuntimeProvider>
+        <AssistantModelModeProvider api={modelMode}>
+          <AssistantRuntimeProvider runtime={runtime}>
+            {children}
+          </AssistantRuntimeProvider>
+        </AssistantModelModeProvider>
       </AssistantPageSessionProvider>
     </AssistantAvailabilityProvider>
   )
