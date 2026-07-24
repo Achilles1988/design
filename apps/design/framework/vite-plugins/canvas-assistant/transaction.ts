@@ -20,6 +20,20 @@ const VALIDATION_FAILED_ERROR =
   'Canvas validation failed after two repair attempts.'
 const APPLY_FAILED_ERROR = 'Canvas proposal could not be applied.'
 const MAX_DIAGNOSTIC_LENGTH = 8_000
+const CREDENTIAL_LABEL =
+  String.raw`(?:[A-Za-z_][A-Za-z0-9_]*(?:API_KEY|ACCESS_TOKEN|AUTH_TOKEN|SECRET_KEY)|api[-_ ]?key|authorization)`
+const CREDENTIAL_VALUE =
+  String.raw`(?:"(?:Bearer\s+)?[^"\r\n]*"|'(?:Bearer\s+)?[^'\r\n]*'|Bearer\s+[^\s,;]+|[^\s,;]+)`
+const CREDENTIAL_ASSIGNMENT_PATTERN = new RegExp(
+  String.raw`\b${CREDENTIAL_LABEL}\b\s*[:=]\s*${CREDENTIAL_VALUE}`,
+  'gi',
+)
+const DIAGNOSTIC_BOUNDARY =
+  String.raw`(?:(?:[A-Za-z][A-Za-z0-9_.-]*Error|Error)\s*:|TS\d+\s*:|(?:Transform|Build|Compilation)\s+(?:failed|error)\b|(?:Cannot|Could not|Failed to)\s+resolve\b|\[(?:vite[^\]]*|plugin:[^\]]*)\])`
+const PROMPT_BLOCK_PATTERN = new RegExp(
+  String.raw`\bPrompt\s*:[^\r\n]*(?:\r?\n(?!\s*${DIAGNOSTIC_BOUNDARY})[^\r\n]*)*`,
+  'gi',
+)
 
 export type CandidateFile = StoredProposal['candidateFiles'][number]
 
@@ -105,35 +119,24 @@ function compactDiagnostic(error: unknown): string {
     .filter((line) => !/^\s*at\s/.test(line))
     .join('\n')
   const sanitized = withoutStackFrames
-    .replace(
-      /\b[A-Za-z][A-Za-z0-9_]*(?:API_KEY|ACCESS_TOKEN|AUTH_TOKEN|SECRET_KEY)\b\s*[:=]\s*[^\s;,]+/gi,
-      '[credential]',
-    )
-    .replace(
-      /\bAuthorization\b\s*[:=]\s*(["'])\s*Bearer\s+[^"'\r\n]+\1/gi,
-      '[credential]',
-    )
-    .replace(
-      /\b(?:api[-_ ]?key|authorization)\b\s*[:=]\s*(?:Bearer\s+)?[^\s;,]+/gi,
-      '[credential]',
-    )
+    .replace(CREDENTIAL_ASSIGNMENT_PATTERN, '[credential]')
     .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, '[credential]')
     .replace(/\bsk-[A-Za-z0-9_-]+\b/g, '[credential]')
-    .replace(/\bPrompt\s*:[^\r\n]*/gi, 'Prompt: [redacted]')
+    .replace(PROMPT_BLOCK_PATTERN, 'Prompt: [redacted]')
     .replace(
       /(["'])(?:[A-Za-z]:[\\/]|\/)[^\r\n]*?\1/g,
       '[absolute path]',
     )
     .replace(
-      /(?:[A-Za-z]:[\\/]|\/)[^\r\n,;)"']*?\.[A-Za-z0-9_-]+(?=:\d|:\s|[\s,;)"']|$)/g,
+      /(?:[A-Za-z]:[\\/]|(?<![.:/\\\w])\/)[^\r\n,;)"']*?\.[A-Za-z0-9_-]+(?=:\d|:\s|[\s,;)"']|$)/g,
       '[absolute path]',
     )
     .replace(
-      /(?:[A-Za-z]:[\\/]|\/)[^\r\n,;)"']+?(?=:\s|[,;)"']|$)/g,
+      /(?:[A-Za-z]:[\\/]|(?<![.:/\\\w])\/)[^\r\n,;)"']+?(?=:\s|[,;)"']|$)/g,
       '[absolute path]',
     )
     .replace(
-      /(?:[A-Za-z]:[\\/]|\/)[^\s\r\n,;:)"']+/g,
+      /(?:[A-Za-z]:[\\/]|(?<![.:/\\\w])\/)[^\s\r\n,;:)"']+/g,
       '[absolute path]',
     )
   return sanitized.slice(0, MAX_DIAGNOSTIC_LENGTH)

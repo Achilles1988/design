@@ -426,26 +426,118 @@ describe('applyProposalTransaction', () => {
     ])
   })
 
-  it('removes a quoted Bearer authorization credential', async () => {
-    const diagnostic = await repairDiagnostic(
-      'Request failed; Authorization: "Bearer abc.def.ghi"',
-    )
+  const credentialLabels = [
+    { name: 'authorization', text: 'Authorization:' },
+    { name: 'camel-case API key', text: 'apiKey=' },
+    { name: 'underscore API key', text: 'api_key=' },
+    { name: 'hyphenated API key', text: 'api-key=' },
+    { name: 'spaced API key', text: 'api key=' },
+    { name: 'environment API key', text: 'OPENAI_API_KEY=' },
+    {
+      name: 'environment access token',
+      text: 'OPENAI_ACCESS_TOKEN=',
+    },
+    {
+      name: 'environment auth token',
+      text: 'OPENAI_AUTH_TOKEN=',
+    },
+    {
+      name: 'underscore-prefixed environment auth token',
+      text: '_OPENAI_AUTH_TOKEN=',
+    },
+    {
+      name: 'environment secret key',
+      text: 'OPENAI_SECRET_KEY=',
+    },
+  ]
+  const credentialValues = [
+    { name: 'unquoted', text: 'abc.def.ghi' },
+    { name: 'single quoted', text: "'abc.def.ghi'" },
+    { name: 'double quoted', text: '"abc.def.ghi"' },
+    { name: 'unquoted Bearer', text: 'Bearer abc.def.ghi' },
+    {
+      name: 'single quoted Bearer',
+      text: "'Bearer abc.def.ghi'",
+    },
+    {
+      name: 'double quoted Bearer',
+      text: '"Bearer abc.def.ghi"',
+    },
+  ]
+  const credentialCases = credentialLabels.flatMap((label) =>
+    credentialValues.map((value) => ({
+      name: `${label.name}, ${value.name}`,
+      diagnostic: `Request failed; ${label.text}${value.text}`,
+    })),
+  )
 
-    expect(diagnostic).toContain('Request failed')
-    expect(diagnostic).not.toContain('abc.def.ghi')
-    expect(diagnostic).not.toContain('Bearer')
-  })
+  it.each(credentialCases)(
+    'removes a $name credential assignment',
+    async ({ diagnostic: unsafeDiagnostic }) => {
+      const diagnostic = await repairDiagnostic(unsafeDiagnostic)
+
+      expect(diagnostic).toContain('Request failed')
+      expect(diagnostic).not.toContain('abc.def.ghi')
+      expect(diagnostic).not.toContain('Bearer')
+    },
+  )
 
   it('keeps a compiler reason after redacting Prompt content', async () => {
     const diagnostic = await repairDiagnostic(
-      'Prompt: private implementation prompt\nSyntaxError: Unexpected token (21:4)',
+      [
+        'Prompt: private implementation prompt',
+        'Private project source and instructions',
+        'SyntaxError: Unexpected token (21:4)',
+      ].join('\n'),
     )
 
     expect(diagnostic).not.toContain('private implementation prompt')
+    expect(diagnostic).not.toContain(
+      'Private project source and instructions',
+    )
     expect(diagnostic).toContain(
       'SyntaxError: Unexpected token (21:4)',
     )
   })
+
+  it.each([
+    {
+      name: 'Vite plugin diagnostic',
+      reason:
+        '[plugin:vite:import-analysis] Failed to resolve import "./missing"',
+    },
+    {
+      name: 'Vite error',
+      reason: 'ViteError: Import analysis failed',
+    },
+    {
+      name: 'transform error',
+      reason: 'TransformError: JSX parsing failed',
+    },
+    {
+      name: 'resolve error',
+      reason: 'Could not resolve "./missing" from Canvas',
+    },
+  ])(
+    'keeps a $name after redacting Prompt content',
+    async ({ reason }) => {
+      const diagnostic = await repairDiagnostic(
+        [
+          'Prompt: private implementation prompt',
+          'Private project source and instructions',
+          reason,
+        ].join('\n'),
+      )
+
+      expect(diagnostic).not.toContain(
+        'private implementation prompt',
+      )
+      expect(diagnostic).not.toContain(
+        'Private project source and instructions',
+      )
+      expect(diagnostic).toContain(reason)
+    },
+  )
 
   it('uses at most two repair attempts', async () => {
     const validate = vi.fn(async () => {
