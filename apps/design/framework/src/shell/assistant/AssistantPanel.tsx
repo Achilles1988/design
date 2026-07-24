@@ -1,7 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { hasValidConfig } from '@/lib/ai/config'
+import { confirmTip } from '@/lib/confirmTip'
 import { AssistantThread } from './AssistantThread'
+import { useAssistantPageSession } from './pageSession'
 import './assistant.css'
 
 export function AssistantPanel({
@@ -11,6 +13,9 @@ export function AssistantPanel({
   open: boolean
   onClose: () => void
 }) {
+  const composerInputRef = useRef<HTMLTextAreaElement>(null)
+  const { hasState, persistenceError, startNewChat } = useAssistantPageSession()
+
   useEffect(() => {
     if (!open) return
 
@@ -22,6 +27,20 @@ export function AssistantPanel({
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
+  async function onNewChat() {
+    if (hasState) {
+      const confirmed = await confirmTip({
+        message: 'Start a new chat? This clears the conversation and filters for this page.',
+        confirmLabel: 'Start new chat',
+        danger: false,
+      })
+      if (!confirmed) return
+    }
+
+    startNewChat()
+    requestAnimationFrame(() => composerInputRef.current?.focus())
+  }
+
   if (!open) return null
 
   const configured = hasValidConfig()
@@ -29,19 +48,34 @@ export function AssistantPanel({
     <aside id="assistant-panel" className="assistant-panel" aria-label="AI Assistant">
       <header className="assistant-panel__header">
         <span>AI Assistant</span>
-        <button
-          type="button"
-          className="assistant-panel__close"
-          onClick={onClose}
-          aria-label="Close assistant"
-          autoFocus={!configured}
-        >
-          ×
-        </button>
+        <div className="assistant-panel__actions">
+          <button
+            type="button"
+            className="assistant-panel__new-chat"
+            onClick={onNewChat}
+            aria-label="New chat"
+          >
+            New chat
+          </button>
+          <button
+            type="button"
+            className="assistant-panel__close"
+            onClick={onClose}
+            aria-label="Close assistant"
+            autoFocus={!configured}
+          >
+            ×
+          </button>
+        </div>
       </header>
       <div className="assistant-panel__body">
+        {persistenceError ? (
+          <p className="assistant-panel__persistence-warning" role="status">
+            Your conversation is available for this session but could not be saved.
+          </p>
+        ) : null}
         {configured ? (
-          <AssistantThread />
+          <AssistantThread composerInputRef={composerInputRef} />
         ) : (
           <div className="assistant-panel__guidance">
             <p>Configure an AI provider before starting a conversation.</p>

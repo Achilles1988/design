@@ -22,12 +22,19 @@ LocalRuntime，客户端直连 AI provider（`streamText`），支持流式、�
 ## `usePageAssistant(options)`
 
 ```ts
-usePageAssistant({ instructions: string; available?: boolean }): void
+usePageAssistant({
+  instructions: string
+  available?: boolean
+  onResetPageState?: () => void
+}): void
 ```
 
 - 必须在 `AssistantProvider` 内使用（`SidebarShell` 已全局包裹所有路由页面）。
 - `instructions`：本页系统提示，经 `useAssistantInstructions` 注册进共享 ModelContext。
 - `available`（默认 `true`）：挂载时点亮 header 入口，**卸载自动置回 false**（离开页面即熄灭）。
+- `onResetPageState`：可选的页面状态重置回调。hook 挂载时向当前页面会话注册，传入回调变更时替换，
+  卸载时注销；当前页面执行 `startNewChat()` 且 Runtime 空闲后调用。页面应在此回调中将其自身的
+  非聊天状态（例如筛选 chips）恢复为空状态。
 - 生命周期语义：仅注册了工具/调用了该 hook 的页面会让助手可用；其余页面入口隐藏。
 - 页面依赖异步 Prompt 或索引时，必须在资源完整成功后再传 `available:true`；失败时保持不可用，不能以空系统提示降级运行。
 
@@ -92,6 +99,13 @@ Runtime 消息数量都会即时更新 `hasState`，筛选 chips 也会参与该
   仍在等待 Runtime hydration，也不会误写旧 active 页面。
 - `startNewChat()` 增加 epoch、取消运行、清空 Runtime 消息、调用页面重置函数，并只清除当前页面
   的消息与筛选；命令回调即使创建于旧页面，也按调用时的最新路由键执行，其他页面状态保持不变。
+
+## New chat UI
+
+配置完成的 AI 面板标题栏提供 `New chat` 按钮。若当前页面会话有消息或筛选状态，点击后先通过
+`confirmTip` 确认“清除本页会话与筛选”；用户取消时不执行清除。空会话直接执行 `startNewChat()`。
+命令已经发起后，composer 在下一帧重新获得焦点。若会话状态的 localStorage 持久化失败，面板以
+`role="status"` 提示：会话仍可在当前会话中使用，但无法保存。
 
 `createPageScopedModelAdapter(adapter, getEpoch)` 在每次模型运行开始时捕获 epoch，并在转发每个
 上游 chunk 前重新检查。页面切换或 `startNewChat()` 改变 epoch 后，旧运行即使迟到产出结果也会
@@ -173,5 +187,4 @@ useAssistantTool({
 ## 未覆盖（YAGNI）
 
 多线程；其他页面场景的实际接入（架构已预留：新页面调
-`usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点；New chat 交互 UI
-（当前仅提供 `startNewChat()` 基础命令）。
+`usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点。
