@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { designApi } from '@/lib/api'
 import { subscribeCanvasesChanged } from '@/lib/canvasEvents'
@@ -154,6 +154,7 @@ export function SidebarShell({ children }: SidebarShellProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
   const [assistantOpen, setAssistantOpen] = useState(false)
+  const launcherRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -191,9 +192,25 @@ export function SidebarShell({ children }: SidebarShellProps) {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
 
+  function closeAssistant() {
+    setAssistantOpen(false)
+    launcherRef.current?.focus()
+  }
+
+  function toggleAssistant() {
+    if (assistantOpen) closeAssistant()
+    else setAssistantOpen(true)
+  }
+
   return (
     <AssistantProvider>
-    <div className="sidebar-shell">
+    <div
+      className={
+        assistantOpen
+          ? 'sidebar-shell sidebar-shell--assistant-open'
+          : 'sidebar-shell'
+      }
+    >
       <header className="sidebar-shell__header">
         <div className="sidebar-shell__brand">
           <div className="sidebar-shell__logo" aria-hidden="true">
@@ -203,8 +220,9 @@ export function SidebarShell({ children }: SidebarShellProps) {
         </div>
         <div className="sidebar-shell__header-spacer" />
         <AssistantLauncher
+          ref={launcherRef}
           open={assistantOpen}
-          onToggle={() => setAssistantOpen((v) => !v)}
+          onToggle={toggleAssistant}
         />
         <button
           type="button"
@@ -235,17 +253,10 @@ export function SidebarShell({ children }: SidebarShellProps) {
             <AssetsIcon />
             <span className="sidebar-shell__nav-link-text">Layout</span>
           </NavLink>
+        </nav>
 
-          <div className="sidebar-shell__group-label">System</div>
-          <NavLink to="/settings" className={navLinkClassName}>
-            <SettingsIcon />
-            <span className="sidebar-shell__nav-link-text">Settings</span>
-          </NavLink>
-
-          {nodes.length > 0 ? (
-            <div className="sidebar-shell__group-label">Workspace</div>
-          ) : null}
-
+        <div className="sidebar-shell__workspace">
+          <div className="sidebar-shell__group-label">Workspace</div>
           {nodes.map(({ app, canvases }) => {
             const isCollapsed = collapsed.has(app.id)
             return (
@@ -287,12 +298,20 @@ export function SidebarShell({ children }: SidebarShellProps) {
               </div>
             )
           })}
+        </div>
+
+        <nav className="sidebar-shell__system" aria-label="System">
+          <div className="sidebar-shell__group-label">System</div>
+          <NavLink to="/settings" className={navLinkClassName}>
+            <SettingsIcon />
+            <span className="sidebar-shell__nav-link-text">Settings</span>
+          </NavLink>
         </nav>
       </aside>
 
       <main className="sidebar-shell__main">{children}</main>
 
-      <AssistantPanel open={assistantOpen} onClose={() => setAssistantOpen(false)} />
+      <AssistantPanel open={assistantOpen} onClose={closeAssistant} />
     </div>
     </AssistantProvider>
   )

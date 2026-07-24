@@ -1,0 +1,14 @@
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--space) * 2);
+}
+
+.section-header__title {
+  min-width: 0;
+}
+
+.section-header__action {
+  flex: 0 0 auto;
+}

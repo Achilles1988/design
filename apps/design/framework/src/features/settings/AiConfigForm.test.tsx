@@ -10,6 +10,21 @@ afterEach(() => {
 })
 
 describe('AiConfigForm', () => {
+  it('renders provider as an aligned radio group and keeps all controls labelled', () => {
+    render(<AiConfigForm />)
+
+    expect(screen.getByRole('radiogroup', { name: 'Provider' })).toBeTruthy()
+    expect(screen.getByLabelText('Base URL')).toBeTruthy()
+    expect(screen.getByLabelText('API Key')).toBeTruthy()
+    expect(screen.getByLabelText('Model')).toBeTruthy()
+    expect(screen.getByLabelText('Base URL').getAttribute('aria-describedby')).toBe(
+      'ai-base-url-hint',
+    )
+    expect(screen.getByLabelText('Model').getAttribute('aria-describedby')).toBe(
+      'ai-model-hint',
+    )
+  })
+
   it('renders empty defaults when no config stored', () => {
     render(<AiConfigForm />)
     expect((screen.getByLabelText(/API Key/i) as HTMLInputElement).value).toBe('')

@@ -1,4 +1,11 @@
-import { ComposerPrimitive, MessagePrimitive, ThreadPrimitive } from '@assistant-ui/react'
+import {
+  ActionBarPrimitive,
+  ComposerPrimitive,
+  ErrorPrimitive,
+  MessagePrimitive,
+  ThreadPrimitive,
+} from '@assistant-ui/react'
+import { AssistantMarkdown } from './AssistantMarkdown'
 import './assistant.css'
 
 function UserBubble() {
@@ -12,7 +19,15 @@ function UserBubble() {
 function AssistantBubble() {
   return (
     <MessagePrimitive.Root className="aui-message aui-message--assistant">
-      <MessagePrimitive.Parts />
+      <MessagePrimitive.Parts components={{ Text: AssistantMarkdown }} />
+      <MessagePrimitive.Error>
+        <ErrorPrimitive.Root className="aui-message-error">
+          <ErrorPrimitive.Message />
+          <ActionBarPrimitive.Reload className="aui-message-retry">
+            Retry
+          </ActionBarPrimitive.Reload>
+        </ErrorPrimitive.Root>
+      </MessagePrimitive.Error>
     </MessagePrimitive.Root>
   )
 }
@@ -23,7 +38,7 @@ export function AssistantThread() {
       <ThreadPrimitive.Viewport className="aui-thread-viewport">
         <ThreadPrimitive.Empty>
           <p className="aui-thread-empty">
-            描述你想要的设计风格 / 布局，例如：“想做金融数据看板，冷色调，深色主题”。
+            Describe the design style or layout you need, for example: “A dark finance dashboard with cool colors.”
           </p>
         </ThreadPrimitive.Empty>
         <ThreadPrimitive.Messages>
@@ -33,11 +48,11 @@ export function AssistantThread() {
       <ComposerPrimitive.Root className="aui-composer">
         <ComposerPrimitive.Input
           className="aui-composer-input"
-          placeholder="告诉我你在找什么…"
+          placeholder="Describe what you need…"
           rows={2}
           autoFocus
         />
-        <ComposerPrimitive.Send className="aui-composer-send">发送</ComposerPrimitive.Send>
+        <ComposerPrimitive.Send className="aui-composer-send">Send</ComposerPrimitive.Send>
       </ComposerPrimitive.Root>
     </ThreadPrimitive.Root>
   )

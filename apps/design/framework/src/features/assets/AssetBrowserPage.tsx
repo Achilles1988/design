@@ -141,20 +141,28 @@ export function AssetBrowserPage({
   const [pickerFor, setPickerFor] = useState<AssetEntry | null>(null)
   const [pickerAppId, setPickerAppId] = useState('')
   const [filter, setFilter] = useState<Filter>(emptyFilter())
-  const [assetIndex, setAssetIndex] = useState<AssetMeta[]>([])
-  const [basePrompt, setBasePrompt] = useState<string>('')
+  const [assetIndex, setAssetIndex] = useState<AssetMeta[] | null>(null)
+  const [basePrompt, setBasePrompt] = useState<string | null>(null)
+  const [assistantIndexError, setAssistantIndexError] = useState<string | null>(null)
+  const [assistantPromptError, setAssistantPromptError] = useState<string | null>(null)
   const busyLock = useRef(false)
   const lightboxFrameRef = useRef<HTMLIFrameElement>(null)
   const filterRef = useRef(filter)
   filterRef.current = filter
 
+  const assistantContextError = assistantIndexError ?? assistantPromptError
+  const assistantReady =
+    basePrompt !== null && assetIndex !== null && assistantContextError === null
   usePageAssistant({
-    instructions: buildSystemPrompt({
-      basePrompt,
-      kind,
-      filter,
-      candidates: applyFilter(assetIndex, filter),
-    }),
+    instructions: assistantReady
+      ? buildSystemPrompt({
+          basePrompt,
+          kind,
+          filter,
+          candidates: applyFilter(assetIndex, filter),
+        })
+      : '',
+    available: assistantReady,
   })
 
   useEffect(() => subscribeTheme(setThemeState), [])
@@ -201,12 +209,18 @@ export function AssetBrowserPage({
 
   useEffect(() => {
     let cancelled = false
+    setAssetIndex(null)
+    setAssistantIndexError(null)
     fetchAssetIndex(kind)
       .then((data) => {
         if (!cancelled) setAssetIndex(data)
       })
       .catch(() => {
-        if (!cancelled) setAssetIndex([])
+        if (!cancelled) {
+          setAssistantIndexError(
+            'AI assistant is unavailable because the asset index could not be loaded.',
+          )
+        }
       })
     return () => {
       cancelled = true
@@ -215,13 +229,22 @@ export function AssetBrowserPage({
 
   useEffect(() => {
     let cancelled = false
+    setBasePrompt(null)
+    setAssistantPromptError(null)
     fetch('/prompts/asset-search.md')
-      .then((res) => (res.ok ? res.text() : ''))
+      .then((response) => {
+        if (!response.ok) throw new Error(`Prompt request failed: ${response.status}`)
+        return response.text()
+      })
       .then((text) => {
         if (!cancelled) setBasePrompt(text)
       })
       .catch(() => {
-        if (!cancelled) setBasePrompt('')
+        if (!cancelled) {
+          setAssistantPromptError(
+            'AI assistant is unavailable because its search instructions could not be loaded.',
+          )
+        }
       })
     return () => {
       cancelled = true
@@ -379,9 +402,11 @@ export function AssetBrowserPage({
     )
   }
 
-  const filteredIds = new Set(applyFilter(assetIndex, filter).map((m) => m.id))
+  const filteredIds = new Set(
+    applyFilter(assetIndex ?? [], filter).map((meta) => meta.id),
+  )
   const visibleItems = items
-    ? filter.chips.length === 0 || assetIndex.length === 0
+    ? filter.chips.length === 0 || !assetIndex || assetIndex.length === 0
       ? items
       : items.filter((e) => filteredIds.has(e.id))
     : null
@@ -409,7 +434,13 @@ export function AssetBrowserPage({
         </div>
       </div>
 
-      <AssetFilterTool index={assetIndex} filterRef={filterRef} onFilterChange={setFilter} />
+      {assistantReady && assetIndex ? (
+        <AssetFilterTool
+          index={assetIndex}
+          filterRef={filterRef}
+          onFilterChange={setFilter}
+        />
+      ) : null}
 
       <AssetFilterChips
         filter={filter}
@@ -420,6 +451,9 @@ export function AssetBrowserPage({
       />
 
       {error ? <p className="assets-error">{error}</p> : null}
+      {assistantContextError ? (
+        <p className="assets-error">{assistantContextError}</p>
+      ) : null}
       {notice ? <p className="assets-notice">{notice}</p> : null}
 
       {items === null && !error ? (

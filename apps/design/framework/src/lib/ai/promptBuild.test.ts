@@ -37,6 +37,8 @@ describe('buildSystemPrompt', () => {
     expect(out).toContain('## Candidates')
     expect(out).toContain('neon | Neon')
     expect(out).toContain('apple | Apple')
+    expect(out).not.toContain('{{chips}}')
+    expect(out).not.toContain('{{candidates}}')
   })
 
   it('serializes current chips (or "none")', () => {

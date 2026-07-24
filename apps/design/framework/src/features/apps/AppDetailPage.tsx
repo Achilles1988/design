@@ -6,6 +6,8 @@ import { emitCanvasesChanged } from '@/lib/canvasEvents'
 import { confirmTip } from '@/lib/confirmTip'
 import { isValidAppId, slugify } from '@/lib/slug'
 import type { AppConfig, AssetEntry, CanvasEntry } from '@/lib/types'
+import { DisclosureForm } from '@/ui/DisclosureForm'
+import { SectionHeader } from '@/ui/SectionHeader'
 import './apps.css'
 
 const BROWSE_LAYOUTS = '__browse__'
@@ -33,6 +35,7 @@ export function AppDetailPage() {
   )
   const [loadError, setLoadError] = useState<string | null>(null)
 
+  const [addCanvasOpen, setAddCanvasOpen] = useState(false)
   const [canvasName, setCanvasName] = useState('')
   const [canvasId, setCanvasId] = useState('')
   const [canvasIdDirty, setCanvasIdDirty] = useState(false)
@@ -40,15 +43,24 @@ export function AppDetailPage() {
   const [submitting, setSubmitting] = useState(false)
   const [busy, setBusy] = useState(false)
   const loadRun = useRef(0)
+  const activeAppId = useRef(appId)
+  const addCanvasButtonRef = useRef<HTMLButtonElement>(null)
+  const canvasNameInputRef = useRef<HTMLInputElement>(null)
+  const restoreAddCanvasFocus = useRef(false)
+  activeAppId.current = appId
 
   const canvasIdValid = isValidAppId(canvasId)
   const canSubmit =
     canvasName.trim().length > 0 && canvasIdValid && !submitting && !busy
 
-  async function reload(runId: number) {
-    setLoadError(null)
-    const { app: nextApp, canvases: nextCanvases } = await loadAppData(appId)
-    if (runId !== loadRun.current) return
+  function isCurrentOperation(targetAppId: string, runId: number) {
+    return targetAppId === activeAppId.current && runId === loadRun.current
+  }
+
+  async function reload(targetAppId: string, runId: number) {
+    if (isCurrentOperation(targetAppId, runId)) setLoadError(null)
+    const { app: nextApp, canvases: nextCanvases } = await loadAppData(targetAppId)
+    if (!isCurrentOperation(targetAppId, runId)) return
     setApp(nextApp)
     setCanvases(nextCanvases)
   }
@@ -58,6 +70,14 @@ export function AppDetailPage() {
     setApp(null)
     setCanvases(null)
     setLoadError(null)
+    setAddCanvasOpen(false)
+    setCanvasName('')
+    setCanvasId('')
+    setCanvasIdDirty(false)
+    setFormError(null)
+    setSubmitting(false)
+    setBusy(false)
+    restoreAddCanvasFocus.current = false
 
     if (!appId) {
       setLoadError('Missing app id')
@@ -117,6 +137,17 @@ export function AppDetailPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (addCanvasOpen) {
+      canvasNameInputRef.current?.focus()
+      return
+    }
+    if (restoreAddCanvasFocus.current) {
+      restoreAddCanvasFocus.current = false
+      addCanvasButtonRef.current?.focus()
+    }
+  }, [addCanvasOpen])
+
   function onCanvasNameChange(value: string) {
     setCanvasName(value)
     if (!canvasIdDirty) setCanvasId(slugify(value))
@@ -127,26 +158,43 @@ export function AppDetailPage() {
     setCanvasId(value)
   }
 
+  function onCancelAddCanvas() {
+    setFormError(null)
+    setCanvasName('')
+    setCanvasId('')
+    setCanvasIdDirty(false)
+    restoreAddCanvasFocus.current = true
+    setAddCanvasOpen(false)
+  }
+
   async function onAddCanvas(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!canSubmit) return
 
+    const targetAppId = appId
+    const runId = loadRun.current
     setSubmitting(true)
     setFormError(null)
     try {
-      await designApi.addCanvas(appId, {
+      await designApi.addCanvas(targetAppId, {
         id: canvasId,
         name: canvasName.trim(),
       })
       emitCanvasesChanged()
+      if (!isCurrentOperation(targetAppId, runId)) return
       setCanvasName('')
       setCanvasId('')
       setCanvasIdDirty(false)
-      await reload(loadRun.current)
+      await reload(targetAppId, runId)
+      if (isCurrentOperation(targetAppId, runId)) {
+        restoreAddCanvasFocus.current = true
+        setAddCanvasOpen(false)
+      }
     } catch (err: unknown) {
+      if (!isCurrentOperation(targetAppId, runId)) return
       setFormError(err instanceof Error ? err.message : 'Failed to add canvas')
     } finally {
-      setSubmitting(false)
+      if (isCurrentOperation(targetAppId, runId)) setSubmitting(false)
     }
   }
 
@@ -157,40 +205,21 @@ export function AppDetailPage() {
       danger: true,
     })
     if (!ok) return
+    const targetAppId = appId
+    const runId = loadRun.current
     setBusy(true)
     setFormError(null)
     try {
-      await designApi.deleteCanvas(appId, canvas.id)
+      await designApi.deleteCanvas(targetAppId, canvas.id)
       emitCanvasesChanged()
-      await reload(loadRun.current)
+      await reload(targetAppId, runId)
     } catch (err: unknown) {
+      if (!isCurrentOperation(targetAppId, runId)) return
       setFormError(
         err instanceof Error ? err.message : 'Failed to delete canvas',
       )
     } finally {
-      setBusy(false)
-    }
-  }
-
-  async function onDeleteApp() {
-    if (!app) return
-    const ok = await confirmTip({
-      message: `Delete app “${app.name}”? This cannot be undone.`,
-      confirmLabel: 'Delete',
-      danger: true,
-    })
-    if (!ok) return
-    setBusy(true)
-    setFormError(null)
-    try {
-      await designApi.deleteApp(appId)
-      emitCanvasesChanged()
-      navigate('/')
-    } catch (err: unknown) {
-      setFormError(
-        err instanceof Error ? err.message : 'Failed to delete app',
-      )
-      setBusy(false)
+      if (isCurrentOperation(targetAppId, runId)) setBusy(false)
     }
   }
 
@@ -202,17 +231,20 @@ export function AppDetailPage() {
       danger: true,
     })
     if (!ok) return
+    const targetAppId = appId
+    const runId = loadRun.current
     setBusy(true)
     setFormError(null)
     try {
-      const next = await designApi.removeAppLayout(appId, layoutId)
-      setApp(next)
+      const next = await designApi.removeAppLayout(targetAppId, layoutId)
+      if (isCurrentOperation(targetAppId, runId)) setApp(next)
     } catch (err: unknown) {
+      if (!isCurrentOperation(targetAppId, runId)) return
       setFormError(
         err instanceof Error ? err.message : 'Failed to remove layout',
       )
     } finally {
-      setBusy(false)
+      if (isCurrentOperation(targetAppId, runId)) setBusy(false)
     }
   }
 
@@ -227,17 +259,20 @@ export function AppDetailPage() {
       confirmLabel: 'Install',
     })
     if (!ok) return
+    const targetAppId = appId
+    const runId = loadRun.current
     setBusy(true)
     setFormError(null)
     try {
-      const next = await designApi.applyAsset('layoutmd', value, appId)
-      setApp(next)
+      const next = await designApi.applyAsset('layoutmd', value, targetAppId)
+      if (isCurrentOperation(targetAppId, runId)) setApp(next)
     } catch (err: unknown) {
+      if (!isCurrentOperation(targetAppId, runId)) return
       setFormError(
         err instanceof Error ? err.message : 'Failed to install layout',
       )
     } finally {
-      setBusy(false)
+      if (isCurrentOperation(targetAppId, runId)) setBusy(false)
     }
   }
 
@@ -252,16 +287,6 @@ export function AppDetailPage() {
           <p className="apps-page__lead">
             App metadata and canvases on disk.
           </p>
-        </div>
-        <div className="apps-page__actions">
-          <button
-            className="apps-btn apps-btn--danger"
-            type="button"
-            onClick={onDeleteApp}
-            disabled={!app || busy}
-          >
-            Delete app
-          </button>
         </div>
       </div>
 
@@ -363,7 +388,27 @@ export function AppDetailPage() {
 
       {app ? (
         <section className="apps-section">
-          <h2 className="apps-section__title">Canvases</h2>
+          <SectionHeader
+            title={
+              <h2 id="canvases-heading" className="apps-section__title">
+                Canvases
+              </h2>
+            }
+            action={
+              !addCanvasOpen ? (
+                <button
+                  ref={addCanvasButtonRef}
+                  type="button"
+                  className="apps-btn"
+                  aria-expanded="false"
+                  aria-controls="add-canvas-form"
+                  onClick={() => setAddCanvasOpen(true)}
+                >
+                  Add canvas
+                </button>
+              ) : null
+            }
+          />
 
           {canvases === null ? (
             <p className="apps-muted">Loading canvases…</p>
@@ -410,12 +455,20 @@ export function AppDetailPage() {
             </div>
           ) : null}
 
-          <form className="apps-form" onSubmit={onAddCanvas} noValidate>
-            <h3 className="apps-section__subtitle">Add canvas</h3>
+          <DisclosureForm
+            open={addCanvasOpen}
+            id="add-canvas-form"
+            labelledBy="add-canvas-heading"
+          >
+            <form className="apps-form" onSubmit={onAddCanvas} noValidate>
+              <h3 id="add-canvas-heading" className="apps-section__subtitle">
+                Add canvas
+              </h3>
 
-            <div className="apps-field">
+              <div className="apps-field">
               <label htmlFor="canvas-name">Name</label>
               <input
+                ref={canvasNameInputRef}
                 id="canvas-name"
                 name="name"
                 type="text"
@@ -439,30 +492,41 @@ export function AppDetailPage() {
                 aria-invalid={
                   canvasId.length > 0 && !canvasIdValid ? true : undefined
                 }
+                aria-describedby={`canvas-id-hint${canvasId.length > 0 && !canvasIdValid ? ' canvas-id-error' : ''}`}
+                required
                 autoComplete="off"
                 placeholder="home"
                 disabled={busy}
               />
-              <p className="apps-field__hint">
+              <p id="canvas-id-hint" className="apps-field__hint">
                 Lowercase letter, then letters, digits, or hyphens.
                 {!canvasIdDirty
                   ? ' Prefills from name until you edit it.'
                   : null}
               </p>
               {canvasId.length > 0 && !canvasIdValid ? (
-                <p className="apps-field__error">
+                <p id="canvas-id-error" className="apps-field__error">
                   ID must start with a lowercase letter and only contain
                   lowercase letters, digits, or hyphens.
                 </p>
               ) : null}
             </div>
 
-            <div className="apps-form__footer">
-              <button className="apps-btn" type="submit" disabled={!canSubmit}>
-                {submitting ? 'Adding…' : 'Add canvas'}
-              </button>
-            </div>
-          </form>
+              <div className="apps-form__footer">
+                <button
+                  type="button"
+                  className="apps-btn apps-btn--ghost"
+                  onClick={onCancelAddCanvas}
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button className="apps-btn" type="submit" disabled={!canSubmit}>
+                  {submitting ? 'Adding…' : 'Add canvas'}
+                </button>
+              </div>
+            </form>
+          </DisclosureForm>
         </section>
       ) : null}
     </div>

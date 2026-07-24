@@ -4,44 +4,51 @@ import { hasValidConfig } from '@/lib/ai/config'
 import { AssistantThread } from './AssistantThread'
 import './assistant.css'
 
-export function AssistantPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AssistantPanel({
+  open,
+  onClose,
+}: {
+  open: boolean
+  onClose: () => void
+}) {
   useEffect(() => {
     if (!open) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
+
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') onClose()
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
   if (!open) return null
+
   const configured = hasValidConfig()
   return (
-    <div className="assistant-overlay" role="dialog" aria-modal="true" aria-label="AI 助手">
-      <div className="assistant-overlay__scrim" onClick={onClose} />
-      <aside className="assistant-panel">
-        <header className="assistant-panel__header">
-          <span>AI 助手</span>
-          <button
-            type="button"
-            className="assistant-panel__close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </header>
-        <div className="assistant-panel__body">
-          {configured ? (
-            <AssistantThread />
-          ) : (
-            <div className="assistant-panel__guidance">
-              <p>请先配置 AI provider。</p>
-              <Link to="/settings">打开 Settings</Link>
-            </div>
-          )}
-        </div>
-      </aside>
-    </div>
+    <aside id="assistant-panel" className="assistant-panel" aria-label="AI Assistant">
+      <header className="assistant-panel__header">
+        <span>AI Assistant</span>
+        <button
+          type="button"
+          className="assistant-panel__close"
+          onClick={onClose}
+          aria-label="Close assistant"
+          autoFocus={!configured}
+        >
+          ×
+        </button>
+      </header>
+      <div className="assistant-panel__body">
+        {configured ? (
+          <AssistantThread />
+        ) : (
+          <div className="assistant-panel__guidance">
+            <p>Configure an AI provider before starting a conversation.</p>
+            <Link to="/settings" onClick={onClose}>Open Settings</Link>
+          </div>
+        )}
+      </div>
+    </aside>
   )
 }

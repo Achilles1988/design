@@ -1,3 +1,4 @@
+import { forwardRef, useEffect } from 'react'
 import { useAssistantAvailability } from './availability'
 import './assistant.css'
 
@@ -10,19 +11,40 @@ function SparkIcon() {
   )
 }
 
-export function AssistantLauncher({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+type AssistantLauncherProps = {
+  open: boolean
+  onToggle: () => void
+}
+
+export const AssistantLauncher = forwardRef<
+  HTMLButtonElement,
+  AssistantLauncherProps
+>(function AssistantLauncher({ open, onToggle }, ref) {
   const { available } = useAssistantAvailability()
+
+  useEffect(() => {
+    if (!available && open) onToggle()
+  }, [available, onToggle, open])
+
   if (!available) return null
+
   return (
     <button
+      ref={ref}
       type="button"
-      className={open ? 'assistant-launcher assistant-launcher--active' : 'assistant-launcher'}
+      className={
+        open
+          ? 'assistant-launcher assistant-launcher--active'
+          : 'assistant-launcher'
+      }
       onClick={onToggle}
       aria-label={open ? 'Close assistant' : 'Open assistant'}
       aria-pressed={open}
-      title="AI 助手"
+      aria-expanded={open}
+      aria-controls="assistant-panel"
+      title="AI Assistant"
     >
       <SparkIcon />
     </button>
   )
-}
+})

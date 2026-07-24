@@ -27,6 +27,18 @@ describe('AssistantLauncher', () => {
     expect(screen.queryByRole('button')).toBeNull()
   })
 
+  it('closes an open assistant when the current page is unavailable', () => {
+    const onToggle = vi.fn()
+    render(
+      <AssistantAvailabilityProvider>
+        <AssistantLauncher open onToggle={onToggle} />
+      </AssistantAvailabilityProvider>,
+    )
+
+    expect(onToggle).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button')).toBeNull()
+  })
+
   it('renders a toggle button when available and fires onToggle', () => {
     const onToggle = vi.fn()
     render(

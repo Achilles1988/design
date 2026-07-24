@@ -17,11 +17,16 @@ const adapter = createStreamTextAdapter({
 })
 
 const modelAdapter: ChatModelAdapter = {
-  async *run({ messages, abortSignal, context }) {
+  async *run({ messages, abortSignal, context, unstable_getMessage }) {
+    const currentMessage = unstable_getMessage()
+    const hasCompletedTool = currentMessage.content.some(
+      (part) => part.type === 'tool-call' && part.result !== undefined,
+    )
     for await (const chunk of adapter.run({
       messages: messages as never,
       abortSignal,
       context: context as never,
+      currentMessage: hasCompletedTool ? (currentMessage as never) : undefined,
     })) {
       yield chunk as unknown as ChatModelRunResult
     }

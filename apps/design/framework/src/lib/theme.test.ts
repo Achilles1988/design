@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   THEME_STORAGE_KEY,
@@ -7,6 +8,11 @@ import {
   setTheme,
   subscribeTheme,
 } from './theme'
+
+const tokensCss = readFileSync(
+  new URL('../styles/tokens.css', import.meta.url),
+  'utf8',
+)
 
 function installDomMocks() {
   const store = new Map<string, string>()
@@ -87,5 +93,11 @@ describe('theme', () => {
 
     applyThemeToFrame(frame, 'light')
     expect(frameAttrs.get('data-theme')).toBe('light')
+  })
+
+  it('defines a readable primary-content token for light mode', () => {
+    expect(tokensCss).toMatch(
+      /\[data-theme='light'\][\s\S]*--color-primary-content:\s*#0c5cab;/,
+    )
   })
 })

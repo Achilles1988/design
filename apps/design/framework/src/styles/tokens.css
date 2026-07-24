@@ -1,6 +1,7 @@
 :root,
 [data-theme='dark'] {
   --color-primary: #0c5cab;
+  --color-primary-content: #67a9e7;
   --color-secondary: #0a4a8a;
   --color-success: #10b981;
   --color-warning: #f59e0b;
@@ -19,6 +20,7 @@
 
 [data-theme='light'] {
   --color-primary: #0c5cab;
+  --color-primary-content: #0c5cab;
   --color-secondary: #0a4a8a;
   --color-success: #059669;
   --color-warning: #d97706;

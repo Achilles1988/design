@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { createStreamTextAdapter, toAiToolParameters, toCoreMessages } from './streamTextAdapter'
 import { AiClientError } from '@/lib/ai/client'
@@ -30,16 +30,62 @@ describe('toCoreMessages', () => {
     ])
     expect(out).toEqual([
       { role: 'user', content: 'hello' },
-      { role: 'assistant', content: 'hi\nthere' },
+      {
+        role: 'assistant',
+        content: [
+          { type: 'text', text: 'hi' },
+          { type: 'text', text: 'there' },
+        ],
+      },
     ])
   })
 
-  it('drops non-text parts and empty messages', () => {
+  it('preserves completed tool calls, results, and following assistant text in protocol order', () => {
     const out = toCoreMessages([
-      { role: 'assistant', content: [{ type: 'tool-call', toolName: 'x' }] },
-      { role: 'user', content: [{ type: 'text', text: 'q' }] },
+      {
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool-call',
+            toolCallId: 't1',
+            toolName: 'apply_filter',
+            args: { add: [] },
+            result: { changed: false, matchCount: 2 },
+          },
+          { type: 'text', text: 'No filter changes.' },
+        ],
+      },
     ])
-    expect(out).toEqual([{ role: 'user', content: 'q' }])
+
+    expect(out).toEqual([
+      {
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool-call',
+            toolCallId: 't1',
+            toolName: 'apply_filter',
+            args: { add: [] },
+          },
+        ],
+      },
+      {
+        role: 'tool',
+        content: [
+          {
+            type: 'tool-result',
+            toolCallId: 't1',
+            toolName: 'apply_filter',
+            result: { changed: false, matchCount: 2 },
+            isError: false,
+          },
+        ],
+      },
+      {
+        role: 'assistant',
+        content: [{ type: 'text', text: 'No filter changes.' }],
+      },
+    ])
   })
 })
 
@@ -77,6 +123,135 @@ describe('createStreamTextAdapter.run', () => {
       if (t && t.type === 'text') seen.push(t.text)
     }
     expect(seen).toEqual(['He', 'Hello'])
+  })
+
+  it('leaves tool execution to the assistant runtime', async () => {
+    const execute = vi.fn(() => ({ changed: true, matchCount: 1 }))
+    let sdkTools: Record<string, { execute?: unknown }> | undefined
+    const adapter = createStreamTextAdapter({
+      streamTextImpl: (options) => {
+        sdkTools = options.tools as Record<string, { execute?: unknown }>
+        return fakeStream([
+          {
+            type: 'tool-call',
+            toolCallId: 't1',
+            toolName: 'apply_filter',
+            args: { add: [] },
+          },
+        ])
+      },
+      createModelImpl: () => ({}) as never,
+      readConfig: () => ({ provider: 'openai', apiKey: 'k', model: 'm' }),
+    })
+
+    for await (const _ of adapter.run({
+      messages: [],
+      abortSignal: new AbortController().signal,
+      context: {
+        tools: {
+          apply_filter: {
+            description: 'Apply filters',
+            parameters: { type: 'object', properties: {} },
+            execute,
+          },
+        },
+      },
+    })) {
+      void _
+    }
+
+    expect(sdkTools?.apply_filter.execute).toBeUndefined()
+    expect(execute).not.toHaveBeenCalled()
+  })
+
+  it('marks tool-call results for LocalRuntime continuation', async () => {
+    const adapter = createStreamTextAdapter({
+      streamTextImpl: () =>
+        fakeStream([
+          {
+            type: 'tool-call',
+            toolCallId: 't1',
+            toolName: 'apply_filter',
+            args: { add: [] },
+          },
+        ]),
+      createModelImpl: () => ({}) as never,
+      readConfig: () => ({ provider: 'openai', apiKey: 'k', model: 'm' }),
+    })
+    let last:
+      | {
+          status?: { type: string; reason: string }
+          metadata?: { steps: unknown[] }
+        }
+      | undefined
+
+    for await (const result of adapter.run({ messages: [], ...baseCtx })) {
+      last = result
+    }
+
+    expect(last?.status).toEqual({
+      type: 'requires-action',
+      reason: 'tool-calls',
+    })
+    expect(last?.metadata?.steps).toHaveLength(1)
+  })
+
+  it('includes the active assistant tool result in a continuation request', async () => {
+    let providerMessages: unknown
+    const adapter = createStreamTextAdapter({
+      streamTextImpl: (options) => {
+        providerMessages = options.messages
+        return fakeStream([])
+      },
+      createModelImpl: () => ({}) as never,
+      readConfig: () => ({ provider: 'openai', apiKey: 'k', model: 'm' }),
+    })
+
+    for await (const _ of adapter.run({
+      messages: [{ role: 'user', content: [{ type: 'text', text: 'dark' }] }],
+      currentMessage: {
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool-call',
+            toolCallId: 't1',
+            toolName: 'apply_filter',
+            args: { add: [] },
+            result: { success: true, changed: false, matchCount: 2 },
+          },
+        ],
+      },
+      ...baseCtx,
+    })) {
+      void _
+    }
+
+    expect(providerMessages).toEqual([
+      { role: 'user', content: 'dark' },
+      {
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool-call',
+            toolCallId: 't1',
+            toolName: 'apply_filter',
+            args: { add: [] },
+          },
+        ],
+      },
+      {
+        role: 'tool',
+        content: [
+          {
+            type: 'tool-result',
+            toolCallId: 't1',
+            toolName: 'apply_filter',
+            result: { success: true, changed: false, matchCount: 2 },
+            isError: false,
+          },
+        ],
+      },
+    ])
   })
 
   it('accumulates tool calls alongside text', async () => {

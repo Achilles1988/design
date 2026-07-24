@@ -5,6 +5,7 @@ import {
   type AiConfig,
   type AiProvider,
 } from '@/lib/ai/config'
+import { FormRow } from '@/ui/FormRow'
 import './settings.css'
 
 const DEFAULT_BASE_URL = 'https://api.openai.com/v1'
@@ -44,72 +45,94 @@ export function AiConfigForm() {
 
   return (
     <form className="settings-form" onSubmit={onSubmit}>
-      <fieldset className="settings-form__section">
-        <legend className="settings-form__legend">Provider</legend>
-        <label className="settings-form__radio">
+      <div className="settings-form__fields">
+        <FormRow label={<span id="provider-label">Provider</span>}>
+          <div
+            className="settings-form__provider"
+            role="radiogroup"
+            aria-labelledby="provider-label"
+          >
+            <label
+              className={`settings-form__provider-option${provider === 'anthropic' ? ' settings-form__provider-option--selected' : ''}`}
+            >
+              <input
+                type="radio"
+                name="provider"
+                value="anthropic"
+                checked={provider === 'anthropic'}
+                onChange={() => setProvider('anthropic')}
+              />
+              Anthropic
+            </label>
+            <label
+              className={`settings-form__provider-option${provider === 'openai' ? ' settings-form__provider-option--selected' : ''}`}
+            >
+              <input
+                type="radio"
+                name="provider"
+                value="openai"
+                checked={provider === 'openai'}
+                onChange={() => setProvider('openai')}
+              />
+              OpenAI
+            </label>
+          </div>
+        </FormRow>
+
+        <FormRow
+          label={<label htmlFor="ai-base-url">Base URL</label>}
+          hint="Available for OpenAI-compatible providers."
+          hintId="ai-base-url-hint"
+        >
           <input
-            type="radio"
-            name="provider"
-            value="anthropic"
-            checked={provider === 'anthropic'}
-            onChange={() => setProvider('anthropic')}
+            id="ai-base-url"
+            className="settings-form__input"
+            aria-describedby="ai-base-url-hint"
+            type="url"
+            value={baseURL}
+            onChange={(event) => setBaseURL(event.target.value)}
+            disabled={provider !== 'openai'}
+            placeholder={DEFAULT_BASE_URL}
           />
-          Anthropic (Claude)
-        </label>
-        <label className="settings-form__radio">
+        </FormRow>
+
+        <FormRow label={<label htmlFor="ai-api-key">API Key</label>}>
           <input
-            type="radio"
-            name="provider"
-            value="openai"
-            checked={provider === 'openai'}
-            onChange={() => setProvider('openai')}
+            id="ai-api-key"
+            className="settings-form__input"
+            type="password"
+            value={apiKey}
+            onChange={(event) => setApiKey(event.target.value)}
+            autoComplete="off"
+            placeholder="sk-..."
           />
-          OpenAI (or OpenAI-compatible proxy)
-        </label>
-      </fieldset>
+        </FormRow>
 
-      <label className="settings-form__field">
-        <span className="settings-form__label">Base URL</span>
-        <input
-          className="settings-form__input"
-          type="url"
-          value={baseURL}
-          onChange={(e) => setBaseURL(e.target.value)}
-          disabled={provider !== 'openai'}
-          placeholder={DEFAULT_BASE_URL}
-        />
-      </label>
+        <FormRow
+          label={<label htmlFor="ai-model">Model</label>}
+          hint={modelHint}
+          hintId="ai-model-hint"
+        >
+          <input
+            id="ai-model"
+            className="settings-form__input"
+            aria-describedby="ai-model-hint"
+            type="text"
+            value={model}
+            onChange={(event) => setModel(event.target.value)}
+            placeholder={modelHint}
+          />
+        </FormRow>
+      </div>
 
-      <label className="settings-form__field">
-        <span className="settings-form__label">API Key</span>
-        <input
-          className="settings-form__input"
-          type="password"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          autoComplete="off"
-          placeholder="sk-..."
-        />
-      </label>
-
-      <label className="settings-form__field">
-        <span className="settings-form__label">Model</span>
-        <input
-          className="settings-form__input"
-          type="text"
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-          placeholder={modelHint}
-        />
-        <span className="settings-form__hint">{modelHint}</span>
-      </label>
-
-      {error ? <p className="settings-form__error">{error}</p> : null}
-      {saved ? <p className="settings-form__notice">Saved.</p> : null}
+      <div className="settings-form__feedback" aria-live="polite">
+        {error ? <p className="settings-form__error">{error}</p> : null}
+        {saved ? <p className="settings-form__notice">Saved.</p> : null}
+      </div>
 
       <div className="settings-form__actions">
         <button type="submit" className="assets-btn">
-          Save
+          Save settings
         </button>
       </div>
     </form>

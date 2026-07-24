@@ -190,16 +190,6 @@
   background: var(--color-surface-2);
 }
 
-.apps-btn--danger {
-  background: color-mix(in srgb, var(--color-danger) 18%, transparent);
-  border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
-  color: var(--color-danger);
-}
-
-.apps-btn--danger:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-danger) 28%, transparent);
-}
-
 .apps-btn--small {
   padding: 6px 10px;
   font-size: 13px;

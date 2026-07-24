@@ -10,10 +10,22 @@ export type ApplyFilterArgs = {
   remove: string[]
 }
 
-export type ApplyFilterResult = {
+type ApplyFilterSuccess = {
+  success: true
   applied: { add: ApplyFilterArgs['add']; remove: string[] }
   matchCount: number
+  changed: boolean
 }
+
+type ApplyFilterFailure = {
+  success: false
+  applied: { add: []; remove: [] }
+  matchCount: number
+  changed: false
+  error: string
+}
+
+export type ApplyFilterResult = ApplyFilterSuccess | ApplyFilterFailure
 
 export type ApplyFilterCtx = {
   index: AssetMeta[]
@@ -21,12 +33,72 @@ export type ApplyFilterCtx = {
   onFilterChange: (f: Filter) => void
 }
 
-export function applyFilterExecute(args: ApplyFilterArgs, ctx: ApplyFilterCtx): ApplyFilterResult {
-  const next = mergeFilterDelta(ctx.filterRef.current, { add: args.add, remove: args.remove }, 'ai')
-  ctx.onFilterChange(next)
+export function applyFilterExecute(
+  args: ApplyFilterArgs,
+  ctx: ApplyFilterCtx,
+): ApplyFilterResult {
+  const previous = ctx.filterRef.current
+  const next = mergeFilterDelta(
+    previous,
+    { add: args.add, remove: args.remove },
+    'ai',
+  )
+  const previousById = new Map(previous.chips.map((chip) => [chip.id, chip]))
+  const nextById = new Map(next.chips.map((chip) => [chip.id, chip]))
+  const sameChip = (
+    left: Filter['chips'][number],
+    right: Filter['chips'][number],
+  ) =>
+    left.kind === right.kind &&
+    left.label === right.label &&
+    left.value === right.value &&
+    left.addedBy === right.addedBy
+  const appliedRemove = previous.chips
+    .filter((chip) => {
+      const nextChip = nextById.get(chip.id)
+      return !nextChip || !sameChip(chip, nextChip)
+    })
+    .map((chip) => chip.id)
+  const appliedAdd = next.chips
+    .filter((chip) => {
+      const previousChip = previousById.get(chip.id)
+      return !previousChip || !sameChip(previousChip, chip)
+    })
+    .map(({ kind, label, value }) => ({ kind, label, value }))
+  const changed = appliedAdd.length > 0 || appliedRemove.length > 0
+
+  if (changed) {
+    ctx.filterRef.current = next
+    try {
+      ctx.onFilterChange(next)
+    } catch (error) {
+      ctx.filterRef.current = previous
+      throw error
+    }
+  }
+
   return {
-    applied: { add: args.add, remove: args.remove },
+    success: true,
+    applied: { add: appliedAdd, remove: appliedRemove },
     matchCount: applyFilter(ctx.index, next).length,
+    changed,
+  }
+}
+
+export function applyFilterSafely(
+  args: ApplyFilterArgs,
+  ctx: ApplyFilterCtx,
+): ApplyFilterResult {
+  try {
+    return applyFilterExecute(args, ctx)
+  } catch (error) {
+    return {
+      success: false,
+      applied: { add: [], remove: [] },
+      matchCount: applyFilter(ctx.index, ctx.filterRef.current).length,
+      changed: false,
+      error: error instanceof Error ? error.message : 'Failed to apply filters',
+    }
   }
 }
 
@@ -35,15 +107,37 @@ const parameters = z.object({
   remove: z.array(z.string()).default([]),
 })
 
-function FilterDeltaCard({ args, result }: { args: ApplyFilterArgs; result?: ApplyFilterResult }) {
+function FilterDeltaCard({
+  args,
+  result,
+}: {
+  args: ApplyFilterArgs
+  result?: ApplyFilterResult
+}) {
+  const delta = result?.applied ?? args
   const chips = [
-    ...(args.add ?? []).map((a) => `+${a.label}`),
-    ...(args.remove ?? []).map((r) => `-${r}`),
+    ...(delta.add ?? []).map((item) => `+${item.label}`),
+    ...(delta.remove ?? []).map((id) => `-${id}`),
   ]
+  const summary = result
+    ? result.success
+      ? result.changed
+        ? chips.join(' · ')
+        : 'No filter changes'
+      : 'Filter update failed'
+    : 'Applying filters…'
+
   return (
     <div className="assistant-filter-card">
-      <span>{chips.join(' · ') || '无变更'}</span>
-      {result ? <span className="assistant-filter-card__count">{result.matchCount} 匹配</span> : null}
+      <span>{summary}</span>
+      {result && !result.success ? (
+        <span className="assistant-filter-card__error">{result.error}</span>
+      ) : null}
+      {result ? (
+        <span className="assistant-filter-card__count">
+          {result.matchCount} matches
+        </span>
+      ) : null}
     </div>
   )
 }
@@ -59,7 +153,7 @@ export function AssetFilterTool({ index, filterRef, onFilterChange }: ApplyFilte
 
   const execute = useCallback(
     async (args: z.infer<typeof parameters>) =>
-      applyFilterExecute(args, {
+      applyFilterSafely(args, {
         index: indexRef.current,
         filterRef,
         onFilterChange: (f) => onFilterChangeRef.current(f),
@@ -70,7 +164,7 @@ export function AssetFilterTool({ index, filterRef, onFilterChange }: ApplyFilte
   const tool = useMemo(
     () => ({
       toolName: 'apply_filter',
-      description: '根据用户描述增删设计资产筛选条件（chips）。仅在与设计资产筛选相关时调用。',
+      description: 'Incrementally add or remove design-asset filter chips when the user asks to refine the visible results.',
       parameters,
       execute,
       // assistant-ui's render component type is broadly generic; our card only
