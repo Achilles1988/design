@@ -10,7 +10,8 @@ LocalRuntime，客户端直连 AI provider（`streamText`），支持流式、�
 
 | 文件 | 职责 |
 |------|------|
-| `AssistantProvider.tsx` | `useLocalRuntime(adapter)` + `AssistantRuntimeProvider` + 可用性 Provider，包裹整个 Shell |
+| `AssistantProvider.tsx` | `useLocalRuntime(adapter)` + 页面 epoch 门控 + Runtime/可用性 Provider，包裹整个 Shell |
+| `pageSession.tsx` | 单 Runtime 的页面会话协调：切换保存/恢复、运行取消、页面状态命令与 epoch 隔离 |
 | `streamTextAdapter.ts` | `ChatModelAdapter` 桥接：ai-sdk `streamText` → assistant-ui 消息 parts；消息转换、工具参数转发 |
 | `usePageAssistant.ts` | 各页注入系统提示 + 切换可用性 |
 | `availability.tsx` | `AssistantAvailabilityContext`：门控 header 入口 |
@@ -69,6 +70,31 @@ type AssistantPageStateEnvelopeV1 = {
 
 若 `localStorage` 写入或删除失败，Store 返回 `ok:false`，同时按 Storage 实例和页面键保留内存
 回退状态。后续读取会优先使用该回退，避免旧的磁盘值在本次会话中回流。
+
+## 页面会话协调（`pageSession.tsx`）
+
+`AssistantProvider` 只创建一个 LocalRuntime，并把它交给
+`AssistantPageSessionProvider`。协调器根据当前路由生成页面键；首次挂载和页面键改变时都会
+增加共享 epoch 并取消当前运行。切换页面时，它先把 Runtime 稳定快照写回旧页面键，再开启
+hydration 门控；若旧 run 尚未完成取消收尾，则等待 `isRunning=false` 后才 reset 并恢复目标
+页面，因此旧 run 不会更新已替换的消息仓库，目标页也不会被切换瞬间的空 Runtime 快照覆盖。
+只有已 hydration 的页面键与当前页面键相同时 `ready=true`，不会暴露“新页面键、旧页面状态且
+ready=true”的不一致组合。
+
+Runtime 非运行状态的消息变化会保存到当前页面；运行中的中间消息不持久化。无论是否正在运行，
+Runtime 消息数量都会即时更新 `hasState`，筛选 chips 也会参与该状态判断。Store 写入失败时，
+`persistenceError` 暴露英文错误提示，页面仍使用 Store 的内存回退状态。
+
+页面通过 `useAssistantPageSession()` 使用以下基础命令：
+
+- `registerResetHandler(handler)` 注册当前页面的重置函数，并返回注销函数。
+- `setPageFilter(filter)` 只更新当前页面筛选，返回 `StoreWriteResult`，不会修改其他页面。
+- `startNewChat()` 增加 epoch、取消运行、清空 Runtime 消息、调用页面重置函数，并只清除当前页面
+  的消息与筛选；其他页面状态保持不变。
+
+`createPageScopedModelAdapter(adapter, getEpoch)` 在每次模型运行开始时捕获 epoch，并在转发每个
+上游 chunk 前重新检查。页面切换或 `startNewChat()` 改变 epoch 后，旧运行即使迟到产出结果也会
+停止 yield，不能写回新页面。
 
 ## 工具注册约定
 
@@ -145,5 +171,6 @@ useAssistantTool({
 
 ## 未覆盖（YAGNI）
 
-多线程或跨页面会话协调；其他页面场景的实际接入（架构已预留：新页面调
-`usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点；New chat 交互 UI。
+多线程；其他页面场景的实际接入（架构已预留：新页面调
+`usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点；New chat 交互 UI
+（当前仅提供 `startNewChat()` 基础命令）。
