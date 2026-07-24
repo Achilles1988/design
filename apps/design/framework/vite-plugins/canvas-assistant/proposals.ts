@@ -88,20 +88,257 @@ function relativeImportTargets(
 }
 
 function isBarePackageImport(moduleSpecifier: string): boolean {
-  return /^(?:@[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*|[A-Za-z0-9][A-Za-z0-9._-]*)(?:\/[A-Za-z0-9][A-Za-z0-9._/-]*)?$/.test(
-    moduleSpecifier,
+  if (
+    moduleSpecifier.includes('\\') ||
+    moduleSpecifier.includes('%')
+  ) {
+    return false
+  }
+  const segments = moduleSpecifier.split('/')
+  if (
+    segments.some(
+      (segment) =>
+        !segment || segment === '.' || segment === '..',
+    )
+  ) {
+    return false
+  }
+  const packageSegment = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
+  const subpathSegment = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
+  if (segments[0]?.startsWith('@')) {
+    if (segments.length < 2) return false
+    if (
+      !/^@[A-Za-z0-9][A-Za-z0-9._-]*$/.test(
+        segments[0],
+      ) ||
+      !packageSegment.test(segments[1])
+    ) {
+      return false
+    }
+    return segments.slice(2).every((segment) =>
+      subpathSegment.test(segment),
+    )
+  }
+  return (
+    packageSegment.test(segments[0] ?? '') &&
+    segments.slice(1).every((segment) =>
+      subpathSegment.test(segment),
+    )
   )
 }
 
-function validateCandidateImports(
+function unwrapParentheses(expression: ts.Expression): ts.Expression {
+  let current = expression
+  while (ts.isParenthesizedExpression(current)) {
+    current = current.expression
+  }
+  return current
+}
+
+function isImportMeta(expression: ts.Expression): boolean {
+  const current = unwrapParentheses(expression)
+  return (
+    ts.isMetaProperty(current) &&
+    current.keywordToken === ts.SyntaxKind.ImportKeyword &&
+    current.name.text === 'meta'
+  )
+}
+
+function viteGlobName(expression: ts.Expression): string | null {
+  const current = unwrapParentheses(expression)
+  if (
+    ts.isPropertyAccessExpression(current) &&
+    isImportMeta(current.expression)
+  ) {
+    return current.name.text
+  }
+  if (
+    ts.isElementAccessExpression(current) &&
+    isImportMeta(current.expression) &&
+    current.argumentExpression &&
+    (ts.isStringLiteral(current.argumentExpression) ||
+      ts.isNoSubstitutionTemplateLiteral(
+        current.argumentExpression,
+      ))
+  ) {
+    return current.argumentExpression.text
+  }
+  return null
+}
+
+function assertSafeAstDependencies(
+  filePath: string,
+  source: string,
+): void {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    path.posix.extname(filePath) === '.tsx'
+      ? ts.ScriptKind.TSX
+      : ts.ScriptKind.TS,
+  )
+  let validationError: string | null = null
+  const visit = (node: ts.Node): void => {
+    if (ts.isCallExpression(node)) {
+      if (
+        node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+        !(
+          node.arguments.length === 1 &&
+          (ts.isStringLiteral(node.arguments[0]) ||
+            ts.isNoSubstitutionTemplateLiteral(
+              node.arguments[0],
+            ))
+        )
+      ) {
+        validationError = 'Candidate import is not allowed.'
+        return
+      }
+      if (
+        ['glob', 'globEager'].includes(
+        viteGlobName(node.expression) ?? '',
+        )
+      ) {
+        validationError =
+          'Candidate Vite glob imports are not allowed.'
+        return
+      }
+    }
+    if (!validationError) ts.forEachChild(node, visit)
+  }
+  visit(sourceFile)
+  if (validationError) throw new Error(validationError)
+}
+
+function readCssEscape(
+  source: string,
+  start: number,
+): { value: string; next: number } {
+  const first = source[start + 1]
+  if (first === undefined) return { value: '', next: start + 1 }
+  if (/[0-9A-Fa-f]/.test(first)) {
+    let end = start + 1
+    while (
+      end < source.length &&
+      end < start + 7 &&
+      /[0-9A-Fa-f]/.test(source[end] ?? '')
+    ) {
+      end += 1
+    }
+    const codePoint = Number.parseInt(
+      source.slice(start + 1, end),
+      16,
+    )
+    if (/\s/.test(source[end] ?? '')) {
+      if (source[end] === '\r' && source[end + 1] === '\n') {
+        end += 2
+      } else {
+        end += 1
+      }
+    }
+    const validCodePoint =
+      codePoint === 0 ||
+      codePoint > 0x10ffff ||
+      (codePoint >= 0xd800 && codePoint <= 0xdfff)
+        ? 0xfffd
+        : codePoint
+    return {
+      value: String.fromCodePoint(validCodePoint),
+      next: end,
+    }
+  }
+  if (first === '\r' && source[start + 2] === '\n') {
+    return { value: '', next: start + 3 }
+  }
+  if (first === '\n' || first === '\r' || first === '\f') {
+    return { value: '', next: start + 2 }
+  }
+  return { value: first, next: start + 2 }
+}
+
+function skipCssString(source: string, start: number): number {
+  const quote = source[start]
+  let cursor = start + 1
+  while (cursor < source.length) {
+    if (source[cursor] === '\\') {
+      cursor = readCssEscape(source, cursor).next
+      continue
+    }
+    if (source[cursor] === quote) return cursor + 1
+    if (
+      source[cursor] === '\n' ||
+      source[cursor] === '\r' ||
+      source[cursor] === '\f'
+    ) {
+      return cursor
+    }
+    cursor += 1
+  }
+  return cursor
+}
+
+function assertNoCssImports(source: string): void {
+  let cursor = 0
+  while (cursor < source.length) {
+    if (source.startsWith('/*', cursor)) {
+      const commentEnd = source.indexOf('*/', cursor + 2)
+      cursor =
+        commentEnd === -1 ? source.length : commentEnd + 2
+      continue
+    }
+    if (source[cursor] === '"' || source[cursor] === "'") {
+      cursor = skipCssString(source, cursor)
+      continue
+    }
+    if (source[cursor] !== '@') {
+      cursor += 1
+      continue
+    }
+
+    let name = ''
+    let nameCursor = cursor + 1
+    while (nameCursor < source.length) {
+      const character = source[nameCursor] ?? ''
+      if (/[A-Za-z0-9_-]/.test(character)) {
+        name += character
+        nameCursor += 1
+        continue
+      }
+      if (character === '\\') {
+        const escaped = readCssEscape(source, nameCursor)
+        name += escaped.value
+        nameCursor = escaped.next
+        continue
+      }
+      break
+    }
+    if (name.toLowerCase() === 'import') {
+      throw new Error('Candidate CSS imports are not allowed.')
+    }
+    cursor = Math.max(nameCursor, cursor + 1)
+  }
+}
+
+export function validateCandidateDependencies(
   context: CanvasAuthoringContext,
   candidateFiles: Array<{ path: string; source: string }>,
-): string[] {
+  reusedComponents: string[],
+): void {
   const readOnlyPaths = new Set(
     context.files
       .filter((file) => file.permission === 'read-only')
       .map((file) => file.relativePath),
   )
+  if (
+    reusedComponents.some(
+      (componentPath) => !readOnlyPaths.has(componentPath),
+    )
+  ) {
+    throw new Error(
+      'Reused components must be discovered read-only components.',
+    )
+  }
   const candidateComponentPaths = new Set(
     candidateFiles
       .map((file) => file.path)
@@ -129,9 +366,15 @@ function validateCandidateImports(
   const imported = new Set<string>()
 
   for (const file of candidateFiles) {
-    if (!['.ts', '.tsx'].includes(path.posix.extname(file.path))) {
+    const extension = path.posix.extname(file.path)
+    if (extension === '.css') {
+      assertNoCssImports(file.source)
       continue
     }
+    if (!['.ts', '.tsx'].includes(extension)) {
+      continue
+    }
+    assertSafeAstDependencies(file.path, file.source)
     const imports = ts.preProcessFile(file.source, true, true)
       .importedFiles
     for (const importedFile of imports) {
@@ -161,7 +404,11 @@ function validateCandidateImports(
     }
   }
 
-  return [...imported]
+  if (!exactlyMatches(reusedComponents, [...imported])) {
+    throw new Error(
+      'Reused components must exactly match imported read-only components.',
+    )
+  }
 }
 
 export function createProposalStore({
@@ -206,34 +453,11 @@ export function createProposalStore({
       )
     }
 
-    const readOnlyPaths = new Set(
-      context.files
-        .filter((file) => file.permission === 'read-only')
-        .map((file) => file.relativePath),
-    )
-    if (
-      raw.reusedComponents.some(
-        (componentPath) => !readOnlyPaths.has(componentPath),
-      )
-    ) {
-      throw new Error(
-        'Reused components must be discovered read-only components.',
-      )
-    }
-    const importedReadOnlyPaths = validateCandidateImports(
+    validateCandidateDependencies(
       context,
       raw.files,
+      raw.reusedComponents,
     )
-    if (
-      !exactlyMatches(
-        raw.reusedComponents,
-        importedReadOnlyPaths,
-      )
-    ) {
-      throw new Error(
-        'Reused components must exactly match imported read-only components.',
-      )
-    }
 
     if (
       raw.layout.kind === 'installed' &&

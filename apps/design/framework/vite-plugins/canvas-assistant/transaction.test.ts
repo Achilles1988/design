@@ -1020,6 +1020,43 @@ describe('applyProposalTransaction', () => {
     )
     expect(await exists(selectPath)).toBe(false)
   })
+
+  it('rejects repaired sources with forbidden dependencies before writing them', async () => {
+    const forbiddenSource = [
+      "const target = '../../canvases/Other'",
+      'export const other = import(/* @vite-ignore */ target)',
+    ].join('\n')
+    const validate = vi.fn().mockRejectedValueOnce(
+      new Error('initial candidate is invalid'),
+    )
+    const repair = vi.fn(async () => [
+      proposal().candidateFiles[0],
+      {
+        path: 'components/Select.tsx',
+        source: forbiddenSource,
+      },
+    ])
+    const writer = vi.fn(writeAtomically)
+
+    const result = await applyProposalTransaction(
+      input({ validate, repair, writer }),
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error: 'Canvas proposal could not be applied.',
+      rolledBack: true,
+    })
+    expect(validate).toHaveBeenCalledOnce()
+    expect(
+      writer.mock.calls.some(([, source]) => source === forbiddenSource),
+    ).toBe(false)
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(
+      ORIGINAL_CANVAS,
+    )
+    expect(await exists(selectPath)).toBe(false)
+  })
 })
 
 describe('writeAtomically', () => {

@@ -206,9 +206,10 @@ are not writable. Component reuse and new-component declarations must match the
 trusted context and candidate set exactly.
 
 Before staging, the server parses every candidate TypeScript source with
-`typescript.preProcessFile`. Imports may target:
+`typescript.preProcessFile` and the TypeScript compiler AST. Imports may target:
 
-- an npm-style bare package specifier;
+- an npm-style bare package specifier, including legitimate scoped and
+  unscoped package subpaths;
 - another candidate under the current App's `components/` directory;
 - the current Canvas's trusted same-directory CSS, when imported by the current
   Canvas;
@@ -218,6 +219,21 @@ All other imports are rejected, including another Canvas, Shell/framework
 source, Style or Layout implementation, arbitrary App files, absolute paths,
 and relative paths outside the App. Extensionless `.ts`, `.tsx`, `.css`, and
 matching `index` imports resolve only when exactly one trusted target matches.
+Bare package specifiers cannot contain empty, `.` or `..` segments,
+backslashes, or percent-encoded separators or traversal. Real
+`import.meta.glob` and `import.meta.globEager` calls, including bracket-access
+variants, are rejected by AST shape; matching text in comments or strings is
+not treated as a call. Every dynamic `import()` must have exactly one string
+literal or no-substitution template literal argument. That literal specifier is
+then checked by the same package, candidate, CSS, and read-only component
+allowlist as a static import; expressions, template substitutions, missing
+arguments, and additional arguments are rejected.
+
+Candidate CSS is scanned as CSS syntax. Real `@import` rules are rejected,
+including case and CSS-escaped spellings. Matching text in comments and strings
+and unrelated at-rules such as `@media`, `@keyframes`, and `@font-face` remain
+valid.
+
 The set of directly imported existing read-only App component files must equal
 `reusedComponents` exactly: missing, extra, and duplicate declarations are
 invalid.
@@ -283,9 +299,12 @@ type CanvasApplyComplete =
     }
 ```
 
-Apply reloads context, checks all candidate and read-only baselines, writes
-atomically, and asks Vite to transform the current Canvas. Validation may run
-at most two AI repairs. A repair must return the same complete path set.
+Apply reloads context, checks all candidate and read-only baselines, and runs
+the same candidate dependency and exact `reusedComponents` validation before
+writing the initial candidate set and before writing every repaired candidate
+set. It then writes atomically and asks Vite to transform the current Canvas.
+Validation may run at most two AI repairs. A repair must return the same
+complete path set.
 Exhausted or invalid repairs run a best-effort rollback across every written
 target; one restore or delete failure never prevents attempts on the remaining
 targets.

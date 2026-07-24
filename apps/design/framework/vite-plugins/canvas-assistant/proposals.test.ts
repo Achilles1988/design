@@ -233,6 +233,170 @@ describe('createProposalStore', () => {
     )
   })
 
+  it.each([
+    'typescript/lib/../../../framework/src/shell/SidebarShell',
+    'typescript/lib/./internal',
+    'typescript/lib//internal',
+    String.raw`typescript\lib\..\framework`,
+    'typescript/lib%2F..%2Fframework',
+    'typescript/lib%5C..%5Cframework',
+    'typescript/lib/%2e%2e/framework',
+    'typescript/lib/%252e%252e/framework',
+  ])('rejects unsafe bare package specifier %s', (moduleSpecifier) => {
+    const raw = rawProposal()
+    raw.files[0].source = [
+      `import value from '${moduleSpecifier}'`,
+      'export default function Home() { return value }',
+    ].join('\n')
+
+    expect(() => store().stage(context(), raw)).toThrow(
+      'Candidate import is not allowed.',
+    )
+  })
+
+  it('accepts legitimate scoped and unscoped package subpaths', () => {
+    const raw = rawProposal()
+    raw.files[0].source = [
+      "import React from 'react'",
+      "import jsxRuntime from 'react/jsx-runtime'",
+      "import scoped from '@scope/pkg'",
+      "import scopedSubpath from '@scope/pkg/subpath/file.js'",
+      'export default function Home() {',
+      '  return React.createElement(jsxRuntime, { scoped, scopedSubpath })',
+      '}',
+    ].join('\n')
+
+    expect(() => store().stage(context(), raw)).not.toThrow()
+  })
+
+  it.each([
+    "const modules = import.meta.glob('./*.tsx')",
+    "const modules = import.meta.globEager('./*.tsx')",
+    "const modules = import.meta['glob']('./*.tsx')",
+    "const modules = (import.meta['globEager'])('./*.tsx')",
+  ])('rejects a real Vite glob call: %s', (globCall) => {
+    const raw = rawProposal()
+    raw.files[0].source = [
+      globCall,
+      'export default function Home() { return modules }',
+    ].join('\n')
+
+    expect(() => store().stage(context(), raw)).toThrow(
+      'Candidate Vite glob imports are not allowed.',
+    )
+  })
+
+  it('allows Vite glob spelling inside TypeScript comments and strings', () => {
+    const raw = rawProposal()
+    raw.files[0].source = [
+      "const example = \"import.meta.glob('./*.tsx')\"",
+      "/* import.meta.globEager('./*.tsx') */",
+      'export default function Home() { return example }',
+    ].join('\n')
+
+    expect(() => store().stage(context(), raw)).not.toThrow()
+  })
+
+  it.each([
+    [
+      "const target = './Other.tsx'",
+      'import(/* @vite-ignore */ target)',
+    ],
+    [
+      "const name = 'Other'",
+      'import(/* @vite-ignore */ `./${name}.tsx`)',
+    ],
+    [
+      '',
+      "import('react', { with: { type: 'json' } })",
+    ],
+  ])(
+    'rejects a dynamic import without exactly one literal argument: %s %s',
+    (declaration, importCall) => {
+      const raw = rawProposal()
+      raw.files[0].source = [
+        declaration,
+        `export const other = ${importCall}`,
+      ].join('\n')
+
+      expect(() => store().stage(context(), raw)).toThrow(
+        'Candidate import is not allowed.',
+      )
+    },
+  )
+
+  it('allows literal dynamic imports through the normal dependency allowlist', () => {
+    const button = {
+      relativePath: 'components/Button.tsx',
+      absolutePath: '/project/design/components/Button.tsx',
+      source: 'export function Button() { return null }',
+      hash: 'button-hash',
+      permission: 'read-only' as const,
+    }
+    const raw = rawProposal()
+    raw.reusedComponents = ['components/Button.tsx']
+    raw.files[0].source = [
+      "export const packageModule = import('react')",
+      "export const candidateModule = import('../components/Select')",
+      'export const reusedModule = import(`../components/Button`)',
+    ].join('\n')
+
+    expect(() =>
+      store().stage(
+        context({ files: [...context().files, button] }),
+        raw,
+      ),
+    ).not.toThrow()
+  })
+
+  it('rejects a literal dynamic import outside the normal dependency allowlist', () => {
+    const raw = rawProposal()
+    raw.files[0].source =
+      "export const other = import('./Other.tsx')"
+
+    expect(() => store().stage(context(), raw)).toThrow(
+      'Candidate import is not allowed.',
+    )
+  })
+
+  it.each([
+    '@import "./Other.css";',
+    '@IMPORT url("./Other.css");',
+    String.raw`@\69mport "./Other.css";`,
+    String.raw`@im\70ort "./Other.css";`,
+    String.raw`@\000069 mport "./Other.css";`,
+    String.raw`@\69\6d\70\6f\72\74 "./Other.css";`,
+    '.note { content: "\n}\n@import "./Other.css";',
+  ])('rejects a real CSS import rule: %s', (cssSource) => {
+    const raw = rawProposal()
+    raw.files.push({
+      path: 'components/Select.css',
+      source: cssSource,
+    })
+    raw.newSharedComponents.push('components/Select.css')
+
+    expect(() => store().stage(context(), raw)).toThrow(
+      'Candidate CSS imports are not allowed.',
+    )
+  })
+
+  it('allows CSS import spelling in comments and strings and normal at-rules', () => {
+    const raw = rawProposal()
+    raw.files.push({
+      path: 'components/Select.css',
+      source: [
+        '/* @import "./comment.css"; */',
+        '.note::before { content: "@import \\"./string.css\\""; }',
+        '@media (min-width: 40rem) { .select { display: grid; } }',
+        '@keyframes enter { from { opacity: 0; } to { opacity: 1; } }',
+        '@font-face { font-family: "Test"; src: local("Arial"); }',
+      ].join('\n'),
+    })
+    raw.newSharedComponents.push('components/Select.css')
+
+    expect(() => store().stage(context(), raw)).not.toThrow()
+  })
+
   it('rejects an installed Layout decision absent from app layouts', () => {
     const raw = rawProposal()
     raw.layout.id = 'not-installed'

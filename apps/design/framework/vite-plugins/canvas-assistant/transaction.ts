@@ -10,7 +10,10 @@ import {
   validateCandidatePath,
   type CanvasAuthoringContext,
 } from './context'
-import type { StoredProposal } from './proposals'
+import {
+  validateCandidateDependencies,
+  type StoredProposal,
+} from './proposals'
 
 const BASELINE_CHANGED_ERROR =
   'The Canvas changed after this proposal was created. Generate a new proposal.'
@@ -511,6 +514,11 @@ export async function applyProposalTransaction({
     candidateSet: CandidateFile[],
   ): Promise<void> => {
     assertCandidateSet(candidateSet, originalCandidatePaths)
+    validateCandidateDependencies(
+      context,
+      candidateSet,
+      proposal.card.reusedComponents,
+    )
     onStatus({ phase: 'writing' })
     for (const candidate of candidateSet) {
       const target = targetsByPath.get(candidate.path)
