@@ -19,7 +19,7 @@ LocalRuntime，客户端直连 AI provider（`streamText`），支持流式、�
 | `AssistantMarkdown.tsx` | `@assistant-ui/react-markdown` 项目封装；禁用外部图片，保留常用 Markdown |
 | `AssistantPanel.tsx` / `AssistantLauncher.tsx` | Shell 右侧停靠区 / header 入口按钮 |
 
-## `usePageAssistant(options)`
+## `usePageAssistant(options)` 页面重置
 
 ```ts
 usePageAssistant({
@@ -32,8 +32,8 @@ usePageAssistant({
 - 必须在 `AssistantProvider` 内使用（`SidebarShell` 已全局包裹所有路由页面）。
 - `instructions`：本页系统提示，经 `useAssistantInstructions` 注册进共享 ModelContext。
 - `available`（默认 `true`）：挂载时点亮 header 入口，**卸载自动置回 false**（离开页面即熄灭）。
-- `onResetPageState`：可选的页面状态重置回调。hook 挂载时向当前页面会话注册，传入回调变更时替换，
-  卸载时注销；当前页面执行 `startNewChat()` 且 Runtime 空闲后调用。页面应在此回调中将其自身的
+- `onResetPageState`：可选的同步页面状态重置回调。hook 挂载时向当前页面会话注册，传入回调变更时替换，
+  卸载时自动注销；当前页面执行 `startNewChat()` 且 Runtime 空闲后调用。页面应在此回调中将其自身的
   非聊天状态（例如筛选 chips）恢复为空状态。
 - 生命周期语义：仅注册了工具/调用了该 hook 的页面会让助手可用；其余页面入口隐藏。
 - 页面依赖异步 Prompt 或索引时，必须在资源完整成功后再传 `available:true`；失败时保持不可用，不能以空系统提示降级运行。
@@ -78,27 +78,32 @@ type AssistantPageStateEnvelopeV1 = {
 若 `localStorage` 写入或删除失败，Store 返回 `ok:false`，同时按 Storage 实例和页面键保留内存
 回退状态。后续读取会优先使用该回退，避免旧的磁盘值在本次会话中回流。
 
-## 页面会话协调（`pageSession.tsx`）
+## 页面级会话（`pageSession.tsx`）
 
-`AssistantProvider` 只创建一个 LocalRuntime，并把它交给
-`AssistantPageSessionProvider`。协调器根据当前路由生成页面键；首次挂载和页面键改变时都会
-增加共享 epoch 并取消当前运行。切换页面时，它先把 Runtime 稳定快照写回旧页面键，再开启
-hydration 门控；若旧 run 尚未完成取消收尾，则等待 `isRunning=false` 后才 reset 并恢复目标
-页面，因此旧 run 不会更新已替换的消息仓库，目标页也不会被切换瞬间的空 Runtime 快照覆盖。
-只有已 hydration 的页面键与当前页面键相同时 `ready=true`，不会暴露“新页面键、旧页面状态且
-ready=true”的不一致组合。
+`AssistantProvider` 继续只创建一个 LocalRuntime，并把它交给
+`AssistantPageSessionProvider`；当前 Runtime 只装载当前 `pageKey` 的消息。`pageKey` 由具体
+pathname 和白名单查询参数生成，当前查询参数白名单只有 `appId`。
+
+协调器在首次挂载和页面键改变时增加共享 epoch。切换页面时，它先把 Runtime 的旧稳定消息写回
+旧页面键、取消旧运行，再恢复目标页面消息。若旧 run 尚未完成取消收尾，则等待 `isRunning=false`
+后才 reset 并恢复目标页面，因此旧 run 不会更新已替换的消息仓库，目标页也不会被切换瞬间的空
+Runtime 快照覆盖。只有已 hydration 的页面键与当前页面键相同时 `ready=true`，不会暴露
+“新页面键、旧页面状态且 ready=true”的不一致组合。
 
 Runtime 非运行状态的消息变化会保存到当前页面；运行中的中间消息不持久化。无论是否正在运行，
 Runtime 消息数量都会即时更新 `hasState`，筛选 chips 也会参与该状态判断。Store 写入失败时，
-`persistenceError` 暴露英文错误提示，页面仍使用 Store 的内存回退状态。
+`persistenceError` 暴露英文错误提示，页面仍使用 Store 的内存回退状态。消息与资产筛选统一写入
+`localStorage['wn.assistant.page-state.v1']`，其 envelope 带 `version: 1`；存储损坏或不可用时，
+当前会话退化为内存模式，不阻断聊天。运行中消息不会持久化，恢复的稳定消息会保留已完成工具结果。
 
 页面通过 `useAssistantPageSession()` 使用以下基础命令：
 
 - `registerResetHandler(handler)` 注册当前页面的重置函数，并返回注销函数。
 - `setPageFilter(filter)` 按调用时的最新路由键更新当前页面筛选，返回 `StoreWriteResult`；即使目标页
   仍在等待 Runtime hydration，也不会误写旧 active 页面。
-- `startNewChat()` 增加 epoch、取消运行、清空 Runtime 消息、调用页面重置函数，并只清除当前页面
-  的消息与筛选；命令回调即使创建于旧页面，也按调用时的最新路由键执行，其他页面状态保持不变。
+- `startNewChat()` 增加 epoch、取消运行、清空 Runtime 消息、同步调用页面重置函数，并删除当前页面
+  的持久化消息与筛选；命令回调即使创建于旧页面，也按调用时的最新路由键执行，其他页面状态保持不变。
+  资产页重置回调必须同时清空 React filter state 和 `filterRef`。
 
 ## 资产筛选恢复与持久化
 
@@ -199,6 +204,11 @@ useAssistantTool({
 - 页面收到真实变更后立即更新 chips、数量与可见资产；工具结果通过 adapter 回传模型，供下一步生成准确英文摘要。
 - 以上筛选恢复与 setter 契约已有纯函数、hook 和工具层测试；它不替代
   composer → adapter → 工具执行 → 资产页重渲染的完整集成验收，该链路需由独立集成测试证明。
+
+## 筛选集成验收
+
+筛选 prompt 只有在 `apply_filter` 工具真实执行并返回成功结果后才算更新成功。验收必须同时观察
+chips、匹配数量和可见资产三者变化；普通助手文本不得修改筛选。
 
 ## 落位与样式
 
