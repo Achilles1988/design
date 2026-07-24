@@ -266,6 +266,49 @@ useAssistantTool({
 筛选 prompt 只有在 `apply_filter` 工具真实执行并返回成功结果后才算更新成功。验收必须同时观察
 chips、匹配数量和可见资产三者变化；普通助手文本不得修改筛选。
 
+## Canvas 页面 server adapter
+
+Canvas 页面使用 `useCanvasAssistant({ appId, canvasId, ready })` 独占当前页面的模型 adapter。
+`CanvasPreview` 会并行加载 Canvas module 与调用
+`POST /__design_ai/canvas/context`；只有 context 成功后才传 `ready:true`，注册
+`createCanvasServerAdapter({ appId, canvasId })` 并点亮助手。Style、Layout 或其他 Canvas
+context 加载失败时，Canvas 预览仍可显示，但助手保持不可用并显示英文状态。空白 Canvas 也走同一
+context readiness 流程，不依赖已有页面内容。context 响应必须是 JSON
+`{ ready:true }`；缺失 middleware、HTML fallback 或非预期 content type 统一显示
+`Canvas Assistant is available only with npm run dev.`。
+
+页面 adapter 的所有权由 `usePageModelAdapter` 管理：Canvas 路由挂载时替换默认浏览器 adapter，
+`ready:false`、参数变化或卸载时写回 `null`。因此非 Canvas 页面不会请求
+`/__design_ai/canvas/chat`，离开 Canvas 后也不会残留旧 `appId` / `canvasId`。server adapter
+每次请求只发送最新 40 条稳定消息（以及已有 human tool result 的当前 assistant message）和读取
+时的当前 AI config；缺少配置时沿用 Settings guidance。chat/apply 成功响应必须声明
+`application/x-ndjson`，否则使用同一 dev-only guidance。响应按 NDJSON 任意字节切分增量解码，
+每条完整行都经 `CanvasRunEventSchema` 校验；`run-result` 逐条转交 LocalRuntime，
+`error` 转成运行错误，LocalRuntime abort signal 原样传给 `fetch`。
+
+### Canvas human tool UI 与恢复
+
+`CanvasAssistantTools` 只用 `useAssistantToolUI` 注册 renderer，不在浏览器重复声明或执行服务端
+工具定义。两项 UI 都使用 `display:'standalone'`：
+
+- `recommend_canvas_layout`：展示推荐 Layout 与 `Not installed` 状态。确认后先调用
+  `designApi.applyAsset('layoutmd', layoutId, appId)`；只有安装成功后才
+  `addResult({ status:'installed', layoutId })`。安装失败会写入 `failed` result，不能声称已安装。
+- `propose_canvas_change`：展示 Style、Layout、changed files、reused components 与 new shared
+  components。确认时调用 proposal apply endpoint，并按收到顺序显示全部 checking、writing、
+  validating、repairing status。按钮 pending 时全部禁用，且 proposal 只能 apply 一次。
+
+两项工具的确认、拒绝和失败都必须在外部操作成功或失败后调用一次 `addResult`。由于
+`AssistantProvider` 已把两项工具名放入 `unstable_humanToolNames`，该 human result 会恢复同一
+LocalRuntime run，并由 Canvas server adapter 把结果续传服务端。proposal apply 在调用时重新读取
+当前 AI config 供 repair 使用；apply NDJSON 会消费到 EOF，必须恰有一个 terminal
+`complete`；重复 `complete`、`complete` 后事件/垃圾数据和 EOF 缺少 `complete` 都视为错误。
+若失败结果为 `rolledBack:false`，UI 必须明确要求用户手动检查文件。
+
+成功 apply 后，Vite 发出 `canvas-assistant:applied`。Canvas 页面只在事件的 `appId` 与
+`canvasId` 同时匹配当前页面时增加 preview revision，以 `key` remount Canvas 并清理 Canvas
+本地状态；不匹配事件不影响当前预览。订阅在页面卸载或目标变化时清理。
+
 ## 落位与样式
 
 - 入口按钮位于 `sidebar-shell` 的 header；桌面端面板占用 Shell 右侧停靠列，打开时主工作区回流缩窄，不使用 overlay、scrim、背景 blur 或 body scroll lock。
@@ -279,5 +322,5 @@ chips、匹配数量和可见资产三者变化；普通助手文本不得修改
 
 ## 未覆盖（YAGNI）
 
-多线程；其他页面场景的实际接入（架构已预留：新页面调
-`usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点。
+多线程；资产页与 Canvas 页之外的页面场景实际接入（架构已预留：普通浏览器端工具页调用
+`usePageAssistant` + `useAssistantTool`，需要服务端模型运行的页面再注册 page adapter）。
