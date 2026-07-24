@@ -3,34 +3,32 @@ import { z } from 'zod'
 import { useAssistantTool } from '@assistant-ui/react'
 import type { AssetMeta } from '@/lib/ai/assetIndex'
 import { applyFilter, mergeFilterDelta, type Filter } from '@/lib/ai/filterState'
-import { FilterDeltaAddSchema } from '@/lib/ai/schema'
+import {
+  ApplyFilterArgsSchema,
+  ApplyFilterResultSchema,
+} from '@/lib/ai/schema'
+import {
+  STALE_PAGE_FILTER_ERROR,
+  type AssistantPageOwner,
+} from '@/shell/assistant/pageSession'
 
-export type ApplyFilterArgs = {
-  add: Array<{ kind: 'tag' | 'origin' | 'freeform'; label: string; value: string }>
-  remove: string[]
-}
-
-type ApplyFilterSuccess = {
-  success: true
-  applied: { add: ApplyFilterArgs['add']; remove: string[] }
-  matchCount: number
-  changed: boolean
-}
-
-type ApplyFilterFailure = {
-  success: false
-  applied: { add: []; remove: [] }
-  matchCount: number
-  changed: false
-  error: string
-}
-
-export type ApplyFilterResult = ApplyFilterSuccess | ApplyFilterFailure
+export type ApplyFilterArgs = z.infer<typeof ApplyFilterArgsSchema>
+export type ApplyFilterResult = z.infer<typeof ApplyFilterResultSchema>
 
 export type ApplyFilterCtx = {
   index: AssetMeta[]
   filterRef: MutableRefObject<Filter>
-  onFilterChange: (f: Filter) => void
+  onFilterChange: (f: Filter) => boolean | void
+}
+
+type AssetFilterToolProps = {
+  index: AssetMeta[]
+  filterRef: MutableRefObject<Filter>
+  owner: AssistantPageOwner
+  onFilterChange: (
+    filter: Filter,
+    owner: AssistantPageOwner,
+  ) => boolean | void
 }
 
 export function applyFilterExecute(
@@ -70,7 +68,8 @@ export function applyFilterExecute(
   if (changed) {
     ctx.filterRef.current = next
     try {
-      ctx.onFilterChange(next)
+      const accepted = ctx.onFilterChange(next)
+      if (accepted === false) throw new Error(STALE_PAGE_FILTER_ERROR)
     } catch (error) {
       ctx.filterRef.current = previous
       throw error
@@ -102,10 +101,7 @@ export function applyFilterSafely(
   }
 }
 
-const parameters = z.object({
-  add: z.array(FilterDeltaAddSchema).default([]),
-  remove: z.array(z.string()).default([]),
-})
+const parameters = ApplyFilterArgsSchema
 
 function FilterDeltaCard({
   args,
@@ -142,7 +138,12 @@ function FilterDeltaCard({
   )
 }
 
-export function AssetFilterTool({ index, filterRef, onFilterChange }: ApplyFilterCtx) {
+export function AssetFilterTool({
+  index,
+  filterRef,
+  owner,
+  onFilterChange,
+}: AssetFilterToolProps) {
   // Keep mutable inputs in refs so the tool object / execute stay referentially
   // stable across re-renders (avoids re-registering the tool on every render)
   // while still reading the latest index / callback.
@@ -156,9 +157,10 @@ export function AssetFilterTool({ index, filterRef, onFilterChange }: ApplyFilte
       applyFilterSafely(args, {
         index: indexRef.current,
         filterRef,
-        onFilterChange: (f) => onFilterChangeRef.current(f),
+        onFilterChange: (f) =>
+          onFilterChangeRef.current(f, owner),
       }),
-    [filterRef],
+    [filterRef, owner],
   )
 
   const tool = useMemo(

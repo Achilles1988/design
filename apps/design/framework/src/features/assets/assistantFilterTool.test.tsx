@@ -1,7 +1,33 @@
+// @vitest-environment jsdom
+import { render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { applyFilterExecute, applyFilterSafely } from './assistantFilterTool'
 import { emptyFilter, type Filter } from '@/lib/ai/filterState'
 import type { AssetMeta } from '@/lib/ai/assetIndex'
+
+const registeredTool = vi.hoisted(() => ({
+  current: null as null | {
+    execute: (args: {
+      add: Array<{
+        kind: 'tag' | 'origin' | 'freeform'
+        label: string
+        value: string
+      }>
+      remove: string[]
+    }) => Promise<unknown>
+  },
+}))
+
+vi.mock('@assistant-ui/react', () => ({
+  useAssistantTool: (tool: typeof registeredTool.current) => {
+    registeredTool.current = tool
+  },
+}))
+
+import {
+  applyFilterExecute,
+  applyFilterSafely,
+  AssetFilterTool,
+} from './assistantFilterTool'
 
 const index = [
   { id: 'a', title: 'Dark board', summary: '', tags: ['dark'], origin: 'x' },
@@ -109,6 +135,27 @@ describe('applyFilterExecute', () => {
     expect(filterRef.current).toEqual(emptyFilter())
   })
 
+  it('rolls back the filter ref when the page owner rejects the update', () => {
+    const filterRef = { current: emptyFilter() }
+    const result = applyFilterSafely(
+      { add: [{ kind: 'tag', label: 'dark', value: 'dark' }], remove: [] },
+      {
+        index,
+        filterRef,
+        onFilterChange: () => false,
+      },
+    )
+
+    expect(result).toEqual({
+      success: false,
+      applied: { add: [], remove: [] },
+      matchCount: 2,
+      changed: false,
+      error: 'Filter update ignored because its page is no longer active.',
+    })
+    expect(filterRef.current).toEqual(emptyFilter())
+  })
+
   it('reports no change for an empty delta', () => {
     const filterRef = { current: emptyFilter() }
     const onFilterChange = vi.fn()
@@ -120,5 +167,39 @@ describe('applyFilterExecute', () => {
     expect(res.matchCount).toBe(2)
     expect(res.changed).toBe(false)
     expect(onFilterChange).not.toHaveBeenCalled()
+  })
+
+  it('keeps the source owner on an execute captured before rerender', async () => {
+    const filterRef = { current: emptyFilter() }
+    const onFilterChange = vi.fn(() => true)
+    const { rerender } = render(
+      <AssetFilterTool
+        index={index}
+        filterRef={filterRef}
+        owner={{ pageKey: '/owner-source', generation: 1 }}
+        onFilterChange={onFilterChange}
+      />,
+    )
+    const sourceExecute = registeredTool.current!.execute
+
+    rerender(
+      <AssetFilterTool
+        index={index}
+        filterRef={filterRef}
+        owner={{ pageKey: '/owner-destination', generation: 2 }}
+        onFilterChange={onFilterChange}
+      />,
+    )
+    await sourceExecute({
+      add: [{ kind: 'tag', label: 'dark', value: 'dark' }],
+      remove: [],
+    })
+
+    expect(onFilterChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chips: [expect.objectContaining({ id: 'tag:dark' })],
+      }),
+      { pageKey: '/owner-source', generation: 1 },
+    )
   })
 })

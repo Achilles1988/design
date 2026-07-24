@@ -10,7 +10,8 @@ LocalRuntime，客户端直连 AI provider（`streamText`），支持流式、�
 
 | 文件 | 职责 |
 |------|------|
-| `AssistantProvider.tsx` | `useLocalRuntime(adapter)` + `AssistantRuntimeProvider` + 可用性 Provider，包裹整个 Shell |
+| `AssistantProvider.tsx` | `useLocalRuntime(adapter)` + 页面 epoch 门控 + Runtime/可用性 Provider，包裹整个 Shell |
+| `pageSession.tsx` | 单 Runtime 的页面会话协调：切换保存/恢复、运行取消、页面状态命令与 epoch 隔离 |
 | `streamTextAdapter.ts` | `ChatModelAdapter` 桥接：ai-sdk `streamText` → assistant-ui 消息 parts；消息转换、工具参数转发 |
 | `usePageAssistant.ts` | 各页注入系统提示 + 切换可用性 |
 | `availability.tsx` | `AssistantAvailabilityContext`：门控 header 入口 |
@@ -18,17 +19,181 @@ LocalRuntime，客户端直连 AI provider（`streamText`），支持流式、�
 | `AssistantMarkdown.tsx` | `@assistant-ui/react-markdown` 项目封装；禁用外部图片，保留常用 Markdown |
 | `AssistantPanel.tsx` / `AssistantLauncher.tsx` | Shell 右侧停靠区 / header 入口按钮 |
 
-## `usePageAssistant(options)`
+## `usePageAssistant(options)` 页面重置
 
 ```ts
-usePageAssistant({ instructions: string; available?: boolean }): void
+usePageAssistant({
+  instructions: string
+  available?: boolean
+  onResetPageState?: () => void
+}): void
 ```
 
 - 必须在 `AssistantProvider` 内使用（`SidebarShell` 已全局包裹所有路由页面）。
 - `instructions`：本页系统提示，经 `useAssistantInstructions` 注册进共享 ModelContext。
 - `available`（默认 `true`）：挂载时点亮 header 入口，**卸载自动置回 false**（离开页面即熄灭）。
+- `onResetPageState`：可选的同步页面状态重置回调。hook 挂载时向当前页面会话注册，传入回调变更时替换，
+  卸载时自动注销；当前页面执行 `startNewChat()` 且 Runtime 空闲后调用。页面应在此回调中将其自身的
+  非聊天状态（例如筛选 chips）恢复为空状态。
 - 生命周期语义：仅注册了工具/调用了该 hook 的页面会让助手可用；其余页面入口隐藏。
 - 页面依赖异步 Prompt 或索引时，必须在资源完整成功后再传 `available:true`；失败时保持不可用，不能以空系统提示降级运行。
+
+## 页面状态持久化（`pageState.ts`）
+
+页面级助手状态存于浏览器 `localStorage` 的
+`wn.assistant.page-state.v1` 键。它是独立的基础设施，不负责跨页面会话协调或 New chat UI。
+
+### 页面键
+
+`createAssistantPageKey(location)` 使用规范化后的 `pathname` 作为主体：除根路径外移除尾随
+`/`。查询参数只保留白名单中的 `appId`，并与资产页的真实消费方式一致：只采用第一个值，
+`trim()` 后为空则视为没有 App 上下文；后续同名值不参与页面键。其余参数不会参与键，因此不会把
+视图类临时状态拆分为不同会话，也不会让实际目标不同的重复 `appId` 地址错误共享会话。
+
+### V1 存储 envelope
+
+存储值是下列 JSON envelope；每个页面键只拥有自身的状态，读写一个页面不会覆盖其他页面：
+
+```ts
+type AssistantPageStateEnvelopeV1 = {
+  version: 1
+  pages: Record<string, {
+    version: 1
+    messages: PersistedMessage[]
+    filter?: Filter
+    updatedAt: string
+  }>
+}
+```
+
+读取时会丢弃无法解析或版本不支持的 envelope。页面条目的 `messages` 按 role 深度校验 part：
+system 仅允许单一文本，user 与 assistant 只允许各自支持的 part 类型且必填字段必须存在；
+tool-call 的 `toolName`、可选 `toolCallId`、`args` 与 `result` 必须是安全的 JSON 形态。无效消息会
+删除对应页面的持久条目，其他健康页面不受影响；`filter` 结构无效时仅忽略该筛选，保留有效消息。
+已知工具还按自身 schema 深校验：`apply_filter.args` 必须满足共享的 filter delta schema，
+`result` 必须满足成功/失败联合结构；因此旧缓存中的畸形 `add/remove` 不会进入 Tool Card。
+`patchAssistantPageState` 合并目标页面的 `messages` 或 `filter`；`clearAssistantPageState` 删除
+目标页面的整个 state，因而同时删除消息和筛选，不影响其他页面。
+
+### 消息快照与写入失败
+
+`serializeMessages` 只保存稳定且通过同一深度校验的消息：用户或 system 消息，以及 status 为
+`complete` 的 assistant 消息。已完成且 JSON 安全的 tool-call 结果会一同恢复；进行中的 assistant
+消息和含函数、循环引用或其他不可序列化值的消息不会写入快照。`restoreMessages` 将时间恢复为
+`Date`，并把 assistant 消息恢复为 complete 状态。
+
+若 `localStorage` 写入或删除失败，Store 返回 `ok:false`，同时保留字段级内存 overlay 或 clear
+tombstone。partial patch 只记录实际触及的 `messages`/`filter`，不会把读取失败时未知的字段物化为
+空值。通过隐式浏览器存储访问的 durable 与 volatile 路径共享同一张进程级逻辑 overlay，因此
+`window.localStorage` getter 暂时不可用、Storage 对象身份变化或页面导航都不能让当前会话的
+dirty patch/tombstone 暂时消失。显式注入的 Storage 仍按实例隔离。后续读取会优先把该回退合并到
+当前可读 base，避免旧磁盘值在本次会话中回流。每次后续 patch/clear 都把相关逻辑存储的全部
+dirty overlay 与 tombstone 合并进同一个 envelope；
+durable 写入成功后只清除该次实际包含且未被更新的 dirty 项。因此 A 写失败后 B 写成功会同时
+持久化 A 的最新状态，A clear 失败后 B 写成功也会同时持久化 A 的删除。
+
+Store 明确区分“已读取但内容 invalid”和“Storage I/O unavailable”。只有前者会触发 repair；
+`getItem` 抛错时绝不尝试写入空 envelope，patch/clear 也保留 dirty 状态并返回失败。真实 repair
+与正常写入使用同一合并路径，必须包含该 Storage 的全部 dirty overlay 与 tombstone。
+`readAssistantPageStateResult()` 返回 `{ state, authoritative }`：只有 durable envelope 可读且
+必要的 dirty overlay/tombstone 已成功迁移时才是 authoritative；getter unavailable、durable
+读取失败或 migration 写入失败时返回的 volatile/空视图均为 provisional
+（`authoritative:false`）。`readAssistantPageState()` 继续提供仅 state 的便捷读取。
+
+访问 `window.localStorage` 本身被浏览器拒绝时，Store 使用 volatile storage 保持当前内存可用，
+但 patch/clear 固定返回 `ok:false` 与英文错误，绝不把内存写声称为 durable success。clear 写入
+失败时 tombstone 仍让当前页面保持为空，并持续通过 session 暴露 persistence warning，直到后续
+写入把全部 dirty 状态成功持久化。getter 后续恢复时，Store 会按字段依次合并 durable 与 volatile
+的全部 overlay/tombstone；outage 期间的同页 partial patch 只覆盖自身字段，未触及字段与 durable
+中的其他页面均保留。`setItem` 成功后，Store 直接从本次已合并并写入的 envelope 返回 state；
+即使紧随其后的 Storage 读取瞬断，也不会返回 `ok:true` 与空 state 的矛盾结果。
+
+## 页面级会话（`pageSession.tsx`）
+
+`AssistantProvider` 继续只创建一个 LocalRuntime，并把它交给
+`AssistantPageSessionProvider`；会话 `ready=true` 时，当前 Runtime 只装载当前 `pageKey` 的消息。
+pending hydration 或等待旧 run idle 时，Runtime 内部可能暂时保留来源页内容，但 `AssistantPanel`
+用 `ready` 门控，不暴露消息、工具结果或 composer。`pageKey` 由具体 pathname 和白名单查询参数
+生成，当前查询参数白名单只有 `appId`。
+
+协调器在首次挂载和页面键改变时增加共享 epoch。切换页面时，它先把 Runtime 的旧稳定消息写回
+旧页面键；但若该页面由 provisional fallback hydration 且 Runtime 此后没有真实变化，则跳过这次
+自动快照，不能用 `messages:[]` 覆盖尚不可读的 durable messages。用户在 outage 中真实新增消息
+会把当前 Runtime 作为 messages overlay 写入；New Chat 仍写入 clear tombstone。随后协调器取消
+旧运行并恢复目标页面消息。若旧 run 尚未完成取消收尾，则等待 `isRunning=false`
+后才 reset 并恢复目标页面，因此旧 run 不会更新已替换的消息仓库，目标页也不会被切换瞬间的空
+Runtime 快照覆盖。恢复消息或 `runtime.thread.reset()` 抛错时，会删除该页无效缓存、reset 空消息
+并完成 hydration；页面进入 ready 而不会崩溃。只有已 hydration 的页面键与当前页面键相同时
+`ready=true`，不会暴露“新页面键、旧页面状态且 ready=true”的不一致组合。
+
+Runtime 消息变化会即时更新 `hasState`，筛选 chips 也会参与该状态判断；只有 Runtime 空闲且
+hydration 完成后才触发消息快照。快照内容和写入失败语义以“消息快照与写入失败”一节为准。
+LocalRuntime 的订阅通知不等同于消息变化：mount 时 `__internal_load()` 的 loading
+true/false、能力更新等通知可能保持同一消息快照且 `isRunning=false`。session 必须以 hydration
+完成后的序列化消息快照作为 baseline；只有后续序列化结果与 baseline 确实不同时，才写入消息并
+claim provisional 页面。首条真实用户消息会在首次同步通知中形成不同快照，必须立即持久化；
+纯 loading/能力通知不得把 provisional empty 物化为 overlay，从而覆盖暂时不可读的 durable 消息。
+Store 写入失败时，`persistenceError` 暴露英文错误提示。
+该提示只在持久层具有恢复证据时清除：hydration 的读取结果必须为 authoritative，即 durable
+可读且 dirty overlay/tombstone 已成功写入。volatile/provisional fallback 即使 Runtime hydration
+完成也继续显示 warning；getter 恢复并完成 migration 后的 authoritative hydration 才终止旧提示。
+
+页面通过 `useAssistantPageSession()` 使用以下基础命令：
+
+- `registerResetHandler(handler)` 注册当前页面的重置函数，并返回注销函数。
+- `setPageFilter(owner, filter)` 要求 mutation 显式携带 `{ pageKey, generation }`。只有 pageKey
+  与最新路由键一致、generation 也等于当前 session generation 才写入 Store；否则返回
+  `accepted:false`，不修改任一页面且不制造 persistence warning。generation 在路由 hydration
+  和每次 New chat 时推进，因此同页迟到工具和 A→B→A 的旧 A 工具也会被拒绝。接受的 mutation
+  返回 `accepted:true` 加 Store 的 durable 结果。
+- `startNewChat(owner)` 只接受与最新 `{ pageKey, generation }` 完全一致且已 hydration ready 的
+  owner。接受后增加 epoch、取消运行，并捕获命令发起时的目标页。该页的 Store clear 不受后续
+  hydration epoch 或导航影响，等待旧 run idle 后必须最终执行；导航保存旧快照时也会跳过正在清理
+  的页面，不能复活旧消息。只有目标页届时仍是当前页，才清空共享 Runtime 并调用当前页面 reset
+  handler。其他页面正常 hydration 且状态不受影响。资产页重置回调必须同时清空 React filter state
+  和 `filterRef`。页面 reset handler 即使抛错，session 也必须通过 `finally` 恢复 ready、同步空
+  page state 并删除 clearing 标记，避免永久 Loading 或后续快照一直被跳过。
+
+## 资产筛选恢复与持久化
+
+`usePersistentAssetFilter(index)` 是资产页对页面会话筛选状态的唯一适配层，返回
+`{ filter, filterRef, owner, setFilter, resetFilter }`。它直接消费 `useAssistantPageSession()` 的
+`pageKey`、`pageState`、`ready` 与 `setPageFilter()`，不会创建第二套页面键。
+
+- 只有页面会话 `ready=true` 且资产索引已加载时才恢复筛选。筛选带有已 hydration 的页面键归属；
+  pending navigation 期间，若归属键与当前 `pageKey` 不同，则 UI 与 `filterRef` 暴露稳定空筛选，
+  普通 `setFilter` 调用直接忽略，不读取来源页 `pageState`，也不会把来源页操作写入目标页面。
+  每次页面键完成 hydration 后只执行一次恢复。
+- 恢复时，`tag` 必须仍存在于索引任一资产的 tags，`origin` 必须仍存在于索引任一资产的
+  origin；失效项会被删除。`freeform` 不依赖索引枚举，始终保留。清理后的筛选会写回当前页面状态。
+- `setFilter` 同时接受完整 `Filter` 和 functional update。它解析下一状态并调用带 owner 的
+  `setPageFilter()`，mutation 被接受后同步更新 `filterRef` 与 React state；AI 工具、手动删除 chip
+  与 `Reset all` 均使用此入口。工具执行会先同步更新 ref 以支持同一渲染周期的连续 delta。每个
+  setter 与工具 execute 都携带创建时的 `{ pageKey, generation }` owner；New chat、页面切换、
+  A→B→A 或 hook 卸载后旧 setter 失效，owner 被 session 拒绝时工具会回滚 `filterRef` 并返回
+  结构化失败。
+- `resetFilter` 仅同步清空 React state 与 `filterRef`，不自行写 Store。它只作为
+  `usePageAssistant({ onResetPageState })` 的 New chat 重置回调使用；随后
+  `startNewChat()` 删除整个当前页面状态。重置会以 session 提供的最新 `pageKey` 标记已清理页面；
+  即使回调创建于旧页面，pending destination 恢复 ready 后也不会把空筛选重新写回，因而不会
+  复活刚删除的页面条目。
+- 用户点击 `Reset all` 不会删除整页会话，因此必须调用 `setFilter(emptyFilter())`，显式持久化
+  空筛选并保留聊天消息。
+
+## New chat UI
+
+配置完成的 AI 面板标题栏提供 `New chat` 按钮。若当前页面会话有消息或筛选状态，点击后先通过
+`confirmTip` 确认“清除本页会话与筛选”；确认请求捕获发起时 owner，导航或 generation 改变后
+确认结果直接失效，不能清理新页。hydration pending（`ready=false`）时按钮禁用。用户取消时不执行
+清除；空会话直接执行 `startNewChat(owner)`。命令被 session 接受后，composer 在下一帧重新获得
+焦点。若会话状态的 localStorage 持久化失败，面板以
+`role="status"` 提示：会话仍可在当前会话中使用，但无法保存。
+
+`createPageScopedModelAdapter(adapter, getEpoch)` 在每次模型运行开始时捕获 epoch，并在转发每个
+上游 chunk 前重新检查。页面切换或 `startNewChat()` 改变 epoch 后，旧运行即使迟到产出结果也会
+停止 yield，不能写回新页面。adapter 还会包装每个前端工具：在调用底层 execute 前同时检查
+run abort 与 epoch，并让底层 execute Promise 与 abort 竞速。即使工具忽略 signal，AI SDK/Runtime
+也会及时 settle；工具稍后完成时，其页面副作用仍由 owner guard 拒绝。
 
 ## 工具注册约定
 
@@ -50,9 +215,9 @@ useAssistantTool({
   把 tool result 附回 assistant 消息，再由 LocalRuntime 按 `maxSteps` 发起后续模型步骤。
 - adapter 会把同步或异步 execute 统一包装为 Promise；不支持 execute 上下文中的
   `human()` 交互，调用时会返回明确错误。需要人工确认的工具不应注册到此聊天内核。
-- 若某工具的 `execute` **可能失败**（网络、外部调用等），应 catch 并**作为结果返回**（如
-  `{ success:false, error }`），让模型可解释；对纯粹、参数已由 `parameters` 校验的确定性
-  `execute`（如 `apply_filter`），无需额外防御分支。
+- 若某工具的 `execute` 可能失败，应 catch 并作为结果返回（如 `{ success:false, error }`），
+  让模型可解释。`apply_filter` 的 `execute` 通过 `applyFilterSafely` 调用
+  `applyFilterExecute`；执行异常时返回既定的 `success:false` 联合成员，不把异常泄漏给 Runtime。
 - 工具组件必须渲染在 `AssistantProvider` 内。
 
 ## adapter 契约（`createStreamTextAdapter`）
@@ -93,11 +258,20 @@ useAssistantTool({
   `{ success:false, applied:{ add:[], remove:[] }, matchCount, changed:false, error }`；失败结果的
   `applied` 始终为空，`matchCount` 基于当前保留的筛选重新计算。
 - 页面收到真实变更后立即更新 chips、数量与可见资产；工具结果通过 adapter 回传模型，供下一步生成准确英文摘要。
+- 以上筛选恢复与 setter 契约已有纯函数、hook 和工具层测试；它不替代
+  composer → adapter → 工具执行 → 资产页重渲染的完整集成验收，该链路需由独立集成测试证明。
+
+## 筛选集成验收
+
+筛选 prompt 只有在 `apply_filter` 工具真实执行并返回成功结果后才算更新成功。验收必须同时观察
+chips、匹配数量和可见资产三者变化；普通助手文本不得修改筛选。
 
 ## 落位与样式
 
 - 入口按钮位于 `sidebar-shell` 的 header；桌面端面板占用 Shell 右侧停靠列，打开时主工作区回流缩窄，不使用 overlay、scrim、背景 blur 或 body scroll lock。
 - 空间不足时，面板替代主工作区网格区域；关闭后恢复内容。`Escape` 与关闭按钮均收起，焦点返回 launcher。
+- `role="alertdialog"` 的 ConfirmTip 活跃时，Panel 的全局 `Escape` 监听忽略事件，由 ConfirmTip
+  独占取消，不会同时收起 Panel。
 - Settings 位于侧栏底部独立 `System` 导航；Workspace 树单独滚动。
 - 样式仅用 `framework/src/styles/tokens.css` 的设计 token，遵循 `dashboard` 风格规范
   （主色 `#0C5CAB`、IBM Plex Sans、8pt 间距、`--radius`、150–250ms 过渡、完整交互态）。
@@ -105,5 +279,5 @@ useAssistantTool({
 
 ## 未覆盖（YAGNI）
 
-多线程 / 历史持久化 / 跨刷新恢复；其他页面场景的实际接入（架构已预留：新页面调
+多线程；其他页面场景的实际接入（架构已预留：新页面调
 `usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点。

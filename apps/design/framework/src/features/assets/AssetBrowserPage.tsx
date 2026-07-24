@@ -10,12 +10,13 @@ import {
   type ThemeMode,
 } from '@/lib/theme'
 import type { AppConfig, AssetEntry, AssetKind } from '@/lib/types'
-import { applyFilter, emptyFilter, type Filter } from '@/lib/ai/filterState'
+import { applyFilter, emptyFilter } from '@/lib/ai/filterState'
 import { fetchAssetIndex, type AssetMeta } from '@/lib/ai/assetIndex'
 import { buildSystemPrompt } from '@/lib/ai/promptBuild'
 import { usePageAssistant } from '@/shell/assistant/usePageAssistant'
 import { AssetFilterChips } from './AssetFilterChips'
 import { AssetFilterTool } from './assistantFilterTool'
+import { usePersistentAssetFilter } from './usePersistentAssetFilter'
 import './assets.css'
 
 type AssetBrowserPageProps = {
@@ -140,15 +141,19 @@ export function AssetBrowserPage({
   const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
   const [pickerFor, setPickerFor] = useState<AssetEntry | null>(null)
   const [pickerAppId, setPickerAppId] = useState('')
-  const [filter, setFilter] = useState<Filter>(emptyFilter())
   const [assetIndex, setAssetIndex] = useState<AssetMeta[] | null>(null)
+  const {
+    filter,
+    filterRef,
+    owner,
+    setFilter,
+    resetFilter,
+  } = usePersistentAssetFilter(assetIndex)
   const [basePrompt, setBasePrompt] = useState<string | null>(null)
   const [assistantIndexError, setAssistantIndexError] = useState<string | null>(null)
   const [assistantPromptError, setAssistantPromptError] = useState<string | null>(null)
   const busyLock = useRef(false)
   const lightboxFrameRef = useRef<HTMLIFrameElement>(null)
-  const filterRef = useRef(filter)
-  filterRef.current = filter
 
   const assistantContextError = assistantIndexError ?? assistantPromptError
   const assistantReady =
@@ -163,6 +168,7 @@ export function AssetBrowserPage({
         })
       : '',
     available: assistantReady,
+    onResetPageState: resetFilter,
   })
 
   useEffect(() => subscribeTheme(setThemeState), [])
@@ -438,6 +444,7 @@ export function AssetBrowserPage({
         <AssetFilterTool
           index={assetIndex}
           filterRef={filterRef}
+          owner={owner}
           onFilterChange={setFilter}
         />
       ) : null}

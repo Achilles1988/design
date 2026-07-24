@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { ComponentType } from 'react'
+import { createRef, type ComponentType } from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -58,5 +58,15 @@ describe('AssistantThread', () => {
     expect(screen.getByRole('button', { name: 'Send' })).toBeTruthy()
     expect(screen.getByRole('alert').textContent).toContain('Request failed')
     expect(screen.getByRole('button', { name: 'Retry' })).toBeTruthy()
+  })
+
+  it('forwards the composer input ref', () => {
+    const composerInputRef = createRef<HTMLTextAreaElement>()
+
+    render(<AssistantThread composerInputRef={composerInputRef} />)
+
+    expect(composerInputRef.current).toBe(
+      screen.getByPlaceholderText('Describe what you need…'),
+    )
   })
 })

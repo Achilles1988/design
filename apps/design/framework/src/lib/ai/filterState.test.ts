@@ -5,8 +5,11 @@ import {
   emptyFilter,
   matchesChip,
   mergeFilterDelta,
+  sanitizeFilterForIndex,
+  type Filter,
   type FilterChip,
 } from './filterState'
+import type { AssetMeta } from './assetIndex'
 
 const NEON = {
   id: 'neon',
@@ -131,5 +134,54 @@ describe('mergeFilterDelta', () => {
       'ai',
     )
     expect(next.chips).toHaveLength(0)
+  })
+})
+
+describe('sanitizeFilterForIndex', () => {
+  it('drops stale tag and origin chips but keeps freeform chips', () => {
+    const filter = {
+      chips: [
+        {
+          id: 'tag:dark',
+          kind: 'tag',
+          label: 'dark',
+          value: 'dark',
+          addedBy: 'ai',
+        },
+        {
+          id: 'tag:retired',
+          kind: 'tag',
+          label: 'retired',
+          value: 'retired',
+          addedBy: 'ai',
+        },
+        {
+          id: 'origin:manual',
+          kind: 'origin',
+          label: 'manual',
+          value: 'manual',
+          addedBy: 'user',
+        },
+        {
+          id: 'free:finance',
+          kind: 'freeform',
+          label: 'finance',
+          value: 'finance',
+          addedBy: 'user',
+        },
+      ],
+    } satisfies Filter
+    const index: AssetMeta[] = [{
+      id: 'a',
+      title: 'Dark',
+      summary: '',
+      tags: ['dark'],
+      origin: 'open-design',
+      hasPreview: false,
+    }]
+
+    expect(
+      sanitizeFilterForIndex(filter, index).chips.map((entry) => entry.id),
+    ).toEqual(['tag:dark', 'free:finance'])
   })
 })

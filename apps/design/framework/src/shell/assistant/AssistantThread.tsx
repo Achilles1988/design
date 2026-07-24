@@ -5,6 +5,7 @@ import {
   MessagePrimitive,
   ThreadPrimitive,
 } from '@assistant-ui/react'
+import type { Ref } from 'react'
 import { AssistantMarkdown } from './AssistantMarkdown'
 import './assistant.css'
 
@@ -32,7 +33,11 @@ function AssistantBubble() {
   )
 }
 
-export function AssistantThread() {
+export function AssistantThread({
+  composerInputRef,
+}: {
+  composerInputRef?: Ref<HTMLTextAreaElement>
+}) {
   return (
     <ThreadPrimitive.Root className="aui-thread">
       <ThreadPrimitive.Viewport className="aui-thread-viewport">
@@ -47,6 +52,7 @@ export function AssistantThread() {
       </ThreadPrimitive.Viewport>
       <ComposerPrimitive.Root className="aui-composer">
         <ComposerPrimitive.Input
+          ref={composerInputRef}
           className="aui-composer-input"
           placeholder="Describe what you need…"
           rows={2}
