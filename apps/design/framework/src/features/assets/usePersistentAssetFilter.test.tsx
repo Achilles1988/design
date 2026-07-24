@@ -2,7 +2,11 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AssetMeta } from '@/lib/ai/assetIndex'
-import type { Filter, FilterChip } from '@/lib/ai/filterState'
+import {
+  emptyFilter,
+  type Filter,
+  type FilterChip,
+} from '@/lib/ai/filterState'
 
 const session = vi.hoisted(() => ({
   pageKey: '/assets/rule',
@@ -93,35 +97,50 @@ describe('usePersistentAssetFilter', () => {
     })
   })
 
-  it('waits for the destination page hydration before restoring its filter', () => {
+  it('hides and rejects source-page filter edits while appId navigation hydrates', () => {
+    const sourceKey = '/assets/rule?appId=a'
+    const destinationKey = '/assets/rule?appId=b'
+    const pageFilters = new Map<string, Filter>([
+      [sourceKey, { chips: [darkChip] }],
+      [destinationKey, { chips: [manualChip] }],
+    ])
+    session.pageKey = sourceKey
     session.ready = true
-    session.pageState = { filter: { chips: [darkChip] } }
-    const writes: Array<{ pageKey: string; filter: Filter }> = []
+    session.pageState = { filter: pageFilters.get(sourceKey) }
     session.setPageFilter.mockImplementation((filter: Filter) => {
-      writes.push({ pageKey: session.pageKey, filter })
+      pageFilters.set(session.pageKey, filter)
     })
     const { result, rerender } = renderHook(
       () => usePersistentAssetFilter(index),
     )
-    writes.length = 0
+    const sourceSetFilter = result.current.setFilter
+    session.setPageFilter.mockClear()
 
-    session.pageKey = '/assets/layout'
+    session.pageKey = destinationKey
     session.ready = false
-    session.pageState = { filter: undefined }
+    session.pageState = { filter: pageFilters.get(sourceKey) }
     rerender()
 
-    expect(result.current.filter.chips).toEqual([darkChip])
-    expect(writes).toEqual([])
+    expect(result.current.filter).toEqual(emptyFilter())
+    expect(result.current.filterRef.current).toEqual(emptyFilter())
+
+    act(() => sourceSetFilter((previous) => ({
+      chips: previous.chips.filter((chip) => chip.id !== darkChip.id),
+    })))
+    act(() => sourceSetFilter(emptyFilter()))
+
+    expect(session.setPageFilter).not.toHaveBeenCalled()
+    expect(pageFilters.get(sourceKey)).toEqual({ chips: [darkChip] })
+    expect(pageFilters.get(destinationKey)).toEqual({ chips: [manualChip] })
 
     session.ready = true
-    session.pageState = { filter: { chips: [manualChip] } }
+    session.pageState = { filter: pageFilters.get(destinationKey) }
     rerender()
 
     expect(result.current.filter.chips).toEqual([manualChip])
-    expect(writes).toEqual([{
-      pageKey: '/assets/layout',
-      filter: { chips: [manualChip] },
-    }])
+    expect(result.current.filterRef.current.chips).toEqual([manualChip])
+    expect(pageFilters.get(sourceKey)).toEqual({ chips: [darkChip] })
+    expect(pageFilters.get(destinationKey)).toEqual({ chips: [manualChip] })
   })
 
   it('resets state and filterRef together without persisting the reset', () => {

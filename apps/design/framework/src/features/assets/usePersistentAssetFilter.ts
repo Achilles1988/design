@@ -18,9 +18,16 @@ export function usePersistentAssetFilter(index: AssetMeta[] | null) {
   } = useAssistantPageSession()
   const [filter, setFilterState] = useState<Filter>(emptyFilter)
   const filterRef = useRef(filter)
+  const inactiveFilterRef = useRef<Filter>(emptyFilter())
   const hydratedKeyRef = useRef<string | null>(null)
   const latestPageKeyRef = useRef(pageKey)
+  const latestReadyRef = useRef(ready)
   latestPageKeyRef.current = pageKey
+  latestReadyRef.current = ready
+
+  const ownsCurrentPage = ready && hydratedKeyRef.current === pageKey
+  const exposedFilter = ownsCurrentPage ? filter : inactiveFilterRef.current
+  filterRef.current = exposedFilter
 
   useEffect(() => {
     if (!ready || !index || hydratedKeyRef.current === pageKey) return
@@ -35,6 +42,10 @@ export function usePersistentAssetFilter(index: AssetMeta[] | null) {
   }, [index, pageKey, pageState.filter, ready, setPageFilter])
 
   const setFilter = useCallback((update: FilterUpdate) => {
+    if (
+      !latestReadyRef.current ||
+      hydratedKeyRef.current !== latestPageKeyRef.current
+    ) return
     const next =
       typeof update === 'function' ? update(filterRef.current) : update
     filterRef.current = next
@@ -49,5 +60,5 @@ export function usePersistentAssetFilter(index: AssetMeta[] | null) {
     setFilterState(next)
   }, [])
 
-  return { filter, filterRef, setFilter, resetFilter }
+  return { filter: exposedFilter, filterRef, setFilter, resetFilter }
 }

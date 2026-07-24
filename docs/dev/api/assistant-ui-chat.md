@@ -106,8 +106,10 @@ Runtime 消息数量都会即时更新 `hasState`，筛选 chips 也会参与该
 `{ filter, filterRef, setFilter, resetFilter }`。它直接消费 `useAssistantPageSession()` 的
 `pageKey`、`pageState`、`ready` 与 `setPageFilter()`，不会创建第二套页面键。
 
-- 只有页面会话 `ready=true` 且资产索引已加载时才恢复筛选；pending navigation 期间不读取旧
-  `pageState`、不写默认空筛选。每次页面键完成 hydration 后只执行一次恢复。
+- 只有页面会话 `ready=true` 且资产索引已加载时才恢复筛选。筛选带有已 hydration 的页面键归属；
+  pending navigation 期间，若归属键与当前 `pageKey` 不同，则 UI 与 `filterRef` 暴露稳定空筛选，
+  普通 `setFilter` 调用直接忽略，不读取来源页 `pageState`，也不会把来源页操作写入目标页面。
+  每次页面键完成 hydration 后只执行一次恢复。
 - 恢复时，`tag` 必须仍存在于索引任一资产的 tags，`origin` 必须仍存在于索引任一资产的
   origin；失效项会被删除。`freeform` 不依赖索引枚举，始终保留。清理后的筛选会写回当前页面状态。
 - `setFilter` 同时接受完整 `Filter` 和 functional update。它先同步更新 `filterRef`，再更新
