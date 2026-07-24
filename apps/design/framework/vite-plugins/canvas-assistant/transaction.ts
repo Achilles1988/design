@@ -110,12 +110,16 @@ function compactDiagnostic(error: unknown): string {
       '[credential]',
     )
     .replace(
+      /\bAuthorization\b\s*[:=]\s*(["'])\s*Bearer\s+[^"'\r\n]+\1/gi,
+      '[credential]',
+    )
+    .replace(
       /\b(?:api[-_ ]?key|authorization)\b\s*[:=]\s*(?:Bearer\s+)?[^\s;,]+/gi,
       '[credential]',
     )
     .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, '[credential]')
     .replace(/\bsk-[A-Za-z0-9_-]+\b/g, '[credential]')
-    .replace(/\bPrompt\s*:[\s\S]*/gi, 'Prompt: [redacted]')
+    .replace(/\bPrompt\s*:[^\r\n]*/gi, 'Prompt: [redacted]')
     .replace(
       /(["'])(?:[A-Za-z]:[\\/]|\/)[^\r\n]*?\1/g,
       '[absolute path]',

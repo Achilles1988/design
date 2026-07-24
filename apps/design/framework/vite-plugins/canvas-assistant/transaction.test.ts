@@ -239,6 +239,29 @@ describe('applyProposalTransaction', () => {
     }
   }
 
+  async function repairDiagnostic(message: string): Promise<string> {
+    const validate = vi
+      .fn()
+      .mockRejectedValueOnce(new Error(message))
+      .mockResolvedValueOnce(undefined)
+    const repair = vi.fn(
+      async (request: {
+        candidateFiles: StoredProposal['candidateFiles']
+      }) => request.candidateFiles,
+    )
+
+    const result = await applyProposalTransaction(
+      input({ validate, repair }),
+    )
+
+    expect(result).toEqual({
+      ok: true,
+      proposalId: 'proposal-1',
+      repairAttempts: 1,
+    })
+    return repair.mock.calls[0][0].diagnostic
+  }
+
   it('rejects a changed baseline before writing', async () => {
     await fs.writeFile(canvasPath, 'changed after proposal')
     const writer = vi.fn(writeAtomically)
@@ -401,6 +424,27 @@ describe('applyProposalTransaction', () => {
       { phase: 'writing' },
       { phase: 'validating' },
     ])
+  })
+
+  it('removes a quoted Bearer authorization credential', async () => {
+    const diagnostic = await repairDiagnostic(
+      'Request failed; Authorization: "Bearer abc.def.ghi"',
+    )
+
+    expect(diagnostic).toContain('Request failed')
+    expect(diagnostic).not.toContain('abc.def.ghi')
+    expect(diagnostic).not.toContain('Bearer')
+  })
+
+  it('keeps a compiler reason after redacting Prompt content', async () => {
+    const diagnostic = await repairDiagnostic(
+      'Prompt: private implementation prompt\nSyntaxError: Unexpected token (21:4)',
+    )
+
+    expect(diagnostic).not.toContain('private implementation prompt')
+    expect(diagnostic).toContain(
+      'SyntaxError: Unexpected token (21:4)',
+    )
   })
 
   it('uses at most two repair attempts', async () => {
