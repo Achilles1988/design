@@ -65,7 +65,14 @@ const index: AssetMeta[] = [
   },
 ]
 
-function Harness() {
+type IntegrationProbe = {
+  initialRuns: number
+  continuationRuns: number
+  executeCalls: number
+  continuationReceivedToolResult: boolean
+}
+
+function Harness({ probe }: { probe: IntegrationProbe }) {
   const [filter, setFilter] = useState<Filter>(emptyFilter())
   const filterRef = useRef(filter)
   filterRef.current = filter
@@ -84,9 +91,33 @@ function Harness() {
           ) => Promise<unknown>
         }
       >
-      const isContinuation = (
-        options.messages as Array<{ role?: string }>
-      ).some((message) => message.role === 'tool')
+      const messages = options.messages as Array<{
+        role?: string
+        content?: unknown
+      }>
+      const toolMessage = messages.find((message) => message.role === 'tool')
+      const isContinuation = toolMessage !== undefined
+      if (isContinuation) {
+        probe.continuationRuns += 1
+        probe.continuationReceivedToolResult =
+          Array.isArray(toolMessage.content) &&
+          toolMessage.content.some(
+            (part) =>
+              typeof part === 'object' &&
+              part !== null &&
+              'type' in part &&
+              part.type === 'tool-result' &&
+              'toolName' in part &&
+              part.toolName === 'apply_filter' &&
+              'result' in part &&
+              typeof part.result === 'object' &&
+              part.result !== null &&
+              'success' in part.result &&
+              part.result.success === true,
+          )
+      } else {
+        probe.initialRuns += 1
+      }
       return {
         fullStream: (async function* () {
           if (isContinuation) {
@@ -104,6 +135,7 @@ function Harness() {
             toolName: 'apply_filter',
             args,
           }
+          probe.executeCalls += 1
           const result = await tools.apply_filter.execute!(args, {
             toolCallId: 't1',
             messages: [],
@@ -157,7 +189,13 @@ function Harness() {
 
 describe('assistant filtering integration', () => {
   it('updates chips, count, and visible assets after a clear prompt', async () => {
-    render(<Harness />)
+    const probe: IntegrationProbe = {
+      initialRuns: 0,
+      continuationRuns: 0,
+      executeCalls: 0,
+      continuationReceivedToolResult: false,
+    }
+    render(<Harness probe={probe} />)
     fireEvent.change(screen.getByPlaceholderText('Describe what you need…'), {
       target: { value: 'Show dark designs' },
     })
@@ -172,6 +210,11 @@ describe('assistant filtering integration', () => {
       expect(screen.getByLabelText('visible assets').textContent).not.toContain(
         'Light dashboard',
       )
+      expect(probe.initialRuns).toBe(1)
+      expect(probe.continuationRuns).toBe(1)
+      expect(probe.executeCalls).toBe(1)
+      expect(probe.continuationReceivedToolResult).toBe(true)
+      expect(screen.getByText('Applied dark.')).toBeTruthy()
     })
   })
 })
