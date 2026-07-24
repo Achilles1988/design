@@ -81,8 +81,10 @@ type AssistantPageStateEnvelopeV1 = {
 ## 页面级会话（`pageSession.tsx`）
 
 `AssistantProvider` 继续只创建一个 LocalRuntime，并把它交给
-`AssistantPageSessionProvider`；当前 Runtime 只装载当前 `pageKey` 的消息。`pageKey` 由具体
-pathname 和白名单查询参数生成，当前查询参数白名单只有 `appId`。
+`AssistantPageSessionProvider`；会话 `ready=true` 时，当前 Runtime 只装载当前 `pageKey` 的消息。
+pending hydration 或等待旧 run idle 时，Runtime 内部可能暂时保留来源页内容，但 `AssistantPanel`
+用 `ready` 门控，不暴露消息、工具结果或 composer。`pageKey` 由具体 pathname 和白名单查询参数
+生成，当前查询参数白名单只有 `appId`。
 
 协调器在首次挂载和页面键改变时增加共享 epoch。切换页面时，它先把 Runtime 的旧稳定消息写回
 旧页面键、取消旧运行，再恢复目标页面消息。若旧 run 尚未完成取消收尾，则等待 `isRunning=false`
@@ -136,10 +138,6 @@ Store 写入失败时，`persistenceError` 暴露英文错误提示。
 `createPageScopedModelAdapter(adapter, getEpoch)` 在每次模型运行开始时捕获 epoch，并在转发每个
 上游 chunk 前重新检查。页面切换或 `startNewChat()` 改变 epoch 后，旧运行即使迟到产出结果也会
 停止 yield，不能写回新页面。
-
-页面切换等待旧运行取消时，页面会话保持 `ready=false`。`AssistantPanel` 此时显示非阻塞的
-`Loading conversation…` 状态且不挂载 `AssistantThread`；目标消息恢复且 `ready=true` 后才显示
-对话和 composer，因此来源页的旧消息与工具结果不会在目标页闪入。
 
 ## 工具注册约定
 
