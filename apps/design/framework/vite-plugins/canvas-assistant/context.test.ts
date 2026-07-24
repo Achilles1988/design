@@ -2,7 +2,10 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { createCanvasContextLoader } from './context'
+import {
+  createCanvasContextLoader,
+  validateCandidatePath,
+} from './context'
 
 const temporaryRoots: string[] = []
 
@@ -404,6 +407,32 @@ describe('createCanvasContextLoader', () => {
         context,
         'components/outside/New.tsx',
         'create-shared',
+      ),
+    ).toThrow()
+  })
+
+  it('exports the same candidate path boundary used by the loader', async () => {
+    const fixture = await createFixture()
+    const context = await fixture.loader.load('shop', 'home')
+
+    expect(
+      validateCandidatePath(
+        context,
+        'canvases/Home.tsx',
+        'write-existing',
+      ),
+    ).toBe(
+      fixture.loader.validateCandidatePath(
+        context,
+        'canvases/Home.tsx',
+        'write-existing',
+      ),
+    )
+    expect(() =>
+      validateCandidatePath(
+        context,
+        'components/Select.tsx',
+        'write-existing',
       ),
     ).toThrow()
   })

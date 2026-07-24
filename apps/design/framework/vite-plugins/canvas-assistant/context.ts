@@ -288,6 +288,27 @@ function assertCreateSharedPath(
   }
 }
 
+export function validateCandidatePath(
+  context: CanvasAuthoringContext,
+  relativePath: string,
+  operation: CandidateOperation,
+): CandidateOperation {
+  if (operation === 'write-existing') {
+    const existing = context.files.find(
+      (file) =>
+        file.relativePath === relativePath &&
+        file.permission === 'write-existing',
+    )
+    if (!existing) {
+      throw new Error('Candidate path is not writable.')
+    }
+    return operation
+  }
+
+  assertCreateSharedPath(context, relativePath)
+  return operation
+}
+
 export function createCanvasContextLoader(
   options: CanvasContextLoaderOptions,
 ) {
@@ -409,27 +430,6 @@ export function createCanvasContextLoader(
       files,
       componentsDir,
     }
-  }
-
-  function validateCandidatePath(
-    context: CanvasAuthoringContext,
-    relativePath: string,
-    operation: CandidateOperation,
-  ): CandidateOperation {
-    if (operation === 'write-existing') {
-      const existing = context.files.find(
-        (file) =>
-          file.relativePath === relativePath &&
-          file.permission === 'write-existing',
-      )
-      if (!existing) {
-        throw new Error('Candidate path is not writable.')
-      }
-      return operation
-    }
-
-    assertCreateSharedPath(context, relativePath)
-    return operation
   }
 
   return { load, validateCandidatePath }
