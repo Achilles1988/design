@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import path from 'node:path'
 import {
   CanvasProposalCardArgsSchema,
   RawCanvasProposalSchema,
@@ -73,7 +74,16 @@ export function createProposalStore({
   ): CanvasProposalCardArgs {
     const raw = RawCanvasProposalSchema.parse(rawToolArgs)
     const candidatePaths = raw.files.map((file) => file.path)
-    if (new Set(candidatePaths).size !== candidatePaths.length) {
+    const appDir = path.dirname(context.componentsDir)
+    const candidateTargets = candidatePaths.map((candidatePath) =>
+      path
+        .resolve(appDir, candidatePath)
+        .normalize('NFC')
+        .toLowerCase(),
+    )
+    if (
+      new Set(candidateTargets).size !== candidateTargets.length
+    ) {
       throw new Error('Candidate file paths must be unique.')
     }
 
@@ -202,7 +212,7 @@ export function createProposalStore({
       throw new Error('Canvas proposal has already been claimed.')
     }
     proposal.state = 'applying'
-    return proposal
+    return structuredClone(proposal)
   }
 
   function complete(proposalId: string): void {

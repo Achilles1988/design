@@ -172,6 +172,30 @@ describe('createProposalStore', () => {
     expect(() => store().stage(context(), raw)).toThrow()
   })
 
+  it('rejects lexical aliases for the same candidate path', () => {
+    const raw = rawProposal()
+    raw.files.push({
+      path: 'components/forms/../Select.tsx',
+      source: 'export function AliasedSelect() { return null }',
+    })
+    raw.newSharedComponents.push(
+      'components/forms/../Select.tsx',
+    )
+
+    expect(() => store().stage(context(), raw)).toThrow()
+  })
+
+  it('rejects non-portable case aliases for one candidate target', () => {
+    const raw = rawProposal()
+    raw.files.push({
+      path: 'components/select.tsx',
+      source: 'export function LowerSelect() { return null }',
+    })
+    raw.newSharedComponents.push('components/select.tsx')
+
+    expect(() => store().stage(context(), raw)).toThrow()
+  })
+
   it('accepts a new shared component and its CSS', () => {
     const raw = rawProposal()
     raw.files.push({
@@ -308,6 +332,39 @@ describe('createProposalStore', () => {
     ).toThrow()
   })
 
+  it('keeps claimed lifecycle state private from returned snapshots', () => {
+    const proposalStore = store()
+    const card = proposalStore.stage(context(), rawProposal())
+    const claimed = proposalStore.claim(
+      card.proposalId,
+      'design',
+      'home',
+    )
+
+    claimed.state = 'ready'
+
+    expect(() =>
+      proposalStore.claim(card.proposalId, 'design', 'home'),
+    ).toThrow()
+  })
+
+  it('keeps completed lifecycle state private from returned snapshots', () => {
+    const proposalStore = store()
+    const card = proposalStore.stage(context(), rawProposal())
+    const claimed = proposalStore.claim(
+      card.proposalId,
+      'design',
+      'home',
+    )
+    proposalStore.complete(card.proposalId)
+
+    claimed.state = 'ready'
+
+    expect(() =>
+      proposalStore.claim(card.proposalId, 'design', 'home'),
+    ).toThrow()
+  })
+
   it('marks both a successful and a failed apply complete forever', () => {
     const proposalStore = store()
     const successfulCard = proposalStore.stage(context(), rawProposal())
@@ -326,8 +383,6 @@ describe('createProposalStore', () => {
     proposalStore.complete(successful.id)
     proposalStore.complete(failed.id)
 
-    expect(successful.state).toBe('complete')
-    expect(failed.state).toBe('complete')
     expect(() =>
       proposalStore.claim(successful.id, 'design', 'home'),
     ).toThrow()
