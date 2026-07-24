@@ -156,6 +156,51 @@ describe('createCanvasContextLoader', () => {
     ).rejects.toThrow('Canvas source could not be loaded.')
   })
 
+  it('rejects aliased, nested, or non-TSX Canvas sources', async () => {
+    const aliasedFixture = await createFixture()
+    await writeJson(path.join(aliasedFixture.appDir, 'canvases.json'), {
+      canvases: [
+        { id: 'home', name: 'Home', component: 'Other.tsx' },
+        { id: 'other', name: 'Other', component: 'Other.tsx' },
+      ],
+    })
+    await expect(
+      aliasedFixture.loader.load('shop', 'home'),
+    ).rejects.toThrow('Canvas source could not be loaded.')
+
+    const nestedFixture = await createFixture()
+    const nestedDir = path.join(nestedFixture.canvasesDir, 'nested')
+    await fs.mkdir(nestedDir)
+    await fs.writeFile(
+      path.join(nestedDir, 'Home.tsx'),
+      'export default function Home() { return null }\n',
+      'utf8',
+    )
+    await writeJson(path.join(nestedFixture.appDir, 'canvases.json'), {
+      canvases: [
+        { id: 'home', name: 'Home', component: 'nested/Home.tsx' },
+      ],
+    })
+    await expect(
+      nestedFixture.loader.load('shop', 'home'),
+    ).rejects.toThrow('Canvas source could not be loaded.')
+
+    const nonTsxFixture = await createFixture()
+    await fs.writeFile(
+      path.join(nonTsxFixture.canvasesDir, 'Home.ts'),
+      'export default function Home() { return null }\n',
+      'utf8',
+    )
+    await writeJson(path.join(nonTsxFixture.appDir, 'canvases.json'), {
+      canvases: [
+        { id: 'home', name: 'Home', component: 'Home.ts' },
+      ],
+    })
+    await expect(
+      nonTsxFixture.loader.load('shop', 'home'),
+    ).rejects.toThrow('Canvas source could not be loaded.')
+  })
+
   it('rejects a Canvas CSS path outside the canvases directory', async () => {
     const fixture = await createFixture()
     await fs.writeFile(
@@ -190,6 +235,52 @@ describe('createCanvasContextLoader', () => {
     ).rejects.toThrow('Canvas source could not be loaded.')
   })
 
+  it('rejects bare, nested, or sibling-directory Canvas CSS imports', async () => {
+    const bareFixture = await createFixture()
+    await fs.writeFile(
+      path.join(bareFixture.canvasesDir, 'Home.tsx'),
+      "import 'Home.css'\nexport default function Home() { return null }\n",
+      'utf8',
+    )
+    await expect(bareFixture.loader.load('shop', 'home')).rejects.toThrow(
+      'Canvas source could not be loaded.',
+    )
+
+    const nestedFixture = await createFixture()
+    const nestedCssDir = path.join(nestedFixture.canvasesDir, 'nested')
+    await fs.mkdir(nestedCssDir)
+    await fs.writeFile(
+      path.join(nestedCssDir, 'Nested.css'),
+      '.nested {}\n',
+      'utf8',
+    )
+    await fs.writeFile(
+      path.join(nestedFixture.canvasesDir, 'Home.tsx'),
+      "import './nested/Nested.css'\nexport default function Home() { return null }\n",
+      'utf8',
+    )
+    await expect(
+      nestedFixture.loader.load('shop', 'home'),
+    ).rejects.toThrow('Canvas source could not be loaded.')
+
+    const siblingFixture = await createFixture()
+    const siblingDir = path.join(siblingFixture.appDir, 'styles')
+    await fs.mkdir(siblingDir)
+    await fs.writeFile(
+      path.join(siblingDir, 'Sibling.css'),
+      '.sibling {}\n',
+      'utf8',
+    )
+    await fs.writeFile(
+      path.join(siblingFixture.canvasesDir, 'Home.tsx'),
+      "import '../styles/Sibling.css'\nexport default function Home() { return null }\n",
+      'utf8',
+    )
+    await expect(
+      siblingFixture.loader.load('shop', 'home'),
+    ).rejects.toThrow('Canvas source could not be loaded.')
+  })
+
   it('marks existing shared components read-only', async () => {
     const fixture = await createFixture()
     const context = await fixture.loader.load('shop', 'home')
@@ -204,6 +295,43 @@ describe('createCanvasContextLoader', () => {
         context,
         'components/Select.tsx',
         'write-existing',
+      ),
+    ).toThrow()
+  })
+
+  it('rejects symlinked App components roots', async () => {
+    const canvasesAlias = await createFixture()
+    await fs.rm(canvasesAlias.componentsDir, { recursive: true })
+    await fs.symlink(canvasesAlias.canvasesDir, canvasesAlias.componentsDir)
+
+    const aliasedContext = await canvasesAlias.loader.load('shop', 'home')
+
+    expect(
+      aliasedContext.files.some(
+        (file) => file.relativePath === 'components/Other.tsx',
+      ),
+    ).toBe(false)
+    expect(() =>
+      canvasesAlias.loader.validateCandidatePath(
+        aliasedContext,
+        'components/New.tsx',
+        'create-shared',
+      ),
+    ).toThrow()
+
+    const outsideAlias = await createFixture()
+    const outsideDir = path.join(outsideAlias.root, 'outside-root')
+    await fs.mkdir(outsideDir)
+    await fs.rm(outsideAlias.componentsDir, { recursive: true })
+    await fs.symlink(outsideDir, outsideAlias.componentsDir)
+
+    const outsideContext = await outsideAlias.loader.load('shop', 'home')
+
+    expect(() =>
+      outsideAlias.loader.validateCandidatePath(
+        outsideContext,
+        'components/New.tsx',
+        'create-shared',
       ),
     ).toThrow()
   })
@@ -258,6 +386,23 @@ describe('createCanvasContextLoader', () => {
       fixture.loader.validateCandidatePath(
         context,
         'components/outside/New.tsx',
+        'create-shared',
+      ),
+    ).toThrow()
+  })
+
+  it('rejects a dangling symlink at a candidate path', async () => {
+    const fixture = await createFixture()
+    const context = await fixture.loader.load('shop', 'home')
+    await fs.symlink(
+      path.join(fixture.componentsDir, 'Missing.tsx'),
+      path.join(fixture.componentsDir, 'Dangling.tsx'),
+    )
+
+    expect(() =>
+      fixture.loader.validateCandidatePath(
+        context,
+        'components/Dangling.tsx',
         'create-shared',
       ),
     ).toThrow()

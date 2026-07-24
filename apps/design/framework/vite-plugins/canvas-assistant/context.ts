@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import fs from 'node:fs/promises'
-import { existsSync, realpathSync } from 'node:fs'
+import { lstatSync, realpathSync } from 'node:fs'
 import path from 'node:path'
 import ts from 'typescript'
 import {
@@ -89,8 +89,31 @@ async function existingPathWithin(
   return realResolved
 }
 
+async function resolvesToPath(
+  allowedRoot: string,
+  candidate: string,
+  expectedRealPath: string,
+): Promise<boolean> {
+  try {
+    return (
+      await existingPathWithin(allowedRoot, candidate)
+    ) === expectedRealPath
+  } catch {
+    return false
+  }
+}
+
 function toRelativePath(root: string, filePath: string): string {
   return path.relative(root, filePath).split(path.sep).join('/')
+}
+
+function lstatEntry(filePath: string): ReturnType<typeof lstatSync> | null {
+  try {
+    return lstatSync(filePath)
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null
+    throw error
+  }
 }
 
 async function readAuthoringFile(
@@ -152,6 +175,8 @@ async function scanComponentFiles(
   componentsDir: string,
 ): Promise<AuthoringFile[]> {
   try {
+    const rootStat = await fs.lstat(componentsDir)
+    if (!rootStat.isDirectory()) return []
     await existingPathWithin(appDir, componentsDir)
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
@@ -230,24 +255,35 @@ function assertCreateSharedPath(
     relativeToComponents.length === 0 ||
     relativeToComponents.startsWith('..') ||
     path.isAbsolute(relativeToComponents) ||
-    existsSync(absolutePath)
+    lstatEntry(absolutePath) !== null
   ) {
     throw new Error('Candidate path is not an allowed shared component.')
   }
 
-  if (existsSync(context.componentsDir)) {
+  const componentsStat = lstatEntry(context.componentsDir)
+  if (componentsStat !== null) {
+    if (
+      !componentsStat.isDirectory() ||
+      componentsStat.isSymbolicLink()
+    ) {
+      throw new Error('Candidate path is not an allowed shared component.')
+    }
     const realComponentsDir = realpathSync(context.componentsDir)
     let existingAncestor = path.dirname(absolutePath)
     while (
-      !existsSync(existingAncestor) &&
       isWithin(context.componentsDir, existingAncestor)
     ) {
+      const ancestorStat = lstatEntry(existingAncestor)
+      if (ancestorStat !== null) {
+        if (
+          !ancestorStat.isDirectory() ||
+          ancestorStat.isSymbolicLink() ||
+          !isWithin(realComponentsDir, realpathSync(existingAncestor))
+        ) {
+          throw new Error('Candidate path is not an allowed shared component.')
+        }
+      }
       existingAncestor = path.dirname(existingAncestor)
-    }
-    if (
-      !isWithin(realComponentsDir, realpathSync(existingAncestor))
-    ) {
-      throw new Error('Candidate path is not an allowed shared component.')
     }
   }
 }
@@ -280,9 +316,36 @@ export function createCanvasContextLoader(
     let canvasFile: AuthoringFile
     let cssFiles: AuthoringFile[]
     try {
+      if (
+        canvas.component !== path.basename(canvas.component) ||
+        path.extname(canvas.component) !== '.tsx'
+      ) {
+        throw new Error('Canvas component must be a direct TSX file.')
+      }
       const canvasPath = resolveWithin(canvasesDir, canvas.component)
       await existingPathWithin(appDir, canvasesDir)
-      await existingPathWithin(canvasesDir, canvasPath)
+      const realCanvasPath = await existingPathWithin(
+        canvasesDir,
+        canvasPath,
+      )
+      for (const otherCanvas of canvases) {
+        if (otherCanvas === canvas) continue
+        let otherPath: string
+        try {
+          otherPath = resolveWithin(
+            canvasesDir,
+            otherCanvas.component,
+          )
+        } catch {
+          continue
+        }
+        if (
+          otherPath === canvasPath ||
+          (await resolvesToPath(canvasesDir, otherPath, realCanvasPath))
+        ) {
+          throw new Error('Canvas component is shared.')
+        }
+      }
       canvasFile = await readAuthoringFile(
         appDir,
         canvasPath,
@@ -290,11 +353,16 @@ export function createCanvasContextLoader(
       )
       cssFiles = await Promise.all(
         importedCssFiles(canvasFile.source).map(async (importedFile) => {
-          const cssPath = path.resolve(path.dirname(canvasPath), importedFile)
-          if (!isWithin(canvasesDir, cssPath)) {
-            throw new Error('Canvas CSS is outside the canvases directory.')
+          const canvasDirectory = path.dirname(canvasPath)
+          const localFileName = importedFile.slice(2)
+          if (
+            !importedFile.startsWith('./') ||
+            localFileName !== path.basename(localFileName)
+          ) {
+            throw new Error('Canvas CSS must be a direct local import.')
           }
-          await existingPathWithin(canvasesDir, cssPath)
+          const cssPath = path.resolve(canvasDirectory, importedFile)
+          await existingPathWithin(canvasDirectory, cssPath)
           return readAuthoringFile(appDir, cssPath, 'write-existing')
         }),
       )
