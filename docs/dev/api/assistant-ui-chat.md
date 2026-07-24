@@ -84,8 +84,11 @@ tool-call 的 `toolName`、可选 `toolCallId`、`args` 与 `result` 必须是�
 
 若 `localStorage` 写入或删除失败，Store 返回 `ok:false`，同时保留字段级内存 overlay 或 clear
 tombstone。partial patch 只记录实际触及的 `messages`/`filter`，不会把读取失败时未知的字段物化为
-空值。后续读取会优先把该回退合并到可用 durable base，避免旧磁盘值在本次会话中回流。每次
-后续 patch/clear 都把相关 Storage 的全部 dirty overlay 与 tombstone 合并进同一个 envelope；
+空值。通过隐式浏览器存储访问的 durable 与 volatile 路径共享同一张进程级逻辑 overlay，因此
+`window.localStorage` getter 暂时不可用、Storage 对象身份变化或页面导航都不能让当前会话的
+dirty patch/tombstone 暂时消失。显式注入的 Storage 仍按实例隔离。后续读取会优先把该回退合并到
+当前可读 base，避免旧磁盘值在本次会话中回流。每次后续 patch/clear 都把相关逻辑存储的全部
+dirty overlay 与 tombstone 合并进同一个 envelope；
 durable 写入成功后只清除该次实际包含且未被更新的 dirty 项。因此 A 写失败后 B 写成功会同时
 持久化 A 的最新状态，A clear 失败后 B 写成功也会同时持久化 A 的删除。
 
@@ -98,7 +101,8 @@ Store 明确区分“已读取但内容 invalid”和“Storage I/O unavailable�
 失败时 tombstone 仍让当前页面保持为空，并持续通过 session 暴露 persistence warning，直到后续
 写入把全部 dirty 状态成功持久化。getter 后续恢复时，Store 会按字段依次合并 durable 与 volatile
 的全部 overlay/tombstone；outage 期间的同页 partial patch 只覆盖自身字段，未触及字段与 durable
-中的其他页面均保留。
+中的其他页面均保留。`setItem` 成功后，Store 直接从本次已合并并写入的 envelope 返回 state；
+即使紧随其后的 Storage 读取瞬断，也不会返回 `ok:true` 与空 state 的矛盾结果。
 
 ## 页面级会话（`pageSession.tsx`）
 
@@ -118,6 +122,8 @@ Runtime 快照覆盖。恢复消息或 `runtime.thread.reset()` 抛错时，会�
 Runtime 消息变化会即时更新 `hasState`，筛选 chips 也会参与该状态判断；只有 Runtime 空闲且
 hydration 完成后才触发消息快照。快照内容和写入失败语义以“消息快照与写入失败”一节为准。
 Store 写入失败时，`persistenceError` 暴露英文错误提示。
+该提示描述最近一次持久化/恢复结果：正常页面 hydration（包括 getter 恢复后的 volatile
+migration）成功后清除旧错误，不能把上一页或故障期的 warning 长期带到健康页面。
 
 页面通过 `useAssistantPageSession()` 使用以下基础命令：
 

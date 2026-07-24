@@ -461,6 +461,35 @@ describe('assistant page state store', () => {
     })
   })
 
+  it('returns the merged written state when the immediate readback is unavailable', () => {
+    const values = new Map<string, string>()
+    let reads = 0
+    const storage = createStorageView(values)
+    storage.getItem = (key) => {
+      reads += 1
+      if (reads >= 3) {
+        throw new DOMException('readback blocked', 'SecurityError')
+      }
+      return values.get(key) ?? null
+    }
+
+    const result = patchAssistantPageState('/written-snapshot', {
+      messages: [{
+        id: 'written-message',
+        role: 'user',
+        content: 'written',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    }, storage)
+
+    expect(result).toMatchObject({
+      ok: true,
+      state: {
+        messages: [expect.objectContaining({ id: 'written-message' })],
+      },
+    })
+  })
+
   it('merges same-page durable and volatile partial patches after storage recovers', () => {
     const values = new Map([[
       ASSISTANT_PAGE_STATE_STORAGE_KEY,

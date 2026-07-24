@@ -110,6 +110,54 @@ function createModelRunInput(
   }
 }
 
+function controlBrowserStorage() {
+  const values = new Map<string, string>()
+  let getterAvailable = true
+  let writesFail = false
+  const durableStorage: Storage = {
+    get length() {
+      return values.size
+    },
+    clear() {
+      values.clear()
+    },
+    getItem(key) {
+      return values.get(key) ?? null
+    },
+    key(index) {
+      return [...values.keys()][index] ?? null
+    },
+    removeItem(key) {
+      values.delete(key)
+    },
+    setItem(key, value) {
+      if (writesFail) {
+        throw new DOMException('quota exceeded', 'QuotaExceededError')
+      }
+      values.set(key, value)
+    },
+  }
+  const getter = vi.spyOn(window, 'localStorage', 'get')
+    .mockImplementation(() => {
+      if (!getterAvailable) {
+        throw new DOMException('access denied', 'SecurityError')
+      }
+      return durableStorage
+    })
+
+  return {
+    setGetterAvailable(value: boolean) {
+      getterAvailable = value
+    },
+    setWritesFail(value: boolean) {
+      writesFail = value
+    },
+    restore() {
+      getter.mockRestore()
+    },
+  }
+}
+
 describe('AssistantPageSessionProvider', () => {
   beforeEach(() => localStorage.clear())
 
@@ -291,6 +339,59 @@ describe('AssistantPageSessionProvider', () => {
       ready: true,
       messageId: 'source-state',
     })
+  })
+
+  it('keeps one logical page overlay visible across storage identity changes', () => {
+    const storage = controlBrowserStorage()
+    const fake = createRuntime()
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/continuity-a'),
+    })
+
+    try {
+      storage.setWritesFail(true)
+      act(() => {
+        result.current.session.setPageFilter(result.current.session.owner, {
+          chips: [{
+            id: 'tag:dark',
+            kind: 'tag',
+            label: 'dark',
+            value: 'dark',
+            addedBy: 'ai',
+          }],
+        })
+      })
+
+      storage.setWritesFail(false)
+      storage.setGetterAvailable(false)
+      act(() => fake.setMessages([{
+        id: 'outage-message',
+        role: 'user',
+        content: 'outage',
+        createdAt: new Date('2026-07-24T00:00:00.000Z'),
+      }]))
+      act(() => result.current.navigate('/continuity-b'))
+      act(() => result.current.navigate('/continuity-a'))
+
+      expect(result.current.session.ready).toBe(true)
+      expect(result.current.session.pageState).toMatchObject({
+        messages: [expect.objectContaining({ id: 'outage-message' })],
+        filter: {
+          chips: [expect.objectContaining({ id: 'tag:dark' })],
+        },
+      })
+      expect(fake.runtime.thread.reset).toHaveBeenLastCalledWith([
+        expect.objectContaining({ id: 'outage-message' }),
+      ])
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/continuity-a')
+      storage.restore()
+    }
   })
 
   it('rejects new chat while destination hydration is pending', () => {
@@ -710,6 +811,67 @@ describe('AssistantPageSessionProvider', () => {
       )
     } finally {
       setItem.mockRestore()
+    }
+  })
+
+  it('clears an old persistence error after recovered migration hydration', () => {
+    const storage = controlBrowserStorage()
+    const fake = createRuntime({ asyncCancellation: true })
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/warning-source'),
+    })
+
+    try {
+      storage.setWritesFail(true)
+      let writeResult:
+        | ReturnType<typeof result.current.session.setPageFilter>
+        | undefined
+      act(() => {
+        writeResult = result.current.session.setPageFilter(
+          result.current.session.owner,
+          {
+            chips: [{
+              id: 'tag:warning',
+              kind: 'tag',
+              label: 'warning',
+              value: 'warning',
+              addedBy: 'ai',
+            }],
+          },
+        )
+      })
+      expect(writeResult).toMatchObject({ accepted: true, ok: false })
+      expect(result.current.session.persistenceError).toBeTruthy()
+
+      act(() => fake.setMessages([{
+        id: 'warning-message',
+        role: 'user',
+        content: 'warning',
+        createdAt: new Date('2026-07-24T00:00:00.000Z'),
+      }], true))
+      storage.setGetterAvailable(false)
+      act(() => result.current.navigate('/warning-destination'))
+      expect(result.current.session.ready).toBe(false)
+
+      storage.setWritesFail(false)
+      storage.setGetterAvailable(true)
+      act(() => fake.finishRun())
+
+      expect(result.current.session.ready).toBe(true)
+      expect(result.current.session.persistenceError).toBeNull()
+      expect(
+        readAssistantPageState('/warning-source').filter,
+      ).toEqual({
+        chips: [expect.objectContaining({ id: 'tag:warning' })],
+      })
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/warning-source')
+      storage.restore()
     }
   })
 

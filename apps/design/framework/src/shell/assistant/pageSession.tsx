@@ -174,6 +174,7 @@ export function AssistantPageSessionProvider({
       try {
         restoredMessages = restoreMessages(restored.messages)
         runtime.thread.reset(restoredMessages)
+        setPersistenceError(null)
       } catch {
         const cleared = clearAssistantPageState(pageKey)
         restored = cleared.state
