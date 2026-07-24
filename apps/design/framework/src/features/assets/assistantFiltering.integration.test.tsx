@@ -295,7 +295,10 @@ function LateToolPage({ control }: { control: LateToolControl }) {
       <button type="button" onClick={() => navigate('/late-source')}>
         Navigate source
       </button>
-      <button type="button" onClick={session.startNewChat}>
+      <button
+        type="button"
+        onClick={() => session.startNewChat(session.owner)}
+      >
         Start new chat
       </button>
       <output aria-label="late session ready">{String(session.ready)}</output>

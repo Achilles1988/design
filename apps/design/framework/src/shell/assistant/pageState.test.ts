@@ -396,6 +396,143 @@ describe('assistant page state store', () => {
     })
   })
 
+  it('preserves untouched durable fields when the first read fails before a partial patch', () => {
+    const values = new Map([[
+      ASSISTANT_PAGE_STATE_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        pages: {
+          '/partial': {
+            version: 1,
+            messages: [{
+              id: 'healthy-message',
+              role: 'user',
+              content: 'healthy',
+              createdAt: '2026-07-24T00:00:00.000Z',
+            }],
+            filter: {
+              chips: [{
+                id: 'tag:old',
+                kind: 'tag',
+                label: 'old',
+                value: 'old',
+                addedBy: 'user',
+              }],
+            },
+            futureField: { preserved: true },
+            updatedAt: '2026-07-24T00:00:00.000Z',
+          },
+        },
+      }),
+    ]])
+    let reads = 0
+    const storage = createStorageView(values)
+    storage.getItem = (key) => {
+      reads += 1
+      if (reads === 1) throw new DOMException('read blocked', 'SecurityError')
+      return values.get(key) ?? null
+    }
+
+    const result = patchAssistantPageState('/partial', {
+      filter: {
+        chips: [{
+          id: 'tag:new',
+          kind: 'tag',
+          label: 'new',
+          value: 'new',
+          addedBy: 'ai',
+        }],
+      },
+    }, storage)
+
+    expect(result.ok).toBe(true)
+    const reloaded = createStorageView(values)
+    expect(readAssistantPageState('/partial', reloaded).messages).toEqual([
+      expect.objectContaining({ id: 'healthy-message' }),
+    ])
+    expect(readAssistantPageState('/partial', reloaded).filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:new' })],
+    })
+    const persisted = JSON.parse(
+      values.get(ASSISTANT_PAGE_STATE_STORAGE_KEY) ?? 'null',
+    ) as { pages: Record<string, Record<string, unknown>> }
+    expect(persisted.pages['/partial'].futureField).toEqual({
+      preserved: true,
+    })
+  })
+
+  it('merges same-page durable and volatile partial patches after storage recovers', () => {
+    const values = new Map([[
+      ASSISTANT_PAGE_STATE_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        pages: {
+          '/cross-storage': {
+            version: 1,
+            messages: [{
+              id: 'base-message',
+              role: 'user',
+              content: 'base',
+              createdAt: '2026-07-24T00:00:00.000Z',
+            }],
+            updatedAt: '2026-07-24T00:00:00.000Z',
+          },
+        },
+      }),
+    ]])
+    let failWrites = true
+    const durableStorage = createStorageView(values, (key, value) => {
+      if (failWrites) throw new DOMException('quota exceeded', 'QuotaExceededError')
+      values.set(key, value)
+    })
+    let getterAvailable = true
+    const localStorageAccess = vi.spyOn(window, 'localStorage', 'get')
+      .mockImplementation(() => {
+        if (!getterAvailable) {
+          throw new DOMException('access denied', 'SecurityError')
+        }
+        return durableStorage
+      })
+
+    try {
+      const durablePatch = patchAssistantPageState('/cross-storage', {
+        filter: {
+          chips: [{
+            id: 'tag:dark',
+            kind: 'tag',
+            label: 'dark',
+            value: 'dark',
+            addedBy: 'ai',
+          }],
+        },
+      })
+      expect(durablePatch.ok).toBe(false)
+
+      failWrites = false
+      getterAvailable = false
+      const volatilePatch = patchAssistantPageState('/cross-storage', {
+        messages: [{
+          id: 'outage-message',
+          role: 'user',
+          content: 'outage',
+          createdAt: '2026-07-24T00:00:00.000Z',
+        }],
+      })
+      expect(volatilePatch.ok).toBe(false)
+
+      getterAvailable = true
+      const recovered = readAssistantPageState('/cross-storage')
+      expect(recovered.messages).toEqual([
+        expect.objectContaining({ id: 'outage-message' }),
+      ])
+      expect(recovered.filter).toEqual({
+        chips: [expect.objectContaining({ id: 'tag:dark' })],
+      })
+    } finally {
+      localStorageAccess.mockRestore()
+    }
+  })
+
   it('merges dirty overlays and tombstones when repairing invalid durable content', () => {
     const values = new Map([[
       ASSISTANT_PAGE_STATE_STORAGE_KEY,

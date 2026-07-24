@@ -8,10 +8,11 @@ const { confirmTipMock, hasValidConfigMock, session } = vi.hoisted(() => ({
   confirmTipMock: vi.fn(),
   hasValidConfigMock: vi.fn(() => false),
   session: {
+    owner: { pageKey: '/source', generation: 1 },
     ready: true,
     hasState: false,
     persistenceError: null as string | null,
-    startNewChat: vi.fn(),
+    startNewChat: vi.fn(() => true),
   },
 }))
 
@@ -41,9 +42,11 @@ afterEach(() => {
   hasValidConfigMock.mockReturnValue(false)
   confirmTipMock.mockReset()
   session.ready = true
+  session.owner = { pageKey: '/source', generation: 1 }
   session.hasState = false
   session.persistenceError = null
   session.startNewChat.mockReset()
+  session.startNewChat.mockReturnValue(true)
 })
 
 function renderPanel(open: boolean) {
@@ -116,7 +119,7 @@ describe('AssistantPanel', () => {
       confirmLabel: 'Start new chat',
       danger: false,
     }))
-    expect(session.startNewChat).toHaveBeenCalledTimes(1)
+    expect(session.startNewChat).toHaveBeenCalledWith(session.owner)
   })
 
   it('starts a new chat without confirmation when the page is empty', () => {
@@ -126,7 +129,7 @@ describe('AssistantPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'New chat' }))
 
     expect(confirmTipMock).not.toHaveBeenCalled()
-    expect(session.startNewChat).toHaveBeenCalledTimes(1)
+    expect(session.startNewChat).toHaveBeenCalledWith(session.owner)
   })
 
   it('hides the previous conversation while the destination page is loading', () => {
@@ -141,6 +144,34 @@ describe('AssistantPanel', () => {
     expect(
       screen.queryByRole('textbox', { name: 'Assistant composer' }),
     ).toBeNull()
+    expect(
+      (screen.getByRole('button', { name: 'New chat' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true)
+  })
+
+  it('expires a pending confirmation when its page owner changes', async () => {
+    hasValidConfigMock.mockReturnValue(true)
+    session.hasState = true
+    let resolveConfirmation = (_confirmed: boolean) => {}
+    confirmTipMock.mockReturnValue(new Promise<boolean>((resolve) => {
+      resolveConfirmation = resolve
+    }))
+    const rendered = renderPanel(true)
+
+    fireEvent.click(screen.getByRole('button', { name: 'New chat' }))
+    await waitFor(() => expect(confirmTipMock).toHaveBeenCalledTimes(1))
+
+    session.owner = { pageKey: '/destination', generation: 2 }
+    rendered.rerender(
+      <MemoryRouter>
+        <AssistantPanel open onClose={() => {}} />
+      </MemoryRouter>,
+    )
+    resolveConfirmation(true)
+    await Promise.resolve()
+
+    expect(session.startNewChat).not.toHaveBeenCalled()
   })
 
   it('keeps the page state when new chat confirmation is cancelled', async () => {

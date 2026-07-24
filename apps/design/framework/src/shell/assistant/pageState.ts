@@ -27,17 +27,19 @@ type AssistantPageStateEnvelopeV1 = {
   pages: Record<string, AssistantPageStateV1>
 }
 
-type MemoryPageOverlay = {
-  state: AssistantPageStateV1 | null
-}
-
-const memoryPagesByStorage =
-  new WeakMap<Storage, Map<string, MemoryPageOverlay>>()
-
 export type AssistantPageStatePatch = {
   messages?: PersistedMessage[]
   filter?: Filter
 }
+
+type MemoryPageOverlay = {
+  cleared: boolean
+  patch: AssistantPageStatePatch
+  updatedAt: string
+}
+
+const memoryPagesByStorage =
+  new WeakMap<Storage, Map<string, MemoryPageOverlay>>()
 
 export type StoreWriteResult =
   | { ok: true; state: AssistantPageStateV1 }
@@ -295,7 +297,15 @@ function parseEnvelope(storage: Storage): ParseEnvelopeResult {
         needsRepair = true
         continue
       }
+      const {
+        version: _version,
+        messages: _messages,
+        filter: _filter,
+        updatedAt: _updatedAt,
+        ...unknownFields
+      } = state
       pages[key] = {
+        ...unknownFields,
         version: 1,
         messages: state.messages,
         ...(isFilter(state.filter) ? { filter: state.filter } : {}),
@@ -345,11 +355,28 @@ function applyOverlays(
   included: Array<[string, MemoryPageOverlay]>,
 ): void {
   for (const [pageKey, overlay] of included) {
-    if (overlay.state === null) {
+    const state = materializeOverlay(envelope.pages[pageKey], overlay)
+    if (state === null) {
       delete envelope.pages[pageKey]
     } else {
-      envelope.pages[pageKey] = overlay.state
+      envelope.pages[pageKey] = state
     }
+  }
+}
+
+function materializeOverlay(
+  base: AssistantPageStateV1 | undefined,
+  overlay: MemoryPageOverlay,
+): AssistantPageStateV1 | null {
+  const hasPatch =
+    overlay.patch.messages !== undefined ||
+    overlay.patch.filter !== undefined
+  if (overlay.cleared && !hasPatch) return null
+  return {
+    ...(overlay.cleared ? emptyState() : base ?? emptyState()),
+    ...overlay.patch,
+    version: 1,
+    updatedAt: overlay.updatedAt,
   }
 }
 
@@ -443,7 +470,9 @@ export function readAssistantPageState(
     const overlay = fallback.get(pageKey)
     const parsed = parseEnvelope(target)
     if (parsed.status === 'unavailable') {
-      return overlay ? overlay.state ?? emptyState() : emptyState()
+      return overlay
+        ? materializeOverlay(undefined, overlay) ?? emptyState()
+        : emptyState()
     }
     if (parsed.needsRepair) {
       persistEnvelopeWithOverlays(
@@ -452,7 +481,12 @@ export function readAssistantPageState(
         'Conversation cache could not be repaired.',
       )
     }
-    if (overlay) return overlay.state ?? emptyState()
+    if (overlay) {
+      return materializeOverlay(
+        parsed.envelope.pages[pageKey],
+        overlay,
+      ) ?? emptyState()
+    }
     return parsed.envelope.pages[pageKey] ?? emptyState()
   } catch {
     return emptyState()
@@ -465,13 +499,19 @@ export function patchAssistantPageState(
   storage?: Storage,
 ): StoreWriteResult {
   const target = resolveStorage(storage)
-  const state: AssistantPageStateV1 = {
-    ...readAssistantPageState(pageKey, target),
-    ...patch,
-    version: 1,
+  const base = readAssistantPageState(pageKey, target)
+  const overlays = memoryPages(target)
+  const existing = overlays.get(pageKey)
+  const overlay: MemoryPageOverlay = {
+    cleared: existing?.cleared ?? false,
+    patch: {
+      ...existing?.patch,
+      ...patch,
+    },
     updatedAt: new Date().toISOString(),
   }
-  memoryPages(target).set(pageKey, { state })
+  const state = materializeOverlay(base, overlay) ?? emptyState()
+  overlays.set(pageKey, overlay)
   if (target === volatileStorage) {
     return {
       ok: false,
@@ -484,7 +524,10 @@ export function patchAssistantPageState(
     'Conversation could not be saved.',
   )
   if (persisted.ok) {
-    return { ok: true, state }
+    return {
+      ok: true,
+      state: readAssistantPageState(pageKey, target),
+    }
   }
   return { ok: false, state, error: persisted.error }
 }
@@ -495,7 +538,11 @@ export function clearAssistantPageState(
 ): StoreWriteResult {
   const target = resolveStorage(storage)
   const state = emptyState()
-  memoryPages(target).set(pageKey, { state: null })
+  memoryPages(target).set(pageKey, {
+    cleared: true,
+    patch: {},
+    updatedAt: new Date().toISOString(),
+  })
   if (target === volatileStorage) {
     return {
       ok: false,

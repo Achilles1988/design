@@ -82,9 +82,10 @@ tool-call 的 `toolName`、可选 `toolCallId`、`args` 与 `result` 必须是�
 消息和含函数、循环引用或其他不可序列化值的消息不会写入快照。`restoreMessages` 将时间恢复为
 `Date`，并把 assistant 消息恢复为 complete 状态。
 
-若 `localStorage` 写入或删除失败，Store 返回 `ok:false`，同时按 Storage 实例和页面键保留内存
-overlay 或 clear tombstone。后续读取会优先使用该回退，避免旧的磁盘值在本次会话中回流。每次
-后续 patch/clear 都把该 Storage 的全部 dirty overlay 与 tombstone 合并进同一个 envelope；
+若 `localStorage` 写入或删除失败，Store 返回 `ok:false`，同时保留字段级内存 overlay 或 clear
+tombstone。partial patch 只记录实际触及的 `messages`/`filter`，不会把读取失败时未知的字段物化为
+空值。后续读取会优先把该回退合并到可用 durable base，避免旧磁盘值在本次会话中回流。每次
+后续 patch/clear 都把相关 Storage 的全部 dirty overlay 与 tombstone 合并进同一个 envelope；
 durable 写入成功后只清除该次实际包含且未被更新的 dirty 项。因此 A 写失败后 B 写成功会同时
 持久化 A 的最新状态，A clear 失败后 B 写成功也会同时持久化 A 的删除。
 
@@ -95,8 +96,9 @@ Store 明确区分“已读取但内容 invalid”和“Storage I/O unavailable�
 访问 `window.localStorage` 本身被浏览器拒绝时，Store 使用 volatile storage 保持当前内存可用，
 但 patch/clear 固定返回 `ok:false` 与英文错误，绝不把内存写声称为 durable success。clear 写入
 失败时 tombstone 仍让当前页面保持为空，并持续通过 session 暴露 persistence warning，直到后续
-写入把全部 dirty 状态成功持久化。getter 后续恢复时，Store 会把 volatile 的全部 overlay 与
-tombstone 合并进 durable envelope；当前会话更新优先，同时保留 durable 中未触及的其他页面。
+写入把全部 dirty 状态成功持久化。getter 后续恢复时，Store 会按字段依次合并 durable 与 volatile
+的全部 overlay/tombstone；outage 期间的同页 partial patch 只覆盖自身字段，未触及字段与 durable
+中的其他页面均保留。
 
 ## 页面级会话（`pageSession.tsx`）
 
@@ -125,7 +127,8 @@ Store 写入失败时，`persistenceError` 暴露英文错误提示。
   `accepted:false`，不修改任一页面且不制造 persistence warning。generation 在路由 hydration
   和每次 New chat 时推进，因此同页迟到工具和 A→B→A 的旧 A 工具也会被拒绝。接受的 mutation
   返回 `accepted:true` 加 Store 的 durable 结果。
-- `startNewChat()` 增加 epoch、取消运行，并捕获命令发起时的目标页。该页的 Store clear 不受后续
+- `startNewChat(owner)` 只接受与最新 `{ pageKey, generation }` 完全一致且已 hydration ready 的
+  owner。接受后增加 epoch、取消运行，并捕获命令发起时的目标页。该页的 Store clear 不受后续
   hydration epoch 或导航影响，等待旧 run idle 后必须最终执行；导航保存旧快照时也会跳过正在清理
   的页面，不能复活旧消息。只有目标页届时仍是当前页，才清空共享 Runtime 并调用当前页面 reset
   handler。其他页面正常 hydration 且状态不受影响。资产页重置回调必须同时清空 React filter state
@@ -161,8 +164,10 @@ Store 写入失败时，`persistenceError` 暴露英文错误提示。
 ## New chat UI
 
 配置完成的 AI 面板标题栏提供 `New chat` 按钮。若当前页面会话有消息或筛选状态，点击后先通过
-`confirmTip` 确认“清除本页会话与筛选”；用户取消时不执行清除。空会话直接执行 `startNewChat()`。
-命令已经发起后，composer 在下一帧重新获得焦点。若会话状态的 localStorage 持久化失败，面板以
+`confirmTip` 确认“清除本页会话与筛选”；确认请求捕获发起时 owner，导航或 generation 改变后
+确认结果直接失效，不能清理新页。hydration pending（`ready=false`）时按钮禁用。用户取消时不执行
+清除；空会话直接执行 `startNewChat(owner)`。命令被 session 接受后，composer 在下一帧重新获得
+焦点。若会话状态的 localStorage 持久化失败，面板以
 `role="status"` 提示：会话仍可在当前会话中使用，但无法保存。
 
 `createPageScopedModelAdapter(adapter, getEpoch)` 在每次模型运行开始时捕获 epoch，并在转发每个

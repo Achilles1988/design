@@ -31,6 +31,16 @@ export type AssistantPageOwner = {
   generation: number
 }
 
+function isSameAssistantPageOwner(
+  left: AssistantPageOwner | null,
+  right: AssistantPageOwner,
+): boolean {
+  return (
+    left?.pageKey === right.pageKey &&
+    left.generation === right.generation
+  )
+}
+
 export type AssistantPageSessionValue = {
   pageKey: string
   owner: AssistantPageOwner
@@ -43,7 +53,7 @@ export type AssistantPageSessionValue = {
     owner: AssistantPageOwner,
     filter: Filter,
   ) => PageFilterWriteResult
-  startNewChat: () => void
+  startNewChat: (owner: AssistantPageOwner) => boolean
 }
 
 export type PageFilterWriteResult =
@@ -213,7 +223,17 @@ export function AssistantPageSessionProvider({
     return { accepted: true, ...result }
   }, [activeEpochRef])
 
-  const startNewChat = useCallback(() => {
+  const startNewChat = useCallback((owner: AssistantPageOwner) => {
+    const activeOwner = {
+      pageKey: latestRouteKeyRef.current,
+      generation: activeEpochRef.current,
+    }
+    if (
+      !isSameAssistantPageOwner(owner, activeOwner) ||
+      hydratingRef.current ||
+      activeKeyRef.current !== owner.pageKey
+    ) return false
+
     activeEpochRef.current += 1
     setGeneration(activeEpochRef.current)
     const targetPageKey = latestRouteKeyRef.current
@@ -245,6 +265,7 @@ export function AssistantPageSessionProvider({
         clearingPageKeysRef.current.delete(targetPageKey)
       }
     })
+    return true
   }, [activeEpochRef, runtime])
 
   const ready = hydratedPageKey === pageKey

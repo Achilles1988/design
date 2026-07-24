@@ -3,8 +3,21 @@ import { Link } from 'react-router-dom'
 import { hasValidConfig } from '@/lib/ai/config'
 import { confirmTip } from '@/lib/confirmTip'
 import { AssistantThread } from './AssistantThread'
-import { useAssistantPageSession } from './pageSession'
+import {
+  useAssistantPageSession,
+  type AssistantPageOwner,
+} from './pageSession'
 import './assistant.css'
+
+function isSameOwner(
+  left: AssistantPageOwner,
+  right: AssistantPageOwner,
+): boolean {
+  return (
+    left.pageKey === right.pageKey &&
+    left.generation === right.generation
+  )
+}
 
 export function AssistantPanel({
   open,
@@ -15,11 +28,16 @@ export function AssistantPanel({
 }) {
   const composerInputRef = useRef<HTMLTextAreaElement>(null)
   const {
+    owner,
     ready,
     hasState,
     persistenceError,
     startNewChat,
   } = useAssistantPageSession()
+  const latestOwnerRef = useRef(owner)
+  const latestReadyRef = useRef(ready)
+  latestOwnerRef.current = owner
+  latestReadyRef.current = ready
 
   useEffect(() => {
     if (!open) return
@@ -36,6 +54,8 @@ export function AssistantPanel({
   }, [open, onClose])
 
   async function onNewChat() {
+    if (!ready) return
+    const requestOwner = owner
     if (hasState) {
       const confirmed = await confirmTip({
         message: 'Start a new chat? This clears the conversation and filters for this page.',
@@ -45,8 +65,13 @@ export function AssistantPanel({
       if (!confirmed) return
     }
 
-    startNewChat()
-    requestAnimationFrame(() => composerInputRef.current?.focus())
+    if (
+      !latestReadyRef.current ||
+      !isSameOwner(requestOwner, latestOwnerRef.current)
+    ) return
+    if (startNewChat(requestOwner)) {
+      requestAnimationFrame(() => composerInputRef.current?.focus())
+    }
   }
 
   if (!open) return null
@@ -62,6 +87,7 @@ export function AssistantPanel({
               type="button"
               className="assistant-panel__new-chat"
               onClick={onNewChat}
+              disabled={!ready}
               aria-label="New chat"
             >
               New chat

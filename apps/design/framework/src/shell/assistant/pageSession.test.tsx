@@ -293,7 +293,7 @@ describe('AssistantPageSessionProvider', () => {
     })
   })
 
-  it('new chat during pending navigation clears the destination page', () => {
+  it('rejects new chat while destination hydration is pending', () => {
     patchAssistantPageState('/pending-destination', {
       messages: [{
         id: 'destination',
@@ -317,12 +317,20 @@ describe('AssistantPageSessionProvider', () => {
       createdAt: new Date('2026-07-24T00:00:00.000Z'),
     }], true))
     act(() => result.current.navigate('/pending-destination'))
-    act(() => result.current.session.startNewChat())
+    let accepted: boolean | undefined
+    act(() => {
+      accepted = result.current.session.startNewChat(
+        result.current.session.owner,
+      )
+    })
     act(() => fake.finishRun())
 
+    expect(accepted).toBe(false)
     expect(result.current.session.pageKey).toBe('/pending-destination')
     expect(result.current.session.ready).toBe(true)
-    expect(readAssistantPageState('/pending-destination').messages).toEqual([])
+    expect(readAssistantPageState('/pending-destination').messages).toEqual([
+      expect.objectContaining({ id: 'destination' }),
+    ])
     expect(readAssistantPageState('/pending-source').messages).toEqual([
       expect.objectContaining({ id: 'source' }),
     ])
@@ -393,7 +401,9 @@ describe('AssistantPageSessionProvider', () => {
       content: 'source running',
       createdAt: new Date('2026-07-24T00:00:00.000Z'),
     }], true))
-    act(() => result.current.session.startNewChat())
+    act(() => result.current.session.startNewChat(
+      result.current.session.owner,
+    ))
     act(() => result.current.navigate('/clear-destination'))
     act(() => fake.finishRun())
 
@@ -416,7 +426,7 @@ describe('AssistantPageSessionProvider', () => {
     expect(resetPage).not.toHaveBeenCalled()
   })
 
-  it('a stale new-chat callback targets the latest pending destination', () => {
+  it('rejects a stale new-chat owner after navigation', () => {
     patchAssistantPageState('/stale-destination', {
       messages: [{
         id: 'destination',
@@ -441,7 +451,7 @@ describe('AssistantPageSessionProvider', () => {
     }), {
       wrapper: createWrapper(fake, '/stale-source'),
     })
-    const staleStartNewChat = result.current.session.startNewChat
+    const staleOwner = result.current.session.owner
 
     act(() => fake.setMessages([{
       id: 'source',
@@ -450,15 +460,21 @@ describe('AssistantPageSessionProvider', () => {
       createdAt: new Date('2026-07-24T00:00:00.000Z'),
     }], true))
     act(() => result.current.navigate('/stale-destination'))
-    act(() => staleStartNewChat())
     act(() => fake.finishRun())
+    let accepted: boolean | undefined
+    act(() => {
+      accepted = result.current.session.startNewChat(staleOwner)
+    })
 
+    expect(accepted).toBe(false)
     expect(result.current.session.pageKey).toBe('/stale-destination')
     expect(result.current.session.ready).toBe(true)
     expect(readAssistantPageState('/stale-destination')).toMatchObject({
-      messages: [],
+      messages: [expect.objectContaining({ id: 'destination' })],
     })
-    expect(readAssistantPageState('/stale-destination').filter).toBeUndefined()
+    expect(readAssistantPageState('/stale-destination').filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:destination' })],
+    })
     expect(readAssistantPageState('/stale-source').messages).toEqual([
       expect.objectContaining({ id: 'source' }),
     ])
@@ -597,7 +613,7 @@ describe('AssistantPageSessionProvider', () => {
       generation: expect.any(Number),
     })
 
-    act(() => result.current.startNewChat())
+    act(() => result.current.startNewChat(result.current.owner))
     let writeResult: ReturnType<typeof result.current.setPageFilter> | undefined
     act(() => {
       writeResult = setOwnedFilter(owner, {
@@ -742,7 +758,7 @@ describe('AssistantPageSessionProvider', () => {
       content: 'running',
       createdAt: new Date('2026-07-24T00:00:00.000Z'),
     }], true))
-    act(() => result.current.startNewChat())
+    act(() => result.current.startNewChat(result.current.owner))
 
     expect(fake.runtime.thread.cancelRun).toHaveBeenCalled()
     expect(fake.runtime.thread.reset).not.toHaveBeenLastCalledWith([])
@@ -783,7 +799,7 @@ describe('AssistantPageSessionProvider', () => {
     })
 
     expect(() => {
-      act(() => result.current.startNewChat())
+      act(() => result.current.startNewChat(result.current.owner))
     }).not.toThrow()
 
     expect(result.current.ready).toBe(true)
@@ -831,7 +847,7 @@ describe('AssistantPageSessionProvider', () => {
       })
 
     try {
-      act(() => result.current.startNewChat())
+      act(() => result.current.startNewChat(result.current.owner))
 
       expect(result.current.ready).toBe(true)
       expect(result.current.hasState).toBe(false)
