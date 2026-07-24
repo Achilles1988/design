@@ -100,6 +100,27 @@ Runtime 消息数量都会即时更新 `hasState`，筛选 chips 也会参与该
 - `startNewChat()` 增加 epoch、取消运行、清空 Runtime 消息、调用页面重置函数，并只清除当前页面
   的消息与筛选；命令回调即使创建于旧页面，也按调用时的最新路由键执行，其他页面状态保持不变。
 
+## 资产筛选恢复与持久化
+
+`usePersistentAssetFilter(index)` 是资产页对页面会话筛选状态的唯一适配层，返回
+`{ filter, filterRef, setFilter, resetFilter }`。它直接消费 `useAssistantPageSession()` 的
+`pageKey`、`pageState`、`ready` 与 `setPageFilter()`，不会创建第二套页面键。
+
+- 只有页面会话 `ready=true` 且资产索引已加载时才恢复筛选；pending navigation 期间不读取旧
+  `pageState`、不写默认空筛选。每次页面键完成 hydration 后只执行一次恢复。
+- 恢复时，`tag` 必须仍存在于索引任一资产的 tags，`origin` 必须仍存在于索引任一资产的
+  origin；失效项会被删除。`freeform` 不依赖索引枚举，始终保留。清理后的筛选会写回当前页面状态。
+- `setFilter` 同时接受完整 `Filter` 和 functional update。它先同步更新 `filterRef`，再更新
+  React state 并调用 `setPageFilter()`；AI 工具、手动删除 chip 与 `Reset all` 均使用此入口。
+  因此连续 AI delta 能读取最新 ref，手动操作也持久化到同一页面状态。
+- `resetFilter` 仅同步清空 React state 与 `filterRef`，不自行写 Store。它只作为
+  `usePageAssistant({ onResetPageState })` 的 New chat 重置回调使用；随后
+  `startNewChat()` 删除整个当前页面状态。重置会以 session 提供的最新 `pageKey` 标记已清理页面；
+  即使回调创建于旧页面，pending destination 恢复 ready 后也不会把空筛选重新写回，因而不会
+  复活刚删除的页面条目。
+- 用户点击 `Reset all` 不会删除整页会话，因此必须调用 `setFilter(emptyFilter())`，显式持久化
+  空筛选并保留聊天消息。
+
 ## New chat UI
 
 配置完成的 AI 面板标题栏提供 `New chat` 按钮。若当前页面会话有消息或筛选状态，点击后先通过
@@ -174,6 +195,8 @@ useAssistantTool({
   `{ success:false, applied:{ add:[], remove:[] }, matchCount, changed:false, error }`；失败结果的
   `applied` 始终为空，`matchCount` 基于当前保留的筛选重新计算。
 - 页面收到真实变更后立即更新 chips、数量与可见资产；工具结果通过 adapter 回传模型，供下一步生成准确英文摘要。
+- 以上筛选恢复与 setter 契约已有纯函数、hook 和工具层测试；它不替代
+  composer → adapter → 工具执行 → 资产页重渲染的完整集成验收，该链路需由独立集成测试证明。
 
 ## 落位与样式
 

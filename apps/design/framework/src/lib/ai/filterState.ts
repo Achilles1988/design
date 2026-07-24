@@ -1,3 +1,5 @@
+import type { AssetMeta } from './assetIndex'
+
 export type FilterKind = 'tag' | 'origin' | 'freeform'
 
 export type FilterChip = {
@@ -36,6 +38,21 @@ export function chipId(kind: FilterKind, value: string): string {
 
 export function emptyFilter(): Filter {
   return { chips: [] }
+}
+
+export function sanitizeFilterForIndex(
+  filter: Filter,
+  index: readonly AssetMeta[],
+): Filter {
+  const tags = new Set(index.flatMap((item) => item.tags))
+  const origins = new Set(index.map((item) => item.origin))
+  return {
+    chips: filter.chips.filter((chip) => {
+      if (chip.kind === 'freeform') return true
+      if (chip.kind === 'tag') return tags.has(chip.value)
+      return origins.has(chip.value)
+    }),
+  }
 }
 
 export function matchesChip(meta: AssetMetaLike, chip: FilterChip): boolean {
