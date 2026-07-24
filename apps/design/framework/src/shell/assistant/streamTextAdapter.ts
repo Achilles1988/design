@@ -1,4 +1,9 @@
-import { jsonSchema, tool as aiTool, type CoreMessage } from 'ai'
+import {
+  jsonSchema,
+  tool as aiTool,
+  type CoreMessage,
+  type ToolExecutionOptions,
+} from 'ai'
 import { AiClientError, classify, createModel } from '@/lib/ai/client'
 import { readAiConfig, type AiConfig } from '@/lib/ai/config'
 
@@ -140,11 +145,34 @@ export function buildTools(tools: AdapterContext['tools']) {
   if (!tools) return undefined
   const out: Record<string, unknown> = {}
   for (const [name, def] of Object.entries(tools)) {
-    out[name] = aiTool({
+    const execute = def.execute
+      ? async (args: unknown, options: ToolExecutionOptions) =>
+          def.execute!(args, {
+            toolCallId: options.toolCallId,
+            abortSignal:
+              options.abortSignal ?? new AbortController().signal,
+            human: async () => {
+              throw new Error(
+                'Human input is not supported by this chat adapter.',
+              )
+            },
+          })
+      : undefined
+    const definition = {
       description: def.description ?? '',
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       parameters: toAiToolParameters(def.parameters) as any,
-    })
+    }
+    out[name] = execute
+      ? aiTool({
+          ...definition,
+          // LocalRuntime does not execute registered frontend tools. Forward
+          // the browser-local implementation so AI SDK emits the tool result.
+          execute,
+        })
+      : aiTool({
+          ...definition,
+        })
   }
   return out
 }

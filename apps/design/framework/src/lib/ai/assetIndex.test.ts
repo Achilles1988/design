@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { readFile, readdir } from 'node:fs/promises'
 import { compactForPrompt, parseIndexMarkdown, type AssetMeta } from './assetIndex'
 
 const SAMPLE = `# 设计风格索引（自动生成，勿手改）
@@ -84,5 +85,24 @@ describe('compactForPrompt', () => {
     const out = compactForPrompt(items.slice(0, 5), 40)
     expect(out).not.toContain('still')
     expect(out.trim().split('\n')).toHaveLength(5)
+  })
+})
+
+describe('published asset indexes', () => {
+  it('publishes metadata for every layout package', async () => {
+    const layoutsUrl = new URL('../../../public/assets/layoutmd/', import.meta.url)
+    const indexUrl = new URL(
+      'INDEX.md',
+      layoutsUrl,
+    )
+    const items = parseIndexMarkdown(await readFile(indexUrl, 'utf8'))
+    const packageIds = (await readdir(layoutsUrl, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort()
+
+    expect(items).toHaveLength(21)
+    expect(items.map((item) => item.id).sort()).toEqual(packageIds)
+    expect(items.every((item) => item.tags.length > 1)).toBe(true)
   })
 })

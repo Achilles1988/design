@@ -45,7 +45,11 @@ useAssistantTool({
 })
 ```
 
-- 工具**执行由 assistant runtime 托管**：adapter 只向模型声明 description 与 parameters；模型发起 tool-call 后，runtime 调页面注册的 `execute`（浏览器端），把结果附回消息，再按 runtime `maxSteps` 发起后续模型步骤。
+- 工具执行由 AI SDK 托管：adapter 把页面注册的 description、parameters 与 `execute`
+  一并交给 `streamText`；模型发起 tool-call 后，AI SDK 在浏览器端调用 `execute`，adapter
+  把 tool result 附回 assistant 消息，再由 LocalRuntime 按 `maxSteps` 发起后续模型步骤。
+- adapter 会把同步或异步 execute 统一包装为 Promise；不支持 execute 上下文中的
+  `human()` 交互，调用时会返回明确错误。需要人工确认的工具不应注册到此聊天内核。
 - 若某工具的 `execute` **可能失败**（网络、外部调用等），应 catch 并**作为结果返回**（如
   `{ success:false, error }`），让模型可解释；对纯粹、参数已由 `parameters` 校验的确定性
   `execute`（如 `apply_filter`），无需额外防御分支。
@@ -56,7 +60,8 @@ useAssistantTool({
 - `async *run({ messages, abortSignal, context })`：**每次 yield 累积全量内容**（非增量），
   文本累加、tool-call 用循环外 `Map` 累积，避免纯文本 chunk 冲掉工具调用。
 - `toCoreMessages` 必须把已完成的 assistant tool-call 转成连续的 AI SDK `assistant` tool-call message 与 `tool` result message；不能丢弃 `result`，否则后续模型步骤看不到真实执行状态。
-- adapter 只把 `context.tools` 的 description 与 parameters 转成 AI SDK tool，不转发 execute；runtime 是唯一执行所有者。
+- adapter 把 `context.tools` 的 description、parameters 与 execute 转成 AI SDK tool；
+  LocalRuntime 本身不会执行前端工具，不能从 adapter 丢弃 execute。
 - `AssistantProvider` 使用 runtime `maxSteps: 2` 完成“模型选择工具 → 页面执行筛选 → 模型基于真实结果生成摘要”。
 - 工具参数转发：`toAiToolParameters` 对 zod/StandardSchema 直接透传给 ai-sdk，纯 JSONSchema7
   用 `jsonSchema()` 包裹。

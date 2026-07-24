@@ -125,12 +125,26 @@ describe('createStreamTextAdapter.run', () => {
     expect(seen).toEqual(['He', 'Hello'])
   })
 
-  it('leaves tool execution to the assistant runtime', async () => {
+  it('forwards frontend tool execution to AI SDK', async () => {
     const execute = vi.fn(() => ({ changed: true, matchCount: 1 }))
-    let sdkTools: Record<string, { execute?: unknown }> | undefined
+    let sdkTools:
+      | Record<
+          string,
+          {
+            execute?: (
+              args: unknown,
+              options: {
+                toolCallId: string
+                messages: []
+                abortSignal: AbortSignal
+              },
+            ) => Promise<unknown>
+          }
+        >
+      | undefined
     const adapter = createStreamTextAdapter({
       streamTextImpl: (options) => {
-        sdkTools = options.tools as Record<string, { execute?: unknown }>
+        sdkTools = options.tools as typeof sdkTools
         return fakeStream([
           {
             type: 'tool-call',
@@ -160,8 +174,18 @@ describe('createStreamTextAdapter.run', () => {
       void _
     }
 
-    expect(sdkTools?.apply_filter.execute).toBeUndefined()
-    expect(execute).not.toHaveBeenCalled()
+    const result = sdkTools?.apply_filter.execute?.(
+      { add: [] },
+      {
+        toolCallId: 't1',
+        messages: [],
+        abortSignal: new AbortController().signal,
+      },
+    )
+
+    expect(result).toBeInstanceOf(Promise)
+    await expect(result).resolves.toEqual({ changed: true, matchCount: 1 })
+    expect(execute).toHaveBeenCalledTimes(1)
   })
 
   it('marks tool-call results for LocalRuntime continuation', async () => {
