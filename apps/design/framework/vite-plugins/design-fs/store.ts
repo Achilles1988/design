@@ -67,10 +67,10 @@ function requireNonEmptyName(name: string, label: string): string {
 
 export function canvasPlaceholderSource(
   componentFile: string,
-  canvasName: string,
+  _canvasName: string,
 ): string {
   const fn = componentFile.replace(/\.tsx$/, '')
-  return `export default function ${fn}() {\n  return <h1>${canvasName}</h1>\n}\n`
+  return `export default function ${fn}() {\n  return null\n}\n`
 }
 
 async function readCanvasesFile(appDir: string): Promise<CanvasesFile> {

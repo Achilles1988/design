@@ -152,9 +152,30 @@ describe('createContentStore', () => {
     expect(canvas.component).toBe('Home.tsx')
     const file = path.join(root, 'orders', 'canvases', 'Home.tsx')
     await expect(fs.access(file)).resolves.toBeUndefined()
-    expect(await fs.readFile(file, 'utf8')).toContain('<h1>Home</h1>')
+    expect(await fs.readFile(file, 'utf8')).toBe(
+      'export default function Home() {\n  return null\n}\n',
+    )
     await store.deleteCanvas('orders', 'home')
     await expect(fs.access(file)).rejects.toThrow()
+  })
+
+  it('creates a visually blank Canvas component', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'alpha', name: 'Alpha' })
+    const canvas = await store.addCanvas('alpha', {
+      id: 'reports',
+      name: 'Reports',
+    })
+
+    const source = await fs.readFile(
+      path.join(root, 'alpha', 'canvases', canvas.component),
+      'utf8',
+    )
+
+    expect(source).toBe(
+      'export default function Reports() {\n  return null\n}\n',
+    )
+    expect(source).not.toContain('<h1>')
   })
 
   it('falls back to id when canvas name yields illegal TS identifier', async () => {
@@ -171,6 +192,8 @@ describe('createContentStore', () => {
     )
     expect(source).toContain('function NotFound(')
     expect(source).not.toContain('function 404')
-    expect(source).toContain('<h1>404 Canvas</h1>')
+    expect(source).toBe(
+      'export default function NotFound() {\n  return null\n}\n',
+    )
   })
 })

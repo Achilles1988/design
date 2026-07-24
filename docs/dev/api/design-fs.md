@@ -101,9 +101,10 @@ See also: [Design project marker and contract resolution](design-project.md).
 
 Adding a canvas appends an entry and writes a placeholder `.tsx`. The component
 filename is derived from the canvas name (falling back to the canvas id when the
-derived name is not a valid TS identifier), while the placeholder `<h1>` uses
-the trimmed canvas `name`. Deleting a canvas removes the entry and the component
-file.
+derived name is not a valid TS identifier). Adding a Canvas writes a minimal
+named TSX component that returns `null`. The preview is visually blank until the
+user or Canvas Assistant authors UI. Deleting a canvas removes the entry and the
+component file.
 
 ### Asset entry (API)
 
