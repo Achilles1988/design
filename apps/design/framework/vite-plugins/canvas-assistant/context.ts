@@ -362,6 +362,10 @@ export function createCanvasContextLoader(
             throw new Error('Canvas CSS must be a direct local import.')
           }
           const cssPath = path.resolve(canvasDirectory, importedFile)
+          const cssStat = await fs.lstat(cssPath)
+          if (!cssStat.isFile() || cssStat.isSymbolicLink()) {
+            throw new Error('Canvas CSS must be a regular file.')
+          }
           await existingPathWithin(canvasDirectory, cssPath)
           return readAuthoringFile(appDir, cssPath, 'write-existing')
         }),

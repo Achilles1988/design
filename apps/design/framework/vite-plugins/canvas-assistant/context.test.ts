@@ -235,6 +235,23 @@ describe('createCanvasContextLoader', () => {
     ).rejects.toThrow('Canvas source could not be loaded.')
   })
 
+  it('rejects writable Canvas CSS symlinks to another Canvas source', async () => {
+    const fixture = await createFixture()
+    await fs.symlink(
+      path.join(fixture.canvasesDir, 'Other.tsx'),
+      path.join(fixture.canvasesDir, 'Linked.css'),
+    )
+    await fs.writeFile(
+      path.join(fixture.canvasesDir, 'Home.tsx'),
+      "import './Linked.css'\nexport default function Home() { return null }\n",
+      'utf8',
+    )
+
+    await expect(fixture.loader.load('shop', 'home')).rejects.toThrow(
+      'Canvas source could not be loaded.',
+    )
+  })
+
   it('rejects bare, nested, or sibling-directory Canvas CSS imports', async () => {
     const bareFixture = await createFixture()
     await fs.writeFile(
