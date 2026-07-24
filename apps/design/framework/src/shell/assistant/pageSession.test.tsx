@@ -146,6 +146,14 @@ function controlBrowserStorage() {
     })
 
   return {
+    hasDurablePage(pageKey: string) {
+      const raw = values.get('wn.assistant.page-state.v1')
+      if (!raw) return false
+      const parsed = JSON.parse(raw) as {
+        pages?: Record<string, unknown>
+      }
+      return parsed.pages?.[pageKey] !== undefined
+    },
     setGetterAvailable(value: boolean) {
       getterAvailable = value
     },
@@ -390,6 +398,175 @@ describe('AssistantPageSessionProvider', () => {
       storage.setGetterAvailable(true)
       storage.setWritesFail(false)
       readAssistantPageState('/continuity-a')
+      storage.restore()
+    }
+  })
+
+  it('does not snapshot provisional empty messages when the getter is unavailable', () => {
+    const storage = controlBrowserStorage()
+    patchAssistantPageState('/provisional-getter-b', {
+      messages: [{
+        id: 'durable-b',
+        role: 'user',
+        content: 'durable',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    const fake = createRuntime()
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/provisional-getter-a'),
+    })
+
+    try {
+      storage.setGetterAvailable(false)
+      act(() => result.current.navigate('/provisional-getter-b'))
+      expect(result.current.session.pageState.messages).toEqual([])
+
+      act(() => result.current.navigate('/provisional-getter-c'))
+      storage.setGetterAvailable(true)
+
+      expect(
+        readAssistantPageState('/provisional-getter-b').messages,
+      ).toEqual([
+        expect.objectContaining({ id: 'durable-b' }),
+      ])
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/provisional-getter-b')
+      storage.restore()
+    }
+  })
+
+  it('does not snapshot provisional empty messages when migration cannot write', () => {
+    const storage = controlBrowserStorage()
+    patchAssistantPageState('/provisional-migration-b', {
+      messages: [{
+        id: 'durable-migration-b',
+        role: 'user',
+        content: 'durable',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    const fake = createRuntime()
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/provisional-migration-a'),
+    })
+
+    try {
+      storage.setWritesFail(true)
+      act(() => {
+        result.current.session.setPageFilter(result.current.session.owner, {
+          chips: [{
+            id: 'tag:dirty',
+            kind: 'tag',
+            label: 'dirty',
+            value: 'dirty',
+            addedBy: 'ai',
+          }],
+        })
+      })
+      act(() => result.current.navigate('/provisional-migration-b'))
+      expect(result.current.session.pageState.messages).toEqual([])
+
+      act(() => result.current.navigate('/provisional-migration-c'))
+      storage.setWritesFail(false)
+
+      expect(
+        readAssistantPageState('/provisional-migration-b').messages,
+      ).toEqual([
+        expect.objectContaining({ id: 'durable-migration-b' }),
+      ])
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/provisional-migration-b')
+      storage.restore()
+    }
+  })
+
+  it('persists genuine message changes from a provisional page', () => {
+    const storage = controlBrowserStorage()
+    patchAssistantPageState('/provisional-message-b', {
+      messages: [{
+        id: 'old-durable',
+        role: 'user',
+        content: 'old',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    const fake = createRuntime()
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/provisional-message-a'),
+    })
+
+    try {
+      storage.setGetterAvailable(false)
+      act(() => result.current.navigate('/provisional-message-b'))
+      act(() => fake.setMessages([{
+        id: 'outage-created',
+        role: 'user',
+        content: 'new',
+        createdAt: new Date('2026-07-24T00:00:00.000Z'),
+      }]))
+      act(() => result.current.navigate('/provisional-message-c'))
+      storage.setGetterAvailable(true)
+
+      expect(
+        readAssistantPageState('/provisional-message-b').messages,
+      ).toEqual([
+        expect.objectContaining({ id: 'outage-created' }),
+      ])
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/provisional-message-b')
+      storage.restore()
+    }
+  })
+
+  it('keeps a New chat tombstone from provisional hydration', () => {
+    const storage = controlBrowserStorage()
+    patchAssistantPageState('/provisional-clear-b', {
+      messages: [{
+        id: 'clear-durable',
+        role: 'user',
+        content: 'clear',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    const fake = createRuntime()
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/provisional-clear-a'),
+    })
+
+    try {
+      storage.setGetterAvailable(false)
+      act(() => result.current.navigate('/provisional-clear-b'))
+      act(() => {
+        result.current.session.startNewChat(result.current.session.owner)
+      })
+      act(() => result.current.navigate('/provisional-clear-c'))
+      storage.setGetterAvailable(true)
+
+      expect(readAssistantPageState('/provisional-clear-b').messages).toEqual([])
+      expect(storage.hasDurablePage('/provisional-clear-b')).toBe(false)
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/provisional-clear-b')
       storage.restore()
     }
   })
@@ -871,6 +1048,44 @@ describe('AssistantPageSessionProvider', () => {
       storage.setGetterAvailable(true)
       storage.setWritesFail(false)
       readAssistantPageState('/warning-source')
+      storage.restore()
+    }
+  })
+
+  it('keeps a persistence error through provisional fallback hydration', () => {
+    const storage = controlBrowserStorage()
+    const fake = createRuntime()
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/warning-provisional-source'),
+    })
+
+    try {
+      storage.setWritesFail(true)
+      act(() => {
+        result.current.session.setPageFilter(result.current.session.owner, {
+          chips: [{
+            id: 'tag:warning',
+            kind: 'tag',
+            label: 'warning',
+            value: 'warning',
+            addedBy: 'ai',
+          }],
+        })
+      })
+      expect(result.current.session.persistenceError).toBeTruthy()
+
+      storage.setGetterAvailable(false)
+      act(() => result.current.navigate('/warning-provisional-target'))
+
+      expect(result.current.session.ready).toBe(true)
+      expect(result.current.session.persistenceError).toBeTruthy()
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/warning-provisional-target')
       storage.restore()
     }
   })

@@ -6,6 +6,7 @@ import {
   createAssistantPageKey,
   patchAssistantPageState,
   readAssistantPageState,
+  readAssistantPageStateResult,
   restoreMessages,
   serializeMessages,
 } from './pageState'
@@ -59,6 +60,89 @@ describe('createAssistantPageKey', () => {
 
 describe('assistant page state store', () => {
   beforeEach(() => localStorage.clear())
+
+  it('exposes page-state read authority to session hydration', () => {
+    expect(readAssistantPageStateResult).toBeTypeOf('function')
+  })
+
+  it('marks an unavailable storage read as provisional', () => {
+    const storage = createStorageView(new Map())
+    storage.getItem = () => {
+      throw new DOMException('read blocked', 'SecurityError')
+    }
+
+    expect(
+      readAssistantPageStateResult('/provisional-read', storage),
+    ).toMatchObject({
+      authoritative: false,
+      state: { messages: [] },
+    })
+  })
+
+  it('marks an unpersisted explicit-storage overlay as provisional', () => {
+    const values = new Map<string, string>()
+    const storage = createStorageView(values, () => {
+      throw new DOMException('quota exceeded', 'QuotaExceededError')
+    })
+
+    expect(patchAssistantPageState('/explicit-dirty', {
+      messages: [{
+        id: 'explicit-message',
+        role: 'user',
+        content: 'dirty',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    }, storage).ok).toBe(false)
+
+    expect(
+      readAssistantPageStateResult('/explicit-dirty', storage),
+    ).toMatchObject({
+      authoritative: false,
+      state: {
+        messages: [expect.objectContaining({ id: 'explicit-message' })],
+      },
+    })
+  })
+
+  it('marks failed browser migration provisional until it becomes durable', () => {
+    const values = new Map<string, string>()
+    let writesFail = true
+    const durableStorage = createStorageView(values, (key, value) => {
+      if (writesFail) {
+        throw new DOMException('quota exceeded', 'QuotaExceededError')
+      }
+      values.set(key, value)
+    })
+    const localStorageAccess = vi.spyOn(window, 'localStorage', 'get')
+      .mockReturnValue(durableStorage)
+
+    try {
+      expect(patchAssistantPageState('/migration-dirty', {
+        filter: {
+          chips: [{
+            id: 'tag:dirty',
+            kind: 'tag',
+            label: 'dirty',
+            value: 'dirty',
+            addedBy: 'ai',
+          }],
+        },
+      }).ok).toBe(false)
+
+      expect(
+        readAssistantPageStateResult('/migration-target'),
+      ).toMatchObject({ authoritative: false })
+
+      writesFail = false
+      expect(
+        readAssistantPageStateResult('/migration-target'),
+      ).toMatchObject({ authoritative: true })
+    } finally {
+      writesFail = false
+      readAssistantPageState('/migration-target')
+      localStorageAccess.mockRestore()
+    }
+  })
 
   it('patches one page without overwriting another page', () => {
     patchAssistantPageState('/assets/rule', {

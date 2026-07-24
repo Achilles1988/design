@@ -95,6 +95,10 @@ durable 写入成功后只清除该次实际包含且未被更新的 dirty 项�
 Store 明确区分“已读取但内容 invalid”和“Storage I/O unavailable”。只有前者会触发 repair；
 `getItem` 抛错时绝不尝试写入空 envelope，patch/clear 也保留 dirty 状态并返回失败。真实 repair
 与正常写入使用同一合并路径，必须包含该 Storage 的全部 dirty overlay 与 tombstone。
+`readAssistantPageStateResult()` 返回 `{ state, authoritative }`：只有 durable envelope 可读且
+必要的 dirty overlay/tombstone 已成功迁移时才是 authoritative；getter unavailable、durable
+读取失败或 migration 写入失败时返回的 volatile/空视图均为 provisional
+（`authoritative:false`）。`readAssistantPageState()` 继续提供仅 state 的便捷读取。
 
 访问 `window.localStorage` 本身被浏览器拒绝时，Store 使用 volatile storage 保持当前内存可用，
 但 patch/clear 固定返回 `ok:false` 与英文错误，绝不把内存写声称为 durable success。clear 写入
@@ -113,7 +117,10 @@ pending hydration 或等待旧 run idle 时，Runtime 内部可能暂时保留�
 生成，当前查询参数白名单只有 `appId`。
 
 协调器在首次挂载和页面键改变时增加共享 epoch。切换页面时，它先把 Runtime 的旧稳定消息写回
-旧页面键、取消旧运行，再恢复目标页面消息。若旧 run 尚未完成取消收尾，则等待 `isRunning=false`
+旧页面键；但若该页面由 provisional fallback hydration 且 Runtime 此后没有真实变化，则跳过这次
+自动快照，不能用 `messages:[]` 覆盖尚不可读的 durable messages。用户在 outage 中真实新增消息
+会把当前 Runtime 作为 messages overlay 写入；New Chat 仍写入 clear tombstone。随后协调器取消
+旧运行并恢复目标页面消息。若旧 run 尚未完成取消收尾，则等待 `isRunning=false`
 后才 reset 并恢复目标页面，因此旧 run 不会更新已替换的消息仓库，目标页也不会被切换瞬间的空
 Runtime 快照覆盖。恢复消息或 `runtime.thread.reset()` 抛错时，会删除该页无效缓存、reset 空消息
 并完成 hydration；页面进入 ready 而不会崩溃。只有已 hydration 的页面键与当前页面键相同时
@@ -122,8 +129,9 @@ Runtime 快照覆盖。恢复消息或 `runtime.thread.reset()` 抛错时，会�
 Runtime 消息变化会即时更新 `hasState`，筛选 chips 也会参与该状态判断；只有 Runtime 空闲且
 hydration 完成后才触发消息快照。快照内容和写入失败语义以“消息快照与写入失败”一节为准。
 Store 写入失败时，`persistenceError` 暴露英文错误提示。
-该提示描述最近一次持久化/恢复结果：正常页面 hydration（包括 getter 恢复后的 volatile
-migration）成功后清除旧错误，不能把上一页或故障期的 warning 长期带到健康页面。
+该提示只在持久层具有恢复证据时清除：hydration 的读取结果必须为 authoritative，即 durable
+可读且 dirty overlay/tombstone 已成功写入。volatile/provisional fallback 即使 Runtime hydration
+完成也继续显示 warning；getter 恢复并完成 migration 后的 authoritative hydration 才终止旧提示。
 
 页面通过 `useAssistantPageSession()` 使用以下基础命令：
 

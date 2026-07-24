@@ -17,6 +17,7 @@ import {
   createAssistantPageKey,
   patchAssistantPageState,
   readAssistantPageState,
+  readAssistantPageStateResult,
   restoreMessages,
   serializeMessages,
   type AssistantPageStateV1,
@@ -126,6 +127,7 @@ export function AssistantPageSessionProvider({
   latestRouteKeyRef.current = pageKey
   const activeKeyRef = useRef(pageKey)
   const hydratingRef = useRef(true)
+  const provisionalPageKeyRef = useRef<string | null>(null)
   const clearingPageKeysRef = useRef(new Set<string>())
   const resetHandlerRef = useRef<() => void>(() => {})
   const [generation, setGeneration] = useState(activeEpochRef.current)
@@ -138,18 +140,28 @@ export function AssistantPageSessionProvider({
   )
   const [persistenceError, setPersistenceError] = useState<string | null>(null)
 
-  const saveSnapshot = useCallback((targetPageKey: string) => {
+  const saveSnapshot = useCallback((
+    targetPageKey: string,
+    claimProvisional = false,
+  ) => {
     if (clearingPageKeysRef.current.has(targetPageKey)) return
+    if (
+      provisionalPageKeyRef.current === targetPageKey &&
+      !claimProvisional
+    ) return
     const result = patchAssistantPageState(targetPageKey, {
       messages: serializeMessages(runtime.thread.getState().messages),
     })
+    if (claimProvisional && activeKeyRef.current === targetPageKey) {
+      provisionalPageKeyRef.current = null
+    }
     setPageState(result.state)
     setPersistenceError(result.ok ? null : result.error)
   }, [runtime])
 
   const saveMessages = useCallback(() => {
     if (hydratingRef.current || runtime.thread.getState().isRunning) return
-    saveSnapshot(activeKeyRef.current)
+    saveSnapshot(activeKeyRef.current, true)
   }, [runtime, saveSnapshot])
 
   const onThreadChange = useCallback(() => {
@@ -168,18 +180,23 @@ export function AssistantPageSessionProvider({
 
     return cancelRunAndWaitForIdle(runtime, () => {
       if (activeEpochRef.current !== transitionEpoch) return
-      let restored = readAssistantPageState(pageKey)
+      const readResult = readAssistantPageStateResult(pageKey)
+      let restored = readResult.state
       let restoredMessages: ReturnType<typeof restoreMessages>
       activeKeyRef.current = pageKey
+      provisionalPageKeyRef.current = readResult.authoritative
+        ? null
+        : pageKey
       try {
         restoredMessages = restoreMessages(restored.messages)
         runtime.thread.reset(restoredMessages)
-        setPersistenceError(null)
+        if (readResult.authoritative) setPersistenceError(null)
       } catch {
         const cleared = clearAssistantPageState(pageKey)
         restored = cleared.state
         restoredMessages = []
         runtime.thread.reset([])
+        provisionalPageKeyRef.current = pageKey
         setPersistenceError(cleared.ok ? null : cleared.error)
       }
       setMessageCount(restoredMessages.length)
@@ -244,6 +261,7 @@ export function AssistantPageSessionProvider({
 
     cancelRunAndWaitForIdle(runtime, () => {
       const result = clearAssistantPageState(targetPageKey)
+      provisionalPageKeyRef.current = targetPageKey
       setPersistenceError(result.ok ? null : result.error)
       const isCurrentPage = latestRouteKeyRef.current === targetPageKey
       try {

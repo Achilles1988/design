@@ -46,6 +46,11 @@ export type StoreWriteResult =
   | { ok: true; state: AssistantPageStateV1 }
   | { ok: false; state: AssistantPageStateV1; error: string }
 
+export type AssistantPageStateReadResult = {
+  state: AssistantPageStateV1
+  authoritative: boolean
+}
+
 const emptyState = (): AssistantPageStateV1 => ({
   version: 1,
   messages: [],
@@ -333,6 +338,7 @@ function parseEnvelope(storage: Storage): ParseEnvelopeResult {
 type ResolvedStorage = {
   target: Storage
   overlays: Map<string, MemoryPageOverlay>
+  authoritative: boolean
 }
 
 function resolveStorage(storage?: Storage): ResolvedStorage {
@@ -340,20 +346,25 @@ function resolveStorage(storage?: Storage): ResolvedStorage {
     return {
       target: storage,
       overlays: memoryPages(storage),
+      authoritative: true,
     }
   }
   try {
     const durableStorage = window.localStorage
+    const authoritative = migrateVolatilePages(
+      durableStorage,
+      browserMemoryPages,
+    )
     return {
-      target: migrateVolatilePages(durableStorage, browserMemoryPages)
-        ? durableStorage
-        : volatileStorage,
+      target: authoritative ? durableStorage : volatileStorage,
       overlays: browserMemoryPages,
+      authoritative,
     }
   } catch {
     return {
       target: volatileStorage,
       overlays: browserMemoryPages,
+      authoritative: false,
     }
   }
 }
@@ -485,13 +496,17 @@ function readResolvedPageState(
   pageKey: string,
   target: Storage,
   overlays: Map<string, MemoryPageOverlay>,
-): AssistantPageStateV1 {
+  authoritative: boolean,
+): AssistantPageStateReadResult {
   const overlay = overlays.get(pageKey)
   const parsed = parseEnvelope(target)
   if (parsed.status === 'unavailable') {
-    return overlay
-      ? materializeOverlay(undefined, overlay) ?? emptyState()
-      : emptyState()
+    return {
+      state: overlay
+        ? materializeOverlay(undefined, overlay) ?? emptyState()
+        : emptyState(),
+      authoritative: false,
+    }
   }
   if (parsed.needsRepair) {
     persistEnvelopeWithOverlays(
@@ -502,23 +517,44 @@ function readResolvedPageState(
     )
   }
   if (overlay) {
-    return materializeOverlay(
-      parsed.envelope.pages[pageKey],
-      overlay,
-    ) ?? emptyState()
+    return {
+      state: materializeOverlay(
+        parsed.envelope.pages[pageKey],
+        overlay,
+      ) ?? emptyState(),
+      authoritative: authoritative && !overlays.has(pageKey),
+    }
   }
-  return parsed.envelope.pages[pageKey] ?? emptyState()
+  return {
+    state: parsed.envelope.pages[pageKey] ?? emptyState(),
+    authoritative,
+  }
 }
 
 export function readAssistantPageState(
   pageKey: string,
   storage?: Storage,
 ): AssistantPageStateV1 {
+  return readAssistantPageStateResult(pageKey, storage).state
+}
+
+export function readAssistantPageStateResult(
+  pageKey: string,
+  storage?: Storage,
+): AssistantPageStateReadResult {
   try {
-    const { target, overlays } = resolveStorage(storage)
-    return readResolvedPageState(pageKey, target, overlays)
+    const { target, overlays, authoritative } = resolveStorage(storage)
+    return readResolvedPageState(
+      pageKey,
+      target,
+      overlays,
+      authoritative,
+    )
   } catch {
-    return emptyState()
+    return {
+      state: emptyState(),
+      authoritative: false,
+    }
   }
 }
 
@@ -527,8 +563,13 @@ export function patchAssistantPageState(
   patch: AssistantPageStatePatch,
   storage?: Storage,
 ): StoreWriteResult {
-  const { target, overlays } = resolveStorage(storage)
-  const base = readResolvedPageState(pageKey, target, overlays)
+  const { target, overlays, authoritative } = resolveStorage(storage)
+  const base = readResolvedPageState(
+    pageKey,
+    target,
+    overlays,
+    authoritative,
+  ).state
   const existing = overlays.get(pageKey)
   const overlay: MemoryPageOverlay = {
     cleared: existing?.cleared ?? false,
