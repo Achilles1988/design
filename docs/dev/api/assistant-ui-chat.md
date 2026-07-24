@@ -57,8 +57,8 @@ type AssistantPageStateEnvelopeV1 = {
 }
 ```
 
-读取时会丢弃无法解析、版本不支持或消息/筛选结构无效的 envelope 或页面条目，并返回空 V1
-状态。`patchAssistantPageState` 合并目标页面的 `messages` 或 `filter`；
+读取时会丢弃无法解析或版本不支持的 envelope。页面条目的 `messages` 结构无效时会丢弃该条目；
+`filter` 结构无效时仅忽略该筛选，保留有效消息。`patchAssistantPageState` 合并目标页面的 `messages` 或 `filter`；
 `clearAssistantPageState` 删除目标页面的整个 state，因而同时删除消息和筛选，不影响其他页面。
 
 ### 消息快照与写入失败
