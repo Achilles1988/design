@@ -275,6 +275,105 @@ describe('AssistantPageSessionProvider', () => {
     ])
   })
 
+  it('a stale new-chat callback targets the latest pending destination', () => {
+    patchAssistantPageState('/stale-destination', {
+      messages: [{
+        id: 'destination',
+        role: 'user',
+        content: 'destination',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+      filter: {
+        chips: [{
+          id: 'tag:destination',
+          kind: 'tag',
+          label: 'destination',
+          value: 'destination',
+          addedBy: 'user',
+        }],
+      },
+    })
+    const fake = createRuntime({ asyncCancellation: true })
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/stale-source'),
+    })
+    const staleStartNewChat = result.current.session.startNewChat
+
+    act(() => fake.setMessages([{
+      id: 'source',
+      role: 'user',
+      content: 'source',
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+    }], true))
+    act(() => result.current.navigate('/stale-destination'))
+    act(() => staleStartNewChat())
+    act(() => fake.finishRun())
+
+    expect(result.current.session.pageKey).toBe('/stale-destination')
+    expect(result.current.session.ready).toBe(true)
+    expect(readAssistantPageState('/stale-destination')).toMatchObject({
+      messages: [],
+    })
+    expect(readAssistantPageState('/stale-destination').filter).toBeUndefined()
+    expect(readAssistantPageState('/stale-source').messages).toEqual([
+      expect.objectContaining({ id: 'source' }),
+    ])
+  })
+
+  it('writes filters to the latest route while its runtime hydration is pending', () => {
+    patchAssistantPageState('/filter-source', {
+      filter: {
+        chips: [{
+          id: 'tag:source',
+          kind: 'tag',
+          label: 'source',
+          value: 'source',
+          addedBy: 'user',
+        }],
+      },
+    })
+    const fake = createRuntime({ asyncCancellation: true })
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/filter-source'),
+    })
+
+    act(() => fake.setMessages([{
+      id: 'source',
+      role: 'user',
+      content: 'source',
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+    }], true))
+    act(() => result.current.navigate('/filter-destination'))
+    expect(result.current.session.ready).toBe(false)
+
+    act(() => {
+      result.current.session.setPageFilter({
+        chips: [{
+          id: 'tag:destination',
+          kind: 'tag',
+          label: 'destination',
+          value: 'destination',
+          addedBy: 'ai',
+        }],
+      })
+    })
+
+    expect(readAssistantPageState('/filter-destination').filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:destination' })],
+    })
+    expect(readAssistantPageState('/filter-source').filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:source' })],
+    })
+
+    act(() => fake.finishRun())
+  })
+
   it('returns a failed filter write and exposes its English persistence error', () => {
     const fake = createRuntime()
     const { result } = renderHook(useAssistantPageSession, {

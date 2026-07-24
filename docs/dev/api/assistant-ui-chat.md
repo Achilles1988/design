@@ -88,9 +88,10 @@ Runtime 消息数量都会即时更新 `hasState`，筛选 chips 也会参与该
 页面通过 `useAssistantPageSession()` 使用以下基础命令：
 
 - `registerResetHandler(handler)` 注册当前页面的重置函数，并返回注销函数。
-- `setPageFilter(filter)` 只更新当前页面筛选，返回 `StoreWriteResult`，不会修改其他页面。
+- `setPageFilter(filter)` 按调用时的最新路由键更新当前页面筛选，返回 `StoreWriteResult`；即使目标页
+  仍在等待 Runtime hydration，也不会误写旧 active 页面。
 - `startNewChat()` 增加 epoch、取消运行、清空 Runtime 消息、调用页面重置函数，并只清除当前页面
-  的消息与筛选；其他页面状态保持不变。
+  的消息与筛选；命令回调即使创建于旧页面，也按调用时的最新路由键执行，其他页面状态保持不变。
 
 `createPageScopedModelAdapter(adapter, getEpoch)` 在每次模型运行开始时捕获 epoch，并在转发每个
 上游 chunk 前重新检查。页面切换或 `startNewChat()` 改变 epoch 后，旧运行即使迟到产出结果也会

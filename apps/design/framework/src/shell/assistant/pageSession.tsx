@@ -91,6 +91,8 @@ export function AssistantPageSessionProvider({
   )
   const internalEpochRef = useRef(0)
   const activeEpochRef = epochRef ?? internalEpochRef
+  const latestRouteKeyRef = useRef(pageKey)
+  latestRouteKeyRef.current = pageKey
   const activeKeyRef = useRef(pageKey)
   const hydratingRef = useRef(true)
   const resetHandlerRef = useRef<() => void>(() => {})
@@ -157,7 +159,7 @@ export function AssistantPageSessionProvider({
   }, [])
 
   const setPageFilter = useCallback((filter: Filter) => {
-    const result = patchAssistantPageState(activeKeyRef.current, { filter })
+    const result = patchAssistantPageState(latestRouteKeyRef.current, { filter })
     setPageState(result.state)
     setPersistenceError(result.ok ? null : result.error)
     return result
@@ -166,7 +168,7 @@ export function AssistantPageSessionProvider({
   const startNewChat = useCallback(() => {
     activeEpochRef.current += 1
     const transitionEpoch = activeEpochRef.current
-    const targetPageKey = pageKey
+    const targetPageKey = latestRouteKeyRef.current
     hydratingRef.current = true
     setHydratedPageKey(null)
 
@@ -182,7 +184,7 @@ export function AssistantPageSessionProvider({
       hydratingRef.current = false
       setHydratedPageKey(targetPageKey)
     })
-  }, [activeEpochRef, pageKey, runtime])
+  }, [activeEpochRef, runtime])
 
   const ready = hydratedPageKey === pageKey
   const value = useMemo<AssistantPageSessionValue>(() => ({
