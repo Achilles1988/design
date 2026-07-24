@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import type { AssetMeta } from '@/lib/ai/assetIndex'
 import {
   emptyFilter,
@@ -22,8 +28,18 @@ export function usePersistentAssetFilter(index: AssetMeta[] | null) {
   const hydratedKeyRef = useRef<string | null>(null)
   const latestPageKeyRef = useRef(pageKey)
   const latestReadyRef = useRef(ready)
+  const mountedRef = useRef(false)
   latestPageKeyRef.current = pageKey
   latestReadyRef.current = ready
+
+  useLayoutEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      hydratedKeyRef.current = null
+      filterRef.current = emptyFilter()
+    }
+  }, [])
 
   const ownsCurrentPage = ready && hydratedKeyRef.current === pageKey
   const exposedFilter = ownsCurrentPage ? filter : inactiveFilterRef.current
@@ -38,20 +54,27 @@ export function usePersistentAssetFilter(index: AssetMeta[] | null) {
     hydratedKeyRef.current = pageKey
     filterRef.current = restored
     setFilterState(restored)
-    setPageFilter(restored)
+    setPageFilter(pageKey, restored)
   }, [index, pageKey, pageState.filter, ready, setPageFilter])
 
-  const setFilter = useCallback((update: FilterUpdate) => {
+  const setFilter = useCallback((
+    update: FilterUpdate,
+    ownerPageKey = pageKey,
+  ) => {
     if (
+      !mountedRef.current ||
+      ownerPageKey !== latestPageKeyRef.current ||
       !latestReadyRef.current ||
-      hydratedKeyRef.current !== latestPageKeyRef.current
-    ) return
+      hydratedKeyRef.current !== ownerPageKey
+    ) return false
     const next =
       typeof update === 'function' ? update(filterRef.current) : update
+    const result = setPageFilter(ownerPageKey, next)
+    if (!result.accepted) return false
     filterRef.current = next
     setFilterState(next)
-    setPageFilter(next)
-  }, [setPageFilter])
+    return true
+  }, [pageKey, setPageFilter])
 
   const resetFilter = useCallback(() => {
     const next = emptyFilter()
@@ -60,5 +83,11 @@ export function usePersistentAssetFilter(index: AssetMeta[] | null) {
     setFilterState(next)
   }, [])
 
-  return { filter: exposedFilter, filterRef, setFilter, resetFilter }
+  return {
+    filter: exposedFilter,
+    filterRef,
+    ownerPageKey: pageKey,
+    setFilter,
+    resetFilter,
+  }
 }

@@ -24,8 +24,10 @@ import { createPageScopedModelAdapter } from './AssistantProvider'
 
 function createRuntime({
   asyncCancellation = false,
+  rejectNonEmptyReset = false,
 }: {
   asyncCancellation?: boolean
+  rejectNonEmptyReset?: boolean
 } = {}) {
   let messages: ThreadMessageLike[] = []
   let running = false
@@ -39,6 +41,9 @@ function createRuntime({
           return () => listeners.delete(listener)
         },
         reset: vi.fn((next: ThreadMessageLike[] = []) => {
+          if (rejectNonEmptyReset && next.length > 0) {
+            throw new Error('Runtime rejected restored messages')
+          }
           messages = next
           listeners.forEach((listener) => listener())
         }),
@@ -75,6 +80,32 @@ function createWrapper(
         </AssistantPageSessionProvider>
       </MemoryRouter>
     )
+  }
+}
+
+function createModelRunInput(
+  abortSignal: AbortSignal,
+  context: Record<string, unknown> = {},
+) {
+  return {
+    messages: [],
+    runConfig: {},
+    abortSignal,
+    context,
+    unstable_getMessage: () => ({
+      id: 'a1',
+      role: 'assistant',
+      content: [],
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+      status: { type: 'complete', reason: 'stop' },
+      metadata: {
+        unstable_state: null,
+        unstable_annotations: [],
+        unstable_data: [],
+        steps: [],
+        custom: {},
+      },
+    }),
   }
 }
 
@@ -193,6 +224,27 @@ describe('AssistantPageSessionProvider', () => {
     expect(result.current.session.ready).toBe(true)
   })
 
+  it('clears a page cache and becomes ready when runtime restore fails', () => {
+    patchAssistantPageState('/restore-failure', {
+      messages: [{
+        id: 'valid-store-message',
+        role: 'user',
+        content: 'cannot restore',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    const fake = createRuntime({ rejectNonEmptyReset: true })
+
+    const { result } = renderHook(useAssistantPageSession, {
+      wrapper: createWrapper(fake, '/restore-failure'),
+    })
+
+    expect(fake.runtime.thread.reset).toHaveBeenLastCalledWith([])
+    expect(result.current.ready).toBe(true)
+    expect(result.current.pageState.messages).toEqual([])
+    expect(readAssistantPageState('/restore-failure').messages).toEqual([])
+  })
+
   it('never exposes a new page key with old state marked ready', () => {
     patchAssistantPageState('/ready-source', {
       messages: [{
@@ -275,6 +327,94 @@ describe('AssistantPageSessionProvider', () => {
     ])
   })
 
+  it('finishes clearing the source page when navigation happens before idle', () => {
+    patchAssistantPageState('/clear-source', {
+      messages: [{
+        id: 'source-cached',
+        role: 'user',
+        content: 'source cached',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+      filter: {
+        chips: [{
+          id: 'tag:source',
+          kind: 'tag',
+          label: 'source',
+          value: 'source',
+          addedBy: 'user',
+        }],
+      },
+    })
+    patchAssistantPageState('/clear-destination', {
+      messages: [{
+        id: 'destination-cached',
+        role: 'user',
+        content: 'destination cached',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+      filter: {
+        chips: [{
+          id: 'tag:destination',
+          kind: 'tag',
+          label: 'destination',
+          value: 'destination',
+          addedBy: 'user',
+        }],
+      },
+    })
+    patchAssistantPageState('/clear-other', {
+      messages: [{
+        id: 'other-cached',
+        role: 'user',
+        content: 'other cached',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    const fake = createRuntime({ asyncCancellation: true })
+    const resetPage = vi.fn()
+    const { result } = renderHook(() => {
+      const session = useAssistantPageSession()
+      useEffect(
+        () => session.registerResetHandler(resetPage),
+        [session.registerResetHandler],
+      )
+      return {
+        session,
+        navigate: useNavigate(),
+      }
+    }, {
+      wrapper: createWrapper(fake, '/clear-source'),
+    })
+
+    act(() => fake.setMessages([{
+      id: 'source-running',
+      role: 'user',
+      content: 'source running',
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+    }], true))
+    act(() => result.current.session.startNewChat())
+    act(() => result.current.navigate('/clear-destination'))
+    act(() => fake.finishRun())
+
+    expect(readAssistantPageState('/clear-source').messages).toEqual([])
+    expect(readAssistantPageState('/clear-source').filter).toBeUndefined()
+    expect(readAssistantPageState('/clear-destination')).toMatchObject({
+      messages: [expect.objectContaining({ id: 'destination-cached' })],
+      filter: {
+        chips: [expect.objectContaining({ id: 'tag:destination' })],
+      },
+    })
+    expect(readAssistantPageState('/clear-other').messages).toEqual([
+      expect.objectContaining({ id: 'other-cached' }),
+    ])
+    expect(result.current.session.pageKey).toBe('/clear-destination')
+    expect(result.current.session.ready).toBe(true)
+    expect(fake.runtime.thread.reset).toHaveBeenLastCalledWith([
+      expect.objectContaining({ id: 'destination-cached' }),
+    ])
+    expect(resetPage).not.toHaveBeenCalled()
+  })
+
   it('a stale new-chat callback targets the latest pending destination', () => {
     patchAssistantPageState('/stale-destination', {
       messages: [{
@@ -353,7 +493,7 @@ describe('AssistantPageSessionProvider', () => {
     expect(result.current.session.ready).toBe(false)
 
     act(() => {
-      result.current.session.setPageFilter({
+      result.current.session.setPageFilter('/filter-destination', {
         chips: [{
           id: 'tag:destination',
           kind: 'tag',
@@ -374,6 +514,67 @@ describe('AssistantPageSessionProvider', () => {
     act(() => fake.finishRun())
   })
 
+  it('rejects a filter mutation owned by a page that is no longer current', () => {
+    patchAssistantPageState('/owner-source', {
+      filter: {
+        chips: [{
+          id: 'tag:source',
+          kind: 'tag',
+          label: 'source',
+          value: 'source',
+          addedBy: 'user',
+        }],
+      },
+    })
+    patchAssistantPageState('/owner-destination', {
+      filter: {
+        chips: [{
+          id: 'tag:destination',
+          kind: 'tag',
+          label: 'destination',
+          value: 'destination',
+          addedBy: 'user',
+        }],
+      },
+    })
+    const fake = createRuntime()
+    const { result } = renderHook(() => ({
+      session: useAssistantPageSession(),
+      navigate: useNavigate(),
+    }), {
+      wrapper: createWrapper(fake, '/owner-source'),
+    })
+
+    act(() => result.current.navigate('/owner-destination'))
+    let writeResult:
+      | ReturnType<typeof result.current.session.setPageFilter>
+      | undefined
+    act(() => {
+      writeResult = result.current.session.setPageFilter('/owner-source', {
+        chips: [{
+          id: 'tag:late',
+          kind: 'tag',
+          label: 'late',
+          value: 'late',
+          addedBy: 'ai',
+        }],
+      })
+    })
+
+    expect(writeResult).toMatchObject({
+      accepted: false,
+      ok: false,
+      error: 'Filter update ignored because its page is no longer active.',
+    })
+    expect(readAssistantPageState('/owner-source').filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:source' })],
+    })
+    expect(readAssistantPageState('/owner-destination').filter).toEqual({
+      chips: [expect.objectContaining({ id: 'tag:destination' })],
+    })
+    expect(result.current.session.persistenceError).toBeNull()
+  })
+
   it('returns a failed filter write and exposes its English persistence error', () => {
     const fake = createRuntime()
     const { result } = renderHook(useAssistantPageSession, {
@@ -387,7 +588,7 @@ describe('AssistantPageSessionProvider', () => {
     try {
       let writeResult: ReturnType<typeof result.current.setPageFilter>
       act(() => {
-        writeResult = result.current.setPageFilter({
+        writeResult = result.current.setPageFilter('/storage-failure', {
           chips: [{
             id: 'tag:dark',
             kind: 'tag',
@@ -467,6 +668,53 @@ describe('AssistantPageSessionProvider', () => {
     expect(readAssistantPageState('/assets/layout').messages).toHaveLength(1)
     expect(result.current.hasState).toBe(false)
   })
+
+  it('keeps the page empty and persistence warning visible when clear is not durable', () => {
+    patchAssistantPageState('/clear-write-failure', {
+      messages: [{
+        id: 'cached-message',
+        role: 'user',
+        content: 'cached',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+      filter: {
+        chips: [{
+          id: 'tag:cached',
+          kind: 'tag',
+          label: 'cached',
+          value: 'cached',
+          addedBy: 'user',
+        }],
+      },
+    })
+    const fake = createRuntime()
+    const { result, rerender } = renderHook(useAssistantPageSession, {
+      wrapper: createWrapper(fake, '/clear-write-failure'),
+    })
+    const setItem = vi.spyOn(Storage.prototype, 'setItem')
+      .mockImplementation(() => {
+        throw new DOMException('quota exceeded', 'QuotaExceededError')
+      })
+
+    try {
+      act(() => result.current.startNewChat())
+
+      expect(result.current.ready).toBe(true)
+      expect(result.current.hasState).toBe(false)
+      expect(result.current.persistenceError).toBeTruthy()
+      expect(readAssistantPageState('/clear-write-failure')).toMatchObject({
+        messages: [],
+      })
+      expect(
+        readAssistantPageState('/clear-write-failure').filter,
+      ).toBeUndefined()
+
+      rerender()
+      expect(result.current.persistenceError).toBeTruthy()
+    } finally {
+      setItem.mockRestore()
+    }
+  })
 })
 
 describe('createPageScopedModelAdapter', () => {
@@ -490,26 +738,9 @@ describe('createPageScopedModelAdapter', () => {
     } as unknown as Parameters<typeof createPageScopedModelAdapter>[0]
     let epoch = 1
     const scoped = createPageScopedModelAdapter(runAdapter, () => epoch)
-    const iterator = scoped.run({
-      messages: [],
-      runConfig: {},
-      abortSignal: new AbortController().signal,
-      context: {},
-      unstable_getMessage: () => ({
-        id: 'a1',
-        role: 'assistant',
-        content: [],
-        createdAt: new Date('2026-07-24T00:00:00.000Z'),
-        status: { type: 'complete', reason: 'stop' },
-        metadata: {
-          unstable_state: null,
-          unstable_annotations: [],
-          unstable_data: [],
-          steps: [],
-          custom: {},
-        },
-      }),
-    } as never) as AsyncGenerator<ChatModelRunResult, void>
+    const iterator = scoped.run(createModelRunInput(
+      new AbortController().signal,
+    ) as never) as AsyncGenerator<ChatModelRunResult, void>
 
     await expect(iterator.next()).resolves.toEqual({
       done: false,
@@ -523,5 +754,130 @@ describe('createPageScopedModelAdapter', () => {
       done: true,
       value: undefined,
     })
+  })
+
+  it('does not start a tool after its page epoch becomes stale', async () => {
+    let releaseTool = () => {}
+    const toolGate = new Promise<void>((resolve) => {
+      releaseTool = resolve
+    })
+    let markRunReady = () => {}
+    const runReady = new Promise<void>((resolve) => {
+      markRunReady = resolve
+    })
+    type ToolContext = {
+      tools?: Record<string, {
+        execute?: (
+          args: unknown,
+          context: {
+            toolCallId: string
+            abortSignal: AbortSignal
+            human: (payload: unknown) => Promise<unknown>
+          },
+        ) => unknown
+      }>
+    }
+    const runAdapter = {
+      async *run({ context }: { context?: ToolContext }) {
+        markRunReady()
+        await toolGate
+        await context?.tools?.apply_filter.execute?.({}, {
+          toolCallId: 't1',
+          abortSignal: new AbortController().signal,
+          human: async () => undefined,
+        })
+        yield { content: [{ type: 'text' as const, text: 'late' }] }
+      },
+    } as unknown as Parameters<typeof createPageScopedModelAdapter>[0]
+    const execute = vi.fn()
+    let epoch = 1
+    const scoped = createPageScopedModelAdapter(runAdapter, () => epoch)
+    const iterator = scoped.run(createModelRunInput(
+      new AbortController().signal,
+      {
+        tools: {
+          apply_filter: {
+            execute,
+          },
+        },
+      },
+    ) as never) as AsyncGenerator<ChatModelRunResult, void>
+
+    const pending = iterator.next()
+    await runReady
+    epoch += 1
+    releaseTool()
+
+    await expect(pending).resolves.toEqual({
+      done: true,
+      value: undefined,
+    })
+    expect(execute).not.toHaveBeenCalled()
+  })
+
+  it('settles promptly when an executing tool ignores abort', async () => {
+    let releaseExecute = (_value: unknown) => {}
+    const ignoredExecute = new Promise<unknown>((resolve) => {
+      releaseExecute = resolve
+    })
+    let markExecuteStarted = () => {}
+    const executeStarted = new Promise<void>((resolve) => {
+      markExecuteStarted = resolve
+    })
+    type ToolContext = {
+      tools?: Record<string, {
+        execute?: (
+          args: unknown,
+          context: {
+            toolCallId: string
+            abortSignal: AbortSignal
+            human: (payload: unknown) => Promise<unknown>
+          },
+        ) => unknown
+      }>
+    }
+    const runAdapter = {
+      async *run({ context }: { context?: ToolContext }) {
+        await context?.tools?.slow_tool.execute?.({}, {
+          toolCallId: 't1',
+          abortSignal: new AbortController().signal,
+          human: async () => undefined,
+        })
+        yield { content: [{ type: 'text' as const, text: 'late' }] }
+      },
+    } as unknown as Parameters<typeof createPageScopedModelAdapter>[0]
+    const execute = vi.fn(() => {
+      markExecuteStarted()
+      return ignoredExecute
+    })
+    const controller = new AbortController()
+    const scoped = createPageScopedModelAdapter(runAdapter, () => 1)
+    const iterator = scoped.run(createModelRunInput(
+      controller.signal,
+      {
+        tools: {
+          slow_tool: {
+            execute,
+          },
+        },
+      },
+    ) as never) as AsyncGenerator<ChatModelRunResult, void>
+    const pending = iterator.next()
+
+    await executeStarted
+    controller.abort()
+    let settled:
+      | IteratorResult<ChatModelRunResult, void>
+      | undefined
+    void pending.then((result) => {
+      settled = result
+    })
+    try {
+      await vi.waitFor(() => {
+        expect(settled).toEqual({ done: true, value: undefined })
+      }, { timeout: 100, interval: 1 })
+    } finally {
+      releaseExecute({ success: false })
+    }
   })
 })

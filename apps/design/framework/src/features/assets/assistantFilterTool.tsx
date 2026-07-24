@@ -4,6 +4,7 @@ import { useAssistantTool } from '@assistant-ui/react'
 import type { AssetMeta } from '@/lib/ai/assetIndex'
 import { applyFilter, mergeFilterDelta, type Filter } from '@/lib/ai/filterState'
 import { FilterDeltaAddSchema } from '@/lib/ai/schema'
+import { STALE_PAGE_FILTER_ERROR } from '@/shell/assistant/pageSession'
 
 export type ApplyFilterArgs = {
   add: Array<{ kind: 'tag' | 'origin' | 'freeform'; label: string; value: string }>
@@ -30,7 +31,17 @@ export type ApplyFilterResult = ApplyFilterSuccess | ApplyFilterFailure
 export type ApplyFilterCtx = {
   index: AssetMeta[]
   filterRef: MutableRefObject<Filter>
-  onFilterChange: (f: Filter) => void
+  onFilterChange: (f: Filter) => boolean | void
+}
+
+type AssetFilterToolProps = {
+  index: AssetMeta[]
+  filterRef: MutableRefObject<Filter>
+  ownerPageKey: string
+  onFilterChange: (
+    filter: Filter,
+    ownerPageKey: string,
+  ) => boolean | void
 }
 
 export function applyFilterExecute(
@@ -70,7 +81,8 @@ export function applyFilterExecute(
   if (changed) {
     ctx.filterRef.current = next
     try {
-      ctx.onFilterChange(next)
+      const accepted = ctx.onFilterChange(next)
+      if (accepted === false) throw new Error(STALE_PAGE_FILTER_ERROR)
     } catch (error) {
       ctx.filterRef.current = previous
       throw error
@@ -142,7 +154,12 @@ function FilterDeltaCard({
   )
 }
 
-export function AssetFilterTool({ index, filterRef, onFilterChange }: ApplyFilterCtx) {
+export function AssetFilterTool({
+  index,
+  filterRef,
+  ownerPageKey,
+  onFilterChange,
+}: AssetFilterToolProps) {
   // Keep mutable inputs in refs so the tool object / execute stay referentially
   // stable across re-renders (avoids re-registering the tool on every render)
   // while still reading the latest index / callback.
@@ -156,9 +173,10 @@ export function AssetFilterTool({ index, filterRef, onFilterChange }: ApplyFilte
       applyFilterSafely(args, {
         index: indexRef.current,
         filterRef,
-        onFilterChange: (f) => onFilterChangeRef.current(f),
+        onFilterChange: (f) =>
+          onFilterChangeRef.current(f, ownerPageKey),
       }),
-    [filterRef],
+    [filterRef, ownerPageKey],
   )
 
   const tool = useMemo(

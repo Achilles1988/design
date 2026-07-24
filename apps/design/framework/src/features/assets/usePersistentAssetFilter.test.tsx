@@ -54,6 +54,22 @@ describe('usePersistentAssetFilter', () => {
     session.pageState = { filter: undefined }
     session.ready = false
     session.setPageFilter.mockReset()
+    session.setPageFilter.mockImplementation((
+      ownerPageKey: string,
+      filter: Filter,
+    ) => ({
+      accepted: ownerPageKey === session.pageKey,
+      ok: ownerPageKey === session.pageKey,
+      state: {
+        version: 1,
+        messages: [],
+        filter,
+        updatedAt: '2026-07-24T00:00:00.000Z',
+      },
+      ...(ownerPageKey === session.pageKey
+        ? {}
+        : { error: 'Filter update ignored because its page is no longer active.' }),
+    }))
   })
 
   it('hydrates the page filter only after session and index are ready', () => {
@@ -74,6 +90,7 @@ describe('usePersistentAssetFilter', () => {
     rerender({ assetIndex: index })
     expect(result.current.filter.chips).toEqual([darkChip])
     expect(session.setPageFilter).toHaveBeenCalledWith(
+      '/assets/rule',
       result.current.filter,
     )
   })
@@ -84,17 +101,19 @@ describe('usePersistentAssetFilter', () => {
     session.setPageFilter.mockClear()
 
     act(() => result.current.setFilter({ chips: [darkChip] }))
-    expect(session.setPageFilter).toHaveBeenLastCalledWith({
-      chips: [darkChip],
-    })
+    expect(session.setPageFilter).toHaveBeenLastCalledWith(
+      '/assets/rule',
+      { chips: [darkChip] },
+    )
 
     act(() => result.current.setFilter((previous) => ({
       chips: [...previous.chips, manualChip],
     })))
     expect(result.current.filter.chips).toEqual([darkChip, manualChip])
-    expect(session.setPageFilter).toHaveBeenLastCalledWith({
-      chips: [darkChip, manualChip],
-    })
+    expect(session.setPageFilter).toHaveBeenLastCalledWith(
+      '/assets/rule',
+      { chips: [darkChip, manualChip] },
+    )
   })
 
   it('hides and rejects source-page filter edits while appId navigation hydrates', () => {
@@ -107,8 +126,24 @@ describe('usePersistentAssetFilter', () => {
     session.pageKey = sourceKey
     session.ready = true
     session.pageState = { filter: pageFilters.get(sourceKey) }
-    session.setPageFilter.mockImplementation((filter: Filter) => {
-      pageFilters.set(session.pageKey, filter)
+    session.setPageFilter.mockImplementation((
+      ownerPageKey: string,
+      filter: Filter,
+    ) => {
+      if (ownerPageKey === session.pageKey) pageFilters.set(ownerPageKey, filter)
+      return {
+        accepted: ownerPageKey === session.pageKey,
+        ok: ownerPageKey === session.pageKey,
+        state: {
+          version: 1,
+          messages: [],
+          filter,
+          updatedAt: '2026-07-24T00:00:00.000Z',
+        },
+        ...(ownerPageKey === session.pageKey
+          ? {}
+          : { error: 'Filter update ignored because its page is no longer active.' }),
+      }
     })
     const { result, rerender } = renderHook(
       () => usePersistentAssetFilter(index),
@@ -141,6 +176,20 @@ describe('usePersistentAssetFilter', () => {
     expect(result.current.filterRef.current.chips).toEqual([manualChip])
     expect(pageFilters.get(sourceKey)).toEqual({ chips: [darkChip] })
     expect(pageFilters.get(destinationKey)).toEqual({ chips: [manualChip] })
+  })
+
+  it('invalidates a captured setter when the hook unmounts', () => {
+    session.ready = true
+    const { result, unmount } = renderHook(
+      () => usePersistentAssetFilter(index),
+    )
+    const staleSetter = result.current.setFilter
+    session.setPageFilter.mockClear()
+
+    unmount()
+    act(() => staleSetter({ chips: [darkChip] }))
+
+    expect(session.setPageFilter).not.toHaveBeenCalled()
   })
 
   it('resets state and filterRef together without persisting the reset', () => {

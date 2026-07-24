@@ -89,6 +89,20 @@ describe('AssistantPanel', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
+  it('does not close on Escape while an alert dialog is active', () => {
+    const onClose = vi.fn()
+    render(
+      <MemoryRouter>
+        <AssistantPanel open onClose={onClose} />
+        <div role="alertdialog" aria-label="Confirm new chat" />
+      </MemoryRouter>,
+    )
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it('confirms and starts a new chat when the page has state', async () => {
     hasValidConfigMock.mockReturnValue(true)
     confirmTipMock.mockResolvedValue(true)

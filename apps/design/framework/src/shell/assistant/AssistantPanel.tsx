@@ -25,7 +25,10 @@ export function AssistantPanel({
     if (!open) return
 
     function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
+      if (
+        event.key === 'Escape' &&
+        !document.querySelector('[role="alertdialog"]')
+      ) onClose()
     }
 
     window.addEventListener('keydown', onKey)
