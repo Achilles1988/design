@@ -128,6 +128,11 @@ Runtime 快照覆盖。恢复消息或 `runtime.thread.reset()` 抛错时，会�
 
 Runtime 消息变化会即时更新 `hasState`，筛选 chips 也会参与该状态判断；只有 Runtime 空闲且
 hydration 完成后才触发消息快照。快照内容和写入失败语义以“消息快照与写入失败”一节为准。
+LocalRuntime 的订阅通知不等同于消息变化：mount 时 `__internal_load()` 的 loading
+true/false、能力更新等通知可能保持同一消息快照且 `isRunning=false`。session 必须以 hydration
+完成后的序列化消息快照作为 baseline；只有后续序列化结果与 baseline 确实不同时，才写入消息并
+claim provisional 页面。首条真实用户消息会在首次同步通知中形成不同快照，必须立即持久化；
+纯 loading/能力通知不得把 provisional empty 物化为 overlay，从而覆盖暂时不可读的 durable 消息。
 Store 写入失败时，`persistenceError` 暴露英文错误提示。
 该提示只在持久层具有恢复证据时清除：hydration 的读取结果必须为 authoritative，即 durable
 可读且 dirty overlay/tombstone 已成功写入。volatile/provisional fallback 即使 Runtime hydration

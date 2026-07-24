@@ -1,16 +1,21 @@
 // @vitest-environment jsdom
 import {
   useEffect,
+  useLayoutEffect,
   type MutableRefObject,
   type ReactNode,
 } from 'react'
-import { act, renderHook } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type {
-  AssistantRuntime,
-  ChatModelRunResult,
-  ThreadMessageLike,
+import {
+  AssistantRuntimeProvider,
+  useLocalRuntime,
+  type ChatModelAdapter,
+  type AssistantRuntime,
+  type ChatModelRunResult,
+  type ThreadHistoryAdapter,
+  type ThreadMessageLike,
 } from '@assistant-ui/react'
 import type { Filter } from '@/lib/ai/filterState'
 import {
@@ -80,6 +85,69 @@ function createWrapper(
           {children}
         </AssistantPageSessionProvider>
       </MemoryRouter>
+    )
+  }
+}
+
+const noOpAdapter: ChatModelAdapter = {
+  async *run() {},
+}
+
+type LocalRuntimeControl = {
+  runtime: AssistantRuntime | null
+  threadStates: Array<{
+    isLoading: boolean
+    messageCount: number
+  }>
+  resolveHistory: () => void
+}
+
+function createLocalRuntimeWrapper(
+  initialEntry: string,
+  control: LocalRuntimeControl,
+) {
+  let resolveHistory: (
+    repository: Awaited<ReturnType<ThreadHistoryAdapter['load']>>,
+  ) => void = () => {}
+  const history: ThreadHistoryAdapter = {
+    load: vi.fn(() => new Promise<
+      Awaited<ReturnType<ThreadHistoryAdapter['load']>>
+    >((resolve) => {
+      resolveHistory = resolve
+    })),
+    append: vi.fn(async () => {}),
+  }
+  control.resolveHistory = () => resolveHistory({ messages: [] })
+
+  function RuntimeLoadingProbe({ runtime }: { runtime: AssistantRuntime }) {
+    useLayoutEffect(() => {
+      const recordLoading = () => {
+        const state = runtime.thread.getState()
+        control.threadStates.push({
+          isLoading: state.isLoading,
+          messageCount: state.messages.length,
+        })
+      }
+      recordLoading()
+      return runtime.thread.subscribe(recordLoading)
+    }, [runtime])
+    return null
+  }
+
+  return function Wrapper({ children }: { children: ReactNode }) {
+    const runtime = useLocalRuntime(noOpAdapter, {
+      adapters: { history },
+    })
+    control.runtime = runtime
+    return (
+      <AssistantRuntimeProvider runtime={runtime}>
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <RuntimeLoadingProbe runtime={runtime} />
+          <AssistantPageSessionProvider runtime={runtime}>
+            {children}
+          </AssistantPageSessionProvider>
+        </MemoryRouter>
+      </AssistantRuntimeProvider>
     )
   }
 }
@@ -437,6 +505,137 @@ describe('AssistantPageSessionProvider', () => {
       storage.setGetterAvailable(true)
       storage.setWritesFail(false)
       readAssistantPageState('/provisional-getter-b')
+      storage.restore()
+    }
+  })
+
+  it('ignores real LocalRuntime mount loading notifications for provisional empty messages', async () => {
+    const storage = controlBrowserStorage()
+    patchAssistantPageState('/provisional-local-runtime', {
+      messages: [{
+        id: 'durable-local-runtime',
+        role: 'user',
+        content: 'durable',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    storage.setGetterAvailable(false)
+    const control: LocalRuntimeControl = {
+      runtime: null,
+      threadStates: [],
+      resolveHistory: () => {},
+    }
+    try {
+      const { result } = renderHook(() => ({
+        session: useAssistantPageSession(),
+        navigate: useNavigate(),
+      }), {
+        wrapper: createLocalRuntimeWrapper(
+          '/provisional-local-runtime',
+          control,
+        ),
+      })
+      expect(result.current.session.pageState.messages).toEqual([])
+      await waitFor(() => {
+        expect(control.threadStates).toContainEqual({
+          isLoading: true,
+          messageCount: 0,
+        })
+      })
+      act(() => control.resolveHistory())
+      await waitFor(() => {
+        expect(control.threadStates.at(-1)).toEqual({
+          isLoading: false,
+          messageCount: 0,
+        })
+      })
+
+      act(() => result.current.navigate('/after-local-runtime-load'))
+      storage.setGetterAvailable(true)
+
+      expect(
+        readAssistantPageState('/provisional-local-runtime').messages,
+      ).toEqual([
+        expect.objectContaining({ id: 'durable-local-runtime' }),
+      ])
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/provisional-local-runtime')
+      storage.restore()
+    }
+  })
+
+  it('persists the first real LocalRuntime user message from a provisional page', async () => {
+    const storage = controlBrowserStorage()
+    patchAssistantPageState('/provisional-local-message', {
+      messages: [{
+        id: 'old-local-runtime',
+        role: 'user',
+        content: 'old',
+        createdAt: '2026-07-24T00:00:00.000Z',
+      }],
+    })
+    storage.setGetterAvailable(false)
+    const control: LocalRuntimeControl = {
+      runtime: null,
+      threadStates: [],
+      resolveHistory: () => {},
+    }
+    try {
+      const { result } = renderHook(() => ({
+        session: useAssistantPageSession(),
+        navigate: useNavigate(),
+      }), {
+        wrapper: createLocalRuntimeWrapper(
+          '/provisional-local-message',
+          control,
+        ),
+      })
+      await waitFor(() => {
+        expect(control.threadStates).toContainEqual({
+          isLoading: true,
+          messageCount: 0,
+        })
+      })
+      act(() => control.resolveHistory())
+      await waitFor(() => {
+        expect(control.threadStates.at(-1)).toEqual({
+          isLoading: false,
+          messageCount: 0,
+        })
+      })
+
+      act(() => {
+        control.runtime!.thread.append({
+          role: 'user',
+          content: [{ type: 'text', text: 'outage-created' }],
+          startRun: false,
+        })
+      })
+      await waitFor(() => {
+        expect(result.current.session.pageState.messages).toEqual([
+          expect.objectContaining({
+            role: 'user',
+            content: [{ type: 'text', text: 'outage-created' }],
+          }),
+        ])
+      })
+      act(() => result.current.navigate('/after-local-runtime-message'))
+      storage.setGetterAvailable(true)
+
+      expect(
+        readAssistantPageState('/provisional-local-message').messages,
+      ).toEqual([
+        expect.objectContaining({
+          role: 'user',
+          content: [{ type: 'text', text: 'outage-created' }],
+        }),
+      ])
+    } finally {
+      storage.setGetterAvailable(true)
+      storage.setWritesFail(false)
+      readAssistantPageState('/provisional-local-message')
       storage.restore()
     }
   })

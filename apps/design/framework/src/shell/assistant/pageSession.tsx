@@ -128,6 +128,9 @@ export function AssistantPageSessionProvider({
   const activeKeyRef = useRef(pageKey)
   const hydratingRef = useRef(true)
   const provisionalPageKeyRef = useRef<string | null>(null)
+  const messageSnapshotRef = useRef(
+    JSON.stringify(serializeMessages(runtime.thread.getState().messages)),
+  )
   const clearingPageKeysRef = useRef(new Set<string>())
   const resetHandlerRef = useRef<() => void>(() => {})
   const [generation, setGeneration] = useState(activeEpochRef.current)
@@ -143,6 +146,7 @@ export function AssistantPageSessionProvider({
   const saveSnapshot = useCallback((
     targetPageKey: string,
     claimProvisional = false,
+    messages = serializeMessages(runtime.thread.getState().messages),
   ) => {
     if (clearingPageKeysRef.current.has(targetPageKey)) return
     if (
@@ -150,7 +154,7 @@ export function AssistantPageSessionProvider({
       !claimProvisional
     ) return
     const result = patchAssistantPageState(targetPageKey, {
-      messages: serializeMessages(runtime.thread.getState().messages),
+      messages,
     })
     if (claimProvisional && activeKeyRef.current === targetPageKey) {
       provisionalPageKeyRef.current = null
@@ -161,7 +165,11 @@ export function AssistantPageSessionProvider({
 
   const saveMessages = useCallback(() => {
     if (hydratingRef.current || runtime.thread.getState().isRunning) return
-    saveSnapshot(activeKeyRef.current, true)
+    const messages = serializeMessages(runtime.thread.getState().messages)
+    const snapshot = JSON.stringify(messages)
+    if (snapshot === messageSnapshotRef.current) return
+    messageSnapshotRef.current = snapshot
+    saveSnapshot(activeKeyRef.current, true, messages)
   }, [runtime, saveSnapshot])
 
   const onThreadChange = useCallback(() => {
@@ -190,12 +198,18 @@ export function AssistantPageSessionProvider({
       try {
         restoredMessages = restoreMessages(restored.messages)
         runtime.thread.reset(restoredMessages)
+        messageSnapshotRef.current = JSON.stringify(
+          serializeMessages(runtime.thread.getState().messages),
+        )
         if (readResult.authoritative) setPersistenceError(null)
       } catch {
         const cleared = clearAssistantPageState(pageKey)
         restored = cleared.state
         restoredMessages = []
         runtime.thread.reset([])
+        messageSnapshotRef.current = JSON.stringify(
+          serializeMessages(runtime.thread.getState().messages),
+        )
         provisionalPageKeyRef.current = pageKey
         setPersistenceError(cleared.ok ? null : cleared.error)
       }
@@ -268,6 +282,9 @@ export function AssistantPageSessionProvider({
         if (isCurrentPage) {
           activeKeyRef.current = targetPageKey
           runtime.thread.reset([])
+          messageSnapshotRef.current = JSON.stringify(
+            serializeMessages(runtime.thread.getState().messages),
+          )
           try {
             resetHandlerRef.current()
           } catch {
