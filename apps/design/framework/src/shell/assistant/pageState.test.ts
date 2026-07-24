@@ -47,12 +47,16 @@ describe('assistant page state store', () => {
   })
 
   it('clears only the requested page', () => {
-    patchAssistantPageState('/assets/rule', { messages: [{ id: 'u1', role: 'user', content: 'dark', createdAt: '2026-07-24T00:00:00.000Z' }] })
+    patchAssistantPageState('/assets/rule', {
+      messages: [{ id: 'u1', role: 'user', content: 'dark', createdAt: '2026-07-24T00:00:00.000Z' }],
+      filter: { chips: [{ id: 'tag:dark', kind: 'tag', label: 'dark', value: 'dark', addedBy: 'ai' }] },
+    })
     patchAssistantPageState('/assets/layout', { messages: [{ id: 'u2', role: 'user', content: 'grid', createdAt: '2026-07-24T00:00:00.000Z' }] })
 
     clearAssistantPageState('/assets/rule')
 
     expect(readAssistantPageState('/assets/rule').messages).toEqual([])
+    expect(readAssistantPageState('/assets/rule').filter).toBeUndefined()
     expect(readAssistantPageState('/assets/layout').messages).toHaveLength(1)
   })
 

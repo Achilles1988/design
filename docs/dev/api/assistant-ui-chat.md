@@ -30,6 +30,46 @@ usePageAssistant({ instructions: string; available?: boolean }): void
 - 生命周期语义：仅注册了工具/调用了该 hook 的页面会让助手可用；其余页面入口隐藏。
 - 页面依赖异步 Prompt 或索引时，必须在资源完整成功后再传 `available:true`；失败时保持不可用，不能以空系统提示降级运行。
 
+## 页面状态持久化（`pageState.ts`）
+
+页面级助手状态存于浏览器 `localStorage` 的
+`wn.assistant.page-state.v1` 键。它是独立的基础设施，不负责跨页面会话协调或 New chat UI。
+
+### 页面键
+
+`createAssistantPageKey(location)` 使用规范化后的 `pathname` 作为主体：除根路径外移除尾随
+`/`。查询参数只保留白名单中的 `appId`；同名的多个值和键均按字典序排序。其余参数不会参与键，
+因此不会把视图类临时状态拆分为不同会话。
+
+### V1 存储 envelope
+
+存储值是下列 JSON envelope；每个页面键只拥有自身的状态，读写一个页面不会覆盖其他页面：
+
+```ts
+type AssistantPageStateEnvelopeV1 = {
+  version: 1
+  pages: Record<string, {
+    version: 1
+    messages: PersistedMessage[]
+    filter?: Filter
+    updatedAt: string
+  }>
+}
+```
+
+读取时会丢弃无法解析、版本不支持或消息/筛选结构无效的 envelope 或页面条目，并返回空 V1
+状态。`patchAssistantPageState` 合并目标页面的 `messages` 或 `filter`；
+`clearAssistantPageState` 删除目标页面的整个 state，因而同时删除消息和筛选，不影响其他页面。
+
+### 消息快照与写入失败
+
+`serializeMessages` 只保存稳定消息：用户或 system 消息，以及 status 为 `complete` 的 assistant
+消息。消息 content 原样保留，因此已完成 tool-call 的结果会一同恢复；进行中的 assistant 消息
+不会写入快照。`restoreMessages` 将时间恢复为 `Date`，并把 assistant 消息恢复为 complete 状态。
+
+若 `localStorage` 写入或删除失败，Store 返回 `ok:false`，同时按 Storage 实例和页面键保留内存
+回退状态。后续读取会优先使用该回退，避免旧的磁盘值在本次会话中回流。
+
 ## 工具注册约定
 
 用 `@assistant-ui/react` 的 `useAssistantTool` 在页面内注册前端工具（每个工具一个组件、单次
@@ -105,5 +145,5 @@ useAssistantTool({
 
 ## 未覆盖（YAGNI）
 
-多线程 / 历史持久化 / 跨刷新恢复；其他页面场景的实际接入（架构已预留：新页面调
-`usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点。
+多线程或跨页面会话协调；其他页面场景的实际接入（架构已预留：新页面调
+`usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点；New chat 交互 UI。
