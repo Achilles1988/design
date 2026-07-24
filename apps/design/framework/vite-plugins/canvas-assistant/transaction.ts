@@ -19,6 +19,8 @@ const INVALID_REPAIR_ERROR =
 const VALIDATION_FAILED_ERROR =
   'Canvas validation failed after two repair attempts.'
 const APPLY_FAILED_ERROR = 'Canvas proposal could not be applied.'
+export const ROLLBACK_INCOMPLETE_ERROR =
+  'Canvas proposal rollback was incomplete. Some files may need manual inspection.'
 const MAX_DIAGNOSTIC_LENGTH = 8_000
 const CREDENTIAL_LABEL =
   String.raw`(?:[A-Za-z_][A-Za-z0-9_]*(?:API_KEY|ACCESS_TOKEN|AUTH_TOKEN|SECRET_KEY)|api[-_ ]?key|authorization)`
@@ -52,7 +54,7 @@ export type ApplyResult =
       ok: false
       proposalId: string
       error: string
-      rolledBack: true
+      rolledBack: boolean
     }
 
 export type ApplyStatusEvent = {
@@ -363,19 +365,19 @@ function baselineTargets(
 async function rollbackTargets(
   targets: CandidateTarget[],
   writer: ApplyProposalTransactionInput['writeAtomically'],
-): Promise<void> {
+): Promise<boolean> {
   const results = await Promise.allSettled(
     targets.map((target) =>
-      target.operation === 'write-existing'
-        ? writer(target.absolutePath, target.originalSource ?? '')
-        : fs.rm(target.absolutePath, { force: true }),
+      Promise.resolve().then(() =>
+        target.operation === 'write-existing'
+          ? writer(target.absolutePath, target.originalSource ?? '')
+          : fs.rm(target.absolutePath, { force: true }),
+      ),
     ),
   )
-  const failure = results.find(
-    (result): result is PromiseRejectedResult =>
-      result.status === 'rejected',
+  return results.every(
+    (result) => result.status === 'fulfilled',
   )
-  if (failure) throw failure.reason
 }
 
 export async function writeAtomically(
@@ -531,12 +533,14 @@ export async function applyProposalTransaction({
         }
       } catch (error) {
         if (repairAttempts === 2) {
-          await rollback()
+          const rolledBack = await rollback()
           return {
             ok: false,
             proposalId: proposal.id,
-            error: VALIDATION_FAILED_ERROR,
-            rolledBack: true,
+            error: rolledBack
+              ? VALIDATION_FAILED_ERROR
+              : ROLLBACK_INCOMPLETE_ERROR,
+            rolledBack,
           }
         }
         repairAttempts += 1
@@ -551,15 +555,18 @@ export async function applyProposalTransaction({
       }
     }
   } catch (error) {
-    if (writtenTargetPaths.size > 0) await rollback()
+    const rolledBack =
+      writtenTargetPaths.size === 0 ? true : await rollback()
     return {
       ok: false,
       proposalId: proposal.id,
       error:
-        error instanceof InvalidCandidateSetError
+        !rolledBack
+          ? ROLLBACK_INCOMPLETE_ERROR
+          : error instanceof InvalidCandidateSetError
           ? INVALID_REPAIR_ERROR
           : APPLY_FAILED_ERROR,
-      rolledBack: true,
+      rolledBack,
     }
   }
 }

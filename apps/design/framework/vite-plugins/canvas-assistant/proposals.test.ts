@@ -158,6 +158,81 @@ describe('createProposalStore', () => {
     expect(() => store().stage(context(), raw)).toThrow()
   })
 
+  it('rejects a directly imported read-only component that is not declared', () => {
+    const button = {
+      relativePath: 'components/Button.tsx',
+      absolutePath: '/project/design/components/Button.tsx',
+      source: 'export function Button() { return null }',
+      hash: 'button-hash',
+      permission: 'read-only' as const,
+    }
+    const raw = rawProposal()
+    raw.files[0].source = [
+      "import { Button } from '../components/Button'",
+      'export default function Home() { return <Button /> }',
+    ].join('\n')
+
+    expect(() =>
+      store().stage(
+        context({ files: [...context().files, button] }),
+        raw,
+      ),
+    ).toThrow(
+      'Reused components must exactly match imported read-only components.',
+    )
+  })
+
+  it('rejects a declared read-only component that no candidate imports', () => {
+    const button = {
+      relativePath: 'components/Button.tsx',
+      absolutePath: '/project/design/components/Button.tsx',
+      source: 'export function Button() { return null }',
+      hash: 'button-hash',
+      permission: 'read-only' as const,
+    }
+    const raw = rawProposal()
+    raw.reusedComponents = ['components/Button.tsx']
+
+    expect(() =>
+      store().stage(
+        context({ files: [...context().files, button] }),
+        raw,
+      ),
+    ).toThrow(
+      'Reused components must exactly match imported read-only components.',
+    )
+  })
+
+  it.each([
+    ['./Other', 'another Canvas'],
+    ['@/shell/SidebarShell', 'Shell-private source'],
+    [
+      '../../framework/src/preview/CanvasPreview',
+      'framework source',
+    ],
+    [
+      '../../framework/public/assets/designmd/dashboard/components',
+      'Style implementation',
+    ],
+    [
+      '../../framework/public/assets/layoutmd/sidebar-shell/layout',
+      'Layout implementation',
+    ],
+    ['../../outside/Secret', 'an outside-App relative path'],
+    ['../app.json', 'an arbitrary App file'],
+    ['/absolute/Secret', 'an absolute path'],
+  ])('rejects an import of %s (%s)', (moduleSpecifier) => {
+    const raw = rawProposal()
+    raw.files[0].source = [
+      `import value from '${moduleSpecifier}'`,
+      'export default function Home() { return value }',
+    ].join('\n')
+
+    expect(() => store().stage(context(), raw)).toThrow(
+      'Candidate import is not allowed.',
+    )
+  })
+
   it('rejects an installed Layout decision absent from app layouts', () => {
     const raw = rawProposal()
     raw.layout.id = 'not-installed'
@@ -260,6 +335,15 @@ describe('createProposalStore', () => {
     })
     const raw = rawProposal()
     raw.reusedComponents = ['components/Button.tsx']
+    raw.files[0].source = [
+      "import React from 'react'",
+      "import './Home.css'",
+      "import { Button } from '../components/Button'",
+      "import { Select } from '../components/Select'",
+      'export default function Home() {',
+      '  return <><Button /><Select /></>',
+      '}',
+    ].join('\n')
     const card = proposalStore.stage(fullContext, raw)
     const proposal = proposalStore.claim(card.proposalId, 'design', 'home')
 

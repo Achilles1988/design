@@ -16,6 +16,8 @@ import {
 import {
   applyProposalTransaction,
   createCanvasRepair,
+  ROLLBACK_INCOMPLETE_ERROR,
+  type ApplyResult,
   validateCanvas,
   writeAtomically,
 } from './transaction'
@@ -383,24 +385,33 @@ export function canvasAssistantPlugin(
             owner.canvasId,
           )
           startNdjson(res)
-          let result
+          let result: ApplyResult
           try {
-            result = await applyTransaction({
-              proposal,
-              reloadContext: () =>
-                contextLoader.load(owner.appId, owner.canvasId),
-              writeAtomically: writer,
-              validate: (absoluteCanvasPath) =>
-                validate(server, absoluteCanvasPath),
-              repair: makeRepair(request.aiConfig),
-              onStatus: (status) => {
-                const event = CanvasApplyEventSchema.parse({
-                  type: 'status',
-                  ...status,
-                })
-                writeNdjson(res, event)
-              },
-            })
+            try {
+              result = await applyTransaction({
+                proposal,
+                reloadContext: () =>
+                  contextLoader.load(owner.appId, owner.canvasId),
+                writeAtomically: writer,
+                validate: (absoluteCanvasPath) =>
+                  validate(server, absoluteCanvasPath),
+                repair: makeRepair(request.aiConfig),
+                onStatus: (status) => {
+                  const event = CanvasApplyEventSchema.parse({
+                    type: 'status',
+                    ...status,
+                  })
+                  writeNdjson(res, event)
+                },
+              })
+            } catch {
+              result = {
+                ok: false,
+                proposalId,
+                error: ROLLBACK_INCOMPLETE_ERROR,
+                rolledBack: false,
+              }
+            }
           } finally {
             proposalStore.complete(proposalId)
           }

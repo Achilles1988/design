@@ -1,4 +1,9 @@
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
+import {
+  createServer,
+  request as httpRequest,
+  type IncomingMessage,
+  type ServerResponse,
+} from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ViteDevServer } from 'vite'
@@ -242,6 +247,45 @@ async function ndjson(response: Response): Promise<unknown[]> {
     .map((line) => JSON.parse(line) as unknown)
 }
 
+async function postChunked(
+  harness: Awaited<ReturnType<typeof startHarness>>,
+  pathname: string,
+  chunks: Buffer[],
+): Promise<{ status: number; body: string }> {
+  const url = new URL(pathname, harness.baseUrl)
+  return new Promise((resolve, reject) => {
+    const request = httpRequest(
+      {
+        hostname: url.hostname,
+        port: url.port,
+        path: url.pathname,
+        method: 'POST',
+        headers: {
+          Origin: harness.origin,
+          Host: url.host,
+          'Content-Type': 'application/json',
+          'Transfer-Encoding': 'chunked',
+        },
+      },
+      (response) => {
+        const responseChunks: Buffer[] = []
+        response.on('data', (chunk: Buffer) => {
+          responseChunks.push(chunk)
+        })
+        response.on('end', () => {
+          resolve({
+            status: response.statusCode ?? 0,
+            body: Buffer.concat(responseChunks).toString('utf8'),
+          })
+        })
+      },
+    )
+    request.on('error', reject)
+    for (const chunk of chunks) request.write(chunk)
+    request.end()
+  })
+}
+
 async function registerProposal(
   harness: Awaited<ReturnType<typeof startHarness>>,
 ): Promise<void> {
@@ -321,6 +365,26 @@ describe('canvasAssistantPlugin', () => {
 
     expect(nonJson.status).toBe(415)
     expect(tooLarge.status).toBe(413)
+  })
+
+  it('rejects a chunked-transfer body larger than 512 KiB', async () => {
+    const harness = await startHarness()
+    const chunks = Array.from(
+      { length: 8 },
+      () => Buffer.alloc(64 * 1024, 0x20),
+    )
+    chunks.push(Buffer.from('x'))
+
+    const response = await postChunked(
+      harness,
+      '/__design_ai/canvas/chat',
+      chunks,
+    )
+
+    expect(response.status).toBe(413)
+    expect(JSON.parse(response.body)).toEqual({
+      error: 'Canvas Assistant request body is too large.',
+    })
   })
 
   it('returns 404 for unknown Canvas Assistant routes', async () => {
@@ -576,6 +640,57 @@ describe('canvasAssistantPlugin', () => {
     await expect(second.json()).resolves.toEqual({
       error: 'Canvas Assistant proposal is no longer available.',
     })
+  })
+
+  it('ends a rejected apply transaction with one failed complete event', async () => {
+    const overrides = defaultOverrides()
+    overrides.applyProposalTransactionImpl.mockImplementationOnce(
+      async (input) => {
+        input.onStatus({ phase: 'checking' })
+        throw new Error('Rollback writer failed.')
+      },
+    )
+    const harness = await startHarness(overrides)
+    await registerProposal(harness)
+
+    const response = await post(
+      harness,
+      '/__design_ai/canvas/proposals/proposal-1/apply',
+      {
+        aiConfig: {
+          provider: 'openai',
+          apiKey: API_KEY,
+          model: 'repair-model',
+        },
+      },
+    )
+    const events = await ndjson(response)
+
+    expect(events).toEqual([
+      { type: 'status', phase: 'checking' },
+      {
+        type: 'complete',
+        result: {
+          ok: false,
+          proposalId: 'proposal-1',
+          error:
+            'Canvas proposal rollback was incomplete. Some files may need manual inspection.',
+          rolledBack: false,
+        },
+      },
+    ])
+    expect(
+      events.filter(
+        (event) =>
+          typeof event === 'object' &&
+          event !== null &&
+          (event as { type?: unknown }).type === 'complete',
+      ),
+    ).toHaveLength(1)
+    expect(overrides.proposalStore.complete).toHaveBeenCalledWith(
+      'proposal-1',
+    )
+    expect(overrides.send).not.toHaveBeenCalled()
   })
 
   it('sends canvas-assistant:applied only after a successful transaction', async () => {

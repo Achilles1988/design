@@ -860,6 +860,117 @@ describe('applyProposalTransaction', () => {
     expect(await fs.readFile(cssPath, 'utf8')).toBe(ORIGINAL_CSS)
   })
 
+  it('reports an incomplete rollback and keeps restoring other targets', async () => {
+    const transactionProposal = proposal({
+      baseline: [
+        {
+          path: 'canvases/Home.tsx',
+          hash: sha256(ORIGINAL_CANVAS),
+          operation: 'write-existing',
+        },
+        {
+          path: 'canvases/Home.css',
+          hash: sha256(ORIGINAL_CSS),
+          operation: 'write-existing',
+        },
+        {
+          path: 'components/Select.tsx',
+          hash: null,
+          operation: 'create-shared',
+        },
+      ],
+      candidateFiles: [
+        {
+          path: 'canvases/Home.tsx',
+          source: CANDIDATE_CANVAS,
+        },
+        {
+          path: 'canvases/Home.css',
+          source: CANDIDATE_CSS,
+        },
+        {
+          path: 'components/Select.tsx',
+          source: NEW_SELECT,
+        },
+      ],
+    })
+    const validate = vi.fn(async () => {
+      throw new Error('invalid')
+    })
+    const repair = vi.fn(
+      async (request: {
+        candidateFiles: StoredProposal['candidateFiles']
+      }) => request.candidateFiles,
+    )
+    const writer = vi.fn(
+      async (absolutePath: string, source: string) => {
+        if (
+          absolutePath === canvasPath &&
+          source === ORIGINAL_CANVAS
+        ) {
+          throw new Error('Canvas restore failed.')
+        }
+        await writeAtomically(absolutePath, source)
+      },
+    )
+
+    const result = await applyProposalTransaction(
+      input({
+        proposal: transactionProposal,
+        validate,
+        repair,
+        writer,
+      }),
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'Canvas proposal rollback was incomplete. Some files may need manual inspection.',
+      rolledBack: false,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(
+      CANDIDATE_CANVAS,
+    )
+    expect(await fs.readFile(cssPath, 'utf8')).toBe(ORIGINAL_CSS)
+    expect(await exists(selectPath)).toBe(false)
+  })
+
+  it('reports an incomplete rollback when a created file cannot be deleted', async () => {
+    let validationAttempt = 0
+    const validate = vi.fn(async () => {
+      validationAttempt += 1
+      if (validationAttempt === 3) {
+        await fs.rm(selectPath, { force: true })
+        await fs.mkdir(selectPath)
+        await fs.writeFile(path.join(selectPath, 'keep.txt'), 'keep')
+      }
+      throw new Error('invalid')
+    })
+    const repair = vi.fn(
+      async (request: {
+        candidateFiles: StoredProposal['candidateFiles']
+      }) => request.candidateFiles,
+    )
+
+    const result = await applyProposalTransaction(
+      input({ validate, repair }),
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'Canvas proposal rollback was incomplete. Some files may need manual inspection.',
+      rolledBack: false,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(
+      ORIGINAL_CANVAS,
+    )
+    expect((await fs.stat(selectPath)).isDirectory()).toBe(true)
+  })
+
   it('never modifies an existing read-only shared component', async () => {
     const transactionProposal = proposal({
       candidateFiles: [

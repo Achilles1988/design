@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  CanvasApplyEventSchema,
   CanvasApplyRequestSchema,
   CanvasChatRequestSchema,
   CanvasProposalCardArgsSchema,
@@ -60,5 +61,29 @@ describe('Canvas Assistant protocol', () => {
 
   it('requires AI config for repair during apply', () => {
     expect(() => CanvasApplyRequestSchema.parse({})).toThrow()
+  })
+
+  it('represents an incomplete rollback truthfully', () => {
+    expect(
+      CanvasApplyEventSchema.parse({
+        type: 'complete',
+        result: {
+          ok: false,
+          proposalId: 'proposal-1',
+          error:
+            'Canvas proposal rollback was incomplete. Some files may need manual inspection.',
+          rolledBack: false,
+        },
+      }),
+    ).toEqual({
+      type: 'complete',
+      result: {
+        ok: false,
+        proposalId: 'proposal-1',
+        error:
+          'Canvas proposal rollback was incomplete. Some files may need manual inspection.',
+        rolledBack: false,
+      },
+    })
   })
 })

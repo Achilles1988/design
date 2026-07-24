@@ -16,8 +16,9 @@ All routes below accept `POST` only and require:
 - `Origin` exactly equal to
   `${X-Forwarded-Proto ?? "http"}://${Host}`; otherwise the response is `403`.
 - `Content-Type: application/json`; otherwise the response is `415`.
-- A body no larger than 512 KiB; reading stops and the response is `413` when
-  the limit is crossed.
+- A body no larger than 512 KiB, counted across both fixed-length and
+  chunked-transfer requests; reading stops and the response is `413` when the
+  limit is crossed.
 - Valid JSON and the documented schema; invalid JSON or schema receives `400`.
 
 A normal browser disconnect aborts the active model run. Request bodies, AI API
@@ -204,6 +205,23 @@ shared components, dependencies, global files, and paths outside these roots
 are not writable. Component reuse and new-component declarations must match the
 trusted context and candidate set exactly.
 
+Before staging, the server parses every candidate TypeScript source with
+`typescript.preProcessFile`. Imports may target:
+
+- an npm-style bare package specifier;
+- another candidate under the current App's `components/` directory;
+- the current Canvas's trusted same-directory CSS, when imported by the current
+  Canvas;
+- a discovered read-only App component declared in `reusedComponents`.
+
+All other imports are rejected, including another Canvas, Shell/framework
+source, Style or Layout implementation, arbitrary App files, absolute paths,
+and relative paths outside the App. Extensionless `.ts`, `.tsx`, `.css`, and
+matching `index` imports resolve only when exactly one trusted target matches.
+The set of directly imported existing read-only App component files must equal
+`reusedComponents` exactly: missing, extra, and duplicate declarations are
+invalid.
+
 The proposal stores candidate source and baseline hashes but never stores
 `aiConfig`. Read-only baseline enforcement belongs to the apply transaction,
 which reloads trusted context and checks every bound hash immediately before
@@ -260,7 +278,7 @@ type CanvasApplyComplete =
         ok: false
         proposalId: string
         error: string
-        rolledBack: true
+        rolledBack: boolean
       }
     }
 ```
@@ -268,7 +286,18 @@ type CanvasApplyComplete =
 Apply reloads context, checks all candidate and read-only baselines, writes
 atomically, and asks Vite to transform the current Canvas. Validation may run
 at most two AI repairs. A repair must return the same complete path set.
-Exhausted or invalid repairs roll every written target back.
+Exhausted or invalid repairs run a best-effort rollback across every written
+target; one restore or delete failure never prevents attempts on the remaining
+targets.
+
+`rolledBack: true` means every required restore/delete succeeded, or no file
+was written before the failure. `rolledBack: false` means at least one restore
+or delete failed; the error is
+`Canvas proposal rollback was incomplete. Some files may need manual inspection.`
+and the user must inspect the affected files manually. Even if an internal
+transaction failure rejects unexpectedly after the NDJSON stream opens, the
+route permanently completes the proposal and emits exactly one terminal
+`complete` event with `rolledBack: false`.
 
 Only after a successful transaction, Vite emits:
 
@@ -280,4 +309,5 @@ Only after a successful transaction, Vite emits:
 }
 ```
 
-Failed or conflicted transactions never emit this event.
+Failed, conflicted, or incompletely rolled-back transactions never emit this
+event.

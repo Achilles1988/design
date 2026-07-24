@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import path from 'node:path'
+import ts from 'typescript'
 import {
   CanvasProposalCardArgsSchema,
   RawCanvasProposalSchema,
@@ -59,6 +60,110 @@ function candidateOperation(
     : 'create-shared'
 }
 
+function relativeImportTargets(
+  importerPath: string,
+  moduleSpecifier: string,
+): string[] {
+  if (
+    !moduleSpecifier.startsWith('./') &&
+    !moduleSpecifier.startsWith('../')
+  ) {
+    return []
+  }
+  const resolved = path.posix.normalize(
+    path.posix.join(
+      path.posix.dirname(importerPath),
+      moduleSpecifier,
+    ),
+  )
+  return [
+    resolved,
+    `${resolved}.ts`,
+    `${resolved}.tsx`,
+    `${resolved}.css`,
+    path.posix.join(resolved, 'index.ts'),
+    path.posix.join(resolved, 'index.tsx'),
+    path.posix.join(resolved, 'index.css'),
+  ]
+}
+
+function isBarePackageImport(moduleSpecifier: string): boolean {
+  return /^(?:@[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*|[A-Za-z0-9][A-Za-z0-9._-]*)(?:\/[A-Za-z0-9][A-Za-z0-9._/-]*)?$/.test(
+    moduleSpecifier,
+  )
+}
+
+function validateCandidateImports(
+  context: CanvasAuthoringContext,
+  candidateFiles: Array<{ path: string; source: string }>,
+): string[] {
+  const readOnlyPaths = new Set(
+    context.files
+      .filter((file) => file.permission === 'read-only')
+      .map((file) => file.relativePath),
+  )
+  const candidateComponentPaths = new Set(
+    candidateFiles
+      .map((file) => file.path)
+      .filter((candidatePath) =>
+        candidatePath.startsWith('components/'),
+      ),
+  )
+  const canvasPath = `canvases/${context.canvas.component}`
+  const currentCssPaths = new Set(
+    context.files
+      .filter(
+        (file) =>
+          file.permission === 'write-existing' &&
+          path.posix.extname(file.relativePath) === '.css' &&
+          path.posix.dirname(file.relativePath) ===
+            path.posix.dirname(canvasPath),
+      )
+      .map((file) => file.relativePath),
+  )
+  const allowedRelativePaths = new Set([
+    ...readOnlyPaths,
+    ...candidateComponentPaths,
+    ...currentCssPaths,
+  ])
+  const imported = new Set<string>()
+
+  for (const file of candidateFiles) {
+    if (!['.ts', '.tsx'].includes(path.posix.extname(file.path))) {
+      continue
+    }
+    const imports = ts.preProcessFile(file.source, true, true)
+      .importedFiles
+    for (const importedFile of imports) {
+      const moduleSpecifier = importedFile.fileName
+      if (isBarePackageImport(moduleSpecifier)) continue
+
+      const targets = relativeImportTargets(
+        file.path,
+        moduleSpecifier,
+      ).filter((candidate) => allowedRelativePaths.has(candidate))
+      if (targets.length !== 1) {
+        throw new Error('Candidate import is not allowed.')
+      }
+      const target = targets[0]
+      if (readOnlyPaths.has(target)) {
+        imported.add(target)
+        continue
+      }
+      if (candidateComponentPaths.has(target)) continue
+      if (
+        currentCssPaths.has(target) &&
+        file.path === canvasPath
+      ) {
+        continue
+      }
+      throw new Error('Candidate import is not allowed.')
+    }
+  }
+
+  return [...imported]
+}
+
 export function createProposalStore({
   now,
   ttlMs,
@@ -113,6 +218,20 @@ export function createProposalStore({
     ) {
       throw new Error(
         'Reused components must be discovered read-only components.',
+      )
+    }
+    const importedReadOnlyPaths = validateCandidateImports(
+      context,
+      raw.files,
+    )
+    if (
+      !exactlyMatches(
+        raw.reusedComponents,
+        importedReadOnlyPaths,
+      )
+    ) {
+      throw new Error(
+        'Reused components must exactly match imported read-only components.',
       )
     }
 

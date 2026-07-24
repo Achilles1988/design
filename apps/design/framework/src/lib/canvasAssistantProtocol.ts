@@ -135,7 +135,7 @@ export const CanvasApplyEventSchema = z.discriminatedUnion('type', [
         ok: z.literal(false),
         proposalId: z.string().min(1),
         error: z.string().min(1),
-        rolledBack: z.literal(true),
+        rolledBack: z.boolean(),
       }),
     ]),
   }),
