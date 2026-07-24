@@ -508,6 +508,7 @@ describe('applyProposalTransaction', () => {
       [
         'Docs: http://example.com/docs/error',
         'Secure docs: https://example.com/docs/error',
+        'Routed docs: https://example.com/docs?next=/workspace/setup#/home/getting-started',
         'Unix source: /Users/Alice/project/Home.tsx',
         String.raw`Windows source: C:\Users\Alice\project\Home.tsx`,
         String.raw`Joined Windows source: joined=xC:\Users\Alice\project\Home.tsx`,
@@ -516,6 +517,9 @@ describe('applyProposalTransaction', () => {
 
     expect(diagnostic).toContain('http://example.com/docs/error')
     expect(diagnostic).toContain('https://example.com/docs/error')
+    expect(diagnostic).toContain(
+      'https://example.com/docs?next=/workspace/setup#/home/getting-started',
+    )
     expect(diagnostic).not.toContain(
       '/Users/Alice/project/Home.tsx',
     )
@@ -523,6 +527,108 @@ describe('applyProposalTransaction', () => {
       String.raw`C:\Users\Alice\project\Home.tsx`,
     )
   })
+
+  it.each([
+    {
+      name: 'Vite fs URL',
+      unsafeUrl:
+        'http://localhost:5173/@fs//Users/Alice/project/Home.tsx',
+      safeUrl: 'http://localhost:5173/@fs/[absolute path]',
+      absolutePath: '/Users/Alice/project/Home.tsx',
+    },
+    {
+      name: 'Unix query path',
+      unsafeUrl:
+        'https://example.com/error?file=/Users/Alice/project/Home.tsx&mode=transform',
+      safeUrl:
+        'https://example.com/error?file=[absolute path]&mode=transform',
+      absolutePath: '/Users/Alice/project/Home.tsx',
+    },
+    {
+      name: 'Windows query path',
+      unsafeUrl: String.raw`https://example.com/error?file=C:\Users\Alice\project\Home.tsx&mode=transform`,
+      safeUrl:
+        'https://example.com/error?file=[absolute path]&mode=transform',
+      absolutePath: String.raw`C:\Users\Alice\project\Home.tsx`,
+    },
+    {
+      name: 'Unix fragment path',
+      unsafeUrl:
+        'https://example.com/error#source=/Users/Alice/project/Home.tsx&line=4',
+      safeUrl:
+        'https://example.com/error#source=[absolute path]&line=4',
+      absolutePath: '/Users/Alice/project/Home.tsx',
+    },
+    {
+      name: 'Windows fragment path',
+      unsafeUrl: String.raw`https://example.com/error#source=C:\Users\Alice\project\Home.tsx&line=4`,
+      safeUrl:
+        'https://example.com/error#source=[absolute path]&line=4',
+      absolutePath: String.raw`C:\Users\Alice\project\Home.tsx`,
+    },
+    {
+      name: 'encoded Vite fs URL',
+      unsafeUrl:
+        'http://localhost:5173/@fs/%2FUsers%2FAlice%2Fproject%2FHome.tsx',
+      safeUrl: 'http://localhost:5173/@fs/[absolute path]',
+      absolutePath:
+        '%2FUsers%2FAlice%2Fproject%2FHome.tsx',
+    },
+    {
+      name: 'encoded Unix query path',
+      unsafeUrl:
+        'https://example.com/error?file=%2FUsers%2FAlice%2Fproject%2FHome.tsx&mode=transform',
+      safeUrl:
+        'https://example.com/error?file=[absolute path]&mode=transform',
+      absolutePath:
+        '%2FUsers%2FAlice%2Fproject%2FHome.tsx',
+    },
+    {
+      name: 'encoded Windows fragment path',
+      unsafeUrl:
+        'https://example.com/error#source=C%3A%5CUsers%5CAlice%5Cproject%5CHome.tsx&line=4',
+      safeUrl:
+        'https://example.com/error#source=[absolute path]&line=4',
+      absolutePath:
+        'C%3A%5CUsers%5CAlice%5Cproject%5CHome.tsx',
+    },
+    {
+      name: 'double-encoded Vite fs URL',
+      unsafeUrl:
+        'http://localhost:5173/@fs/%252FUsers%252FAlice%252Fproject%252FHome.tsx',
+      safeUrl: 'http://localhost:5173/@fs/[absolute path]',
+      absolutePath:
+        '%252FUsers%252FAlice%252Fproject%252FHome.tsx',
+    },
+    {
+      name: 'double-encoded Unix query path',
+      unsafeUrl:
+        'https://example.com/error?file=%252FUsers%252FAlice%252Fproject%252FHome.tsx&mode=transform',
+      safeUrl:
+        'https://example.com/error?file=[absolute path]&mode=transform',
+      absolutePath:
+        '%252FUsers%252FAlice%252Fproject%252FHome.tsx',
+    },
+    {
+      name: 'double-encoded Windows fragment path',
+      unsafeUrl:
+        'https://example.com/error#source=C%253A%255CUsers%255CAlice%255Cproject%255CHome.tsx&line=4',
+      safeUrl:
+        'https://example.com/error#source=[absolute path]&line=4',
+      absolutePath:
+        'C%253A%255CUsers%255CAlice%255Cproject%255CHome.tsx',
+    },
+  ])(
+    'redacts a local path inside a $name',
+    async ({ unsafeUrl, safeUrl, absolutePath }) => {
+      const diagnostic = await repairDiagnostic(
+        `Transform failed at ${unsafeUrl}`,
+      )
+
+      expect(diagnostic).toContain(safeUrl)
+      expect(diagnostic).not.toContain(absolutePath)
+    },
+  )
 
   it('keeps a compiler reason after redacting Prompt content', async () => {
     const diagnostic = await repairDiagnostic(

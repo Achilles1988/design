@@ -132,12 +132,121 @@ function redactAbsolutePaths(value: string): string {
     )
 }
 
+const FILESYSTEM_PARAMETER_NAMES = new Set([
+  'file',
+  'filename',
+  'filepath',
+  'path',
+  'source',
+  'sourcefile',
+])
+
+function decodeUrlComponent(value: string): string {
+  let decodedValue = value
+
+  while (true) {
+    try {
+      const nextValue = decodeURIComponent(decodedValue)
+      if (nextValue === decodedValue) {
+        return decodedValue
+      }
+      decodedValue = nextValue
+    } catch {
+      return decodedValue
+    }
+  }
+}
+
+function isFilesystemParameter(name: string): boolean {
+  const normalizedName = decodeUrlComponent(name)
+    .replace(/[-_.]/g, '')
+    .toLowerCase()
+  return FILESYSTEM_PARAMETER_NAMES.has(normalizedName)
+}
+
+function startsWithLocalAbsolutePath(
+  value: string,
+  allowAnyUnixRoot: boolean,
+): boolean {
+  const decodedValue = decodeUrlComponent(value)
+  if (/^[A-Za-z]:[\\/]/.test(decodedValue)) {
+    return true
+  }
+  if (!/^\/(?!\/)/.test(decodedValue)) {
+    return false
+  }
+  return allowAnyUnixRoot
+}
+
+function redactUrlParameterSection(section: string): string {
+  return section
+    .split('&')
+    .map((parameter) => {
+      const separatorIndex = parameter.indexOf('=')
+      if (separatorIndex === -1) {
+        return startsWithLocalAbsolutePath(parameter, false)
+          ? '[absolute path]'
+          : parameter
+      }
+
+      const name = parameter.slice(0, separatorIndex)
+      const value = parameter.slice(separatorIndex + 1)
+      return (
+        `${name}=` +
+        (startsWithLocalAbsolutePath(
+          value,
+          isFilesystemParameter(name),
+        )
+          ? '[absolute path]'
+          : value)
+      )
+    })
+    .join('&')
+}
+
+function redactPathsInsideHttpUrl(value: string): string {
+  const fragmentIndex = value.indexOf('#')
+  const beforeFragment =
+    fragmentIndex === -1 ? value : value.slice(0, fragmentIndex)
+  const fragment =
+    fragmentIndex === -1 ? undefined : value.slice(fragmentIndex + 1)
+  const queryIndex = beforeFragment.indexOf('?')
+  let baseUrl =
+    queryIndex === -1
+      ? beforeFragment
+      : beforeFragment.slice(0, queryIndex)
+  const query =
+    queryIndex === -1
+      ? undefined
+      : beforeFragment.slice(queryIndex + 1)
+  const viteFsMarker = '/@fs/'
+  const viteFsIndex = baseUrl.indexOf(viteFsMarker)
+
+  if (viteFsIndex !== -1) {
+    const pathIndex = viteFsIndex + viteFsMarker.length
+    const viteFsPath = baseUrl.slice(pathIndex)
+    if (startsWithLocalAbsolutePath(viteFsPath, true)) {
+      baseUrl = `${baseUrl.slice(0, pathIndex)}[absolute path]`
+    }
+  }
+
+  return (
+    baseUrl +
+    (query === undefined
+      ? ''
+      : `?${redactUrlParameterSection(query)}`) +
+    (fragment === undefined
+      ? ''
+      : `#${redactUrlParameterSection(fragment)}`)
+  )
+}
+
 function redactPathsOutsideHttpUrls(value: string): string {
   let result = ''
   let cursor = 0
   for (const match of value.matchAll(HTTP_URL_PATTERN)) {
     result += redactAbsolutePaths(value.slice(cursor, match.index))
-    result += match[0]
+    result += redactPathsInsideHttpUrl(match[0])
     cursor = match.index + match[0].length
   }
   return result + redactAbsolutePaths(value.slice(cursor))
