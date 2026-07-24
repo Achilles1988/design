@@ -49,14 +49,16 @@ export function AssistantPanel({
       <header className="assistant-panel__header">
         <span>AI Assistant</span>
         <div className="assistant-panel__actions">
-          <button
-            type="button"
-            className="assistant-panel__new-chat"
-            onClick={onNewChat}
-            aria-label="New chat"
-          >
-            New chat
-          </button>
+          {configured ? (
+            <button
+              type="button"
+              className="assistant-panel__new-chat"
+              onClick={onNewChat}
+              aria-label="New chat"
+            >
+              New chat
+            </button>
+          ) : null}
           <button
             type="button"
             className="assistant-panel__close"

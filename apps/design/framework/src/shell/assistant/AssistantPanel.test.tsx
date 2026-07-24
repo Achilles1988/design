@@ -65,6 +65,7 @@ describe('AssistantPanel', () => {
       screen.getByText('Configure an AI provider before starting a conversation.'),
     ).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Open Settings' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'New chat' })).toBeNull()
     expect(document.activeElement).toBe(
       screen.getByRole('button', { name: 'Close assistant' }),
     )
