@@ -8,6 +8,7 @@ const { confirmTipMock, hasValidConfigMock, session } = vi.hoisted(() => ({
   confirmTipMock: vi.fn(),
   hasValidConfigMock: vi.fn(() => false),
   session: {
+    ready: true,
     hasState: false,
     persistenceError: null as string | null,
     startNewChat: vi.fn(),
@@ -25,7 +26,10 @@ vi.mock('./pageSession', () => ({
 }))
 vi.mock('./AssistantThread', () => ({
   AssistantThread: ({ composerInputRef }: { composerInputRef?: Ref<HTMLTextAreaElement> }) => (
-    <textarea ref={composerInputRef} aria-label="Assistant composer" />
+    <>
+      <p>Old conversation</p>
+      <textarea ref={composerInputRef} aria-label="Assistant composer" />
+    </>
   ),
 }))
 
@@ -36,6 +40,7 @@ afterEach(() => {
   hasValidConfigMock.mockReset()
   hasValidConfigMock.mockReturnValue(false)
   confirmTipMock.mockReset()
+  session.ready = true
   session.hasState = false
   session.persistenceError = null
   session.startNewChat.mockReset()
@@ -108,6 +113,20 @@ describe('AssistantPanel', () => {
 
     expect(confirmTipMock).not.toHaveBeenCalled()
     expect(session.startNewChat).toHaveBeenCalledTimes(1)
+  })
+
+  it('hides the previous conversation while the destination page is loading', () => {
+    hasValidConfigMock.mockReturnValue(true)
+    session.ready = false
+    renderPanel(true)
+
+    expect(screen.getByRole('status').textContent).toBe(
+      'Loading conversation…',
+    )
+    expect(screen.queryByText('Old conversation')).toBeNull()
+    expect(
+      screen.queryByRole('textbox', { name: 'Assistant composer' }),
+    ).toBeNull()
   })
 
   it('keeps the page state when new chat confirmation is cancelled', async () => {

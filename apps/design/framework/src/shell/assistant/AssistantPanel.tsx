@@ -14,7 +14,12 @@ export function AssistantPanel({
   onClose: () => void
 }) {
   const composerInputRef = useRef<HTMLTextAreaElement>(null)
-  const { hasState, persistenceError, startNewChat } = useAssistantPageSession()
+  const {
+    ready,
+    hasState,
+    persistenceError,
+    startNewChat,
+  } = useAssistantPageSession()
 
   useEffect(() => {
     if (!open) return
@@ -76,7 +81,11 @@ export function AssistantPanel({
             Your conversation is available for this session but could not be saved.
           </p>
         ) : null}
-        {configured ? (
+        {configured && !ready ? (
+          <div className="assistant-panel__guidance" role="status">
+            <p>Loading conversation…</p>
+          </div>
+        ) : configured ? (
           <AssistantThread composerInputRef={composerInputRef} />
         ) : (
           <div className="assistant-panel__guidance">

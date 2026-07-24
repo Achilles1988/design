@@ -90,11 +90,9 @@ pathname 和白名单查询参数生成，当前查询参数白名单只有 `app
 Runtime 快照覆盖。只有已 hydration 的页面键与当前页面键相同时 `ready=true`，不会暴露
 “新页面键、旧页面状态且 ready=true”的不一致组合。
 
-Runtime 非运行状态的消息变化会保存到当前页面；运行中的中间消息不持久化。无论是否正在运行，
-Runtime 消息数量都会即时更新 `hasState`，筛选 chips 也会参与该状态判断。Store 写入失败时，
-`persistenceError` 暴露英文错误提示，页面仍使用 Store 的内存回退状态。消息与资产筛选统一写入
-`localStorage['wn.assistant.page-state.v1']`，其 envelope 带 `version: 1`；存储损坏或不可用时，
-当前会话退化为内存模式，不阻断聊天。运行中消息不会持久化，恢复的稳定消息会保留已完成工具结果。
+Runtime 消息变化会即时更新 `hasState`，筛选 chips 也会参与该状态判断；只有 Runtime 空闲且
+hydration 完成后才触发消息快照。快照内容和写入失败语义以“消息快照与写入失败”一节为准。
+Store 写入失败时，`persistenceError` 暴露英文错误提示。
 
 页面通过 `useAssistantPageSession()` 使用以下基础命令：
 
@@ -139,6 +137,10 @@ Runtime 消息数量都会即时更新 `hasState`，筛选 chips 也会参与该
 上游 chunk 前重新检查。页面切换或 `startNewChat()` 改变 epoch 后，旧运行即使迟到产出结果也会
 停止 yield，不能写回新页面。
 
+页面切换等待旧运行取消时，页面会话保持 `ready=false`。`AssistantPanel` 此时显示非阻塞的
+`Loading conversation…` 状态且不挂载 `AssistantThread`；目标消息恢复且 `ready=true` 后才显示
+对话和 composer，因此来源页的旧消息与工具结果不会在目标页闪入。
+
 ## 工具注册约定
 
 用 `@assistant-ui/react` 的 `useAssistantTool` 在页面内注册前端工具（每个工具一个组件、单次
@@ -159,9 +161,9 @@ useAssistantTool({
   把 tool result 附回 assistant 消息，再由 LocalRuntime 按 `maxSteps` 发起后续模型步骤。
 - adapter 会把同步或异步 execute 统一包装为 Promise；不支持 execute 上下文中的
   `human()` 交互，调用时会返回明确错误。需要人工确认的工具不应注册到此聊天内核。
-- 若某工具的 `execute` **可能失败**（网络、外部调用等），应 catch 并**作为结果返回**（如
-  `{ success:false, error }`），让模型可解释；对纯粹、参数已由 `parameters` 校验的确定性
-  `execute`（如 `apply_filter`），无需额外防御分支。
+- 若某工具的 `execute` 可能失败，应 catch 并作为结果返回（如 `{ success:false, error }`），
+  让模型可解释。`apply_filter` 的 `execute` 通过 `applyFilterSafely` 调用
+  `applyFilterExecute`；执行异常时返回既定的 `success:false` 联合成员，不把异常泄漏给 Runtime。
 - 工具组件必须渲染在 `AssistantProvider` 内。
 
 ## adapter 契约（`createStreamTextAdapter`）
