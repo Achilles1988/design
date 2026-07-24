@@ -289,7 +289,11 @@ function baselineTargets(
   }
 
   const writableEntries = proposal.baseline.filter(
-    (entry) => entry.operation !== 'read-only',
+    (
+      entry,
+    ): entry is typeof entry & {
+      operation: 'write-existing' | 'create-shared'
+    } => entry.operation !== 'read-only',
   )
   const expectedCandidatePaths = writableEntries.map(
     (entry) => entry.path,

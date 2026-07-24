@@ -261,7 +261,7 @@ function assertCreateSharedPath(
   }
 
   const componentsStat = lstatEntry(context.componentsDir)
-  if (componentsStat !== null) {
+  if (componentsStat) {
     if (
       !componentsStat.isDirectory() ||
       componentsStat.isSymbolicLink()
@@ -274,7 +274,7 @@ function assertCreateSharedPath(
       isWithin(context.componentsDir, existingAncestor)
     ) {
       const ancestorStat = lstatEntry(existingAncestor)
-      if (ancestorStat !== null) {
+      if (ancestorStat) {
         if (
           !ancestorStat.isDirectory() ||
           ancestorStat.isSymbolicLink() ||

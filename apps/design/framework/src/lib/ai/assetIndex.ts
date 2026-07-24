@@ -1,4 +1,4 @@
-import type { AssetKind } from '@/lib/types'
+import type { AssetKind } from '../types'
 
 export type AssetMeta = {
   id: string
