@@ -142,6 +142,11 @@ export function CanvasPreview({
   const assistantTools = assistantReady ? (
     <CanvasAssistantTools appId={appId} canvasId={canvasId} />
   ) : null
+  const assistantErrorAlert = assistantError ? (
+    <p className="canvas-assistant-context-error" role="alert">
+      Canvas Assistant unavailable: {assistantError.message}
+    </p>
+  ) : null
 
   if (state.status === 'loading') {
     return (
@@ -163,11 +168,7 @@ export function CanvasPreview({
             </Link>
           </p>
         ) : null}
-        {assistantError ? (
-          <p className="apps-error">
-            Canvas Assistant unavailable: {assistantError.message}
-          </p>
-        ) : null}
+        {assistantErrorAlert}
         {assistantTools}
       </div>
     )
@@ -176,11 +177,7 @@ export function CanvasPreview({
   const { Canvas } = state
   return (
     <>
-      {assistantError ? (
-        <p className="apps-error" role="status">
-          Canvas Assistant unavailable: {assistantError.message}
-        </p>
-      ) : null}
+      {assistantErrorAlert}
       <Canvas key={previewRevision} />
       {assistantTools}
     </>

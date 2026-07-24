@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs'
 import { useEffect, useState } from 'react'
 import {
   act,
@@ -400,22 +401,55 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     })
   })
 
-  it('keeps the assistant unavailable and shows English context errors', async () => {
+  it('announces an English context error when the preview is ready', async () => {
     mocks.checkContext.mockRejectedValue(
       new Error('Installed Style could not be loaded.'),
     )
     const view = renderCanvasPreview()
 
     await screen.findByTestId('canvas')
-    expect(
-      await screen.findByText(
-        'Canvas Assistant unavailable: Installed Style could not be loaded.',
-      ),
-    ).toBeTruthy()
+    const alert = await screen.findByRole('alert')
+    expect(alert.textContent).toBe(
+      'Canvas Assistant unavailable: Installed Style could not be loaded.',
+    )
+    expect(alert.className).toContain('canvas-assistant-context-error')
     expect(view.getActiveAdapter()).toBeNull()
     expect(mocks.pageAssistant).toHaveBeenLastCalledWith({
       instructions: '',
       available: false,
     })
+  })
+
+  it('announces an asynchronously inserted context error when the preview also fails', async () => {
+    const context = deferred<void>()
+    mocks.checkContext.mockReturnValue(context.promise)
+    mocks.loadCanvasModule.mockRejectedValue(
+      new Error('Canvas preview could not be loaded.'),
+    )
+    const view = renderCanvasPreview()
+
+    await screen.findByText('Canvas preview could not be loaded.')
+    context.reject(new Error('Installed Style could not be loaded.'))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert.textContent).toBe(
+      'Canvas Assistant unavailable: Installed Style could not be loaded.',
+    )
+    expect(alert.className).toContain('canvas-assistant-context-error')
+    expect(view.getActiveAdapter()).toBeNull()
+  })
+
+  it('uses a dedicated high-contrast Canvas Assistant context error style', () => {
+    const appStyles = readFileSync(
+      'framework/src/features/apps/apps.css',
+      'utf8',
+    )
+
+    expect(appStyles).toMatch(
+      /\.canvas-assistant-context-error \{[\s\S]*?border: 1px solid color-mix\(in srgb, var\(--color-danger\) 40%, transparent\);[\s\S]*?background: color-mix\(in srgb, var\(--color-danger\) 12%, transparent\);[\s\S]*?color: var\(--color-text\);[\s\S]*?font-size: 14px;/,
+    )
+    expect(appStyles).toMatch(
+      /\.canvas-assistant-context-error::before \{[\s\S]*?background: var\(--color-danger\);/,
+    )
   })
 })

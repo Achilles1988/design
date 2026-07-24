@@ -260,6 +260,29 @@
   font-size: 14px;
 }
 
+.canvas-assistant-context-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space);
+  margin: 0;
+  padding: calc(var(--space) * 1.5) calc(var(--space) * 2);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.canvas-assistant-context-error::before {
+  content: '';
+  flex: 0 0 auto;
+  width: var(--space);
+  height: var(--space);
+  margin-top: calc(var(--space) * 0.75);
+  border-radius: 50%;
+  background: var(--color-danger);
+}
+
 .apps-empty {
   margin: 0;
   padding: calc(var(--space) * 4) calc(var(--space) * 2.5);
