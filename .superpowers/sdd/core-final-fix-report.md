@@ -8,6 +8,7 @@
 - Finding 3：`466c9d8f fix(design): bind proposals to trusted context`
 - Finding 4：`3a8be6ff fix(design): preserve concurrent canvas edits`
 - 最终审查收口：`2134d21f fix(design): close canvas review security gaps`
+- Context freshness 收口：`63841a29 fix(design): revalidate canvas apply context`
 - 未增加依赖，未开展 multimodal 工作。
 
 ### 根因与决策
@@ -93,6 +94,25 @@ context 并比较三类 fingerprint。每个 repair request 从 server-side prop
 Layout contract 或 temporary decision、保留约束、compact diagnostic 与完整
 candidate set。API key 和无关聊天历史不进入 proposal。
 
+最终 whole-branch 复审发现 apply-start snapshot 仍不足：Style/Layout/app config 或
+reused read-only component 可在 Vite validation / repair pending 时变化，而旧事务仍用
+初始 `repairContext` 返回成功。事务现在通过统一 `reloadAndVerifyContext` 在 apply
+开始、每次 validation 前后、每次 repair 后以及 success return 前重新加载。每个
+checkpoint 核对 App/Style/selected Layout fingerprint、当前 Canvas identity 与全部
+read-only baseline；repair request 只从 validation 后最新且核验通过的 context 重建。
+repair resolve/reject 后都会再次核验，未核验 candidate 不会进入下一次写入。
+
+重复 context check 不比较 writable target 的 proposal 原始 hash；它们继续完全由
+`expectedSource` / `lastWrittenSource` 状态机管理。Read-only baseline 则在初始 context
+固定 absolute path + realpath + source，每个 checkpoint 核对 regular/non-symlink 身份并
+直接 reread；fresh context 若仍枚举该文件，其 path/source 也必须一致。Reused component
+必须继续出现在 fresh context，扫描遗漏也 fail closed；仅同 Canvas 目录的 CSS 可因
+candidate 移除 import 而不再枚举，但绑定身份/source 仍须不变。每个 checkpoint 还以
+fresh 文件覆盖 approval-time 授权文件后重跑 dependency / exact reused 校验；本事务
+create-shared 路径从该混合集合排除，所以仍按 candidate 处理。这样既保留不再动态
+发现的 approved Canvas CSS，又能发现新 `.ts` / `.tsx` 文件导致的 extensionless
+import 歧义。
+
 #### Finding 4：repair/rollback 无条件覆盖磁盘
 
 根因是 baseline 只在事务开始检查一次。等待 validation/repair 期间的 IDE 修改
@@ -102,15 +122,17 @@ candidate set。API key 和无关聊天历史不进入 proposal。
 
 - `originalSource`；
 - 当前 `expectedSource`，包括 expected absence；
-- 本事务最后成功写入的 `lastWrittenSource`。
+- 本事务最后成功写入的 `lastWrittenSource`；
+- 初始绑定的 `expectedRealPath`。
 
-事务通过唯一显式 `readSource` dependency 在每次 atomic write 前比较磁盘与
-`expectedSource`，只有 writer 成功后才推进期待值。Rollback 对每个已写 target
-再次读取；只有当前内容仍等于 `lastWrittenSource` 才 restore/delete。发现外部
-修改时保留该修改，继续 best-effort rollback 其他目标，并返回现有英文
-manual-inspection error、`rolledBack:false`。最终审查还补出 validation 成功时的
-终态缺口：现在每次异步 Vite validation resolve/reject 后都会重读全部已写 target，
-通过后才可返回成功、进入 repair 或 terminal rollback。
+事务在每次 atomic write 前后检查 regular/non-symlink `lstat`、realpath 与
+`expectedSource`，只有 writer 成功并通过身份复核后才推进。Rollback 对每个已写
+target 重复身份/source 检查；只有当前身份仍绑定且内容等于 `lastWrittenSource`
+才 restore/delete。发现外部修改（包括同源 symlink 替换）时保留该修改，继续
+best-effort rollback 其他目标，并返回现有英文 manual-inspection error、
+`rolledBack:false`。最终审查还补出 validation 成功时的终态缺口：现在每次异步
+Vite validation resolve/reject 后都会重读全部已写 target，通过后才可返回成功、
+进入 repair 或 terminal rollback。
 
 #### 最终审查：repair prompt authority
 
@@ -182,6 +204,31 @@ Finding 3 初始聚焦运行结果为 `4 failed files / 8 failed tests / 299 pas
 - app config、Style、selected Layout 变化后仍返回 `ok:true`；
 - repair prompt 不含 intent/contracts/preservation。
 
+最终 context-freshness RED 使用真实临时文件与 deferred Promise：
+
+- reused `Button.tsx` 在 validation pending 时变化，旧实现仍返回
+  `{ ok:true, repairAttempts:0 }`；
+- Style contract 在 repair pending 时变化，旧实现仍返回
+  `{ ok:true, repairAttempts:1 }`；
+- reload dependency 已返回新 Style source，旧 repair request 仍携带初始
+  `# Dashboard`；
+- candidate Canvas 导致 fresh context 不再枚举原只读 CSS 时，第一版修复误报
+  proposal conflict，证明 repeated check 不能依赖动态 discovery 集合；
+- validation pending 时新增与 approved `Button.tsx` 同名的 `Button.ts`，旧实现仍
+  返回成功，证明 checkpoint 必须重跑 fresh dependency resolution；
+- reused component 从 fresh context 消失但旧 absolute path 仍可读同源时，旧实现仍
+  返回成功，证明非 Canvas CSS 的 discovery omission 必须 fail closed；
+- validation pending 时把本事务 create-shared target 换为同源 symlink，旧实现仍
+  返回成功；新实现保留 symlink、回滚其他未变 target 并返回 `rolledBack:false`；
+- validation pending 时把 read-only baseline 换为同源 symlink，旧实现仍返回成功；
+  新实现返回 proposal conflict、回滚事务写入并保留外部 symlink；
+- 合法 package CSS 与 candidate component CSS import 在首次 reload 被旧 loader
+  错误转成 proposal conflict；真实 server integration 证明修复后 apply 成功。
+
+最终实现对 context/dependency conflict 返回 proposal conflict 并条件回滚本事务
+写入；外部 read-only 修改/新增保留。Canvas CSS discovery 用例通过初始
+absolute/source 直接 reread 后正常成功。
+
 #### Finding 4
 
 两个真实临时文件并发回归在旧实现上均失败：
@@ -228,7 +275,9 @@ validation success 后仍返回 `{ ok:true, repairAttempts:0 }`。新实现检�
 
 测试覆盖真实 Vite 新依赖、真实磁盘 app/style/layout stage→apply conflict、
 installed/temporary repair context、凭据/路径 diagnostic redaction、repair pending
-IDE edit、conditional rollback 和无外部修改的完整成功/rollback 路径。
+IDE edit、validation/repair pending context conflict、latest verified repair
+context、read-only discovery 变化、fresh extensionless resolution ambiguity、
+conditional rollback 和无外部修改的完整 success/rollback 路径。
 
 ### 运行态安全证明
 
@@ -262,8 +311,8 @@ bootstrap failure 由生成文档测试确定性验证 try/catch、严格 error 
 在修复完成后从 `apps/design` 运行全新命令：
 
 ```text
-npm run test: 47 files / 608 tests passed
-./node_modules/.bin/tsc -b: exit 0
+npm run test: 47 files / 617 tests passed
+./node_modules/.bin/tsc -b --force: exit 0
 npm run build: 1007 modules transformed / built successfully
 git diff --check: exit 0
 ```
@@ -281,6 +330,15 @@ git diff --check: exit 0
   前端 renewal 与签发后 symlink 替换；逐请求复核 GREEN 为 Store
   `1 file / 5 tests passed`、插件集成 `1 file / 15 tests passed`。最终聚焦、全量
   测试、TypeScript、build 与 diff-check 结果见上述最新数据。
+- 最终 context-freshness 收口先得到 `3 failed / 230 skipped` 的精确旧误成功/旧
+  repairContext RED；后续 CSS discovery、fresh extension ambiguity、fresh omission、
+  writable/read-only 同源 symlink 与 package/candidate CSS false-conflict 都先得到
+  精确 RED。最终 transaction 为 `1 file / 238 tests passed`，context + transaction
+  为 `2 files / 254 tests passed`，context/transaction/model/plugin/server
+  integration 聚焦为 `5 files / 289 tests passed`。
+- 最新 7-file diff 经独立只读复核确认无 Critical、无 Important；独立聚焦验证为
+  context + transaction `254/254`、authoring integration `10/10`，并通过
+  `git diff --check 79d55a8e`。
 
 ### Security boundary 与残余风险
 
@@ -298,8 +356,9 @@ git diff --check: exit 0
   apply body 或 server logs。
 - Source compare 与 atomic rename 之间仍存在极小 TOCTOU 窗口；没有 OS-level
   locking 时无法完全消除。所有已知 validation/repair 异步边界均重新比较。
-- App/Style/Layout fingerprint 是 apply-start snapshot；检查与第一笔写入之间也有
-  极小并发窗口。当前文件 target 有逐写 guard，contract 文件没有 OS-level lock。
+- App/Style/Layout 与 read-only baseline 会在 validation/repair checkpoint 重载；
+  checkpoint 结束到下一段同步逻辑之间仍有极小无锁窗口。Writable target 另有逐写
+  guard；contract/read-only 文件没有 OS-level lock。
 - Style/Layout、intent、diagnostic 与 candidate 都可能包含 prompt injection。
   最终边界仍由固定 candidate path schema、dependency allowlist、全 target Vite
   validation、compare-before-write 和 conditional rollback 提供。
@@ -320,6 +379,16 @@ git diff --check: exit 0
   会在下一次 module GET 立即失效。
 - 已确认浏览器 card mutation 不会改变 server candidate 或 trusted constraints。
 - 已确认 temporary Layout 没有伪造 installed contract fingerprint/source。
+- 已确认 validation/repair pending 期间 App/Style/Layout/read-only baseline 变化会
+  返回 proposal conflict；每个 repair request 使用最新核验 context，writable 与
+  create-shared 不会被重复 context check 误判。
+- 已确认 checkpoint dependency 校验会发现 fresh extensionless import 歧义；reused
+  component 从 fresh context 消失时 fail closed，只有 unchanged Canvas CSS 可因
+  candidate discovery 变化被保留。
+- 已确认 writable target 在写前后、checkpoint 与 rollback 都核验 regular-file
+  identity/realpath/source；同源 symlink 替换不会成功或被 rollback 删除。
+- 已确认 package CSS 与 candidate component CSS 不会被 fresh context 错归为 writable
+  Canvas CSS；dependency allowlist 与 Vite validation 继续承担校验。
 - 已确认所有失败、conflict、incomplete rollback 路径不发送
   `canvas-assistant:applied` HMR event。
 - 需要关注的非阻塞项是共享 dev HMR、普通外部网络/CPU 能力、上述微小 TOCTOU，以及
