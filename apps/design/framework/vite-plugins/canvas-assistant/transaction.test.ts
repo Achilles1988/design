@@ -17,6 +17,7 @@ import {
   applyProposalTransaction,
   createCanvasRepair,
   type CandidateValidationTarget,
+  readSource,
   validateCanvas,
   writeAtomically,
 } from './transaction'
@@ -51,6 +52,14 @@ function exists(file: string): Promise<boolean> {
     .access(file)
     .then(() => true)
     .catch(() => false)
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise
+  })
+  return { promise, resolve }
 }
 
 function card(): StoredProposal['card'] {
@@ -269,12 +278,15 @@ describe('applyProposalTransaction', () => {
     repair?: ReturnType<typeof vi.fn>
     onStatus?: ReturnType<typeof vi.fn>
     writer?: ReturnType<typeof vi.fn>
+    readSource?: (absolutePath: string) => Promise<string | null>
   } = {}) {
     return {
       proposal: overrides.proposal ?? proposal(),
       reloadContext: overrides.reloadContext ?? reloadContext,
       writeAtomically:
         overrides.writer ?? vi.fn(writeAtomically),
+      readSource:
+        overrides.readSource ?? vi.fn(readSource),
       validate: overrides.validate ?? vi.fn(async () => undefined),
       repair:
         overrides.repair ??
@@ -373,6 +385,30 @@ describe('applyProposalTransaction', () => {
     expect(writer).not.toHaveBeenCalled()
     expect(await fs.readFile(canvasPath, 'utf8')).toBe(
       'changed after proposal',
+    )
+  })
+
+  it('rereads the current source immediately before the initial write', async () => {
+    const writer = vi.fn(writeAtomically)
+    const reader = vi.fn(async (absolutePath: string) =>
+      absolutePath === canvasPath ? 'concurrent IDE source' : null,
+    )
+
+    const result = await applyProposalTransaction(
+      input({ writer, readSource: reader }),
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'The Canvas changed after this proposal was created. Generate a new proposal.',
+      rolledBack: true,
+    })
+    expect(reader).toHaveBeenCalledWith(canvasPath)
+    expect(writer).not.toHaveBeenCalled()
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(
+      ORIGINAL_CANVAS,
     )
   })
 
@@ -635,6 +671,53 @@ describe('applyProposalTransaction', () => {
       { phase: 'writing' },
       { phase: 'validating' },
     ])
+  })
+
+  it('does not overwrite an IDE edit made while repair is pending', async () => {
+    const repairStarted = deferred<void>()
+    const repairResult = deferred<StoredProposal['candidateFiles']>()
+    const validate = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Vite rejected the candidate.'))
+      .mockResolvedValueOnce(undefined)
+    const repair = vi.fn(async () => {
+      repairStarted.resolve()
+      return repairResult.promise
+    })
+    const writer = vi.fn(writeAtomically)
+
+    const pending = applyProposalTransaction(
+      input({ validate, repair, writer }),
+    )
+    await repairStarted.promise
+    const ideSource =
+      'export default function Home() { return <main>IDE edit</main> }'
+    await fs.writeFile(canvasPath, ideSource, 'utf8')
+    repairResult.resolve([
+      {
+        path: 'canvases/Home.tsx',
+        source: REPAIRED_CANVAS,
+      },
+      {
+        path: 'components/Select.tsx',
+        source: NEW_SELECT,
+      },
+    ])
+
+    const result = await pending
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'Canvas proposal rollback was incomplete. Some files may need manual inspection.',
+      rolledBack: false,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(ideSource)
+    expect(await exists(selectPath)).toBe(false)
+    expect(
+      writer.mock.calls.some(([, source]) => source === REPAIRED_CANVAS),
+    ).toBe(false)
   })
 
   const credentialLabels = [
@@ -1148,6 +1231,74 @@ describe('applyProposalTransaction', () => {
     expect(await exists(selectPath)).toBe(false)
   })
 
+  it('preserves an IDE edit made after writing while rolling back untouched targets', async () => {
+    const transactionProposal = proposal({
+      baseline: [
+        {
+          path: 'canvases/Home.tsx',
+          hash: sha256(ORIGINAL_CANVAS),
+          operation: 'write-existing',
+        },
+        {
+          path: 'canvases/Home.css',
+          hash: sha256(ORIGINAL_CSS),
+          operation: 'write-existing',
+        },
+        {
+          path: 'components/Select.tsx',
+          hash: null,
+          operation: 'create-shared',
+        },
+      ],
+      candidateFiles: [
+        {
+          path: 'canvases/Home.tsx',
+          source: CANDIDATE_CANVAS,
+        },
+        {
+          path: 'canvases/Home.css',
+          source: CANDIDATE_CSS,
+        },
+        {
+          path: 'components/Select.tsx',
+          source: NEW_SELECT,
+        },
+      ],
+    })
+    const ideSource =
+      'export default function Home() { return <main>IDE after write</main> }'
+    let validationAttempt = 0
+    const validate = vi.fn(async () => {
+      validationAttempt += 1
+      if (validationAttempt === 3) {
+        await fs.writeFile(canvasPath, ideSource, 'utf8')
+      }
+      throw new Error('still invalid')
+    })
+    const repair = vi.fn(
+      async (request: RepairRequest) => request.candidateFiles,
+    )
+
+    const result = await applyProposalTransaction(
+      input({
+        proposal: transactionProposal,
+        validate,
+        repair,
+      }),
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'Canvas proposal rollback was incomplete. Some files may need manual inspection.',
+      rolledBack: false,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(ideSource)
+    expect(await fs.readFile(cssPath, 'utf8')).toBe(ORIGINAL_CSS)
+    expect(await exists(selectPath)).toBe(false)
+  })
+
   it('reports an incomplete rollback when a created file cannot be deleted', async () => {
     let validationAttempt = 0
     const validate = vi.fn(async () => {
@@ -1286,6 +1437,25 @@ describe('writeAtomically', () => {
       expect(await fs.readdir(path.dirname(target))).toEqual([
         'Canvas.tsx',
       ])
+    } finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('readSource', () => {
+  it('returns exact source or null for an absent target', async () => {
+    const root = await fs.mkdtemp(
+      path.join(os.tmpdir(), 'canvas-source-read-'),
+    )
+    const target = path.join(root, 'Canvas.tsx')
+    await fs.writeFile(target, CANDIDATE_CANVAS, 'utf8')
+
+    try {
+      await expect(readSource(target)).resolves.toBe(CANDIDATE_CANVAS)
+      await expect(
+        readSource(path.join(root, 'Missing.tsx')),
+      ).resolves.toBeNull()
     } finally {
       await fs.rm(root, { recursive: true, force: true })
     }

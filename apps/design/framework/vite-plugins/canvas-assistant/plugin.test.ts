@@ -200,6 +200,7 @@ function defaultOverrides() {
     applyProposalTransactionImpl,
     createCanvasRepairImpl,
     writeAtomicallyImpl: vi.fn(),
+    readSourceImpl: vi.fn(async () => null),
     validateCanvasImpl: vi.fn(),
     send,
   }
@@ -685,6 +686,10 @@ describe('canvasAssistantPlugin', () => {
       'design',
       'home',
     )
+    expect(
+      harness.overrides.applyProposalTransactionImpl.mock.calls[0]?.[0]
+        .readSource,
+    ).toBe(harness.overrides.readSourceImpl)
     expect(proposal()).not.toHaveProperty('aiConfig')
   })
 

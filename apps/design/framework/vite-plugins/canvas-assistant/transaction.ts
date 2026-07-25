@@ -94,6 +94,7 @@ type ApplyProposalTransactionInput = {
     absolutePath: string,
     source: string,
   ) => Promise<void>
+  readSource: (absolutePath: string) => Promise<string | null>
   validate: (targets: CandidateValidationTarget[]) => Promise<void>
   repair: (request: RepairRequest) => Promise<CandidateFile[]>
   onStatus: (event: ApplyStatusEvent) => void
@@ -104,12 +105,21 @@ type CandidateTarget = {
   absolutePath: string
   operation: 'write-existing' | 'create-shared'
   originalSource: string | null
+  expectedSource: string | null
+  lastWrittenSource?: string
 }
 
 class InvalidCandidateSetError extends Error {
   constructor() {
     super(INVALID_REPAIR_ERROR)
     this.name = 'InvalidCandidateSetError'
+  }
+}
+
+class ConcurrentTargetEditError extends Error {
+  constructor() {
+    super(BASELINE_CHANGED_ERROR)
+    this.name = 'ConcurrentTargetEditError'
   }
 }
 
@@ -442,6 +452,7 @@ function baselineTargets(
         absolutePath: current.absolutePath,
         operation: entry.operation,
         originalSource: current.source,
+        expectedSource: current.source,
       }
     }
     return {
@@ -449,6 +460,7 @@ function baselineTargets(
       absolutePath: path.resolve(appDir, entry.path),
       operation: entry.operation,
       originalSource: null,
+      expectedSource: null,
     }
   })
 }
@@ -456,19 +468,38 @@ function baselineTargets(
 async function rollbackTargets(
   targets: CandidateTarget[],
   writer: ApplyProposalTransactionInput['writeAtomically'],
+  reader: ApplyProposalTransactionInput['readSource'],
 ): Promise<boolean> {
   const results = await Promise.allSettled(
-    targets.map((target) =>
-      Promise.resolve().then(() =>
-        target.operation === 'write-existing'
-          ? writer(target.absolutePath, target.originalSource ?? '')
-          : fs.rm(target.absolutePath, { force: true }),
-      ),
-    ),
+    targets.map(async (target) => {
+      if (target.lastWrittenSource === undefined) return
+      const currentSource = await reader(target.absolutePath)
+      if (currentSource !== target.lastWrittenSource) {
+        throw new ConcurrentTargetEditError()
+      }
+      if (target.operation === 'write-existing') {
+        await writer(target.absolutePath, target.originalSource ?? '')
+        return
+      }
+      await fs.rm(target.absolutePath, { force: true })
+    }),
   )
   return results.every(
     (result) => result.status === 'fulfilled',
   )
+}
+
+export async function readSource(
+  file: string,
+): Promise<string | null> {
+  try {
+    return await fs.readFile(file, 'utf8')
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return null
+    }
+    throw error
+  }
 }
 
 export async function writeAtomically(
@@ -568,6 +599,7 @@ export async function applyProposalTransaction({
   proposal,
   reloadContext,
   writeAtomically: writer,
+  readSource: reader,
   validate,
   repair,
   onStatus,
@@ -642,6 +674,7 @@ export async function applyProposalTransaction({
         writtenTargetPaths.has(target.path),
       ),
       writer,
+      reader,
     )
   const applyCandidateSet = async (
     candidateSet: CandidateFile[],
@@ -656,7 +689,13 @@ export async function applyProposalTransaction({
     for (const candidate of candidateSet) {
       const target = targetsByPath.get(candidate.path)
       if (!target) throw new InvalidCandidateSetError()
+      const currentSource = await reader(target.absolutePath)
+      if (currentSource !== target.expectedSource) {
+        throw new ConcurrentTargetEditError()
+      }
       await writer(target.absolutePath, candidate.source)
+      target.expectedSource = candidate.source
+      target.lastWrittenSource = candidate.source
       writtenTargetPaths.add(target.path)
     }
   }
@@ -707,6 +746,8 @@ export async function applyProposalTransaction({
           ? ROLLBACK_INCOMPLETE_ERROR
           : error instanceof InvalidCandidateSetError
           ? INVALID_REPAIR_ERROR
+          : error instanceof ConcurrentTargetEditError
+          ? BASELINE_CHANGED_ERROR
           : APPLY_FAILED_ERROR,
       rolledBack,
     }

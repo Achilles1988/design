@@ -330,18 +330,30 @@ original user intent, complete current Style contract, selected installed
 Layout contract or temporary Layout decision, authoritative preservation
 constraints, compact diagnostic, and complete candidate set. Browser state is
 never used to supply repair constraints.
+
+The transaction tracks the exact expected source, including expected absence,
+for every writable target. Immediately before each atomic write in the initial
+or repaired candidate set, it rereads that target and compares it with the
+transaction's expected source. The expectation advances only after that
+transaction write succeeds. A concurrent IDE edit therefore cannot be
+overwritten after an asynchronous validation or repair boundary.
+
 Exhausted or invalid repairs run a best-effort rollback across every written
 target; one restore or delete failure never prevents attempts on the remaining
+targets. Rollback also rereads each target and restores or deletes it only when
+its current source exactly equals the last source written by this transaction.
+An intervening IDE edit is preserved while rollback continues for other
 targets.
 
 `rolledBack: true` means every required restore/delete succeeded, or no file
 was written before the failure. `rolledBack: false` means at least one restore
 or delete failed; the error is
 `Canvas proposal rollback was incomplete. Some files may need manual inspection.`
-and the user must inspect the affected files manually. Even if an internal
-transaction failure rejects unexpectedly after the NDJSON stream opens, the
-route permanently completes the proposal and emits exactly one terminal
-`complete` event with `rolledBack: false`.
+and the user must inspect the affected files manually. This includes a
+conditional rollback skipped to preserve a concurrent external edit. Even if
+an internal transaction failure rejects unexpectedly after the NDJSON stream
+opens, the route permanently completes the proposal and emits exactly one
+terminal `complete` event with `rolledBack: false`.
 
 Only after a successful transaction, Vite emits:
 

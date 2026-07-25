@@ -17,6 +17,7 @@ import {
   applyProposalTransaction,
   createCanvasRepair,
   ROLLBACK_INCOMPLETE_ERROR,
+  readSource,
   type ApplyResult,
   validateCanvas,
   writeAtomically,
@@ -61,6 +62,7 @@ type CanvasAssistantPluginOverrides = {
   applyProposalTransactionImpl?: typeof applyProposalTransaction
   createCanvasRepairImpl?: typeof createCanvasRepair
   writeAtomicallyImpl?: typeof writeAtomically
+  readSourceImpl?: typeof readSource
   validateCanvasImpl?: typeof validateCanvas
   send?: ViteDevServer['ws']['send']
 }
@@ -328,6 +330,7 @@ export function canvasAssistantPlugin(
   const makeRepair =
     overrides.createCanvasRepairImpl ?? createCanvasRepair
   const writer = overrides.writeAtomicallyImpl ?? writeAtomically
+  const reader = overrides.readSourceImpl ?? readSource
   const validate = overrides.validateCanvasImpl ?? validateCanvas
   const owners = new Map<
     string,
@@ -455,6 +458,7 @@ export function canvasAssistantPlugin(
                 reloadContext: () =>
                   contextLoader.load(owner.appId, owner.canvasId),
                 writeAtomically: writer,
+                readSource: reader,
                 validate: (targets) => validate(server, targets),
                 repair: makeRepair(request.aiConfig),
                 onStatus: (status) => {
