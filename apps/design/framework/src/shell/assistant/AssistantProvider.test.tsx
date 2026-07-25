@@ -130,6 +130,11 @@ describe('AssistantProvider', () => {
         'recommend_canvas_layout',
         'propose_canvas_change',
       ],
+      adapters: {
+        attachments: expect.objectContaining({
+          accept: 'image/png,image/jpeg,image/webp',
+        }),
+      },
     })
   })
 })

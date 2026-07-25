@@ -27,6 +27,7 @@ import {
   readAssistantPageState,
 } from './pageState'
 import { createPageScopedModelAdapter } from './AssistantProvider'
+import type { VisualAttachmentStore } from './visualAttachmentStore'
 
 function createRuntime({
   asyncCancellation = false,
@@ -74,6 +75,7 @@ function createWrapper(
   fake: ReturnType<typeof createRuntime>,
   initialEntry: string,
   epochRef?: MutableRefObject<number>,
+  visualStore?: VisualAttachmentStore,
 ) {
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
@@ -81,11 +83,25 @@ function createWrapper(
         <AssistantPageSessionProvider
           runtime={fake.runtime}
           epochRef={epochRef}
+          visualStore={visualStore}
         >
           {children}
         </AssistantPageSessionProvider>
       </MemoryRouter>
     )
+  }
+}
+
+function createVisualStore(
+  overrides: Partial<VisualAttachmentStore> = {},
+): VisualAttachmentStore {
+  return {
+    put: vi.fn(async () => {}),
+    get: vi.fn(async () => null),
+    delete: vi.fn(async () => {}),
+    deletePage: vi.fn(async () => {}),
+    reconcilePage: vi.fn(async () => {}),
+    ...overrides,
   }
 }
 
@@ -1440,6 +1456,97 @@ describe('AssistantPageSessionProvider', () => {
     } finally {
       setItem.mockRestore()
     }
+  })
+
+  it('reconciles attachment records after a successful message snapshot', async () => {
+    const fake = createRuntime()
+    const visualStore = createVisualStore()
+    renderHook(useAssistantPageSession, {
+      wrapper: createWrapper(fake, '/attachment-snapshot', undefined, visualStore),
+    })
+
+    act(() => fake.setMessages([{
+      id: 'image-message',
+      role: 'user',
+      content: [{ type: 'image', image: 'wn-attachment:image-1' }],
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+    }]))
+
+    await waitFor(() => {
+      expect(visualStore.reconcilePage).toHaveBeenCalledWith(
+        '/attachment-snapshot',
+        new Set(['image-1']),
+      )
+    })
+  })
+
+  it('deletes current-page attachments after New chat without deleting another Canvas', async () => {
+    const fake = createRuntime()
+    const visualStore = createVisualStore()
+    const { result } = renderHook(useAssistantPageSession, {
+      wrapper: createWrapper(fake, '/attachment-home', undefined, visualStore),
+    })
+
+    act(() => result.current.startNewChat(result.current.owner))
+
+    await waitFor(() => {
+      expect(visualStore.deletePage).toHaveBeenCalledWith('/attachment-home')
+    })
+    expect(visualStore.deletePage).not.toHaveBeenCalledWith('/attachment-settings')
+  })
+
+  it('keeps in-memory images and reports a warning when IndexedDB fails', async () => {
+    const fake = createRuntime()
+    const visualStore = createVisualStore({
+      reconcilePage: vi.fn(async () => {
+        throw new Error('Visual attachment persistence failed.')
+      }),
+    })
+    const { result } = renderHook(useAssistantPageSession, {
+      wrapper: createWrapper(fake, '/attachment-failure', undefined, visualStore),
+    })
+    const message: ThreadMessageLike = {
+      id: 'image-message',
+      role: 'user',
+      content: [{ type: 'image', image: 'wn-attachment:image-1' }],
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+    }
+
+    act(() => fake.setMessages([message]))
+
+    await waitFor(() => {
+      expect(result.current.persistenceError).toBe(
+        'Visual attachment persistence failed.',
+      )
+    })
+    expect(fake.runtime.thread.getState().messages).toEqual([message])
+  })
+
+  it('does not restore cleared Runtime messages when IndexedDB cleanup fails', async () => {
+    const fake = createRuntime()
+    const visualStore = createVisualStore({
+      deletePage: vi.fn(async () => {
+        throw new Error('Visual attachment persistence failed.')
+      }),
+    })
+    const { result } = renderHook(useAssistantPageSession, {
+      wrapper: createWrapper(fake, '/attachment-clear-failure', undefined, visualStore),
+    })
+
+    act(() => fake.setMessages([{
+      id: 'image-message',
+      role: 'user',
+      content: [{ type: 'image', image: 'wn-attachment:image-1' }],
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+    }]))
+    act(() => result.current.startNewChat(result.current.owner))
+
+    await waitFor(() => {
+      expect(result.current.persistenceError).toBe(
+        'Visual attachment persistence failed.',
+      )
+    })
+    expect(fake.runtime.thread.getState().messages).toEqual([])
   })
 })
 

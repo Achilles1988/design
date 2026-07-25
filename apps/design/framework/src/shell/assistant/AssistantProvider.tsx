@@ -8,7 +8,13 @@ import {
 } from '@assistant-ui/react'
 import { AssistantAvailabilityProvider } from './availability'
 import { AssistantPageSessionProvider } from './pageSession'
+import { createAssistantPageKey } from './pageState'
 import { createStreamTextAdapter } from './streamTextAdapter'
+import { createVisualAttachmentAdapter } from './visualAttachmentAdapter'
+import {
+  getVisualAttachmentStore,
+  type VisualAttachmentStore,
+} from './visualAttachmentStore'
 import {
   AssistantModelModeProvider,
   createDelegatingChatModelAdapter,
@@ -27,6 +33,26 @@ const adapter: ChatModelAdapter = {
       options as unknown as Parameters<typeof streamTextAdapter.run>[0],
     ) as unknown as AsyncGenerator<ChatModelRunResult, void>
   },
+}
+
+function createDeferredVisualAttachmentStore(): VisualAttachmentStore {
+  return {
+    put: (record) => getVisualAttachmentStore().then((store) => store.put(record)),
+    get: (id) => getVisualAttachmentStore().then((store) => store.get(id)),
+    delete: (id) => getVisualAttachmentStore().then((store) => store.delete(id)),
+    deletePage: (pageKey) => getVisualAttachmentStore().then(
+      (store) => store.deletePage(pageKey),
+    ),
+    reconcilePage: (pageKey, referencedIds) => getVisualAttachmentStore().then(
+      (store) => store.reconcilePage(pageKey, referencedIds),
+    ),
+  }
+}
+
+function getCurrentAssistantPageKey(): string {
+  return typeof window === 'undefined'
+    ? '/'
+    : createAssistantPageKey(window.location)
 }
 
 function createAbortError(): Error {
@@ -165,6 +191,15 @@ export function createPageScopedModelAdapter(
 export function AssistantProvider({ children }: { children: ReactNode }) {
   const epochRef = useRef(0)
   const modelMode = useModelModeApi()
+  const visualStore = useMemo(createDeferredVisualAttachmentStore, [])
+  const visualAttachmentAdapter = useMemo(
+    () => createVisualAttachmentAdapter({
+      getPageKey: getCurrentAssistantPageKey,
+      store: visualStore,
+      originForFile: () => ({ origin: 'clipboard' }),
+    }),
+    [visualStore],
+  )
   const delegatingAdapter = useMemo(
     () =>
       createDelegatingChatModelAdapter(
@@ -187,10 +222,15 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       'recommend_canvas_layout',
       'propose_canvas_change',
     ],
+    adapters: { attachments: visualAttachmentAdapter },
   })
   return (
     <AssistantAvailabilityProvider>
-      <AssistantPageSessionProvider runtime={runtime} epochRef={epochRef}>
+      <AssistantPageSessionProvider
+        runtime={runtime}
+        epochRef={epochRef}
+        visualStore={visualStore}
+      >
         <AssistantModelModeProvider api={modelMode}>
           <AssistantRuntimeProvider runtime={runtime}>
             {children}

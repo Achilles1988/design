@@ -10,6 +10,7 @@ import {
   restoreMessages,
   serializeMessages,
 } from './pageState'
+import { extractAttachmentIds } from './visualAttachmentAdapter'
 
 function createStorageView(
   values: Map<string, string>,
@@ -799,6 +800,46 @@ describe('assistant page state store', () => {
 })
 
 describe('message snapshots', () => {
+  it('persists small wn-attachment references instead of Base64', () => {
+    const persisted = serializeMessages([{
+      id: 'image-message',
+      role: 'user',
+      content: [{ type: 'image', image: 'wn-attachment:image-1' }],
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+      attachments: [],
+      metadata: { custom: {} },
+    }])
+
+    expect(persisted).toEqual([expect.objectContaining({
+      content: [{ type: 'image', image: 'wn-attachment:image-1' }],
+    })])
+    expect(JSON.stringify(persisted)).not.toContain('base64')
+  })
+
+  it('extracts attachment ids from stable user messages', () => {
+    const messages = serializeMessages([{
+      id: 'user-image',
+      role: 'user',
+      content: [
+        { type: 'text', text: 'Use this reference.' },
+        { type: 'image', image: 'wn-attachment:image-1' },
+        { type: 'image', image: 'data:image/png;base64,ignored' },
+      ],
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+      attachments: [],
+      metadata: { custom: {} },
+    }, {
+      id: 'assistant-image',
+      role: 'assistant',
+      content: [{ type: 'image', image: 'wn-attachment:ignore-assistant' }],
+      createdAt: new Date('2026-07-24T00:00:00.000Z'),
+      status: { type: 'complete', reason: 'stop' },
+      metadata: { unstable_state: null, unstable_annotations: [], unstable_data: [], steps: [], custom: {} },
+    }])
+
+    expect(extractAttachmentIds(messages)).toEqual(new Set(['image-1']))
+  })
+
   it('round-trips completed text and tool result content', () => {
     const persisted = serializeMessages([{
       id: 'a1',
