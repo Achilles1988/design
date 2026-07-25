@@ -258,6 +258,91 @@ describe('useCanvasReferences', () => {
     expect(harness.send).toHaveBeenCalledTimes(1)
   })
 
+  it('dismisses one pending capture without cancelling its sibling', async () => {
+    const dismissedUrl = 'https://dismiss.example'
+    const siblingUrl = 'https://keep.example'
+    updateText(`Compare ${dismissedUrl} with ${siblingUrl}`)
+    let resolveCapture!: (
+      value: ReturnType<typeof successfulCapture>,
+    ) => void
+    harness.capture.mockImplementation(() => new Promise((resolve) => {
+      resolveCapture = resolve
+    }))
+    const { result } = renderHook(useCanvasReferences)
+    let pending!: Promise<'sent' | 'review' | 'blocked'>
+    act(() => {
+      pending = result.current.prepareAndMaybeSend()
+    })
+    await waitFor(() => {
+      expect(result.current.references.every(
+        (reference) => reference.state === 'capturing',
+      )).toBe(true)
+    })
+
+    act(() => result.current.dismiss(dismissedUrl))
+    await act(async () => {
+      resolveCapture(successfulCapture([dismissedUrl, siblingUrl]))
+      await expect(pending).resolves.toBe('review')
+    })
+
+    expect(result.current.references).toEqual([
+      { url: dismissedUrl, state: 'dismissed' },
+      {
+        url: siblingUrl,
+        state: 'ready',
+        attachmentId: 'attachment-1',
+      },
+    ])
+    expect(harness.addAttachment).toHaveBeenCalledTimes(1)
+    expect(harness.registerOrigin).toHaveBeenCalledWith(
+      expect.any(File),
+      { origin: 'url-capture', sourceUrl: siblingUrl },
+    )
+    expect(harness.attachments.map((attachment) => attachment.id)).toEqual([
+      'attachment-1',
+    ])
+  })
+
+  it('removes a capture attachment that finishes after dismissal', async () => {
+    const url = 'https://dismiss.example'
+    updateText(`Use ${url}`)
+    harness.capture.mockResolvedValue(successfulCapture([url]))
+    let finishAttachment!: () => void
+    harness.addAttachment.mockImplementation((file: File) =>
+      new Promise<void>((resolve) => {
+        finishAttachment = () => {
+          harness.attachments.push({
+            id: 'dismissed-late',
+            type: 'image',
+            name: file.name,
+            contentType: file.type,
+            file,
+          })
+          resolve()
+        }
+      }))
+    const { result } = renderHook(useCanvasReferences)
+    let pending!: Promise<'sent' | 'review' | 'blocked'>
+    act(() => {
+      pending = result.current.prepareAndMaybeSend()
+    })
+    await waitFor(() => {
+      expect(harness.addAttachment).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => result.current.dismiss(url))
+    await act(async () => {
+      finishAttachment()
+      await expect(pending).resolves.toBe('review')
+    })
+
+    expect(result.current.references).toEqual([
+      { url, state: 'dismissed' },
+    ])
+    expect(harness.removeAttachment).toHaveBeenCalledWith('dismissed-late')
+    expect(harness.attachments).toEqual([])
+  })
+
   it('changing the URL text removes stale capture draft state', async () => {
     updateText('Use https://old.example')
     harness.capture.mockResolvedValue(

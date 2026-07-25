@@ -284,13 +284,17 @@ export function useCanvasReferences(): {
         }
       })
       const files = uncaptured.flatMap((reference) => {
+        const currentReference = referencesRef.current.find(
+          (candidate) => candidate.url === reference.url,
+        )
+        if (currentReference?.state !== 'capturing') return []
         const file = filesByUrl.get(reference.url)
         return file ? [file] : []
       })
       if (!validateVisualBatch(composer.getState().attachments, files)) {
         setReferenceError(VISUAL_BATCH_ERROR)
         replaceReferences(referencesRef.current.map((reference) =>
-          capturingUrls.has(reference.url)
+          capturingUrls.has(reference.url) && reference.state === 'capturing'
             ? {
                 url: reference.url,
                 state: 'failed',
@@ -303,6 +307,10 @@ export function useCanvasReferences(): {
 
       const completed = new Map<string, string>()
       for (const reference of uncaptured) {
+        const currentReference = referencesRef.current.find(
+          (candidate) => candidate.url === reference.url,
+        )
+        if (currentReference?.state !== 'capturing') continue
         const file = filesByUrl.get(reference.url)
         if (!file) continue
         if (
@@ -333,6 +341,13 @@ export function useCanvasReferences(): {
           if (attachment) await removeAttachment(attachment.id)
           return 'blocked'
         }
+        const latestReference = referencesRef.current.find(
+          (candidate) => candidate.url === reference.url,
+        )
+        if (latestReference?.state !== 'capturing') {
+          if (attachment) await removeAttachment(attachment.id)
+          continue
+        }
         if (attachment) completed.set(reference.url, attachment.id)
       }
 
@@ -342,7 +357,10 @@ export function useCanvasReferences(): {
         || ownerKeyRef.current !== ownerKey
       ) return 'blocked'
       replaceReferences(referencesRef.current.map((reference) => {
-        if (!capturingUrls.has(reference.url)) return reference
+        if (
+          !capturingUrls.has(reference.url)
+          || reference.state !== 'capturing'
+        ) return reference
         const attachmentId = completed.get(reference.url)
         return attachmentId
           ? {
@@ -364,7 +382,7 @@ export function useCanvasReferences(): {
         || ownerKeyRef.current !== ownerKey
       ) return 'blocked'
       replaceReferences(referencesRef.current.map((reference) =>
-        capturingUrls.has(reference.url)
+        capturingUrls.has(reference.url) && reference.state === 'capturing'
           ? {
               url: reference.url,
               state: 'failed',
