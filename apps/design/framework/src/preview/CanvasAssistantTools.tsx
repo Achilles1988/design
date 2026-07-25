@@ -359,6 +359,20 @@ function CanvasProposalCard({
               {statusLabel(status)}
             </p>
           ))}
+          {outcome === 'applied'
+            ? statuses
+                .filter((status) => status.phase === 'repairing')
+                .map((status, index) => (
+                  <p
+                    className="canvas-assistant-card__status"
+                    data-state="success"
+                    role="status"
+                    key={`repaired-${status.attempt ?? 0}-${index}`}
+                  >
+                    {`Repaired${status.attempt ? ` · attempt ${status.attempt}` : ''}`}
+                  </p>
+                ))
+            : null}
           {outcome ? (
             <p
               className="canvas-assistant-card__status"

@@ -399,6 +399,7 @@ describe('Canvas Assistant browser integration', () => {
     await waitFor(() => {
       expect(screen.getByText('Validating changes')).toBeTruthy()
       expect(screen.getByText('Repairing · attempt 1')).toBeTruthy()
+      expect(screen.getByText('Repaired · attempt 1')).toBeTruthy()
       expect(
         screen.getAllByText('Applied', { selector: '[role="status"]' }),
       ).not.toHaveLength(0)

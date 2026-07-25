@@ -356,6 +356,7 @@ describe('CanvasAssistantTools', () => {
         'Writing files',
         'Validating changes',
         'Repairing · attempt 1',
+        'Repaired · attempt 1',
         'Applied',
       ])
       expect(statuses.every((status) => status.dataset.state === 'success')).toBe(

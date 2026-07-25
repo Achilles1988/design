@@ -455,6 +455,7 @@ describe('Canvas Assistant authoring server integration', () => {
         args: proposal,
       }),
     )
+    expect(await fs.readFile(fixture.canvasFile, 'utf8')).toBe(ORIGINAL_CANVAS)
     expect(await fs.readFile(fixture.appJson, 'utf8')).toBe(before)
 
     const events = await applyProposal(fixture, card.proposalId)
@@ -561,7 +562,11 @@ describe('Canvas Assistant authoring server integration', () => {
   })
 
   it('rolls back Canvas and new components after two failed repairs', async () => {
-    const repairedSources = ['Repair one', 'Repair two']
+    const repairedSources = ['Repair one', 'Repair two'].map(
+      (label) =>
+        `export default function Home() {\n  return <main>${label}</main>\n}\n`,
+    )
+    const canvasSourcesDuringValidation: string[] = []
     const componentSourcesDuringValidation: string[] = []
     const fixture = await createFixture({
       validate: async (canvasPath) => {
@@ -574,6 +579,7 @@ describe('Canvas Assistant authoring server integration', () => {
           fs.readFile(canvasPath, 'utf8'),
           fs.readFile(componentPath, 'utf8'),
         ])
+        canvasSourcesDuringValidation.push(source)
         componentSourcesDuringValidation.push(componentSource)
         throw new Error(`Vite rejected: ${source}`)
       },
@@ -582,7 +588,7 @@ describe('Canvas Assistant authoring server integration', () => {
           ...file,
           source:
             file.path === 'canvases/Home.tsx'
-              ? `export default function Home() {\n  return <main>${repairedSources[request.attempt - 1]}</main>\n}\n`
+              ? repairedSources[request.attempt - 1]!
               : file.source,
         })),
     })
@@ -628,6 +634,11 @@ describe('Canvas Assistant authoring server integration', () => {
     })
     expect(fixture.validator).toHaveBeenCalledTimes(3)
     expect(fixture.repair).toHaveBeenCalledTimes(2)
+    expect(canvasSourcesDuringValidation).toEqual([
+      proposal.files[0]?.source,
+      repairedSources[0],
+      repairedSources[1],
+    ])
     expect(componentSourcesDuringValidation).toEqual([
       proposal.files[1]?.source,
       proposal.files[1]?.source,
