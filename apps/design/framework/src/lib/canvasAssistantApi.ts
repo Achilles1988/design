@@ -2,7 +2,10 @@ import type { z } from 'zod'
 import { readAiConfig } from '@/lib/ai/config'
 import {
   CanvasApplyEventSchema,
+  CanvasPreviewSessionResponseSchema,
   type CanvasApplyEvent,
+  type CanvasPreviewSessionRequest,
+  type CanvasPreviewSessionResponse,
 } from '@/lib/canvasAssistantProtocol'
 
 const AI_CONFIG_GUIDANCE =
@@ -109,6 +112,25 @@ export async function checkCanvasAssistantContext({
   if (body?.ready !== true) {
     throw new Error(CANVAS_ASSISTANT_DEV_ONLY_GUIDANCE)
   }
+}
+
+export async function createCanvasPreviewSession(
+  request: CanvasPreviewSessionRequest,
+): Promise<CanvasPreviewSessionResponse> {
+  const response = await fetch('/__design_ai/canvas/preview-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  })
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!response.ok && contentType.includes('application/json')) {
+    throw await responseError(response)
+  }
+  if (!contentType.includes('application/json')) {
+    throw new Error(CANVAS_ASSISTANT_DEV_ONLY_GUIDANCE)
+  }
+  if (!response.ok) throw await responseError(response)
+  return CanvasPreviewSessionResponseSchema.parse(await response.json())
 }
 
 export async function applyCanvasProposal({

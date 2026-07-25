@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
-import { checkCanvasAssistantContext } from '@/lib/canvasAssistantApi'
+import {
+  checkCanvasAssistantContext,
+  createCanvasPreviewSession,
+} from '@/lib/canvasAssistantApi'
 import { getTheme, subscribeTheme, type ThemeMode } from '@/lib/theme'
 import { CanvasAssistantTools } from './CanvasAssistantTools'
 import { createCanvasPreviewDocument } from './canvasPreviewDocument'
@@ -15,7 +18,12 @@ import '../features/apps/apps.css'
 type PreviewState =
   | { status: 'loading' }
   | { status: 'error'; message: string }
-  | { status: 'ready'; componentFile: string }
+  | {
+      status: 'ready'
+      componentFile: string
+      moduleBase: string
+      expiresAt: string
+    }
 
 type AssistantContextState =
   | { status: 'loading'; appId: string; canvasId: string }
@@ -26,6 +34,8 @@ const GLOB_MISS_HINT =
   'Canvas not found / restart dev server after adding files if glob cache stale'
 const CANVAS_ENTRY_MISSING = 'Canvas entry not found in canvases.json'
 const MAX_PREVIEW_ERROR_LENGTH = 4_000
+const PREVIEW_SESSION_RENEWAL_LEAD_MS = 60_000
+const MAX_TIMEOUT_MS = 2_147_483_647
 
 type SubscribeApplied = (
   appId: string,
@@ -77,16 +87,23 @@ export function CanvasPreview({
     ;(async () => {
       try {
         const canvases = await designApi.listCanvases(appId)
-        const entry = canvases.find((c) => c.id === canvasId)
-        if (!entry) {
+        if (!canvases.some((entry) => entry.id === canvasId)) {
           if (!cancelled) {
             setState({ status: 'error', message: CANVAS_ENTRY_MISSING })
           }
           return
         }
-
+        const session = await createCanvasPreviewSession({
+          appId,
+          canvasId,
+        })
         if (cancelled) return
-        setState({ status: 'ready', componentFile: entry.component })
+        setState({
+          status: 'ready',
+          componentFile: session.componentFile,
+          moduleBase: session.moduleBase,
+          expiresAt: session.expiresAt,
+        })
       } catch (err: unknown) {
         if (!cancelled) {
           setState({
@@ -101,6 +118,20 @@ export function CanvasPreview({
       cancelled = true
     }
   }, [appId, canvasId, previewRevision])
+
+  useEffect(() => {
+    if (state.status !== 'ready') return
+    const renewalDelay = Math.max(
+      0,
+      Date.parse(state.expiresAt) -
+        Date.now() -
+        PREVIEW_SESSION_RENEWAL_LEAD_MS,
+    )
+    const timer = window.setTimeout(() => {
+      setPreviewRevision((revision) => revision + 1)
+    }, Math.min(renewalDelay, MAX_TIMEOUT_MS))
+    return () => window.clearTimeout(timer)
+  }, [state])
 
   useEffect(() => subscribeTheme(setThemeState), [])
 
@@ -215,6 +246,7 @@ export function CanvasPreview({
     appId,
     componentFile: state.componentFile,
     generation: previewGeneration,
+    moduleBase: state.moduleBase,
     theme,
   })
   return (

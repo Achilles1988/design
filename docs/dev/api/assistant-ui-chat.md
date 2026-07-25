@@ -269,7 +269,8 @@ chips、匹配数量和可见资产三者变化；普通助手文本不得修改
 ## Canvas 页面 server adapter
 
 Canvas 页面使用 `useCanvasAssistant({ appId, canvasId, ready })` 独占当前页面的模型 adapter。
-`CanvasPreview` 会并行加载隔离 Canvas preview 与调用
+`CanvasPreview` 会并行申请
+`POST /__design_ai/canvas/preview-session`、加载隔离 Canvas preview 与调用
 `POST /__design_ai/canvas/context`；只有 context 成功后才传 `ready:true`，注册
 `createCanvasServerAdapter({ appId, canvasId })` 并点亮助手。Style、Layout 或其他 Canvas
 context 加载失败时，Canvas 预览仍可显示，但助手保持不可用并显示英文状态。空白 Canvas 也走同一
@@ -279,9 +280,20 @@ context readiness 流程，不依赖已有页面内容。context 响应必须是
 
 Canvas module 只在 `sandbox="allow-scripts"` 且不含 `allow-same-origin`
 的 iframe 中执行，因此运行时 origin 为 opaque。Shell 继续持有 `designApi` 与 Canvas
-Assistant API 权限；preview 只能加载非 API 的只读 Vite 模块资源。父页面只接受来自当前
-iframe `contentWindow` 且符合严格 `ready` / `error` type 的消息，该通道不提供任何文件或
-API mutation 能力。
+Assistant API 权限。preview session 由同源 Shell 申请，服务端从 `appId + canvasId`
+解析当前非 symlink 的普通 TSX 文件，并返回含 `moduleBase`、`componentFile`、
+`expiresAt` 的 30 分钟有效不可猜 module capability；`CanvasPreview` 在到期前 1 分钟
+重新申请 capability 并 remount iframe，避免后续 HMR/lazy import 使用过期 token，
+同时按预览 remount 语义清空 Canvas 本地状态。iframe import map
+把 Vite runtime、当前 Canvas/直接 CSS 与经 realpath 校验的共享组件请求改写到 capability
+namespace。只有 `Origin:null + Sec-Fetch-Dest:script`、有效 token 和精确 allowlist
+同时满足时才返回 `ACAO:null`；每个 App module GET 还会重新执行 `lstat + realpath`，
+要求文件仍是普通非 symlink 文件且解析到签发时记录的真实路径，签发后的 symlink/路径
+替换会立即 fail closed。普通 fetch、危险 Vite raw/url/worker query、另一
+Canvas/App、`/@fs` 与 privileged `__*` 路由均拒绝。父页面只接受来自当前 iframe
+`contentWindow` 且符合严格 `ready` / `error` type 的消息，该通道不提供任何文件或 API
+mutation 能力。srcdoc bootstrap 自身捕获 runtime/frame module import 失败并发送同一严格
+error 消息，不能永久停在空白 loading。
 
 页面 adapter 的所有权由 `usePageModelAdapter` 管理：Canvas 路由挂载时替换默认浏览器 adapter，
 `ready:false`、参数变化或卸载时写回 `null`。因此非 Canvas 页面不会请求

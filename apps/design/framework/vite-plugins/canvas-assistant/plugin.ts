@@ -5,6 +5,7 @@ import {
   CanvasApplyRequestSchema,
   CanvasChatRequestSchema,
   CanvasContextRequestSchema,
+  CanvasPreviewSessionRequestSchema,
   CanvasRunEventSchema,
 } from '../../src/lib/canvasAssistantProtocol'
 import { createCanvasContextLoader } from './context'
@@ -22,24 +23,29 @@ import {
   validateCanvas,
   writeAtomically,
 } from './transaction'
+import {
+  CANVAS_PREVIEW_MODULE_PREFIX,
+  createCanvasPreviewSessionStore,
+  createCanvasPreviewTargetLoader,
+  type CanvasPreviewTarget,
+} from './previewSessions'
 
 const API_PREFIX = '/__design_ai'
 const CONTEXT_ROUTE = '/__design_ai/canvas/context'
 const CHAT_ROUTE = '/__design_ai/canvas/chat'
+const PREVIEW_SESSION_ROUTE = '/__design_ai/canvas/preview-session'
 const APPLY_ROUTE =
   /^\/__design_ai\/canvas\/proposals\/([^/]+)\/apply$/
 const MAX_BODY_BYTES = 512 * 1024
-const OPAQUE_PREVIEW_MODULE_PATHS = [
-  '/@react-refresh',
-  '/@vite/client',
-  '/node_modules/vite/dist/client/env.mjs',
-  '/node_modules/.vite/deps/',
-  '/framework/src/preview/canvasPreviewFrame.tsx',
-  '/framework/src/preview/loadCanvasModule.ts',
-  '/framework/src/styles/global.css',
-  '/framework/src/styles/tokens.css',
-  '/apps/',
-]
+const PREVIEW_TOKEN_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+const FORBIDDEN_PREVIEW_QUERY_KEYS = new Set([
+  'inline',
+  'raw',
+  'sharedworker',
+  'url',
+  'worker',
+])
 
 class HttpError extends Error {
   constructor(
@@ -54,6 +60,11 @@ class HttpError extends Error {
 type ContextLoader = ReturnType<typeof createCanvasContextLoader>
 type ProposalStore = ReturnType<typeof createProposalStore>
 type ModelRunner = ReturnType<typeof createCanvasModelRunner>
+type PreviewTargetLoader = (
+  request: Parameters<
+    ReturnType<typeof createCanvasPreviewTargetLoader>
+  >[0],
+) => Promise<CanvasPreviewTarget>
 
 type CanvasAssistantPluginOverrides = {
   contextLoader?: ContextLoader
@@ -64,6 +75,7 @@ type CanvasAssistantPluginOverrides = {
   writeAtomicallyImpl?: typeof writeAtomically
   readSourceImpl?: typeof readSource
   validateCanvasImpl?: typeof validateCanvas
+  loadPreviewTargetImpl?: PreviewTargetLoader
   send?: ViteDevServer['ws']['send']
 }
 
@@ -110,25 +122,31 @@ function isCrossSiteBrowserRequest(req: IncomingMessage): boolean {
   return req.headers.origin === 'null' || site === 'cross-site'
 }
 
-function allowOpaquePreviewModule(
-  req: IncomingMessage,
-  res: ServerResponse,
+function previewModuleRequest(
   pathname: string,
-): void {
-  const method = (req.method ?? 'GET').toUpperCase()
-  if (
-    req.headers.origin !== 'null' ||
-    (method !== 'GET' && method !== 'HEAD') ||
-    !OPAQUE_PREVIEW_MODULE_PATHS.some(
-      (allowed) =>
-        pathname === allowed ||
-        (allowed.endsWith('/') && pathname.startsWith(allowed)),
-    )
-  ) {
-    return
+): { token: string; modulePath: string } | null {
+  if (!pathname.startsWith(CANVAS_PREVIEW_MODULE_PREFIX)) return null
+  const remainder = pathname.slice(CANVAS_PREVIEW_MODULE_PREFIX.length)
+  const separator = remainder.indexOf('/')
+  if (separator === -1) return null
+  const token = remainder.slice(0, separator)
+  if (!PREVIEW_TOKEN_PATTERN.test(token)) return null
+  return {
+    token,
+    modulePath: `/${remainder.slice(separator + 1)}`,
   }
-  res.setHeader('Access-Control-Allow-Origin', 'null')
-  appendVaryOrigin(res)
+}
+
+function headerValue(
+  value: string | string[] | undefined,
+): string | undefined {
+  return Array.isArray(value) ? value[0] : value
+}
+
+function hasForbiddenPreviewQuery(requestUrl: URL): boolean {
+  return [...requestUrl.searchParams.keys()].some((key) =>
+    FORBIDDEN_PREVIEW_QUERY_KEYS.has(key.toLowerCase()),
+  )
 }
 
 function requireSameOrigin(req: IncomingMessage): void {
@@ -332,6 +350,12 @@ export function canvasAssistantPlugin(
   const writer = overrides.writeAtomicallyImpl ?? writeAtomically
   const reader = overrides.readSourceImpl ?? readSource
   const validate = overrides.validateCanvasImpl ?? validateCanvas
+  const loadPreviewTarget =
+    overrides.loadPreviewTargetImpl ??
+    createCanvasPreviewTargetLoader({
+      contentRoot: options.contentRoot,
+    })
+  const previewSessions = createCanvasPreviewSessionStore()
   const owners = new Map<
     string,
     { appId: string; canvasId: string }
@@ -344,13 +368,44 @@ export function canvasAssistantPlugin(
 
       server.middlewares.use(async (req, res, next) => {
         const rawUrl = req.url ?? ''
-        let pathname: string
+        let requestUrl: URL
         try {
-          pathname = new URL(rawUrl, 'http://localhost').pathname
+          requestUrl = new URL(rawUrl, 'http://localhost')
         } catch {
           return next()
         }
-        allowOpaquePreviewModule(req, res, pathname)
+        const pathname = requestUrl.pathname
+        const previewRequest = previewModuleRequest(pathname)
+        if (pathname.startsWith(CANVAS_PREVIEW_MODULE_PREFIX)) {
+          const method = (req.method ?? 'GET').toUpperCase()
+          if (
+            !previewRequest ||
+            req.headers.origin !== 'null' ||
+            headerValue(req.headers['sec-fetch-dest']) !== 'script' ||
+            (method !== 'GET' && method !== 'HEAD') ||
+            hasForbiddenPreviewQuery(requestUrl) ||
+            !(await previewSessions.authorize(
+              previewRequest.token,
+              previewRequest.modulePath,
+            ))
+          ) {
+            sendJson(res, 403, {
+              error: 'Canvas preview module capability was rejected.',
+            })
+            return
+          }
+          res.setHeader('Access-Control-Allow-Origin', 'null')
+          appendVaryOrigin(res)
+          req.url = `${previewRequest.modulePath}${requestUrl.search}`
+          return next()
+        }
+        if (req.headers.origin === 'null') {
+          sendJson(res, 403, {
+            error:
+              'Sandboxed previews require a scoped module capability.',
+          })
+          return
+        }
         if (
           pathname.startsWith('/__') &&
           !pathname.startsWith(API_PREFIX) &&
@@ -370,6 +425,7 @@ export function canvasAssistantPlugin(
         const knownRoute =
           pathname === CONTEXT_ROUTE ||
           pathname === CHAT_ROUTE ||
+          pathname === PREVIEW_SESSION_ROUTE ||
           applyMatch !== null
         if (!knownRoute || method !== 'POST') {
           sendJson(res, 404, {
@@ -383,6 +439,14 @@ export function canvasAssistantPlugin(
           requireSameOrigin(req)
           requireJson(req)
           const rawBody = await parseJsonBody(req)
+
+          if (pathname === PREVIEW_SESSION_ROUTE) {
+            const request =
+              CanvasPreviewSessionRequestSchema.parse(rawBody)
+            const target = await loadPreviewTarget(request)
+            sendJson(res, 200, previewSessions.issue(target))
+            return
+          }
 
           if (pathname === CONTEXT_ROUTE) {
             const request = CanvasContextRequestSchema.parse(rawBody)

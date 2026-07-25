@@ -6,12 +6,13 @@ preview do not expose these routes. A client that receives a missing or
 non-NDJSON endpoint outside the dev server must show the English failure:
 `Canvas Assistant is available only with npm run dev.`
 
-Every response, including an error response, uses `Cache-Control: no-store`.
-JSON failures use `{ "error": "<English message>" }`.
+Every `/__design_ai` response, including an error response, uses
+`Cache-Control: no-store`. JSON failures use
+`{ "error": "<English message>" }`.
 
 ## Request security
 
-All routes below accept `POST` only and require:
+All `/__design_ai` routes below accept `POST` only and require:
 
 - `Origin` exactly equal to
   `${X-Forwarded-Proto ?? "http"}://${Host}`; otherwise the response is `403`.
@@ -54,6 +55,69 @@ Success is `200 application/json`:
 
 An unavailable or invalid trusted context receives a sanitized `400`; a loader
 error explicitly classified as not found receives `404`.
+
+## Preview module capability
+
+### `POST /__design_ai/canvas/preview-session`
+
+The trusted Shell requests a preview session with only server-resolved
+ownership keys:
+
+```json
+{
+  "appId": "design",
+  "canvasId": "home"
+}
+```
+
+The server resolves `componentFile` from the current `canvases.json`; the
+browser cannot select a filename. It verifies the real App/Canvas directories,
+requires the current Canvas TSX and directly imported local CSS to be regular
+non-symlink files, and verifies every reusable `.ts`, `.tsx`, or `.css`
+component without following component symlinks. Success returns:
+
+```json
+{
+  "moduleBase": "/__design_canvas_preview/<random-uuid>/",
+  "componentFile": "Home.tsx",
+  "expiresAt": "2026-07-25T12:30:00.000Z"
+}
+```
+
+The unpredictable session expires after 30 minutes and is bound to that
+App/Canvas target. The opaque iframe import map rewrites required Vite module
+prefixes through `moduleBase`; this preserves Vite transforms and HMR query
+timestamps without treating `Origin: null` as an identity. `CanvasPreview`
+uses `expiresAt` to request a fresh capability and remount the iframe one
+minute before expiry, so later HMR and lazy module requests do not inherit an
+expired token. The remount intentionally clears Canvas-local runtime state.
+
+`GET` or `HEAD /__design_canvas_preview/:token/*` is accepted only when all of
+these conditions hold:
+
+- `Origin` is exactly `null` and `Sec-Fetch-Dest` is exactly `script`;
+- the token exists and has not expired;
+- the path is a fixed preview runtime module, a Vite prebundled `.js`
+  dependency, the exact current Canvas/direct CSS, or an exact real shared
+  component discovered for the current App;
+- every App file still exists as a regular non-symlink file and resolves to
+  the same real path recorded when the session was issued; this check runs
+  again for every capability request so a post-issuance filesystem
+  replacement fails closed;
+- the decoded path is normalized and contains no traversal, reserved
+  query/fragment characters, NUL, or control characters;
+- the query does not request Vite `raw`, `url`, `worker`, `sharedworker`, or
+  `inline` transforms.
+
+Only an authorized module response receives
+`Access-Control-Allow-Origin: null`. Direct opaque-origin access without the
+capability, a guessed/expired token, ordinary `fetch()` destination, another
+Canvas/App, `/@fs`, or any privileged `__*` route receives `403`. The module
+channel cannot mint sessions or call filesystem/Assistant APIs and exposes no
+mutation capability. Its allowed generated code can still execute CPU work,
+use the shared dev HMR WebSocket, and make ordinary external network requests;
+the iframe is a local privileged-route boundary, not a general untrusted-code
+container.
 
 ## Chat stream
 
@@ -329,14 +393,22 @@ server-side proposal and reloaded trusted context and includes the sanitized
 original user intent, complete current Style contract, selected installed
 Layout contract or temporary Layout decision, authoritative preservation
 constraints, compact diagnostic, and complete candidate set. Browser state is
-never used to supply repair constraints.
+never used to supply repair constraints. The repair model receives a fully
+static system authority policy and one JSON data envelope. Trusted domain
+requirements and untrusted validation/candidate evidence occupy separate
+fields; no dynamic value can change roles, the allowed path set, the task, or
+the output protocol. Candidate comments, diagnostics, strings, and fake
+delimiters are evidence only, never repair instructions.
 
 The transaction tracks the exact expected source, including expected absence,
 for every writable target. Immediately before each atomic write in the initial
 or repaired candidate set, it rereads that target and compares it with the
 transaction's expected source. The expectation advances only after that
-transaction write succeeds. A concurrent IDE edit therefore cannot be
-overwritten after an asynchronous validation or repair boundary.
+transaction write succeeds. Immediately after every asynchronous Vite
+validation, the transaction rereads every written target before it can report
+success, request repair, or begin terminal rollback. A concurrent IDE edit
+therefore cannot be overwritten or mistaken for a successfully applied
+candidate after a validation or repair boundary.
 
 Exhausted or invalid repairs run a best-effort rollback across every written
 target; one restore or delete failure never prevents attempts on the remaining

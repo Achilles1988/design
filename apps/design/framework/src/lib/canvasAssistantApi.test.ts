@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   applyCanvasProposal,
   checkCanvasAssistantContext,
+  createCanvasPreviewSession,
 } from './canvasAssistantApi'
 
 const AI_CONFIG = {
@@ -172,6 +173,46 @@ describe('canvasAssistantApi', () => {
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ appId: 'design', canvasId: 'home' }),
+      }),
+    )
+  })
+
+  it('creates a capability-bound preview session', async () => {
+    const moduleBase =
+      '/__design_canvas_preview/00000000-0000-4000-8000-000000000001/'
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          moduleBase,
+          componentFile: 'Home.tsx',
+          expiresAt: '2026-07-25T12:30:00.000Z',
+        }),
+        {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+        },
+      ),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(
+      createCanvasPreviewSession({
+        appId: 'design',
+        canvasId: 'home',
+      }),
+    ).resolves.toEqual({
+      moduleBase,
+      componentFile: 'Home.tsx',
+      expiresAt: '2026-07-25T12:30:00.000Z',
+    })
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/__design_ai/canvas/preview-session',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          appId: 'design',
+          canvasId: 'home',
+        }),
       }),
     )
   })

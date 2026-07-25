@@ -42,6 +42,23 @@ export const CanvasContextRequestSchema = z.object({
   canvasId: z.string().min(1),
 })
 
+export const CanvasPreviewSessionRequestSchema = z.object({
+  appId: z.string().regex(/^[a-z][a-z0-9-]*$/),
+  canvasId: z.string().regex(/^[a-z][a-z0-9-]*$/),
+}).strict()
+
+export const CanvasPreviewSessionResponseSchema = z.object({
+  moduleBase: z
+    .string()
+    .regex(
+      /^\/__design_canvas_preview\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/$/,
+    ),
+  componentFile: z
+    .string()
+    .regex(/^[^/\\\0-\x1f\x7f?#]+\.tsx$/),
+  expiresAt: z.string().datetime(),
+}).strict()
+
 const LayoutDecisionSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('installed'),
@@ -151,6 +168,12 @@ export const CanvasApplyEventSchema = z.discriminatedUnion('type', [
 
 export type CanvasChatRequest = z.infer<typeof CanvasChatRequestSchema>
 export type CanvasApplyEvent = z.infer<typeof CanvasApplyEventSchema>
+export type CanvasPreviewSessionRequest = z.infer<
+  typeof CanvasPreviewSessionRequestSchema
+>
+export type CanvasPreviewSessionResponse = z.infer<
+  typeof CanvasPreviewSessionResponseSchema
+>
 export type RawCanvasProposal = z.infer<typeof RawCanvasProposalSchema>
 export type CanvasProposalCardArgs = z.infer<
   typeof CanvasProposalCardArgsSchema

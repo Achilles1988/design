@@ -4,11 +4,16 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from 'node:http'
+import fs from 'node:fs/promises'
 import type { AddressInfo } from 'node:net'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ViteDevServer } from 'vite'
 import type {
   CanvasChatRequest,
+  CanvasPreviewSessionRequest,
 } from '../../src/lib/canvasAssistantProtocol'
 import type { CanvasAuthoringContext } from './context'
 import type { StoredProposal } from './proposals'
@@ -24,6 +29,7 @@ type Middleware = (
 const API_KEY = 'sk-test-secret'
 const CANDIDATE_SOURCE =
   'export default function Home() { return <main>Secret candidate</main> }'
+const PLUGIN_TEST_FILE = fileURLToPath(import.meta.url)
 const servers: Array<ReturnType<typeof createServer>> = []
 
 function context(): CanvasAuthoringContext {
@@ -187,6 +193,32 @@ function defaultOverrides() {
     },
   )
   const createCanvasRepairImpl = vi.fn(() => vi.fn())
+  const loadPreviewTargetImpl = vi.fn(
+    async (request: CanvasPreviewSessionRequest) => {
+      const canvasModulePath =
+        `/apps/${request.appId}/canvases/Home.tsx`
+      const componentModulePath =
+        `/apps/${request.appId}/components/Button.tsx`
+      return {
+        ...request,
+        componentFile: 'Home.tsx',
+        canvasModulePaths: [canvasModulePath],
+        componentModulePaths: [componentModulePath],
+        guardedModuleFiles: [
+          {
+            modulePath: canvasModulePath,
+            absolutePath: PLUGIN_TEST_FILE,
+            realPath: PLUGIN_TEST_FILE,
+          },
+          {
+            modulePath: componentModulePath,
+            absolutePath: PLUGIN_TEST_FILE,
+            realPath: PLUGIN_TEST_FILE,
+          },
+        ],
+      }
+    },
+  )
   const send = vi.fn()
 
   return {
@@ -202,6 +234,7 @@ function defaultOverrides() {
     writeAtomicallyImpl: vi.fn(),
     readSourceImpl: vi.fn(async () => null),
     validateCanvasImpl: vi.fn(),
+    loadPreviewTargetImpl,
     send,
   }
 }
@@ -370,49 +403,238 @@ afterEach(async () => {
 })
 
 describe('canvasAssistantPlugin', () => {
-  it('allows opaque-origin GETs only to continue into read-only Vite module handling', async () => {
+  it('requires a current-Canvas preview capability for opaque-origin modules', async () => {
     const harness = await startHarness()
 
-    const moduleResponse = await fetch(
+    const directModuleResponse = await fetch(
       `${harness.baseUrl}/framework/src/preview/canvasPreviewFrame.tsx`,
       {
         headers: { Origin: 'null' },
       },
     )
-    const viteEnvironmentResponse = await fetch(
-      `${harness.baseUrl}/node_modules/vite/dist/client/env.mjs`,
+    const directAppResponse = await fetch(
+      `${harness.baseUrl}/apps/other/canvases/Other.tsx?raw`,
       {
         headers: { Origin: 'null' },
       },
     )
-    const unrelatedPackageResponse = await fetch(
-      `${harness.baseUrl}/node_modules/unrelated-package/index.js`,
+    const sessionResponse = await post(
+      harness,
+      '/__design_ai/canvas/preview-session',
+      {
+        appId: 'design',
+        canvasId: 'home',
+      },
+    )
+    const session = (await sessionResponse.json()) as {
+      moduleBase: string
+      componentFile: string
+      expiresAt: string
+    }
+    const allowedRuntimeResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}framework/src/preview/canvasPreviewFrame.tsx`,
+      {
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const allowedCanvasResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}apps/design/canvases/Home.tsx`,
+      {
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const allowedComponentResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}apps/design/components/Button.tsx`,
+      {
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const otherCanvasResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}apps/design/canvases/Other.tsx?raw`,
+      {
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const otherAppResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}apps/other/canvases/Other.tsx?raw`,
+      {
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const guessedTokenResponse = await fetch(
+      `${harness.baseUrl}/__design_canvas_preview/00000000-0000-4000-8000-000000000000/apps/design/canvases/Home.tsx`,
+      {
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const stolenTokenResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}apps/design/canvases/Home.tsx`,
+      {
+        headers: {
+          Origin: 'https://attacker.invalid',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const sourceFetchResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}apps/design/canvases/Home.tsx`,
       {
         headers: { Origin: 'null' },
       },
     )
-    const apiResponse = await fetch(
-      `${harness.baseUrl}/__design_ai/canvas/context`,
+    const rawImportResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}apps/design/canvases/Home.tsx?raw`,
       {
-        headers: { Origin: 'null' },
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const hmrImportResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}apps/design/canvases/Home.tsx?t=123`,
+      {
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
+      },
+    )
+    const privilegedResponse = await fetch(
+      `${harness.baseUrl}${session.moduleBase}__design_fs/apps`,
+      {
+        headers: {
+          Origin: 'null',
+          'Sec-Fetch-Dest': 'script',
+        },
       },
     )
 
-    expect(moduleResponse.status).toBe(599)
-    expect(moduleResponse.headers.get('access-control-allow-origin')).toBe(
-      'null',
-    )
+    expect(directModuleResponse.status).toBe(403)
     expect(
-      viteEnvironmentResponse.headers.get(
+      directModuleResponse.headers.get('access-control-allow-origin'),
+    ).toBeNull()
+    expect(directAppResponse.status).toBe(403)
+    expect(
+      directAppResponse.headers.get('access-control-allow-origin'),
+    ).toBeNull()
+    expect(sessionResponse.status).toBe(200)
+    expect(session.componentFile).toBe('Home.tsx')
+    expect(Date.parse(session.expiresAt)).toBeGreaterThan(Date.now())
+    expect(session.moduleBase).toMatch(
+      /^\/__design_canvas_preview\/[0-9a-f-]{36}\/$/,
+    )
+    expect(allowedRuntimeResponse.status).toBe(599)
+    expect(
+      allowedRuntimeResponse.headers.get(
         'access-control-allow-origin',
       ),
     ).toBe('null')
+    expect(allowedCanvasResponse.status).toBe(599)
     expect(
-      unrelatedPackageResponse.headers.get(
+      allowedCanvasResponse.headers.get(
         'access-control-allow-origin',
       ),
-    ).toBeNull()
-    expect(apiResponse.headers.get('access-control-allow-origin')).toBeNull()
+    ).toBe('null')
+    expect(allowedComponentResponse.status).toBe(599)
+    expect(
+      allowedComponentResponse.headers.get(
+        'access-control-allow-origin',
+      ),
+    ).toBe('null')
+    expect(otherCanvasResponse.status).toBe(403)
+    expect(otherAppResponse.status).toBe(403)
+    expect(guessedTokenResponse.status).toBe(403)
+    expect(stolenTokenResponse.status).toBe(403)
+    expect(sourceFetchResponse.status).toBe(403)
+    expect(rawImportResponse.status).toBe(403)
+    expect(hmrImportResponse.status).toBe(599)
+    expect(privilegedResponse.status).toBe(403)
+  })
+
+  it('revokes a capability when its Canvas file becomes a symlink', async () => {
+    const root = await fs.mkdtemp(
+      path.join(os.tmpdir(), 'preview-capability-'),
+    )
+    const canvasPath = path.join(root, 'Home.tsx')
+    const otherPath = path.join(root, 'Other.tsx')
+    const modulePath = '/apps/design/canvases/Home.tsx'
+    await Promise.all([
+      fs.writeFile(
+        canvasPath,
+        'export default function Home() { return null }',
+      ),
+      fs.writeFile(
+        otherPath,
+        'export default function Other() { return null }',
+      ),
+    ])
+    const realCanvasPath = await fs.realpath(canvasPath)
+    const overrides = defaultOverrides()
+    overrides.loadPreviewTargetImpl.mockImplementation(
+      async (request: CanvasPreviewSessionRequest) => ({
+        ...request,
+        componentFile: 'Home.tsx',
+        canvasModulePaths: [modulePath],
+        componentModulePaths: [],
+        guardedModuleFiles: [
+          {
+            modulePath,
+            absolutePath: canvasPath,
+            realPath: realCanvasPath,
+          },
+        ],
+      }),
+    )
+
+    try {
+      const harness = await startHarness(overrides)
+      const sessionResponse = await post(
+        harness,
+        '/__design_ai/canvas/preview-session',
+        { appId: 'design', canvasId: 'home' },
+      )
+      const session = (await sessionResponse.json()) as {
+        moduleBase: string
+      }
+      const requestModule = () =>
+        fetch(
+          `${harness.baseUrl}${session.moduleBase}apps/design/canvases/Home.tsx`,
+          {
+            headers: {
+              Origin: 'null',
+              'Sec-Fetch-Dest': 'script',
+            },
+          },
+        )
+
+      expect((await requestModule()).status).toBe(599)
+
+      await fs.rm(canvasPath)
+      await fs.symlink('Other.tsx', canvasPath)
+
+      expect((await requestModule()).status).toBe(403)
+    } finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
   })
 
   it('rejects a cross-origin chat POST with 403', async () => {

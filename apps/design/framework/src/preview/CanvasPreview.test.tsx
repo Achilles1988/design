@@ -27,6 +27,7 @@ const mocks = vi.hoisted(() => ({
   listCanvases: vi.fn(),
   loadCanvasModule: vi.fn(),
   checkContext: vi.fn(),
+  createPreviewSession: vi.fn(),
   createAdapter: vi.fn(),
   pageAssistant: vi.fn(),
   toolsMount: vi.fn(),
@@ -44,6 +45,7 @@ vi.mock('./loadCanvasModule', () => ({
 
 vi.mock('@/lib/canvasAssistantApi', () => ({
   checkCanvasAssistantContext: mocks.checkContext,
+  createCanvasPreviewSession: mocks.createPreviewSession,
 }))
 
 vi.mock('@/shell/assistant/canvasServerAdapter', () => ({
@@ -157,12 +159,21 @@ describe('CanvasPreview Canvas Assistant integration', () => {
   beforeEach(() => {
     Object.values(mocks).forEach((mock) => mock.mockReset())
     mocks.listCanvases.mockResolvedValue([
-      { id: 'home', name: 'Home', component: 'src/canvases/home.tsx' },
+      { id: 'home', name: 'Home', component: 'Home.tsx' },
     ])
     mocks.loadCanvasModule.mockResolvedValue(() => (
       <div data-testid="canvas">Canvas</div>
     ))
     mocks.checkContext.mockResolvedValue(undefined)
+    mocks.createPreviewSession.mockImplementation(
+      async ({ canvasId }: { canvasId: string }) => ({
+        moduleBase:
+          '/__design_canvas_preview/00000000-0000-4000-8000-000000000001/',
+        componentFile:
+          canvasId === 'about' ? 'About.tsx' : 'Home.tsx',
+        expiresAt: '2099-07-25T12:30:00.000Z',
+      }),
+    )
     mocks.createAdapter.mockImplementation(({ appId, canvasId }) => ({
       id: `${appId}:${canvasId}`,
       async *run() {},
@@ -214,8 +225,8 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     const nextContext = deferred<void>()
     mocks.listCanvases.mockImplementation(async (appId: string) => [
       appId === 'design'
-        ? { id: 'home', name: 'Home', component: 'src/canvases/home.tsx' }
-        : { id: 'about', name: 'About', component: 'src/canvases/about.tsx' },
+        ? { id: 'home', name: 'Home', component: 'Home.tsx' }
+        : { id: 'about', name: 'About', component: 'About.tsx' },
     ])
     mocks.checkContext.mockImplementation(
       ({ appId }: { appId: string }) =>
@@ -291,8 +302,8 @@ describe('CanvasPreview Canvas Assistant integration', () => {
   it('cleans HMR subscriptions on target change and unmount', async () => {
     mocks.listCanvases.mockImplementation(async (appId: string) => [
       appId === 'design'
-        ? { id: 'home', name: 'Home', component: 'src/canvases/home.tsx' }
-        : { id: 'about', name: 'About', component: 'src/canvases/about.tsx' },
+        ? { id: 'home', name: 'Home', component: 'Home.tsx' }
+        : { id: 'about', name: 'About', component: 'About.tsx' },
     ])
     const cleanups: ReturnType<typeof vi.fn>[] = []
     const subscribe = vi.fn(() => {
@@ -380,6 +391,45 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     expect(await screen.findByTitle('Canvas preview')).toBeTruthy()
   })
 
+  it('keeps the existing missing Canvas entry error before minting a session', async () => {
+    mocks.listCanvases.mockResolvedValue([])
+
+    renderCanvasPreview()
+
+    expect(
+      await screen.findByText('Canvas entry not found in canvases.json'),
+    ).toBeTruthy()
+    expect(mocks.createPreviewSession).not.toHaveBeenCalled()
+  })
+
+  it('renews the preview capability before it expires', async () => {
+    mocks.createPreviewSession
+      .mockResolvedValueOnce({
+        moduleBase:
+          '/__design_canvas_preview/00000000-0000-4000-8000-000000000001/',
+        componentFile: 'Home.tsx',
+        expiresAt: new Date(Date.now() + 100).toISOString(),
+      })
+      .mockResolvedValueOnce({
+        moduleBase:
+          '/__design_canvas_preview/00000000-0000-4000-8000-000000000002/',
+        componentFile: 'Home.tsx',
+        expiresAt: '2099-07-25T12:30:00.000Z',
+      })
+
+    renderCanvasPreview()
+
+    await waitFor(() =>
+      expect(mocks.createPreviewSession).toHaveBeenCalledTimes(2),
+    )
+    expect(
+      (screen.getByTitle('Canvas preview') as HTMLIFrameElement)
+        .srcdoc,
+    ).toContain(
+      '/__design_canvas_preview/00000000-0000-4000-8000-000000000002/',
+    )
+  })
+
   it('executes the Canvas only in an opaque-origin sandboxed iframe', async () => {
     renderCanvasPreview()
 
@@ -389,6 +439,11 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     expect(frame.tagName).toBe('IFRAME')
     expect(frame.getAttribute('sandbox')).toBe('allow-scripts')
     expect(frame.getAttribute('sandbox')).not.toContain('allow-same-origin')
+    expect(mocks.createPreviewSession).toHaveBeenCalledWith({
+      appId: 'design',
+      canvasId: 'home',
+    })
+    expect(frame.srcdoc).toContain('/__design_canvas_preview/')
     expect(screen.queryByTestId('canvas')).toBeNull()
     expect(mocks.loadCanvasModule).not.toHaveBeenCalled()
   })

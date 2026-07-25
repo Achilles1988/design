@@ -3,6 +3,8 @@ import {
   CanvasApplyEventSchema,
   CanvasApplyRequestSchema,
   CanvasChatRequestSchema,
+  CanvasPreviewSessionRequestSchema,
+  CanvasPreviewSessionResponseSchema,
   CanvasProposalCardArgsSchema,
 } from './canvasAssistantProtocol'
 
@@ -73,6 +75,38 @@ describe('Canvas Assistant protocol', () => {
 
   it('requires AI config for repair during apply', () => {
     expect(() => CanvasApplyRequestSchema.parse({})).toThrow()
+  })
+
+  it('accepts only direct TSX preview-session targets and capability paths', () => {
+    expect(
+      CanvasPreviewSessionRequestSchema.parse({
+        appId: 'design',
+        canvasId: 'home',
+      }),
+    ).toEqual({
+      appId: 'design',
+      canvasId: 'home',
+    })
+    expect(() =>
+      CanvasPreviewSessionRequestSchema.parse({
+        appId: 'design',
+        canvasId: 'home',
+        componentFile: 'Other.tsx',
+      }),
+    ).toThrow()
+    expect(
+      CanvasPreviewSessionResponseSchema.parse({
+        moduleBase:
+          '/__design_canvas_preview/00000000-0000-4000-8000-000000000001/',
+        componentFile: 'Home.tsx',
+        expiresAt: '2026-07-25T12:30:00.000Z',
+      }),
+    ).toEqual({
+      moduleBase:
+        '/__design_canvas_preview/00000000-0000-4000-8000-000000000001/',
+      componentFile: 'Home.tsx',
+      expiresAt: '2026-07-25T12:30:00.000Z',
+    })
   })
 
   it('represents an incomplete rollback truthfully', () => {
