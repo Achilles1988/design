@@ -631,6 +631,18 @@ export function clearAssistantPageState(
   return { ok: false, state, error: persisted.error }
 }
 
+export function flattenUserMessageContent(
+  message: ThreadMessage,
+): ThreadMessage['content'] {
+  if (message.role !== 'user' || !message.attachments?.length) {
+    return message.content
+  }
+  return [
+    ...message.content,
+    ...message.attachments.flatMap((attachment) => attachment.content),
+  ]
+}
+
 export function serializeMessages(
   messages: readonly ThreadMessage[],
 ): PersistedMessage[] {
@@ -642,15 +654,7 @@ export function serializeMessages(
     .map((message) => ({
       id: message.id,
       role: message.role,
-      content:
-        message.role === 'user' && message.attachments?.length
-          ? [
-              ...message.content,
-              ...message.attachments.flatMap(
-                (attachment) => attachment.content,
-              ),
-            ]
-          : message.content,
+      content: flattenUserMessageContent(message),
       createdAt: message.createdAt.toISOString(),
     }))
     .filter(isPersistedMessage)

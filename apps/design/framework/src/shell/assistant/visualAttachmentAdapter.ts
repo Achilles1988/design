@@ -54,13 +54,19 @@ export function createVisualAttachmentAdapter(input: {
         throw new Error('Each image must be 10 MiB or smaller.')
       }
 
+      const pageKey = input.getPageKey()
       const bitmap = await createImageBitmap(file)
       const { width, height } = bitmap
       bitmap.close()
+      if (input.getPageKey() !== pageKey) {
+        throw new Error(
+          'The Canvas changed before this image could be attached.',
+        )
+      }
       const id = crypto.randomUUID()
       await input.store.put({
         id,
-        pageKey: input.getPageKey(),
+        pageKey,
         blob: file,
         mimeType: file.type,
         width,

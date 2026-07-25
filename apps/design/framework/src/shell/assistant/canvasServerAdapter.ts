@@ -15,6 +15,7 @@ import {
   type VisualAttachmentRecord,
   type VisualAttachmentStore,
 } from './visualAttachmentStore'
+import { flattenUserMessageContent } from './pageState'
 
 const AI_CONFIG_GUIDANCE =
   'Configure an AI provider in Settings before starting a conversation.'
@@ -30,24 +31,12 @@ function isStableMessage(message: ThreadMessage): boolean {
   )
 }
 
-function userMessageContent(
-  message: ThreadMessage,
-): ThreadMessage['content'] {
-  if (message.role !== 'user' || !message.attachments?.length) {
-    return message.content
-  }
-  return [
-    ...message.content,
-    ...message.attachments.flatMap((attachment) => attachment.content),
-  ]
-}
-
 function toRequestMessage(
   message: ThreadMessage,
   attachments: ReadonlyMap<string, VisualAttachmentRecord>,
 ): CanvasChatRequest['messages'][number] {
   const content: CanvasChatRequest['messages'][number]['content'] = []
-  const messageContent = userMessageContent(message)
+  const messageContent = flattenUserMessageContent(message)
   if (
     message.role !== 'user' &&
     messageContent.some((part) => part.type === 'image')
@@ -103,7 +92,7 @@ function referencedAttachmentIds(
   const ids = new Set<string>()
   for (const message of messages) {
     if (message.role !== 'user') continue
-    for (const part of userMessageContent(message)) {
+    for (const part of flattenUserMessageContent(message)) {
       if (part.type !== 'image') continue
       const id = parseAttachmentUri(part.image)
       if (!id) {

@@ -107,6 +107,48 @@ describe('createVisualAttachmentAdapter', () => {
     }))
   })
 
+  it('rejects paste when the Canvas page key changes during image decoding', async () => {
+    const { store } = createStore()
+    let pageKey = '/apps/demo/canvases/home'
+    let releaseBitmap: (() => void) | undefined
+    vi.stubGlobal(
+      'createImageBitmap',
+      () =>
+        new Promise<{ width: number; height: number; close(): void }>((resolve) => {
+          releaseBitmap = () => {
+            resolve({ width: 1, height: 1, close() {} })
+          }
+        }),
+    )
+    vi.stubGlobal('crypto', { randomUUID: () => 'image-1' })
+    const adapter = createVisualAttachmentAdapter({
+      getPageKey: () => pageKey,
+      store,
+      originForFile: () => ({ origin: 'clipboard' }),
+    })
+
+    const pending = adapter.add({ file: imageFile() })
+    pageKey = '/apps/demo/canvases/other'
+    releaseBitmap?.()
+
+    await expect(pending).rejects.toThrow(
+      'The Canvas changed before this image could be attached.',
+    )
+    expect(store.put).not.toHaveBeenCalled()
+  })
+
+  it('rejects unsupported MIME types from add()', async () => {
+    const adapter = createVisualAttachmentAdapter({
+      getPageKey: () => '/canvas',
+      store: createStore().store,
+      originForFile: () => ({ origin: 'clipboard' }),
+    })
+
+    await expect(adapter.add({
+      file: new File([new Uint8Array(3)], 'x.gif', { type: 'image/gif' }),
+    })).rejects.toThrow('Only PNG, JPEG, and WebP images are supported.')
+  })
+
   it('consumes a registered file origin only once', async () => {
     const { store } = createStore()
     vi.stubGlobal('createImageBitmap', async () => ({ width: 1, height: 1, close() {} }))
