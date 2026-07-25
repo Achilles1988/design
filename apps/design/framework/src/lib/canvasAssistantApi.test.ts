@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   applyCanvasProposal,
+  captureCanvasReferences,
   checkCanvasAssistantContext,
   createCanvasPreviewSession,
 } from './canvasAssistantApi'
@@ -47,6 +48,40 @@ describe('canvasAssistantApi', () => {
     localStorage.clear()
     localStorage.setItem('wn.ai.config', JSON.stringify(AI_CONFIG))
     vi.unstubAllGlobals()
+  })
+
+  it('captures explicit URL references with an abort signal', async () => {
+    const responseBody = {
+      results: [{
+        url: 'https://example.com/design',
+        finalUrl: 'https://example.com/design',
+        ok: true,
+        mimeType: 'image/png',
+        base64: 'iVBORw0KGgo=',
+      }],
+    }
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(responseBody), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const controller = new AbortController()
+
+    await expect(captureCanvasReferences(
+      ['https://example.com/design'],
+      controller.signal,
+    )).resolves.toEqual(responseBody)
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/__design_ai/references/capture',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls: ['https://example.com/design'] }),
+        signal: controller.signal,
+      },
+    )
   })
 
   it('parses NDJSON split across arbitrary byte chunks', async () => {

@@ -2,6 +2,7 @@ import type { z } from 'zod'
 import { readAiConfig } from '@/lib/ai/config'
 import {
   CanvasApplyEventSchema,
+  CanvasCaptureResponseSchema,
   CanvasPreviewSessionResponseSchema,
   type CanvasApplyEvent,
   type CanvasPreviewSessionRequest,
@@ -112,6 +113,27 @@ export async function checkCanvasAssistantContext({
   if (body?.ready !== true) {
     throw new Error(CANVAS_ASSISTANT_DEV_ONLY_GUIDANCE)
   }
+}
+
+export async function captureCanvasReferences(
+  urls: readonly string[],
+  signal: AbortSignal,
+): Promise<z.infer<typeof CanvasCaptureResponseSchema>> {
+  const response = await fetch('/__design_ai/references/capture', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ urls }),
+    signal,
+  })
+  const contentType = response.headers.get('content-type') ?? ''
+  if (!response.ok && contentType.includes('application/json')) {
+    throw await responseError(response)
+  }
+  if (!contentType.includes('application/json')) {
+    throw new Error(CANVAS_ASSISTANT_DEV_ONLY_GUIDANCE)
+  }
+  if (!response.ok) throw await responseError(response)
+  return CanvasCaptureResponseSchema.parse(await response.json())
 }
 
 export async function createCanvasPreviewSession(

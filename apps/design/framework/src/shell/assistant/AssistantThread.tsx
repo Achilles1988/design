@@ -1,39 +1,38 @@
 import {
   ActionBarPrimitive,
-  type Attachment,
   ComposerPrimitive,
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
   useComposerRuntime,
 } from '@assistant-ui/react'
-import { useState, type ClipboardEvent, type Ref } from 'react'
+import {
+  useState,
+  type ClipboardEvent,
+  type FormEvent,
+  type MouseEvent,
+  type Ref,
+} from 'react'
 import { AssistantMarkdown } from './AssistantMarkdown'
 import {
   RestoredVisualAttachment,
   VisualAttachment,
 } from './VisualAttachment'
 import { VISUAL_MIME_TYPES } from './visualAttachmentAdapter'
+import {
+  MAX_VISUAL_REFERENCES,
+  MAX_VISUAL_TOTAL_BYTES,
+  URL_CAPTURE_LOGIN_GUIDANCE,
+  useCanvasReferences,
+  validateVisualBatch,
+  VISUAL_BATCH_ERROR,
+} from './useCanvasReferences'
 import './assistant.css'
 
-export const MAX_VISUAL_REFERENCES = 8
-export const MAX_VISUAL_TOTAL_BYTES = 30 * 1024 * 1024
-const VISUAL_BATCH_ERROR = 'You can attach up to 8 images and 30 MB per message.'
-
-export function validateVisualBatch(
-  existing: readonly Attachment[],
-  incoming: readonly File[],
-): boolean {
-  const existingVisuals = existing.filter((attachment) => attachment.type === 'image')
-  const existingBytes = existingVisuals.reduce(
-    (total, attachment) => total + (attachment.file?.size ?? 0),
-    0,
-  )
-  const incomingBytes = incoming.reduce((total, file) => total + file.size, 0)
-  return (
-    existingVisuals.length + incoming.length <= MAX_VISUAL_REFERENCES
-    && existingBytes + incomingBytes <= MAX_VISUAL_TOTAL_BYTES
-  )
+export {
+  MAX_VISUAL_REFERENCES,
+  MAX_VISUAL_TOTAL_BYTES,
+  validateVisualBatch,
 }
 
 function UserBubble() {
@@ -67,6 +66,12 @@ export function AssistantThread({
 }) {
   const composer = useComposerRuntime()
   const [visualStatus, setVisualStatus] = useState<string | null>(null)
+  const {
+    references,
+    referenceError,
+    prepareAndMaybeSend,
+    dismiss,
+  } = useCanvasReferences()
 
   const addVisualFiles = async (files: readonly File[]) => {
     if (!validateVisualBatch(composer.getState().attachments, files)) {
@@ -95,6 +100,24 @@ export function AssistantThread({
     void addVisualFiles(files)
   }
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    void prepareAndMaybeSend()
+  }
+
+  const handleSendClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    void prepareAndMaybeSend()
+  }
+
+  const visibleReferences = references.filter(
+    (reference) => reference.state !== 'dismissed',
+  )
+  const hasCapturedReview = visibleReferences.some(
+    (reference) =>
+      reference.state === 'ready' || reference.state === 'failed',
+  )
+
   return (
     <ThreadPrimitive.Root className="aui-thread">
       <ThreadPrimitive.Viewport className="aui-thread-viewport">
@@ -107,12 +130,67 @@ export function AssistantThread({
           {({ message }) => (message.role === 'user' ? <UserBubble /> : <AssistantBubble />)}
         </ThreadPrimitive.Messages>
       </ThreadPrimitive.Viewport>
-      <ComposerPrimitive.Root className="aui-composer">
+      <ComposerPrimitive.Root
+        className="aui-composer"
+        onSubmit={handleSubmit}
+      >
         <div className="aui-composer-attachments">
           <ComposerPrimitive.Attachments>
             {({ attachment }) => <VisualAttachment attachment={attachment} />}
           </ComposerPrimitive.Attachments>
         </div>
+        {visibleReferences.length > 0
+          ? (
+              <ul
+                className="aui-url-references"
+                aria-label="URL references"
+              >
+                {visibleReferences.map((reference) => (
+                  <li
+                    key={reference.url}
+                    className="aui-url-reference"
+                  >
+                    <span className="aui-url-reference__url">
+                      {reference.url}
+                    </span>
+                    <span className="aui-url-reference__state">
+                      {reference.state === 'capturing'
+                        ? 'Capturing reference…'
+                        : reference.state === 'ready'
+                          ? 'Captured'
+                          : reference.state === 'failed'
+                            ? reference.error
+                            : 'Ready to capture'}
+                    </span>
+                    <span className="aui-url-reference__guidance">
+                      {URL_CAPTURE_LOGIN_GUIDANCE}
+                    </span>
+                    <button
+                      type="button"
+                      className="aui-url-reference__remove"
+                      onClick={() => dismiss(reference.url)}
+                    >
+                      Remove reference
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )
+          : null}
+        {hasCapturedReview
+          ? (
+              <p className="aui-composer-review" role="status">
+                Review the captured references, then send again.
+              </p>
+            )
+          : null}
+        {referenceError
+          ? (
+              <p className="aui-composer-status" role="alert">
+                {referenceError}
+              </p>
+            )
+          : null}
         {visualStatus
           ? (
               <p className="aui-composer-status" role="status">
@@ -129,7 +207,12 @@ export function AssistantThread({
           addAttachmentOnPaste={false}
           onPaste={handlePaste}
         />
-        <ComposerPrimitive.Send className="aui-composer-send">Send</ComposerPrimitive.Send>
+        <ComposerPrimitive.Send
+          className="aui-composer-send"
+          onClick={handleSendClick}
+        >
+          Send
+        </ComposerPrimitive.Send>
       </ComposerPrimitive.Root>
     </ThreadPrimitive.Root>
   )

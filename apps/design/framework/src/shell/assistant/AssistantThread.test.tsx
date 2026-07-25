@@ -1,10 +1,16 @@
 // @vitest-environment jsdom
-import { createRef, type ComponentType } from 'react'
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import {
+  createRef,
+  type ComponentType,
+  type FormEvent,
+  type MouseEvent,
+} from 'react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const assistantUi = vi.hoisted(() => ({
   addAttachment: vi.fn(),
+  send: vi.fn(),
   storeGet: vi.fn(),
   attachments: [] as Array<{
     id: string
@@ -15,7 +21,28 @@ const assistantUi = vi.hoisted(() => ({
     status: { type: 'requires-action'; reason: 'composer-send' }
   }>,
   messageRole: 'assistant',
+  references: [] as Array<{
+    url: string
+    state: 'uncaptured' | 'capturing' | 'ready' | 'failed' | 'dismissed'
+    attachmentId?: string
+    error?: string
+  }>,
+  prepareAndMaybeSend: vi.fn(),
+  dismissReference: vi.fn(),
 }))
+
+vi.mock('./useCanvasReferences', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./useCanvasReferences')>()
+  return {
+    ...actual,
+    useCanvasReferences: () => ({
+      references: assistantUi.references,
+      referenceError: null,
+      prepareAndMaybeSend: assistantUi.prepareAndMaybeSend,
+      dismiss: assistantUi.dismissReference,
+    }),
+  }
+})
 
 vi.mock('./visualAttachmentStore', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./visualAttachmentStore')>()
@@ -35,7 +62,8 @@ vi.mock('@assistant-ui/react', () => ({
   useMessagePartText: () => ({ text: '**Assistant text**' }),
   useComposerRuntime: () => ({
     addAttachment: assistantUi.addAttachment,
-    getState: () => ({ attachments: assistantUi.attachments }),
+    send: assistantUi.send,
+    getState: () => ({ attachments: assistantUi.attachments, text: '' }),
   }),
   AttachmentPrimitive: {
     Root: (props: { children: unknown }) => <div>{props.children as never}</div>,
@@ -75,7 +103,10 @@ vi.mock('@assistant-ui/react', () => ({
     },
   },
   ComposerPrimitive: {
-    Root: (props: { children: unknown }) => <form>{props.children as never}</form>,
+    Root: (props: {
+      children: unknown
+      onSubmit?: (event: FormEvent<HTMLFormElement>) => void
+    }) => <form onSubmit={props.onSubmit}>{props.children as never}</form>,
     Input: ({
       addAttachmentOnPaste: _addAttachmentOnPaste,
       ...props
@@ -91,7 +122,20 @@ vi.mock('@assistant-ui/react', () => ({
         ))}
       </>
     ),
-    Send: (props: { children: unknown }) => <button>{props.children as never}</button>,
+    Send: (props: {
+      children: unknown
+      onClick?: (event: MouseEvent<HTMLButtonElement>) => void
+    }) => (
+      <button
+        type="button"
+        onClick={(event) => {
+          props.onClick?.(event)
+          if (!event.defaultPrevented) assistantUi.send()
+        }}
+      >
+        {props.children as never}
+      </button>
+    ),
   },
 }))
 
@@ -126,6 +170,11 @@ beforeEach(() => {
   })
   assistantUi.attachments = []
   assistantUi.messageRole = 'assistant'
+  assistantUi.references = []
+  assistantUi.prepareAndMaybeSend.mockReset()
+  assistantUi.prepareAndMaybeSend.mockResolvedValue('sent')
+  assistantUi.dismissReference.mockReset()
+  assistantUi.send.mockReset()
   Object.defineProperty(URL, 'createObjectURL', {
     configurable: true,
     value: vi.fn(() => 'blob:restored-image'),
@@ -253,5 +302,32 @@ describe('AssistantThread', () => {
 
     expect(screen.queryByRole('button', { name: /add file/i })).toBeNull()
     expect(screen.queryByText(/drag and drop/i)).toBeNull()
+  })
+
+  it('intercepts Send and renders URL captures for review', async () => {
+    assistantUi.references = [{
+      url: 'https://example.com/design',
+      state: 'ready',
+      attachmentId: 'attachment-1',
+    }]
+    assistantUi.prepareAndMaybeSend.mockResolvedValue('review')
+    render(<AssistantThread />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+
+    await waitFor(() => {
+      expect(assistantUi.prepareAndMaybeSend).toHaveBeenCalledTimes(1)
+    })
+    expect(assistantUi.send).not.toHaveBeenCalled()
+    expect(screen.getByText(
+      'Review the captured references, then send again.',
+    )).toBeTruthy()
+    expect(screen.getByText(
+      'If this capture misses a signed-in state, paste a screenshot from your browser.',
+    )).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Remove reference' }))
+    expect(assistantUi.dismissReference).toHaveBeenCalledWith(
+      'https://example.com/design',
+    )
   })
 })
