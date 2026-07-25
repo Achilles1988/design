@@ -2,7 +2,11 @@ import { createHash } from 'node:crypto'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import type { ViteDevServer } from 'vite'
+import react from '@vitejs/plugin-react'
+import {
+  createServer as createViteServer,
+  type ViteDevServer,
+} from 'vite'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { generateObject } from 'ai'
 import { createModel } from '../../src/lib/ai/client'
@@ -12,6 +16,7 @@ import type { StoredProposal } from './proposals'
 import {
   applyProposalTransaction,
   createCanvasRepair,
+  type CandidateValidationTarget,
   validateCanvas,
   writeAtomically,
 } from './transaction'
@@ -229,7 +234,7 @@ describe('applyProposalTransaction', () => {
 
   function input(overrides: {
     proposal?: StoredProposal
-    validate?: (absoluteCanvasPath: string) => Promise<void>
+    validate?: (targets: CandidateValidationTarget[]) => Promise<void>
     repair?: ReturnType<typeof vi.fn>
     onStatus?: ReturnType<typeof vi.fn>
     writer?: ReturnType<typeof vi.fn>
@@ -272,6 +277,55 @@ describe('applyProposalTransaction', () => {
     return repair.mock.calls[0][0].diagnostic
   }
 
+  it('uses real Vite validation to reject an invalid newly created TSX dependency', async () => {
+    const vite = await createViteServer({
+      configFile: false,
+      root: appDir,
+      logLevel: 'silent',
+      plugins: [react()],
+      server: { middlewareMode: true },
+    })
+    const repair = vi.fn(async () => {
+      throw new Error('Repair stopped after the regression was observed.')
+    })
+    const candidate = proposal({
+      candidateFiles: [
+        {
+          path: 'canvases/Home.tsx',
+          source: [
+            "import { Select } from '../components/Select'",
+            'export default function Home() {',
+            '  return Select',
+            '}',
+          ].join('\n'),
+        },
+        {
+          path: 'components/Select.tsx',
+          source:
+            'export function Select() { return <section>broken</div> }',
+        },
+      ],
+    })
+
+    try {
+      const result = await applyProposalTransaction(
+        input({
+          proposal: candidate,
+          validate: (targets) => validateCanvas(vite, targets),
+          repair,
+        }),
+      )
+
+      expect(result).toMatchObject({
+        ok: false,
+        proposalId: 'proposal-1',
+      })
+      expect(repair).toHaveBeenCalledOnce()
+    } finally {
+      await vite.close()
+    }
+  })
+
   it('rejects a changed baseline before writing', async () => {
     await fs.writeFile(canvasPath, 'changed after proposal')
     const writer = vi.fn(writeAtomically)
@@ -305,8 +359,17 @@ describe('applyProposalTransaction', () => {
   })
 
   it('writes existing Canvas and new shared component together', async () => {
-    const validate = vi.fn(async (absoluteCanvasPath: string) => {
-      expect(absoluteCanvasPath).toBe(canvasPath)
+    const validate = vi.fn(async (targets: CandidateValidationTarget[]) => {
+      expect(targets).toEqual([
+        {
+          path: 'canvases/Home.tsx',
+          absolutePath: canvasPath,
+        },
+        {
+          path: 'components/Select.tsx',
+          absolutePath: selectPath,
+        },
+      ])
       await expect(fs.readFile(canvasPath, 'utf8')).resolves.toBe(
         CANDIDATE_CANVAS,
       )
@@ -370,7 +433,16 @@ describe('applyProposalTransaction', () => {
     )
 
     expect(result.ok).toBe(true)
-    expect(validate).toHaveBeenCalledWith(canvasPath)
+    expect(validate).toHaveBeenCalledWith([
+      {
+        path: 'canvases/Home.css',
+        absolutePath: cssPath,
+      },
+      {
+        path: 'canvases/Home.tsx',
+        absolutePath: canvasPath,
+      },
+    ])
     expect(await fs.readFile(cssPath, 'utf8')).toBe(CANDIDATE_CSS)
   })
 
@@ -1092,9 +1164,12 @@ describe('writeAtomically', () => {
 })
 
 describe('validateCanvas', () => {
-  it('invalidates the current module and transforms its fs URL', async () => {
-    const moduleNode = { id: '/project/canvases/Home.tsx' }
-    const getModuleById = vi.fn(() => moduleNode)
+  it('invalidates and transforms every target in stable relative-path order', async () => {
+    const canvasModule = { id: '/project/canvases/Home.tsx' }
+    const componentModule = { id: '/project/components/Select.tsx' }
+    const getModuleById = vi.fn((id: string) =>
+      id === canvasModule.id ? canvasModule : componentModule,
+    )
     const invalidateModule = vi.fn()
     const transformRequest = vi.fn(async () => ({ code: 'ok' }))
     const server = {
@@ -1102,15 +1177,28 @@ describe('validateCanvas', () => {
       transformRequest,
     } as unknown as ViteDevServer
 
-    await validateCanvas(server, '/project/canvases/Home.tsx')
+    await validateCanvas(server, [
+      {
+        path: 'components/Select.tsx',
+        absolutePath: componentModule.id,
+      },
+      {
+        path: 'canvases/Home.tsx',
+        absolutePath: canvasModule.id,
+      },
+    ])
 
-    expect(invalidateModule).toHaveBeenCalledWith(moduleNode)
-    expect(transformRequest).toHaveBeenCalledWith(
-      '/@fs//project/canvases/Home.tsx',
-    )
+    expect(invalidateModule.mock.calls).toEqual([
+      [canvasModule],
+      [componentModule],
+    ])
+    expect(transformRequest.mock.calls).toEqual([
+      ['/@fs//project/canvases/Home.tsx'],
+      ['/@fs//project/components/Select.tsx'],
+    ])
   })
 
-  it('rejects an empty Vite transform result', async () => {
+  it('rejects an empty Vite transform result with the candidate path', async () => {
     const server = {
       moduleGraph: {
         getModuleById: vi.fn(() => undefined),
@@ -1120,8 +1208,15 @@ describe('validateCanvas', () => {
     } as unknown as ViteDevServer
 
     await expect(
-      validateCanvas(server, '/project/canvases/Home.tsx'),
-    ).rejects.toThrow('Vite could not transform the Canvas.')
+      validateCanvas(server, [
+        {
+          path: 'components/Select.tsx',
+          absolutePath: '/project/components/Select.tsx',
+        },
+      ]),
+    ).rejects.toThrow(
+      'Vite could not transform candidate "components/Select.tsx"',
+    )
   })
 })
 

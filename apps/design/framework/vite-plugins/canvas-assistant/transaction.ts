@@ -65,6 +65,11 @@ export type ApplyStatusEvent = {
   attempt?: 1 | 2
 }
 
+export type CandidateValidationTarget = {
+  path: string
+  absolutePath: string
+}
+
 type ApplyProposalTransactionInput = {
   proposal: StoredProposal
   reloadContext: () => Promise<CanvasAuthoringContext>
@@ -72,7 +77,7 @@ type ApplyProposalTransactionInput = {
     absolutePath: string,
     source: string,
   ) => Promise<void>
-  validate: (absoluteCanvasPath: string) => Promise<void>
+  validate: (targets: CandidateValidationTarget[]) => Promise<void>
   repair: (request: RepairRequest) => Promise<CandidateFile[]>
   onStatus: (event: ApplyStatusEvent) => void
 }
@@ -400,14 +405,29 @@ export async function writeAtomically(
 
 export async function validateCanvas(
   server: ViteDevServer,
-  absoluteCanvasPath: string,
+  targets: CandidateValidationTarget[],
 ): Promise<void> {
-  const url = `/@fs/${absoluteCanvasPath}`
-  const module = server.moduleGraph.getModuleById(absoluteCanvasPath)
-  if (module) server.moduleGraph.invalidateModule(module)
-  const transformed = await server.transformRequest(url)
-  if (!transformed) {
-    throw new Error('Vite could not transform the Canvas.')
+  const sortedTargets = [...targets].sort((left, right) =>
+    left.path < right.path ? -1 : left.path > right.path ? 1 : 0,
+  )
+  for (const target of sortedTargets) {
+    const url = `/@fs/${target.absolutePath}`
+    const module = server.moduleGraph.getModuleById(
+      target.absolutePath,
+    )
+    if (module) server.moduleGraph.invalidateModule(module)
+    try {
+      const transformed = await server.transformRequest(url)
+      if (!transformed) {
+        throw new Error('Vite returned an empty transform result.')
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : String(error)
+      throw new Error(
+        `Vite could not transform candidate "${target.path}": ${message}`,
+      )
+    }
   }
 }
 
@@ -499,6 +519,28 @@ export async function applyProposalTransaction({
   const targetsByPath = new Map(
     targets.map((target) => [target.path, target]),
   )
+  const validationTargetsByPath = new Map<
+    string,
+    CandidateValidationTarget
+  >()
+  for (const target of targets) {
+    if (/\.(?:css|tsx?)$/.test(target.path)) {
+      validationTargetsByPath.set(target.path, {
+        path: target.path,
+        absolutePath: target.absolutePath,
+      })
+    }
+  }
+  if (!validationTargetsByPath.has(canvasRelativePath)) {
+    validationTargetsByPath.set(canvasRelativePath, {
+      path: canvasRelativePath,
+      absolutePath: canvasFile.absolutePath,
+    })
+  }
+  const validationTargets = [...validationTargetsByPath.values()].sort(
+    (left, right) =>
+      left.path < right.path ? -1 : left.path > right.path ? 1 : 0,
+  )
   let candidates = proposal.candidateFiles
   let repairAttempts = 0
   const writtenTargetPaths = new Set<string>()
@@ -533,7 +575,7 @@ export async function applyProposalTransaction({
       await applyCandidateSet(candidates)
       onStatus({ phase: 'validating' })
       try {
-        await validate(canvasFile.absolutePath)
+        await validate(validationTargets)
         return {
           ok: true,
           proposalId: proposal.id,

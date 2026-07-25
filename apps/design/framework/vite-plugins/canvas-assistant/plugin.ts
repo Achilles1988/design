@@ -455,8 +455,7 @@ export function canvasAssistantPlugin(
                 reloadContext: () =>
                   contextLoader.load(owner.appId, owner.canvasId),
                 writeAtomically: writer,
-                validate: (absoluteCanvasPath) =>
-                  validate(server, absoluteCanvasPath),
+                validate: (targets) => validate(server, targets),
                 repair: makeRepair(request.aiConfig),
                 onStatus: (status) => {
                   const event = CanvasApplyEventSchema.parse({

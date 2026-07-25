@@ -26,6 +26,7 @@ import { canvasAssistantPlugin } from './plugin'
 import {
   writeAtomically,
   type CandidateFile,
+  type CandidateValidationTarget,
   type RepairRequest,
 } from './transaction'
 
@@ -75,7 +76,7 @@ async function writeJson(file: string, value: unknown): Promise<void> {
 }
 
 async function createFixture(options: {
-  validate?: (canvasPath: string) => Promise<void>
+  validate?: (targets: CandidateValidationTarget[]) => Promise<void>
   repair?: (request: RepairRequest) => Promise<CandidateFile[]>
 } = {}) {
   const root = await fs.mkdtemp(
@@ -175,8 +176,11 @@ async function createFixture(options: {
     layoutsRoot,
   })
   const validator = vi.fn(
-    async (_server: ViteDevServer, absoluteCanvasPath: string) => {
-      await (options.validate ?? (async () => undefined))(absoluteCanvasPath)
+    async (
+      _server: ViteDevServer,
+      targets: CandidateValidationTarget[],
+    ) => {
+      await (options.validate ?? (async () => undefined))(targets)
     },
   )
   const repair = vi.fn(
@@ -569,7 +573,13 @@ describe('Canvas Assistant authoring server integration', () => {
     const canvasSourcesDuringValidation: string[] = []
     const componentSourcesDuringValidation: string[] = []
     const fixture = await createFixture({
-      validate: async (canvasPath) => {
+      validate: async (targets) => {
+        const canvasPath = targets.find(
+          (target) => target.path === 'canvases/Home.tsx',
+        )?.absolutePath
+        if (!canvasPath) {
+          throw new Error('Canvas validation target is missing.')
+        }
         const componentPath = path.join(
           path.dirname(path.dirname(canvasPath)),
           'components',

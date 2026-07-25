@@ -310,9 +310,12 @@ type CanvasApplyComplete =
 Apply reloads context, checks all candidate and read-only baselines, and runs
 the same candidate dependency and exact `reusedComponents` validation before
 writing the initial candidate set and before writing every repaired candidate
-set. It then writes atomically and asks Vite to transform the current Canvas.
-Validation may run at most two AI repairs. A repair must return the same
-complete path set.
+set. It then writes atomically and asks the production Vite server to invalidate
+and transform every candidate `.ts`, `.tsx`, and `.css` target in stable
+relative-path order. Validation is never limited to the Canvas entry, so a
+newly created or otherwise unvisited dependency must transform successfully
+before apply can complete. Validation may run at most two AI repairs. A repair
+must return the same complete path set.
 Exhausted or invalid repairs run a best-effort rollback across every written
 target; one restore or delete failure never prevents attempts on the remaining
 targets.
