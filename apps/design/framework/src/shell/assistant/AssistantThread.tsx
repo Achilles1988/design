@@ -5,6 +5,7 @@ import {
   MessagePrimitive,
   ThreadPrimitive,
   useComposerRuntime,
+  useThread,
 } from '@assistant-ui/react'
 import {
   useState,
@@ -76,6 +77,7 @@ export function AssistantThread({
   composerInputRef?: Ref<HTMLTextAreaElement>
 }) {
   const composer = useComposerRuntime()
+  const isRunning = useThread((thread) => thread.isRunning)
   const [visualStatus, setVisualStatus] = useState<string | null>(null)
   const {
     references,
@@ -148,6 +150,7 @@ export function AssistantThread({
       </ThreadPrimitive.Viewport>
       <ComposerPrimitive.Root
         className="aui-composer"
+        aria-busy={isRunning || undefined}
         onSubmit={handleSubmit}
       >
         <div className="aui-composer-attachments">

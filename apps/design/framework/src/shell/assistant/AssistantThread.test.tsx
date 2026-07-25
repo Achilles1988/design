@@ -61,6 +61,12 @@ vi.mock('@assistant-ui/react-markdown', () => ({
 
 vi.mock('@assistant-ui/react', () => ({
   useMessagePartText: () => ({ text: '**Assistant text**' }),
+  useThread: (
+    selector?: (thread: { isRunning: boolean }) => unknown,
+  ) =>
+    selector
+      ? selector({ isRunning: assistantUi.isRunning })
+      : { isRunning: assistantUi.isRunning },
   useComposerRuntime: () => ({
     addAttachment: assistantUi.addAttachment,
     send: assistantUi.send,
@@ -113,7 +119,17 @@ vi.mock('@assistant-ui/react', () => ({
     Root: (props: {
       children: unknown
       onSubmit?: (event: FormEvent<HTMLFormElement>) => void
-    }) => <form onSubmit={props.onSubmit}>{props.children as never}</form>,
+      'aria-busy'?: boolean
+      className?: string
+    }) => (
+      <form
+        className={props.className}
+        aria-busy={props['aria-busy']}
+        onSubmit={props.onSubmit}
+      >
+        {props.children as never}
+      </form>
+    ),
     Input: ({
       addAttachmentOnPaste: _addAttachmentOnPaste,
       ...props
@@ -322,6 +338,9 @@ describe('AssistantThread', () => {
     expect(status.textContent).toBe('Generating…')
     expect(status.className).toContain('aui-thread-generating')
     expect(status.getAttribute('aria-live')).toBe('polite')
+    expect(document.querySelector('.aui-composer')?.getAttribute('aria-busy')).toBe(
+      'true',
+    )
     expect((screen.getByRole('button', { name: 'Send' }) as HTMLButtonElement).disabled).toBe(true)
   })
 
@@ -329,6 +348,7 @@ describe('AssistantThread', () => {
     render(<AssistantThread />)
 
     expect(screen.queryByText('Generating…')).toBeNull()
+    expect(document.querySelector('.aui-composer')?.getAttribute('aria-busy')).toBeNull()
     expect((screen.getByRole('button', { name: 'Send' }) as HTMLButtonElement).disabled).toBe(false)
   })
 

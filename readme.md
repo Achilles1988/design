@@ -21,6 +21,13 @@ npm run dev
 
 Open the URL Vite prints (default `http://localhost:5173`). App and canvas management write APIs require the design-fs middleware, which only runs under `npm run dev` — see [`docs/dev/api/design-fs.md`](docs/dev/api/design-fs.md) for the HTTP contract.
 
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Dev server + `/__design_fs` filesystem API |
+| `npm test` | Unit / component tests |
+| `npm run build` | Production bundle (no write API) |
+| `npm run preview` | Serve the build read-only |
+
 ## Acknowledgements
 
 This project builds on excellent open-source libraries:

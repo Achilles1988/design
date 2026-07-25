@@ -261,7 +261,7 @@ useAssistantTool({
 - Markdown 外部图片被禁用，避免第三方请求和不可控图片尺寸；原始 HTML 不启用。
 - Markdown 渲染异常由消息级错误边界捕获，并降级为当前 part 的安全纯文本。
 - assistant 请求失败通过 `ErrorPrimitive.Message` 显示，并提供 `ActionBarPrimitive.Reload` 的英文 `Retry` 操作；已有对话和筛选不清空。
-- 模型运行期间（`ThreadPrimitive.If running`），viewport 在消息列表下方显示英文 `Generating…`（`role="status"`、`aria-live="polite"`）；Composer 的 Send 保持 busy/disabled 态（`ComposerPrimitive.Send` + `.aui-composer-send:disabled`）。
+- 模型运行期间（`ThreadPrimitive.If running`），viewport 在消息列表下方显示英文 `Generating…`（`role="status"`、`aria-live="polite"`）；Composer 根节点设置 `aria-busy`，Send 保持 disabled（`ComposerPrimitive.Send` + `.aui-composer-send:disabled`）。
 - 渲染样式使用项目 token，代码块在面板内横向滚动，不扩张 Shell。
 
 ## `apply_filter` 增量契约

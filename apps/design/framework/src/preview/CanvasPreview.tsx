@@ -312,9 +312,6 @@ export function CanvasPreview({
     loadedRevision.current === previewRevision &&
     (revealRevision === previewRevision ||
       revealLockedForGeneration.current === previewGeneration)
-  if (reveal) {
-    revealLockedForGeneration.current = previewGeneration
-  }
   const sourceDocument = createCanvasPreviewDocument({
     appId,
     componentFile: state.componentFile,

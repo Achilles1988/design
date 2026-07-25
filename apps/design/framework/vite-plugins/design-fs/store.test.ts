@@ -235,6 +235,22 @@ describe('createContentStore', () => {
     ).resolves.toBeUndefined()
   })
 
+  it('rejects rename when the new component file is taken by another canvas', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await store.addCanvas('orders', { id: 'about', name: 'About' })
+    await store.addCanvas('orders', { id: 'home', name: 'Home' })
+    await expect(
+      store.renameCanvas('orders', 'home', { id: 'home', name: 'About' }),
+    ).rejects.toThrow(/Component already exists/)
+    await expect(
+      fs.access(path.join(root, 'orders', 'canvases', 'Home.tsx')),
+    ).resolves.toBeUndefined()
+    await expect(
+      fs.access(path.join(root, 'orders', 'canvases', 'About.tsx')),
+    ).resolves.toBeUndefined()
+  })
+
   it('returns the same entry when rename is a no-op', async () => {
     const store = createContentStore(root)
     await store.createApp({ id: 'orders', name: 'Orders' })
