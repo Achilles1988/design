@@ -2,6 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { canvasAssistantPlugin } from './framework/vite-plugins/canvas-assistant/plugin'
 import { designFsPlugin } from './framework/vite-plugins/design-fs/plugin'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -13,6 +14,17 @@ export default defineConfig({
     designFsPlugin({
       contentRoot: path.resolve(__dirname, 'apps'),
       assetsRoot: path.resolve(__dirname, 'framework/public/assets'),
+    }),
+    canvasAssistantPlugin({
+      contentRoot: path.resolve(__dirname, 'apps'),
+      stylesRoot: path.resolve(
+        __dirname,
+        'framework/public/assets/designmd',
+      ),
+      layoutsRoot: path.resolve(
+        __dirname,
+        'framework/public/assets/layoutmd',
+      ),
     }),
   ],
   resolve: {

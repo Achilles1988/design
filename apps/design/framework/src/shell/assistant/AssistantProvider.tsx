@@ -8,17 +8,52 @@ import {
 } from '@assistant-ui/react'
 import { AssistantAvailabilityProvider } from './availability'
 import { AssistantPageSessionProvider } from './pageSession'
+import { createAssistantPageKey } from './pageState'
+import { createStreamTextAdapter } from './streamTextAdapter'
+import { createVisualAttachmentAdapter } from './visualAttachmentAdapter'
 import {
-  createStreamTextAdapter,
-  type AdapterContext,
-} from './streamTextAdapter'
+  getVisualAttachmentStore,
+  type VisualAttachmentStore,
+} from './visualAttachmentStore'
+import {
+  AssistantModelModeProvider,
+  createDelegatingChatModelAdapter,
+  useModelModeApi,
+} from './modelAdapterMode'
 
-const adapter = createStreamTextAdapter({
+const streamTextAdapter = createStreamTextAdapter({
   streamTextImpl: (opts) =>
     streamText(opts as Parameters<typeof streamText>[0]) as unknown as {
       fullStream: AsyncIterable<Record<string, unknown>>
   },
 })
+const adapter: ChatModelAdapter = {
+  run(options) {
+    return streamTextAdapter.run(
+      options as unknown as Parameters<typeof streamTextAdapter.run>[0],
+    ) as unknown as AsyncGenerator<ChatModelRunResult, void>
+  },
+}
+
+function createDeferredVisualAttachmentStore(): VisualAttachmentStore {
+  return {
+    put: (record) => getVisualAttachmentStore().then((store) => store.put(record)),
+    get: (id) => getVisualAttachmentStore().then((store) => store.get(id)),
+    delete: (id) => getVisualAttachmentStore().then((store) => store.delete(id)),
+    deletePage: (pageKey) => getVisualAttachmentStore().then(
+      (store) => store.deletePage(pageKey),
+    ),
+    reconcilePage: (pageKey, referencedIds) => getVisualAttachmentStore().then(
+      (store) => store.reconcilePage(pageKey, referencedIds),
+    ),
+  }
+}
+
+function getCurrentAssistantPageKey(): string {
+  return typeof window === 'undefined'
+    ? '/'
+    : createAssistantPageKey(window.location)
+}
 
 function createAbortError(): Error {
   const error = new Error('Tool execution was aborted.')
@@ -74,28 +109,37 @@ function executeWithAbortRace<T>(
 }
 
 export function createPageScopedModelAdapter(
-  runAdapter: ReturnType<typeof createStreamTextAdapter>,
+  runAdapter:
+    | ReturnType<typeof createStreamTextAdapter>
+    | ChatModelAdapter,
   getEpoch: () => number,
 ): ChatModelAdapter {
   return {
-    async *run({ messages, abortSignal, context, unstable_getMessage }) {
+    async *run(options) {
+      const {
+        abortSignal,
+        context,
+        unstable_getMessage,
+      } = options
       const epoch = getEpoch()
       const currentMessage = unstable_getMessage()
       const hasCompletedTool = currentMessage.content.some(
         (part) => part.type === 'tool-call' && part.result !== undefined,
       )
-      const adapterContext = context as unknown as AdapterContext
-      const guardedContext: AdapterContext = {
-        ...adapterContext,
-        ...(adapterContext.tools
+      const guardedContext = {
+        ...context,
+        ...(context.tools
           ? {
               tools: Object.fromEntries(
-                Object.entries(adapterContext.tools).map(([name, tool]) => {
+                Object.entries(context.tools).map(([name, tool]) => {
                   if (!tool.execute) return [name, tool]
                   const execute = tool.execute
                   return [name, {
                     ...tool,
-                    execute: (args, toolContext) =>
+                    execute: (
+                      args: Parameters<typeof execute>[0],
+                      toolContext: Parameters<typeof execute>[1],
+                    ) =>
                       executeWithAbortRace(
                         () => execute(args, {
                           ...toolContext,
@@ -111,16 +155,30 @@ export function createPageScopedModelAdapter(
           : {}),
       }
       try {
-        for await (const chunk of runAdapter.run({
-          messages: messages as never,
+        const run = runAdapter.run as unknown as (
+          runOptions: typeof options & {
+            currentMessage?: typeof currentMessage
+          },
+        ) =>
+          | Promise<ChatModelRunResult>
+          | AsyncGenerator<ChatModelRunResult, void>
+        const result = run({
+          ...options,
           abortSignal,
           context: guardedContext,
           currentMessage: hasCompletedTool
-            ? (currentMessage as never)
+            ? currentMessage
             : undefined,
-        })) {
+        })
+        if (!(Symbol.asyncIterator in result)) {
+          const chunk = await result
           if (abortSignal.aborted || getEpoch() !== epoch) return
-          yield chunk as unknown as ChatModelRunResult
+          yield chunk
+          return
+        }
+        for await (const chunk of result) {
+          if (abortSignal.aborted || getEpoch() !== epoch) return
+          yield chunk
         }
       } catch (error) {
         if (abortSignal.aborted || getEpoch() !== epoch) return
@@ -132,17 +190,52 @@ export function createPageScopedModelAdapter(
 
 export function AssistantProvider({ children }: { children: ReactNode }) {
   const epochRef = useRef(0)
-  const modelAdapter = useMemo(
-    () => createPageScopedModelAdapter(adapter, () => epochRef.current),
-    [],
+  const modelMode = useModelModeApi()
+  const visualStore = useMemo(createDeferredVisualAttachmentStore, [])
+  const visualAttachmentAdapter = useMemo(
+    () => createVisualAttachmentAdapter({
+      getPageKey: getCurrentAssistantPageKey,
+      store: visualStore,
+      originForFile: () => ({ origin: 'clipboard' }),
+    }),
+    [visualStore],
   )
-  const runtime = useLocalRuntime(modelAdapter, { maxSteps: 2 })
+  const delegatingAdapter = useMemo(
+    () =>
+      createDelegatingChatModelAdapter(
+        adapter,
+        modelMode.getPageAdapter,
+      ),
+    [modelMode],
+  )
+  const modelAdapter = useMemo(
+    () =>
+      createPageScopedModelAdapter(
+        delegatingAdapter,
+        () => epochRef.current,
+      ),
+    [delegatingAdapter],
+  )
+  const runtime = useLocalRuntime(modelAdapter, {
+    maxSteps: 2,
+    unstable_humanToolNames: [
+      'recommend_canvas_layout',
+      'propose_canvas_change',
+    ],
+    adapters: { attachments: visualAttachmentAdapter },
+  })
   return (
     <AssistantAvailabilityProvider>
-      <AssistantPageSessionProvider runtime={runtime} epochRef={epochRef}>
-        <AssistantRuntimeProvider runtime={runtime}>
-          {children}
-        </AssistantRuntimeProvider>
+      <AssistantPageSessionProvider
+        runtime={runtime}
+        epochRef={epochRef}
+        visualStore={visualStore}
+      >
+        <AssistantModelModeProvider api={modelMode}>
+          <AssistantRuntimeProvider runtime={runtime}>
+            {children}
+          </AssistantRuntimeProvider>
+        </AssistantModelModeProvider>
       </AssistantPageSessionProvider>
     </AssistantAvailabilityProvider>
   )

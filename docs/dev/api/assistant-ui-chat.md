@@ -108,6 +108,21 @@ Store 明确区分“已读取但内容 invalid”和“Storage I/O unavailable�
 中的其他页面均保留。`setItem` 成功后，Store 直接从本次已合并并写入的 envelope 返回 state；
 即使紧随其后的 Storage 读取瞬断，也不会返回 `ok:true` 与空 state 的矛盾结果。
 
+## 视觉附件持久化
+
+PNG、JPEG 与 WebP 的实际 Blob 存入版本化 IndexedDB
+`wn.assistant.attachments.v1`，消息与 `localStorage` 页面快照只保存
+`wn-attachment:<id>`，不保存 Base64 或对象 URL。旧的纯文本 V1 页面状态无需迁移，恢复与发送
+行为保持不变；含有效 `wn-attachment:` 的新状态才会解析对应 Blob。
+
+单张图片不超过 10 MiB，当前消息最多 8 张；Composer 对一次粘贴批次还执行 30 MiB 整批校验。
+URL capture 成功后也经过同一附件 adapter 存储，并在 record 中保留 `sourceUrl`。预览和恢复时
+创建的对象 URL 会在移除、页面切换或组件卸载时撤销。
+
+稳定消息快照成功后，页面会用快照中的引用集合 reconcile 当前页面 IndexedDB records，删除已不再
+引用的 Blob；接受 New chat 后删除该页面的全部 records。清理失败沿用视觉持久化英文错误，不能把
+清理失败声称为成功，也不能恢复已从 Runtime 删除的消息。
+
 ## 页面级会话（`pageSession.tsx`）
 
 `AssistantProvider` 继续只创建一个 LocalRuntime，并把它交给
@@ -266,6 +281,84 @@ useAssistantTool({
 筛选 prompt 只有在 `apply_filter` 工具真实执行并返回成功结果后才算更新成功。验收必须同时观察
 chips、匹配数量和可见资产三者变化；普通助手文本不得修改筛选。
 
+## Canvas 页面 server adapter
+
+Canvas 页面使用 `useCanvasAssistant({ appId, canvasId, ready })` 独占当前页面的模型 adapter。
+`CanvasPreview` 会并行申请
+`POST /__design_ai/canvas/preview-session`、加载隔离 Canvas preview 与调用
+`POST /__design_ai/canvas/context`；只有 context 成功后才传 `ready:true`，注册
+`createCanvasServerAdapter({ appId, canvasId })` 并点亮助手。Style、Layout 或其他 Canvas
+context 加载失败时，Canvas 预览仍可显示，但助手保持不可用并显示英文状态。空白 Canvas 也走同一
+context readiness 流程，不依赖已有页面内容。context 响应必须是 JSON
+`{ ready:true }`；缺失 middleware、HTML fallback 或非预期 content type 统一显示
+`Canvas Assistant is available only with npm run dev.`。
+
+Canvas module 只在 `sandbox="allow-scripts"` 且不含 `allow-same-origin`
+的 iframe 中执行，因此运行时 origin 为 opaque。Shell 继续持有 `designApi` 与 Canvas
+Assistant API 权限。preview session 由同源 Shell 申请，服务端从 `appId + canvasId`
+解析当前非 symlink 的普通 TSX 文件，并返回含 `moduleBase`、`componentFile`、
+`expiresAt` 的 30 分钟有效不可猜 module capability；`CanvasPreview` 在到期前 1 分钟
+重新申请 capability 并 remount iframe，避免后续 HMR/lazy import 使用过期 token，
+同时按预览 remount 语义清空 Canvas 本地状态。iframe import map
+把 Vite runtime、当前 Canvas/直接 CSS 与经 realpath 校验的共享组件请求改写到 capability
+namespace。只有 `Origin:null + Sec-Fetch-Dest:script`、有效 token 和精确 allowlist
+同时满足时才返回 `ACAO:null`；每个 App module GET 还会重新执行 `lstat + realpath`，
+要求文件仍是普通非 symlink 文件且解析到签发时记录的真实路径，签发后的 symlink/路径
+替换会立即 fail closed。普通 fetch、危险 Vite raw/url/worker query、另一
+Canvas/App、`/@fs` 与 privileged `__*` 路由均拒绝。父页面只接受来自当前 iframe
+`contentWindow` 且符合严格 `ready` / `error` type 的消息，该通道不提供任何文件或 API
+mutation 能力。srcdoc bootstrap 自身捕获 runtime/frame module import 失败并发送同一严格
+error 消息，不能永久停在空白 loading。
+
+页面 adapter 的所有权由 `usePageModelAdapter` 管理：Canvas 路由挂载时替换默认浏览器 adapter，
+`ready:false`、参数变化或卸载时写回 `null`。因此非 Canvas 页面不会请求
+`/__design_ai/canvas/chat`，离开 Canvas 后也不会残留旧 `appId` / `canvasId`。server adapter
+每次请求只发送最新 40 条稳定消息（以及已有 human tool result 的当前 assistant message）和读取
+时的当前 AI config；缺少配置时沿用 Settings guidance。chat 使用浏览器生成 boundary 的
+`multipart/form-data`：`request` 是不超过 512 KiB 的 JSON envelope，每个唯一引用 Blob 只发送
+一次并命名为 `attachment:<id>`，不得显式设置 `Content-Type`。缺失引用在请求发出前以
+`A referenced image is no longer available.` 失败。URL capture 的 `sourceUrl` 只在发送给模型的
+消息副本中作为紧邻截图的 `Source URL: <url>` 文本出现，不改写 Runtime 快照。
+
+服务端要求当前用户消息最多 8 张、单张最多 10 MiB、保留的 40 条消息中唯一 Blob 合计最多
+30 MiB；超限时不裁剪旧消息或附件，而是要求开始新对话。通过校验后按消息 part 原顺序转换为 AI
+SDK `Uint8Array` image parts。若 provider 不支持视觉输入，服务端返回固定英文错误
+`The configured model does not support image input. Choose a vision-capable model or remove the images.`，
+且不得 stage `propose_canvas_change`；LocalRuntime 中已提交的消息与 `wn-attachment:` 引用保持，
+用户可更换模型或移除图片后再试。
+
+chat/apply 成功响应必须声明
+`application/x-ndjson`，否则使用同一 dev-only guidance。响应按 NDJSON 任意字节切分增量解码，
+每条完整行都经 `CanvasRunEventSchema` 校验；`run-result` 逐条转交 LocalRuntime，
+`error` 转成运行错误，LocalRuntime abort signal 原样传给 `fetch`。
+
+### Canvas human tool UI 与恢复
+
+`CanvasAssistantTools` 只用 `useAssistantToolUI` 注册 renderer，不在浏览器重复声明或执行服务端
+工具定义。两项 UI 都使用 `display:'standalone'`：
+
+- `recommend_canvas_layout`：展示推荐 Layout 与 `Not installed` 状态。确认后先调用
+  `designApi.applyAsset('layoutmd', layoutId, appId)`；只有安装成功后才
+  `addResult({ status:'installed', layoutId })`。安装失败会写入 `failed` result，不能声称已安装。
+- `propose_canvas_change`：展示 Style、Layout、changed files、reused components 与 new shared
+  components，并用英文 `<details>` 提供逐文件 path/source 的只读折叠审阅。确认时调用
+  proposal apply endpoint，并按收到顺序显示全部 checking、writing、
+  validating、repairing status。若成功结果包含 repairing history，UI 会从最后一条
+  repairing status 的 attempt 派生 `Repaired · attempt N` 成功行并放在 `Applied` 前；这是
+  UI 终态，不增加公共协议 phase，协议 status phase 仍仅允许 checking、writing、validating、
+  repairing。按钮 pending 时全部禁用，且 proposal 只能 apply 一次。
+
+两项工具的确认、拒绝和失败都必须在外部操作成功或失败后调用一次 `addResult`。由于
+`AssistantProvider` 已把两项工具名放入 `unstable_humanToolNames`，该 human result 会恢复同一
+LocalRuntime run，并由 Canvas server adapter 把结果续传服务端。proposal apply 在调用时重新读取
+当前 AI config 供 repair 使用；apply NDJSON 会消费到 EOF，必须恰有一个 terminal
+`complete`；重复 `complete`、`complete` 后事件/垃圾数据和 EOF 缺少 `complete` 都视为错误。
+若失败结果为 `rolledBack:false`，UI 必须明确要求用户手动检查文件。
+
+成功 apply 后，Vite 发出 `canvas-assistant:applied`。Canvas 页面只在事件的 `appId` 与
+`canvasId` 同时匹配当前页面时增加 preview revision，以 `key` remount Canvas 并清理 Canvas
+本地状态；不匹配事件不影响当前预览。订阅在页面卸载或目标变化时清理。
+
 ## 落位与样式
 
 - 入口按钮位于 `sidebar-shell` 的 header；桌面端面板占用 Shell 右侧停靠列，打开时主工作区回流缩窄，不使用 overlay、scrim、背景 blur 或 body scroll lock。
@@ -279,5 +372,5 @@ chips、匹配数量和可见资产三者变化；普通助手文本不得修改
 
 ## 未覆盖（YAGNI）
 
-多线程；其他页面场景的实际接入（架构已预留：新页面调
-`usePageAssistant` + `useAssistantTool` 即接入）；独立后端聊天端点。
+多线程；资产页与 Canvas 页之外的页面场景实际接入（架构已预留：普通浏览器端工具页调用
+`usePageAssistant` + `useAssistantTool`，需要服务端模型运行的页面再注册 page adapter）。

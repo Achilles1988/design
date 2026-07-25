@@ -23,6 +23,8 @@ import {
   type AssistantPageStateV1,
   type StoreWriteResult,
 } from './pageState'
+import { extractAttachmentIds } from './visualAttachmentAdapter'
+import type { VisualAttachmentStore } from './visualAttachmentStore'
 
 export const STALE_PAGE_FILTER_ERROR =
   'Filter update ignored because its page is no longer active.'
@@ -71,7 +73,7 @@ const AssistantPageSessionContext =
 
 function cancelRunAndWaitForIdle(
   runtime: AssistantRuntime,
-  onIdle: () => void,
+  onIdle: () => void | Promise<void>,
 ): () => void {
   let active = true
   let unsubscribe = () => {}
@@ -79,7 +81,7 @@ function cancelRunAndWaitForIdle(
     if (!active || runtime.thread.getState().isRunning) return
     active = false
     unsubscribe()
-    onIdle()
+    void onIdle()
   }
 
   if (runtime.thread.getState().isRunning) {
@@ -110,10 +112,12 @@ export function useAssistantPageSession(): AssistantPageSessionValue {
 export function AssistantPageSessionProvider({
   runtime,
   epochRef,
+  visualStore,
   children,
 }: {
   runtime: AssistantRuntime
   epochRef?: MutableRefObject<number>
+  visualStore?: VisualAttachmentStore
   children: ReactNode
 }) {
   const location = useLocation()
@@ -143,6 +147,29 @@ export function AssistantPageSessionProvider({
   )
   const [persistenceError, setPersistenceError] = useState<string | null>(null)
 
+  const reportVisualPersistenceError = useCallback((error: unknown) => {
+    setPersistenceError(
+      error instanceof Error
+        ? error.message
+        : 'Visual attachment persistence failed.',
+    )
+  }, [])
+
+  const reconcileVisualAttachments = useCallback((
+    targetPageKey: string,
+    messages: ReturnType<typeof serializeMessages>,
+  ) => {
+    if (!visualStore) return
+    void visualStore.reconcilePage(
+      targetPageKey,
+      extractAttachmentIds(messages),
+    ).catch((error: unknown) => {
+      if (activeKeyRef.current === targetPageKey) {
+        reportVisualPersistenceError(error)
+      }
+    })
+  }, [reportVisualPersistenceError, visualStore])
+
   const saveSnapshot = useCallback((
     targetPageKey: string,
     claimProvisional = false,
@@ -161,7 +188,8 @@ export function AssistantPageSessionProvider({
     }
     setPageState(result.state)
     setPersistenceError(result.ok ? null : result.error)
-  }, [runtime])
+    if (result.ok) reconcileVisualAttachments(targetPageKey, messages)
+  }, [reconcileVisualAttachments, runtime])
 
   const saveMessages = useCallback(() => {
     if (hydratingRef.current || runtime.thread.getState().isRunning) return
@@ -276,33 +304,52 @@ export function AssistantPageSessionProvider({
     cancelRunAndWaitForIdle(runtime, () => {
       const result = clearAssistantPageState(targetPageKey)
       provisionalPageKeyRef.current = targetPageKey
-      setPersistenceError(result.ok ? null : result.error)
-      const isCurrentPage = latestRouteKeyRef.current === targetPageKey
-      try {
-        if (isCurrentPage) {
-          activeKeyRef.current = targetPageKey
-          runtime.thread.reset([])
-          messageSnapshotRef.current = JSON.stringify(
-            serializeMessages(runtime.thread.getState().messages),
-          )
-          try {
-            resetHandlerRef.current()
-          } catch {
-            // Page-owned cleanup cannot prevent the session reset from settling.
+      const finish = (visualError: unknown = null) => {
+        setPersistenceError(
+          visualError
+            ? visualError instanceof Error
+              ? visualError.message
+              : 'Visual attachment persistence failed.'
+            : result.ok
+              ? null
+              : result.error,
+        )
+        const isCurrentPage = latestRouteKeyRef.current === targetPageKey
+        try {
+          if (isCurrentPage) {
+            activeKeyRef.current = targetPageKey
+            runtime.thread.reset([])
+            messageSnapshotRef.current = JSON.stringify(
+              serializeMessages(runtime.thread.getState().messages),
+            )
+            try {
+              resetHandlerRef.current()
+            } catch {
+              // Page-owned cleanup cannot prevent the session reset from settling.
+            }
           }
+        } finally {
+          if (isCurrentPage) {
+            setMessageCount(0)
+            setPageState(result.state)
+            hydratingRef.current = false
+            setHydratedPageKey(targetPageKey)
+          }
+          clearingPageKeysRef.current.delete(targetPageKey)
         }
-      } finally {
-        if (isCurrentPage) {
-          setMessageCount(0)
-          setPageState(result.state)
-          hydratingRef.current = false
-          setHydratedPageKey(targetPageKey)
-        }
-        clearingPageKeysRef.current.delete(targetPageKey)
       }
+
+      if (!visualStore) {
+        finish()
+        return
+      }
+      return visualStore.deletePage(targetPageKey).then(
+        () => finish(),
+        (error: unknown) => finish(error),
+      )
     })
     return true
-  }, [activeEpochRef, runtime])
+  }, [activeEpochRef, runtime, visualStore])
 
   const ready = hydratedPageKey === pageKey
   const owner = useMemo<AssistantPageOwner>(() => ({

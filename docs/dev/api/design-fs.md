@@ -101,9 +101,10 @@ See also: [Design project marker and contract resolution](design-project.md).
 
 Adding a canvas appends an entry and writes a placeholder `.tsx`. The component
 filename is derived from the canvas name (falling back to the canvas id when the
-derived name is not a valid TS identifier), while the placeholder `<h1>` uses
-the trimmed canvas `name`. Deleting a canvas removes the entry and the component
-file.
+derived name is not a valid TS identifier). Adding a Canvas writes a minimal
+named TSX component that returns `null`. The preview is visually blank until the
+user or Canvas Assistant authors UI. Deleting a canvas removes the entry and the
+component file.
 
 ### Asset entry (API)
 
@@ -121,10 +122,17 @@ JSON responses use `{ "error": "<message>" }` on failure with status:
 
 | Condition | Status |
 |-----------|--------|
+| Mutation request is not same-origin | `403` |
 | Validation / bad request | `400` |
 | Missing app, canvas, or asset | `404` |
 | Duplicate app/canvas/component | `409` |
 | Unexpected failure | `500` |
+
+Every mutating `POST` or `DELETE` request requires `Origin` to equal
+`${X-Forwarded-Proto ?? "http"}://${Host}` exactly. Sandboxed Canvas preview
+documents have an opaque `Origin: null` and therefore cannot create, install,
+change, or delete managed filesystem content. Normal Shell `designApi`
+mutations remain same-origin and are accepted.
 
 ### Apps
 
