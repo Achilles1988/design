@@ -104,7 +104,11 @@ filename is derived from the canvas name (falling back to the canvas id when the
 derived name is not a valid TS identifier). Adding a Canvas writes a minimal
 named TSX component that returns `null`. The preview is visually blank until the
 user or Canvas Assistant authors UI. Deleting a canvas removes the entry and the
-component file.
+component file. Renaming a canvas updates the display name, id, and component
+file under `canvases/`; validation conflicts (duplicate id or component filename)
+leave disk unchanged. If the component file is renamed but writing `canvases.json`
+fails, the server attempts a best-effort rollback of the file rename before
+returning the error.
 
 ### Asset entry (API)
 
@@ -150,6 +154,7 @@ mutations remain same-origin and are accepted.
 |--------|------|------|---------|
 | `GET` | `/apps/:id/canvases` | — | `CanvasEntry[]` |
 | `POST` | `/apps/:id/canvases` | `{ "id", "name" }` | `CanvasEntry` |
+| `POST` | `/apps/:id/canvases/:canvasId/rename` | `{ "id", "name" }` | `CanvasEntry` |
 | `DELETE` | `/apps/:id/canvases/:canvasId` | — | `{ "ok": true }` |
 
 ### Assets
@@ -175,7 +180,7 @@ validated (`GET`-equivalent) before writing:
 
 - `listApps()`, `getApp(id)`, `createApp({ id, name, path? })`, `deleteApp(id)`
 - `removeAppLayout(appId, layoutId)` (drop a layout id from `app.json` `layouts` only; does not delete stock packages)
-- `listCanvases(appId)`, `addCanvas(appId, { id, name })`, `deleteCanvas(appId, canvasId)`
+- `listCanvases(appId)`, `addCanvas(appId, { id, name })`, `deleteCanvas(appId, canvasId)`, `renameCanvas(appId, canvasId, { id, name })`
 - `listAssets(kind)`, `downloadAssetUrl(kind, id)` (URL helper for ZIP download)
 - `applyAsset(kind, id, appId)` (install layout / replace style ids on the App)
 

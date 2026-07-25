@@ -304,6 +304,29 @@ export function designFsPlugin(options: {
             return
           }
 
+          // POST /__design_fs/apps/:id/canvases/:canvasId/rename
+          if (
+            parts.length === 6 &&
+            parts[5] === 'rename' &&
+            method === 'POST'
+          ) {
+            const canvasId = parts[4]
+            const body = (await parseJsonBody(req)) as {
+              id?: string
+              name?: string
+            }
+            if (typeof body.id !== 'string' || typeof body.name !== 'string') {
+              sendJson(res, 400, { error: 'id and name are required' })
+              return
+            }
+            const canvas = await store.renameCanvas(appId, canvasId, {
+              id: body.id,
+              name: body.name,
+            })
+            sendJson(res, 200, canvas)
+            return
+          }
+
           sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
         } catch (err) {
           const status = statusForError(err)

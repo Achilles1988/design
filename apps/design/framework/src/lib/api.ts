@@ -63,6 +63,18 @@ export const designApi = {
     request<{ ok: true }>(`/__design_fs/apps/${appId}/canvases/${canvasId}`, {
       method: 'DELETE',
     }),
+  renameCanvas: (
+    appId: string,
+    canvasId: string,
+    body: { id: string; name: string },
+  ) =>
+    request<CanvasEntry>(
+      `/__design_fs/apps/${appId}/canvases/${encodeURIComponent(canvasId)}/rename`,
+      {
+        method: 'POST',
+        body: JSON.stringify(body),
+      },
+    ),
   listAssets: (kind: AssetKind) =>
     request<AssetEntry[]>(`/__design_fs/assets/${kind}`),
   downloadAssetUrl: (kind: AssetKind, id: string) =>
