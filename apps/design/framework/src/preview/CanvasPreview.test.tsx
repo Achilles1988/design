@@ -20,6 +20,11 @@ import {
   AssistantModelModeProvider,
   createDelegatingChatModelAdapter,
 } from '@/shell/assistant/modelAdapterMode'
+import {
+  clearCanvasRenameNotice,
+  readCanvasRenameNotice,
+  writeCanvasRenameNotice,
+} from '@/lib/canvasRenameNotice'
 import { subscribeCanvasApplied } from './canvasHotReload'
 import { CanvasPreview } from './CanvasPreview'
 
@@ -153,6 +158,7 @@ function runOptions(): Parameters<ChatModelAdapter['run']>[0] {
 describe('CanvasPreview Canvas Assistant integration', () => {
   afterEach(() => {
     cleanup()
+    clearCanvasRenameNotice()
     vi.unstubAllGlobals()
   })
 
@@ -574,6 +580,62 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     )
     expect(alert.className).toContain('canvas-assistant-context-error')
     expect(view.getActiveAdapter()).toBeNull()
+  })
+
+  it('shows a rename banner with a link when the canvas entry is missing', async () => {
+    writeCanvasRenameNotice({
+      appId: 'design',
+      fromId: 'home',
+      toId: 'landing',
+      name: 'Landing',
+    })
+    mocks.listCanvases.mockResolvedValue([])
+
+    renderCanvasPreview()
+
+    expect(await screen.findByText(/Canvas renamed/)).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Landing' }).getAttribute('href')).toBe(
+      '/apps/design/canvases/landing',
+    )
+    expect(
+      await screen.findByText('Canvas entry not found in canvases.json'),
+    ).toBeTruthy()
+    expect(mocks.createPreviewSession).not.toHaveBeenCalled()
+  })
+
+  it('shows the rename banner above the preview on a stale old route', async () => {
+    writeCanvasRenameNotice({
+      appId: 'design',
+      fromId: 'home',
+      toId: 'landing',
+      name: 'Landing',
+    })
+
+    renderCanvasPreview()
+
+    await screen.findByTitle('Canvas preview')
+    expect(screen.getByText(/Canvas renamed/)).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Landing' }).getAttribute('href')).toBe(
+      '/apps/design/canvases/landing',
+    )
+  })
+
+  it('dismisses the rename banner and clears the stored notice', async () => {
+    writeCanvasRenameNotice({
+      appId: 'design',
+      fromId: 'home',
+      toId: 'landing',
+      name: 'Landing',
+    })
+    mocks.listCanvases.mockResolvedValue([])
+
+    renderCanvasPreview()
+    await screen.findByRole('status')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+
+    expect(screen.queryByRole('status')).toBeNull()
+    expect(readCanvasRenameNotice('design', 'home')).toBeNull()
   })
 
   it('uses a dedicated high-contrast Canvas Assistant context error style', () => {

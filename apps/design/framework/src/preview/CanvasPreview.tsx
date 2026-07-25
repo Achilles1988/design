@@ -5,6 +5,11 @@ import {
   checkCanvasAssistantContext,
   createCanvasPreviewSession,
 } from '@/lib/canvasAssistantApi'
+import {
+  clearCanvasRenameNotice,
+  readCanvasRenameNotice,
+  type CanvasRenameNotice,
+} from '@/lib/canvasRenameNotice'
 import { getTheme, subscribeTheme, type ThemeMode } from '@/lib/theme'
 import { CanvasAssistantTools } from './CanvasAssistantTools'
 import { createCanvasPreviewDocument } from './canvasPreviewDocument'
@@ -61,6 +66,9 @@ export function CanvasPreview({
       canvasId: '',
     })
   const [previewRevision, setPreviewRevision] = useState(0)
+  const [renameNotice, setRenameNotice] = useState<CanvasRenameNotice | null>(
+    () => readCanvasRenameNotice(appId, canvasId),
+  )
   const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
   const frameRef = useRef<HTMLIFrameElement>(null)
   const previewGeneration = `${appId}:${canvasId}:${previewRevision}`
@@ -74,6 +82,15 @@ export function CanvasPreview({
       ? assistantContext
       : null
   useCanvasAssistant({ appId, canvasId, ready: assistantReady })
+
+  useEffect(() => {
+    setRenameNotice(readCanvasRenameNotice(appId, canvasId))
+  }, [appId, canvasId])
+
+  const dismissRenameNotice = () => {
+    clearCanvasRenameNotice()
+    setRenameNotice(null)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -215,10 +232,23 @@ export function CanvasPreview({
       Canvas Assistant unavailable: {assistantError.message}
     </p>
   ) : null
+  const renameBanner = renameNotice ? (
+    <p className="apps-muted" role="status">
+      Canvas renamed. Open{' '}
+      <Link to={`/apps/${appId}/canvases/${renameNotice.toId}`}>
+        {renameNotice.name}
+      </Link>
+      .{' '}
+      <button type="button" className="apps-btn apps-btn--ghost" onClick={dismissRenameNotice}>
+        Dismiss
+      </button>
+    </p>
+  ) : null
 
   if (state.status === 'loading') {
     return (
       <>
+        {renameBanner}
         <p className="apps-muted">Loading preview…</p>
         {assistantTools}
       </>
@@ -228,6 +258,7 @@ export function CanvasPreview({
   if (state.status === 'error') {
     return (
       <div className="apps-page">
+        {renameBanner}
         <p className="apps-error">{state.message}</p>
         {appId ? (
           <p>
@@ -251,6 +282,7 @@ export function CanvasPreview({
   })
   return (
     <>
+      {renameBanner}
       {assistantErrorAlert}
       <iframe
         ref={frameRef}
