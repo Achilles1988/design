@@ -72,6 +72,7 @@ export function CanvasPreview({
   const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
   const frameRef = useRef<HTMLIFrameElement>(null)
   const [revealRevision, setRevealRevision] = useState<number | null>(null)
+  const revealLockedForGeneration = useRef<string | null>(null)
   const loadedRevision = useRef(-1)
   const previewGeneration = `${appId}:${canvasId}:${previewRevision}`
   const assistantOwnsCurrentCanvas =
@@ -225,6 +226,12 @@ export function CanvasPreview({
   }, [appId, canvasId])
 
   useEffect(() => {
+    return () => {
+      revealLockedForGeneration.current = null
+    }
+  }, [previewGeneration])
+
+  useEffect(() => {
     if (!appId || !canvasId) return
     return subscribeApplied(appId, canvasId, () => {
       setPreviewRevision((revision) => {
@@ -244,8 +251,9 @@ export function CanvasPreview({
     ) {
       return
     }
+    revealLockedForGeneration.current = previewGeneration
     setRevealRevision(null)
-  }, [state, revealRevision, previewRevision])
+  }, [state, revealRevision, previewRevision, previewGeneration])
 
   const assistantTools = assistantReady ? (
     <CanvasAssistantTools appId={appId} canvasId={canvasId} />
@@ -297,8 +305,12 @@ export function CanvasPreview({
   }
 
   const reveal =
-    revealRevision === previewRevision &&
-    loadedRevision.current === previewRevision
+    loadedRevision.current === previewRevision &&
+    (revealRevision === previewRevision ||
+      revealLockedForGeneration.current === previewGeneration)
+  if (reveal) {
+    revealLockedForGeneration.current = previewGeneration
+  }
   const sourceDocument = createCanvasPreviewDocument({
     appId,
     componentFile: state.componentFile,

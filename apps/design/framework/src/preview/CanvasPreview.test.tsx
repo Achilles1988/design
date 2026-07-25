@@ -374,6 +374,13 @@ describe('CanvasPreview Canvas Assistant integration', () => {
       const frame = screen.getByTitle('Canvas preview') as HTMLIFrameElement
       expect(frame.srcdoc).toMatch(/"reveal"\s*:\s*true/)
     })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const frame = screen.getByTitle('Canvas preview') as HTMLIFrameElement
+    expect(frame.srcdoc).toMatch(/"reveal"\s*:\s*true/)
   })
 
   it('does not carry a pending apply reveal to another canvas', async () => {
