@@ -30,6 +30,10 @@ const markdownText = [
   '```',
   '',
   '![blocked](https://example.com/image.png)',
+  '',
+  '| Style | Layout |',
+  '| --- | --- |',
+  '| dashboard | sidebar-shell |',
 ].join('\n')
 
 const noOpAdapter: ChatModelAdapter = {
@@ -104,5 +108,8 @@ describe('AssistantMarkdown', () => {
       'const value = 1',
     )
     expect(document.querySelector('img')).toBeNull()
+    expect(screen.getByRole('table')).toBeTruthy()
+    expect(screen.getByRole('cell', { name: 'dashboard' })).toBeTruthy()
+    expect(screen.getByRole('cell', { name: 'sidebar-shell' })).toBeTruthy()
   })
 })

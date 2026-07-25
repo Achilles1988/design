@@ -304,6 +304,26 @@
   background: transparent;
 }
 
+.aui-md .aui-md-table-wrap,
+.aui-md table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.aui-md table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+}
+
+.aui-md th,
+.aui-md td {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
 .aui-composer {
   display: flex;
   flex-wrap: wrap;

@@ -8,6 +8,7 @@ import {
   MarkdownTextPrimitive,
 } from '@assistant-ui/react-markdown'
 import { useMessagePartText } from '@assistant-ui/react'
+import remarkGfm from 'remark-gfm'
 
 type MarkdownErrorBoundaryProps = {
   children: ReactNode
@@ -56,6 +57,7 @@ function AssistantMarkdownImpl() {
     >
       <MarkdownTextPrimitive
         className="aui-md"
+        remarkPlugins={[remarkGfm]}
         components={{ img: BlockedImage }}
       />
     </MarkdownErrorBoundary>

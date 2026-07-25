@@ -257,7 +257,7 @@ useAssistantTool({
 ## Markdown 文本契约
 
 - 用户消息保持纯文本；仅 assistant 消息通过 `MessagePrimitive.Parts.components.Text` 注册 `AssistantMarkdown`，工具 part 继续由 assistant-ui 渲染。
-- 支持标题、加粗、斜体、引用、列表、链接、行内代码与代码块；不启用 GFM 表格、任务列表或语法高亮。
+- 支持标题、加粗、斜体、引用、列表、链接、行内代码、代码块与 GFM 表格；任务列表与语法高亮未专门支持或样式化。
 - Markdown 外部图片被禁用，避免第三方请求和不可控图片尺寸；原始 HTML 不启用。
 - Markdown 渲染异常由消息级错误边界捕获，并降级为当前 part 的安全纯文本。
 - assistant 请求失败通过 `ErrorPrimitive.Message` 显示，并提供 `ActionBarPrimitive.Reload` 的英文 `Retry` 操作；已有对话和筛选不清空。
