@@ -64,6 +64,13 @@ type ModelRunnerOptions = {
 
 type ModelRunInput = {
   request: CanvasChatRequest
+  attachments: ReadonlyMap<
+    string,
+    {
+      bytes: Uint8Array
+      mimeType: 'image/png' | 'image/jpeg' | 'image/webp'
+    }
+  >
   context: CanvasAuthoringContext
   abortSignal: AbortSignal
 }
@@ -92,11 +99,12 @@ function validatedMessages(
 
 function toCoreMessages(
   messages: CanvasChatRequest['messages'],
+  attachments: ModelRunInput['attachments'],
 ): CoreMessage[] {
   const output: CoreMessage[] = []
 
   for (const message of validatedMessages(messages)) {
-    if (message.role !== 'assistant') {
+    if (message.role === 'system') {
       const text = message.content
         .filter(
           (part): part is Extract<typeof part, { type: 'text' }> =>
@@ -105,6 +113,46 @@ function toCoreMessages(
         .map((part) => part.text)
         .join('\n')
       if (text) output.push({ role: message.role, content: text })
+      continue
+    }
+    if (message.role === 'user') {
+      const hasImages = message.content.some(
+        (part) => part.type === 'image',
+      )
+      if (!hasImages) {
+        const text = message.content
+          .filter(
+            (part): part is Extract<typeof part, { type: 'text' }> =>
+              part.type === 'text',
+          )
+          .map((part) => part.text)
+          .join('\n')
+        if (text) output.push({ role: 'user', content: text })
+        continue
+      }
+
+      const content: Extract<
+        CoreMessage,
+        { role: 'user' }
+      >['content'] = []
+      for (const part of message.content) {
+        if (part.type === 'text') {
+          content.push({ type: 'text', text: part.text })
+          continue
+        }
+        if (part.type !== 'image') continue
+        const id = part.image.slice('wn-attachment:'.length)
+        const attachment = attachments.get(id)
+        if (!attachment) {
+          throw new Error('A referenced image is no longer available.')
+        }
+        content.push({
+          type: 'image',
+          image: attachment.bytes,
+          mimeType: attachment.mimeType,
+        })
+      }
+      output.push({ role: 'user', content })
       continue
     }
 
@@ -133,6 +181,11 @@ function toCoreMessages(
         assistantContent.push({ type: 'text', text: part.text })
         continue
       }
+      if (part.type === 'image') {
+        throw new Error(
+          'Canvas Assistant supports image parts only in user messages.',
+        )
+      }
       assistantContent.push({
         type: 'tool-call',
         toolCallId: part.toolCallId,
@@ -153,6 +206,35 @@ function toCoreMessages(
   }
 
   return output
+}
+
+const VISION_MODEL_ERROR =
+  'The configured model does not support image input. Choose a vision-capable model or remove the images.'
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message
+  }
+  return ''
+}
+
+function isUnsupportedVisualError(error: unknown): boolean {
+  const message = errorMessage(error)
+  return (
+    /(?:does not support|doesn't support|not support|unsupported).{0,80}(?:image|visual|content type)/i.test(
+      message,
+    ) ||
+    /(?:image|visual|content type).{0,80}(?:does not support|doesn't support|not supported|unsupported)/i.test(
+      message,
+    )
+  )
 }
 
 function minimalOriginalUserIntent(
@@ -224,6 +306,7 @@ export function createCanvasModelRunner(options: ModelRunnerOptions) {
   return {
     async *run({
       request,
+      attachments,
       context,
       abortSignal,
     }: ModelRunInput): AsyncGenerator<CanvasRunEvent> {
@@ -239,57 +322,74 @@ export function createCanvasModelRunner(options: ModelRunnerOptions) {
           parameters: RawCanvasProposalSchema,
         }),
       }
-      const result = stream({
-        model: makeModel(request.aiConfig),
-        system: buildCanvasSystemPrompt(context),
-        messages: toCoreMessages(request.messages),
-        tools: humanTools,
-        abortSignal,
-      })
       let text = ''
 
-      for await (const part of result.fullStream) {
-        if (part.type === 'text-delta') {
-          text += typeof part.textDelta === 'string' ? part.textDelta : ''
-          yield runResult(text)
-          continue
-        }
-        if (part.type === 'error') {
-          throw new Error('AI model run failed.')
-        }
-        if (part.type !== 'tool-call') continue
+      try {
+        const result = stream({
+          model: makeModel(request.aiConfig),
+          system: buildCanvasSystemPrompt(context),
+          messages: toCoreMessages(request.messages, attachments),
+          tools: humanTools,
+          abortSignal,
+        })
+        for await (const part of result.fullStream) {
+          if (part.type === 'text-delta') {
+            text +=
+              typeof part.textDelta === 'string' ? part.textDelta : ''
+            yield runResult(text)
+            continue
+          }
+          if (part.type === 'error') {
+            if (
+              attachments.size > 0 &&
+              isUnsupportedVisualError(part.error)
+            ) {
+              yield { type: 'error', error: VISION_MODEL_ERROR }
+              return
+            }
+            throw new Error('AI model run failed.')
+          }
+          if (part.type !== 'tool-call') continue
 
-        const toolCallId =
-          typeof part.toolCallId === 'string' ? part.toolCallId : ''
+          const toolCallId =
+            typeof part.toolCallId === 'string' ? part.toolCallId : ''
+          if (part.toolName === 'recommend_canvas_layout') {
+            const args = recommendLayout(context, part.args)
+            yield runResult(text, {
+              type: 'tool-call',
+              toolCallId,
+              toolName: 'recommend_canvas_layout',
+              args,
+              argsText: JSON.stringify(args),
+            })
+            return
+          }
+          if (part.toolName === 'propose_canvas_change') {
+            const args = options.stageProposal(
+              context,
+              part.args,
+              minimalOriginalUserIntent(request.messages),
+            )
+            yield runResult(text, {
+              type: 'tool-call',
+              toolCallId,
+              toolName: 'propose_canvas_change',
+              args,
+              argsText: JSON.stringify(args),
+            })
+            return
+          }
+          throw new Error('AI model returned an unsupported tool call.')
+        }
+      } catch (error) {
         if (
-          part.toolName === 'recommend_canvas_layout'
+          attachments.size > 0 &&
+          isUnsupportedVisualError(error)
         ) {
-          const args = recommendLayout(context, part.args)
-          yield runResult(text, {
-            type: 'tool-call',
-            toolCallId,
-            toolName: 'recommend_canvas_layout',
-            args,
-            argsText: JSON.stringify(args),
-          })
+          yield { type: 'error', error: VISION_MODEL_ERROR }
           return
         }
-        if (part.toolName === 'propose_canvas_change') {
-          const args = options.stageProposal(
-            context,
-            part.args,
-            minimalOriginalUserIntent(request.messages),
-          )
-          yield runResult(text, {
-            type: 'tool-call',
-            toolCallId,
-            toolName: 'propose_canvas_change',
-            args,
-            argsText: JSON.stringify(args),
-          })
-          return
-        }
-        throw new Error('AI model returned an unsupported tool call.')
+        throw error
       }
     },
   }

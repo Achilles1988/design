@@ -108,6 +108,21 @@ Store 明确区分“已读取但内容 invalid”和“Storage I/O unavailable�
 中的其他页面均保留。`setItem` 成功后，Store 直接从本次已合并并写入的 envelope 返回 state；
 即使紧随其后的 Storage 读取瞬断，也不会返回 `ok:true` 与空 state 的矛盾结果。
 
+## 视觉附件持久化
+
+PNG、JPEG 与 WebP 的实际 Blob 存入版本化 IndexedDB
+`wn.assistant.attachments.v1`，消息与 `localStorage` 页面快照只保存
+`wn-attachment:<id>`，不保存 Base64 或对象 URL。旧的纯文本 V1 页面状态无需迁移，恢复与发送
+行为保持不变；含有效 `wn-attachment:` 的新状态才会解析对应 Blob。
+
+单张图片不超过 10 MiB，当前消息最多 8 张；Composer 对一次粘贴批次还执行 30 MiB 整批校验。
+URL capture 成功后也经过同一附件 adapter 存储，并在 record 中保留 `sourceUrl`。预览和恢复时
+创建的对象 URL 会在移除、页面切换或组件卸载时撤销。
+
+稳定消息快照成功后，页面会用快照中的引用集合 reconcile 当前页面 IndexedDB records，删除已不再
+引用的 Blob；接受 New chat 后删除该页面的全部 records。清理失败沿用视觉持久化英文错误，不能把
+清理失败声称为成功，也不能恢复已从 Runtime 删除的消息。
+
 ## 页面级会话（`pageSession.tsx`）
 
 `AssistantProvider` 继续只创建一个 LocalRuntime，并把它交给
@@ -299,7 +314,20 @@ error 消息，不能永久停在空白 loading。
 `ready:false`、参数变化或卸载时写回 `null`。因此非 Canvas 页面不会请求
 `/__design_ai/canvas/chat`，离开 Canvas 后也不会残留旧 `appId` / `canvasId`。server adapter
 每次请求只发送最新 40 条稳定消息（以及已有 human tool result 的当前 assistant message）和读取
-时的当前 AI config；缺少配置时沿用 Settings guidance。chat/apply 成功响应必须声明
+时的当前 AI config；缺少配置时沿用 Settings guidance。chat 使用浏览器生成 boundary 的
+`multipart/form-data`：`request` 是不超过 512 KiB 的 JSON envelope，每个唯一引用 Blob 只发送
+一次并命名为 `attachment:<id>`，不得显式设置 `Content-Type`。缺失引用在请求发出前以
+`A referenced image is no longer available.` 失败。URL capture 的 `sourceUrl` 只在发送给模型的
+消息副本中作为紧邻截图的 `Source URL: <url>` 文本出现，不改写 Runtime 快照。
+
+服务端要求当前用户消息最多 8 张、单张最多 10 MiB、保留的 40 条消息中唯一 Blob 合计最多
+30 MiB；超限时不裁剪旧消息或附件，而是要求开始新对话。通过校验后按消息 part 原顺序转换为 AI
+SDK `Uint8Array` image parts。若 provider 不支持视觉输入，服务端返回固定英文错误
+`The configured model does not support image input. Choose a vision-capable model or remove the images.`，
+且不得 stage `propose_canvas_change`；LocalRuntime 中已提交的消息与 `wn-attachment:` 引用保持，
+用户可更换模型或移除图片后再试。
+
+chat/apply 成功响应必须声明
 `application/x-ndjson`，否则使用同一 dev-only guidance。响应按 NDJSON 任意字节切分增量解码，
 每条完整行都经 `CanvasRunEventSchema` 校验；`run-result` 逐条转交 LocalRuntime，
 `error` 转成运行错误，LocalRuntime abort signal 原样传给 `fetch`。

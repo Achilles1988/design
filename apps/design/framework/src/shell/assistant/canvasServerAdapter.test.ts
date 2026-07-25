@@ -3,6 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ChatModelAdapter } from '@assistant-ui/react'
 import { createDelegatingChatModelAdapter } from './modelAdapterMode'
 import { createCanvasServerAdapter } from './canvasServerAdapter'
+import type {
+  VisualAttachmentRecord,
+  VisualAttachmentStore,
+} from './visualAttachmentStore'
 
 const AI_CONFIG = {
   provider: 'anthropic',
@@ -43,6 +47,38 @@ function streamResponse(lines: readonly string[]): Response {
   })
 }
 
+function visualRecord(
+  id: string,
+  input: Partial<VisualAttachmentRecord> = {},
+): VisualAttachmentRecord {
+  return {
+    id,
+    pageKey: '/apps/design/canvases/home',
+    blob: new Blob([new Uint8Array([1, 2, 3])], {
+      type: 'image/png',
+    }),
+    mimeType: 'image/png',
+    width: 1,
+    height: 1,
+    origin: 'clipboard',
+    createdAt: '2026-07-25T12:00:00.000Z',
+    ...input,
+  }
+}
+
+function visualStore(
+  records: readonly VisualAttachmentRecord[],
+): VisualAttachmentStore {
+  const byId = new Map(records.map((record) => [record.id, record]))
+  return {
+    put: vi.fn(async () => {}),
+    get: vi.fn(async (id) => byId.get(id) ?? null),
+    delete: vi.fn(async () => {}),
+    deletePage: vi.fn(async () => {}),
+    reconcilePage: vi.fn(async () => {}),
+  }
+}
+
 async function collect(
   adapter: ChatModelAdapter,
   options: Parameters<ChatModelAdapter['run']>[0],
@@ -61,7 +97,7 @@ describe('createCanvasServerAdapter', () => {
     vi.unstubAllGlobals()
   })
 
-  it('posts the latest forty stable messages and current AI config', async () => {
+  it('places the latest forty stable messages and current AI config in the request field', async () => {
     const messages = Array.from({ length: 43 }, (_, index) => ({
       id: `message-${index}`,
       role: index === 0 ? 'assistant' : 'user',
@@ -107,7 +143,8 @@ describe('createCanvasServerAdapter', () => {
     )
 
     const init = fetchMock.mock.calls[0]![1] as RequestInit
-    const body = JSON.parse(String(init.body))
+    const form = init.body as FormData
+    const body = JSON.parse(String(form.get('request')))
     expect(body).toMatchObject({
       appId: 'design',
       canvasId: 'home',
@@ -119,6 +156,165 @@ describe('createCanvasServerAdapter', () => {
       role: 'assistant',
       content: currentMessage.content,
     })
+    expect(init.headers).toBeUndefined()
+  })
+
+  it('uploads each referenced Blob once even when history repeats it', async () => {
+    const record = visualRecord('image-1')
+    const store = visualStore([record])
+    const fetchMock = vi.fn().mockResolvedValue(
+      streamResponse([
+        JSON.stringify({ type: 'run-result', value: { content: [] } }),
+      ]),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const adapter = createCanvasServerAdapter({
+      appId: 'design',
+      canvasId: 'home',
+      visualStore: store,
+    })
+    const messages = [
+      {
+        id: 'user-1',
+        role: 'user',
+        content: [
+          { type: 'text', text: 'First' },
+          { type: 'image', image: 'wn-attachment:image-1' },
+        ],
+        createdAt: new Date(),
+        status: { type: 'complete', reason: 'stop' },
+      },
+      {
+        id: 'user-2',
+        role: 'user',
+        content: [
+          { type: 'image', image: 'wn-attachment:image-1' },
+        ],
+        createdAt: new Date(),
+        status: { type: 'complete', reason: 'stop' },
+      },
+    ]
+
+    await collect(adapter, runOptions(messages))
+
+    const form = fetchMock.mock.calls[0]?.[1]?.body as FormData
+    const uploaded = form.getAll('attachment:image-1')
+    expect(uploaded).toHaveLength(1)
+    expect(uploaded[0]).toBeInstanceOf(Blob)
+    expect((uploaded[0] as Blob).size).toBe(record.blob.size)
+    expect(store.get).toHaveBeenCalledTimes(1)
+  })
+
+  it('preserves URL source text next to its screenshot', async () => {
+    const store = visualStore([
+      visualRecord('capture-1', {
+        origin: 'url-capture',
+        sourceUrl: 'https://example.com/reference',
+      }),
+    ])
+    const fetchMock = vi.fn().mockResolvedValue(
+      streamResponse([
+        JSON.stringify({ type: 'run-result', value: { content: [] } }),
+      ]),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const adapter = createCanvasServerAdapter({
+      appId: 'design',
+      canvasId: 'home',
+      visualStore: store,
+    })
+
+    await collect(
+      adapter,
+      runOptions([
+        {
+          id: 'user-1',
+          role: 'user',
+          content: [
+            { type: 'text', text: 'Use this reference' },
+            { type: 'image', image: 'wn-attachment:capture-1' },
+          ],
+          createdAt: new Date(),
+          status: { type: 'complete', reason: 'stop' },
+        },
+      ]),
+    )
+
+    const form = fetchMock.mock.calls[0]?.[1]?.body as FormData
+    const request = JSON.parse(String(form.get('request')))
+    expect(request.messages[0].content).toEqual([
+      { type: 'text', text: 'Use this reference' },
+      {
+        type: 'text',
+        text: 'Source URL: https://example.com/reference',
+      },
+      { type: 'image', image: 'wn-attachment:capture-1' },
+    ])
+  })
+
+  it('rejects a missing referenced Blob', async () => {
+    const adapter = createCanvasServerAdapter({
+      appId: 'design',
+      canvasId: 'home',
+      visualStore: visualStore([]),
+    })
+    const messages = [
+      {
+        id: 'user-1',
+        role: 'user',
+        content: [
+          { type: 'image', image: 'wn-attachment:missing' },
+        ],
+        createdAt: new Date(),
+        status: { type: 'complete', reason: 'stop' },
+      },
+    ]
+
+    await expect(collect(adapter, runOptions(messages))).rejects.toThrow(
+      'A referenced image is no longer available.',
+    )
+  })
+
+  it('retains the Runtime message and attachment references after visual rejection', async () => {
+    const record = visualRecord('image-1')
+    const store = visualStore([record])
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        streamResponse([
+          JSON.stringify({
+            type: 'error',
+            error:
+              'The configured model does not support image input. Choose a vision-capable model or remove the images.',
+          }),
+        ]),
+      ),
+    )
+    const adapter = createCanvasServerAdapter({
+      appId: 'design',
+      canvasId: 'home',
+      visualStore: store,
+    })
+    const messages = [
+      {
+        id: 'user-1',
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Use this' },
+          { type: 'image', image: 'wn-attachment:image-1' },
+        ],
+        createdAt: new Date(),
+        status: { type: 'complete', reason: 'stop' },
+      },
+    ]
+    const before = structuredClone(messages)
+
+    await expect(collect(adapter, runOptions(messages))).rejects.toThrow(
+      'The configured model does not support image input.',
+    )
+    expect(messages).toEqual(before)
+    expect(store.delete).not.toHaveBeenCalled()
+    await expect(store.get('image-1')).resolves.toBe(record)
   })
 
   it('throws the existing Settings guidance when config is absent', async () => {

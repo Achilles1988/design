@@ -9,6 +9,12 @@ import {
   type CanvasChatRequest,
 } from '@/lib/canvasAssistantProtocol'
 import { parseCanvasNdjson } from '@/lib/canvasAssistantApi'
+import {
+  getVisualAttachmentStore,
+  parseAttachmentUri,
+  type VisualAttachmentRecord,
+  type VisualAttachmentStore,
+} from './visualAttachmentStore'
 
 const AI_CONFIG_GUIDANCE =
   'Configure an AI provider in Settings before starting a conversation.'
@@ -26,36 +32,84 @@ function isStableMessage(message: ThreadMessage): boolean {
 
 function toRequestMessage(
   message: ThreadMessage,
+  attachments: ReadonlyMap<string, VisualAttachmentRecord>,
 ): CanvasChatRequest['messages'][number] {
+  const content: CanvasChatRequest['messages'][number]['content'] = []
+  if (
+    message.role !== 'user' &&
+    message.content.some((part) => part.type === 'image')
+  ) {
+    throw new Error(
+      'Canvas Assistant supports image parts only in user messages.',
+    )
+  }
+  for (const part of message.content) {
+    if (part.type === 'text') {
+      content.push({ type: 'text', text: part.text })
+      continue
+    }
+    if (part.type === 'image') {
+      const id = parseAttachmentUri(part.image)
+      if (!id) {
+        throw new Error('Canvas Assistant received an invalid image reference.')
+      }
+      const record = attachments.get(id)
+      if (record?.sourceUrl) {
+        content.push({
+          type: 'text',
+          text: `Source URL: ${record.sourceUrl}`,
+        })
+      }
+      content.push({ type: 'image', image: part.image })
+      continue
+    }
+    if (part.type === 'tool-call') {
+      content.push({
+        type: 'tool-call',
+        toolCallId: part.toolCallId,
+        toolName: part.toolName,
+        args: part.args,
+        ...(part.result !== undefined ? { result: part.result } : {}),
+        ...(part.isError !== undefined ? { isError: part.isError } : {}),
+      })
+      continue
+    }
+    throw new Error(
+      `Canvas Assistant does not support the "${part.type}" message part.`,
+    )
+  }
   return {
     role: message.role,
-    content: message.content.map((part) => {
-      if (part.type === 'text') {
-        return { type: 'text' as const, text: part.text }
-      }
-      if (part.type === 'tool-call') {
-        return {
-          type: 'tool-call' as const,
-          toolCallId: part.toolCallId,
-          toolName: part.toolName,
-          args: part.args,
-          ...(part.result !== undefined ? { result: part.result } : {}),
-          ...(part.isError !== undefined ? { isError: part.isError } : {}),
-        }
-      }
-      throw new Error(
-        `Canvas Assistant does not support the "${part.type}" message part.`,
-      )
-    }),
+    content,
   }
+}
+
+function referencedAttachmentIds(
+  messages: readonly ThreadMessage[],
+): string[] {
+  const ids = new Set<string>()
+  for (const message of messages) {
+    if (message.role !== 'user') continue
+    for (const part of message.content) {
+      if (part.type !== 'image') continue
+      const id = parseAttachmentUri(part.image)
+      if (!id) {
+        throw new Error('Canvas Assistant received an invalid image reference.')
+      }
+      ids.add(id)
+    }
+  }
+  return [...ids]
 }
 
 export function createCanvasServerAdapter({
   appId,
   canvasId,
+  visualStore,
 }: {
   appId: string
   canvasId: string
+  visualStore?: Pick<VisualAttachmentStore, 'get'>
 }): ChatModelAdapter {
   return {
     async *run(options) {
@@ -71,18 +125,42 @@ export function createCanvasServerAdapter({
       const requestMessages = [
         ...stableMessages,
         ...(currentMessage ? [currentMessage] : []),
-      ]
-        .slice(-40)
-        .map(toRequestMessage)
+      ].slice(-40)
+      const attachmentRecords = new Map<
+        string,
+        VisualAttachmentRecord
+      >()
+      const ids = referencedAttachmentIds(requestMessages)
+      if (ids.length > 0) {
+        const store = visualStore ?? await getVisualAttachmentStore()
+        for (const id of ids) {
+          const record = await store.get(id)
+          if (!record) {
+            throw new Error('A referenced image is no longer available.')
+          }
+          attachmentRecords.set(id, record)
+        }
+      }
+      const serializedMessages = requestMessages.map((message) =>
+        toRequestMessage(message, attachmentRecords),
+      )
+      const form = new FormData()
+      form.set('request', JSON.stringify({
+        appId,
+        canvasId,
+        aiConfig,
+        messages: serializedMessages,
+      }))
+      for (const id of ids) {
+        const record = attachmentRecords.get(id)
+        if (!record) {
+          throw new Error('A referenced image is no longer available.')
+        }
+        form.set(`attachment:${id}`, record.blob, `${id}.image`)
+      }
       const response = await fetch('/__design_ai/canvas/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          appId,
-          canvasId,
-          aiConfig,
-          messages: requestMessages,
-        }),
+        body: form,
         signal: abortSignal,
       })
 

@@ -16,11 +16,15 @@ All `/__design_ai` routes below accept `POST` only and require:
 
 - `Origin` exactly equal to
   `${X-Forwarded-Proto ?? "http"}://${Host}`; otherwise the response is `403`.
-- `Content-Type: application/json`; otherwise the response is `415`.
-- A body no larger than 512 KiB, counted across both fixed-length and
-  chunked-transfer requests; reading stops and the response is `413` when the
-  limit is crossed.
-- Valid JSON and the documented schema; invalid JSON or schema receives `400`.
+- The documented content type; an incorrect media type receives `415`.
+- Valid fields and the documented schema; malformed or unexpected input
+  receives `400`.
+
+Context, capture, preview-session, and proposal-apply requests use
+`application/json`. Their body is limited to 512 KiB across fixed-length and
+chunked-transfer requests. Chat instead uses `multipart/form-data`; its
+`request` JSON field is limited to 512 KiB, while its bounded binary fields
+follow the visual limits documented below.
 
 A normal browser disconnect aborts the active model run. Request bodies, AI API
 keys, system prompts, current source, candidate source, and repair source are
@@ -95,8 +99,6 @@ logs.
 ## Context readiness
 
 ### `POST /__design_ai/canvas/context`
-
-Body:
 
 ```json
 {
@@ -190,7 +192,16 @@ container.
 
 ### `POST /__design_ai/canvas/chat`
 
-Body:
+The browser sends `multipart/form-data` and does not set `Content-Type`
+manually, so the browser supplies the boundary. The exact fields are:
+
+```text
+request                 JSON envelope below
+attachment:<id>         one referenced PNG, JPEG, or WebP Blob
+```
+
+The server bounds the complete multipart transport before `formData()` can
+buffer it. The `request` field contains:
 
 ```json
 {
@@ -205,17 +216,47 @@ Body:
   "messages": [
     {
       "role": "user",
-      "content": [{ "type": "text", "text": "Build an account page" }]
+      "content": [
+        { "type": "text", "text": "Build an account page" },
+        {
+          "type": "image",
+          "image": "wn-attachment:94cd7aa0-..."
+        }
+      ]
     }
   ]
 }
 ```
 
 `provider` is `openai` or `anthropic`. `baseURL` is optional. Each message role
-is `user`, `assistant`, or `system`; content contains text or tool-call
-snapshots. A completed human tool call stores `result` on the same assistant
-tool-call part so the server can send an AI SDK assistant tool-call message
-followed by its tool-result message.
+is `user`, `assistant`, or `system`; content contains text, user image
+references, or tool-call snapshots. A completed human tool call stores
+`result` on the same assistant tool-call part so the server can send an AI SDK
+assistant tool-call message followed by its tool-result message.
+
+Image parts are accepted only on user messages and contain only a
+`wn-attachment:<id>` reference. Every unique referenced ID in the retained
+40-message history must have exactly one matching `attachment:<id>` file;
+missing files, duplicate fields, unreferenced files, non-image fields, and any
+other form field are rejected. A repeated reference uploads one Blob and counts
+once toward the retained total.
+
+The current user message may contain at most eight image parts. Only
+`image/png`, `image/jpeg`, and `image/webp` are accepted; each file is at most
+10 MiB, and all unique referenced files across retained history total at most
+30 MiB. Historical images are never trimmed or silently omitted. Exceeding
+the retained total returns:
+
+```text
+This conversation contains more than 30 MB of visual references. Start a new chat before sending more images.
+```
+
+The server converts validated files directly in memory to AI SDK
+`Uint8Array` image parts, preserving the user message part order. It does not
+write image bytes to disk or logs. For URL captures, the browser adds
+`Source URL: <url>` immediately before the corresponding image in the
+transmitted message copy; the persisted Runtime image remains only its
+`wn-attachment:` reference.
 
 Success is `200 application/x-ndjson`. Each line is one of:
 
@@ -252,8 +293,17 @@ stops immediately. Proposal events contain sanitized card arguments plus the
 read-only candidate path/source review copy. That browser-visible copy is not
 accepted by apply and cannot replace the authoritative server-side candidate.
 
-Model failures after stream start produce one generic English `error` event.
-Pre-stream request failures use JSON with the status codes described above.
+Model failures after stream start normally produce one generic English
+`error` event. If a provider rejects the image/content type as unsupported,
+the run stops before any proposal is staged and returns:
+
+```text
+The configured model does not support image input. Choose a vision-capable model or remove the images.
+```
+
+The browser does not delete or rewrite the submitted Runtime message or its
+attachment references after this error. Pre-stream request failures use JSON
+with the status codes described above.
 
 ## Human tools
 

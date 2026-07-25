@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { Readable } from 'node:stream'
 import type { Plugin, ViteDevServer } from 'vite'
 import { chromium } from 'playwright'
 import {
@@ -46,6 +47,18 @@ const APPLY_ROUTE =
   /^\/__design_ai\/canvas\/proposals\/([^/]+)\/apply$/
 const MAX_BODY_BYTES = 512 * 1024
 const MAX_CAPTURE_BYTES = 10 * 1024 * 1024
+const MAX_RETAINED_VISUAL_BYTES = 30 * 1024 * 1024
+const MAX_MULTIPART_BYTES = 34 * 1024 * 1024
+const MAX_CURRENT_VISUALS = 8
+const ATTACHMENT_FIELD_PREFIX = 'attachment:'
+const ATTACHMENT_URI_PREFIX = 'wn-attachment:'
+const VISUAL_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+])
+const RETAINED_VISUAL_LIMIT_ERROR =
+  'This conversation contains more than 30 MB of visual references. Start a new chat before sending more images.'
 const PREVIEW_TOKEN_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
 const FORBIDDEN_PREVIEW_QUERY_KEYS = new Set([
@@ -187,6 +200,23 @@ function requireJson(req: IncomingMessage): void {
   }
 }
 
+function requireMultipart(req: IncomingMessage): void {
+  const contentType = headerValue(req.headers['content-type'])
+  const mediaType = contentType
+    ?.split(';')[0]
+    ?.trim()
+    .toLowerCase()
+  if (
+    mediaType !== 'multipart/form-data' ||
+    !/;\s*boundary=(?:"[^"]+"|[^;\s]+)/i.test(contentType ?? '')
+  ) {
+    throw new HttpError(
+      415,
+      'Canvas Assistant chat requires multipart/form-data.',
+    )
+  }
+}
+
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
@@ -254,6 +284,177 @@ async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
   } catch {
     throw new HttpError(400, 'Canvas Assistant request body is invalid JSON.')
   }
+}
+
+type VisualMimeType = 'image/png' | 'image/jpeg' | 'image/webp'
+type ChatAttachment = {
+  bytes: Uint8Array
+  mimeType: VisualMimeType
+}
+
+function webRequestHeaders(
+  headers: IncomingMessage['headers'],
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(headers).flatMap(([name, value]) => {
+      if (value === undefined) return []
+      return [[name, Array.isArray(value) ? value.join(', ') : value]]
+    }),
+  )
+}
+
+async function parseMultipartChat(
+  req: IncomingMessage,
+): Promise<{
+  request: ReturnType<typeof CanvasChatRequestSchema.parse>
+  attachments: Map<string, ChatAttachment>
+}> {
+  const contentLength = headerValue(req.headers['content-length'])
+  if (
+    contentLength &&
+    /^\d+$/.test(contentLength) &&
+    Number(contentLength) > MAX_MULTIPART_BYTES
+  ) {
+    throw new HttpError(
+      413,
+      'Canvas Assistant multipart body is too large.',
+    )
+  }
+
+  let form: FormData
+  let transportLimitExceeded = false
+  try {
+    let transportBytes = 0
+    const body = (
+      Readable.toWeb(req) as ReadableStream<Uint8Array>
+    ).pipeThrough(
+      new TransformStream<Uint8Array, Uint8Array>({
+        transform(chunk, controller) {
+          transportBytes += chunk.byteLength
+          if (transportBytes > MAX_MULTIPART_BYTES) {
+            transportLimitExceeded = true
+            controller.error(
+              new Error('Multipart transport limit exceeded.'),
+            )
+            return
+          }
+          controller.enqueue(chunk)
+        },
+      }),
+    )
+    const webRequest = new Request(
+      `http://${req.headers.host}${req.url}`,
+      {
+        method: 'POST',
+        headers: webRequestHeaders(req.headers),
+        body,
+        duplex: 'half',
+      } as RequestInit & { duplex: 'half' },
+    )
+    form = await webRequest.formData()
+  } catch {
+    if (transportLimitExceeded) {
+      throw new HttpError(
+        413,
+        'Canvas Assistant multipart body is too large.',
+      )
+    }
+    throw new HttpError(400, 'Canvas Assistant request is invalid.')
+  }
+
+  let requestSource: string | undefined
+  const files = new Map<string, File>()
+  for (const [name, value] of form.entries()) {
+    if (name === 'request') {
+      if (requestSource !== undefined || typeof value !== 'string') {
+        throw new HttpError(400, 'Canvas Assistant request is invalid.')
+      }
+      requestSource = value
+      continue
+    }
+    if (
+      !name.startsWith(ATTACHMENT_FIELD_PREFIX) ||
+      typeof value === 'string'
+    ) {
+      throw new HttpError(400, 'Canvas Assistant request is invalid.')
+    }
+    const id = name.slice(ATTACHMENT_FIELD_PREFIX.length)
+    if (!id || files.has(id)) {
+      throw new HttpError(400, 'Canvas Assistant request is invalid.')
+    }
+    files.set(id, value)
+  }
+
+  if (requestSource === undefined) {
+    throw new HttpError(400, 'Canvas Assistant request is invalid.')
+  }
+  if (Buffer.byteLength(requestSource, 'utf8') > MAX_BODY_BYTES) {
+    throw new HttpError(
+      413,
+      'Canvas Assistant request field is too large.',
+    )
+  }
+
+  let rawRequest: unknown
+  try {
+    rawRequest = JSON.parse(requestSource) as unknown
+  } catch {
+    throw new HttpError(400, 'Canvas Assistant request is invalid.')
+  }
+  const request = CanvasChatRequestSchema.parse(rawRequest)
+  const referencedIds = new Set<string>()
+  for (const message of request.messages) {
+    for (const part of message.content) {
+      if (part.type !== 'image') continue
+      if (message.role !== 'user') {
+        throw new HttpError(400, 'Canvas Assistant request is invalid.')
+      }
+      referencedIds.add(part.image.slice(ATTACHMENT_URI_PREFIX.length))
+    }
+  }
+  const currentUserMessage = [...request.messages]
+    .reverse()
+    .find((message) => message.role === 'user')
+  const currentVisuals =
+    currentUserMessage?.content.filter((part) => part.type === 'image')
+      .length ?? 0
+  if (currentVisuals > MAX_CURRENT_VISUALS) {
+    throw new HttpError(
+      400,
+      'A user message can contain at most eight images.',
+    )
+  }
+
+  if (
+    files.size !== referencedIds.size ||
+    [...referencedIds].some((id) => !files.has(id))
+  ) {
+    throw new HttpError(400, 'Canvas Assistant request is invalid.')
+  }
+
+  let retainedBytes = 0
+  for (const [id, file] of files) {
+    if (
+      !referencedIds.has(id) ||
+      !VISUAL_MIME_TYPES.has(file.type) ||
+      file.size > MAX_CAPTURE_BYTES
+    ) {
+      throw new HttpError(400, 'Canvas Assistant request is invalid.')
+    }
+    retainedBytes += file.size
+  }
+  if (retainedBytes > MAX_RETAINED_VISUAL_BYTES) {
+    throw new HttpError(400, RETAINED_VISUAL_LIMIT_ERROR)
+  }
+
+  const attachments = new Map<string, ChatAttachment>()
+  for (const [id, file] of files) {
+    attachments.set(id, {
+      bytes: new Uint8Array(await file.arrayBuffer()),
+      mimeType: file.type as VisualMimeType,
+    })
+  }
+  return { request, attachments }
 }
 
 function requestAbort(
@@ -483,6 +684,45 @@ export function canvasAssistantPlugin(
         const lifecycle = requestAbort(req, res)
         try {
           requireSameOrigin(req)
+          if (pathname === CHAT_ROUTE) {
+            requireMultipart(req)
+            const { request, attachments } =
+              await parseMultipartChat(req)
+            const context = await contextLoader.load(
+              request.appId,
+              request.canvasId,
+            )
+            startNdjson(res)
+            try {
+              for await (const rawEvent of modelRunner.run({
+                request,
+                attachments,
+                context,
+                abortSignal: lifecycle.signal,
+              })) {
+                if (lifecycle.signal.aborted) break
+                const event = CanvasRunEventSchema.parse(rawEvent)
+                const proposalId = proposalIdFromEvent(event)
+                if (proposalId) {
+                  owners.set(proposalId, {
+                    appId: request.appId,
+                    canvasId: request.canvasId,
+                  })
+                }
+                writeNdjson(res, event)
+              }
+            } catch {
+              if (!lifecycle.signal.aborted) {
+                writeNdjson(res, {
+                  type: 'error',
+                  error: 'Canvas Assistant model request failed.',
+                })
+              }
+            }
+            if (!res.writableEnded) res.end()
+            return
+          }
+
           requireJson(req)
           const rawBody = await parseJsonBody(req)
 
@@ -510,42 +750,6 @@ export function canvasAssistantPlugin(
             const request = CanvasContextRequestSchema.parse(rawBody)
             await contextLoader.load(request.appId, request.canvasId)
             sendJson(res, 200, { ready: true })
-            return
-          }
-
-          if (pathname === CHAT_ROUTE) {
-            const request = CanvasChatRequestSchema.parse(rawBody)
-            const context = await contextLoader.load(
-              request.appId,
-              request.canvasId,
-            )
-            startNdjson(res)
-            try {
-              for await (const rawEvent of modelRunner.run({
-                request,
-                context,
-                abortSignal: lifecycle.signal,
-              })) {
-                if (lifecycle.signal.aborted) break
-                const event = CanvasRunEventSchema.parse(rawEvent)
-                const proposalId = proposalIdFromEvent(event)
-                if (proposalId) {
-                  owners.set(proposalId, {
-                    appId: request.appId,
-                    canvasId: request.canvasId,
-                  })
-                }
-                writeNdjson(res, event)
-              }
-            } catch {
-              if (!lifecycle.signal.aborted) {
-                writeNdjson(res, {
-                  type: 'error',
-                  error: 'Canvas Assistant model request failed.',
-                })
-              }
-            }
-            if (!res.writableEnded) res.end()
             return
           }
 

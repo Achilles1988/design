@@ -320,6 +320,35 @@ async function post(
   })
 }
 
+function chatForm(
+  body: CanvasChatRequest = chatBody(),
+  attachments: Record<string, Blob> = {},
+): FormData {
+  const form = new FormData()
+  form.set('request', JSON.stringify(body))
+  for (const [id, blob] of Object.entries(attachments)) {
+    form.set(`attachment:${id}`, blob, `${id}.image`)
+  }
+  return form
+}
+
+async function postChat(
+  harness: Awaited<ReturnType<typeof startHarness>>,
+  body: CanvasChatRequest = chatBody(),
+  attachments: Record<string, Blob> = {},
+  headers: Record<string, string> = {},
+) {
+  return fetch(`${harness.baseUrl}/__design_ai/canvas/chat`, {
+    method: 'POST',
+    headers: {
+      Origin: harness.origin,
+      Host: new URL(harness.baseUrl).host,
+      ...headers,
+    },
+    body: chatForm(body, attachments),
+  })
+}
+
 async function ndjson(response: Response): Promise<unknown[]> {
   const source = await response.text()
   return source
@@ -333,6 +362,7 @@ async function postChunked(
   harness: Awaited<ReturnType<typeof startHarness>>,
   pathname: string,
   chunks: Buffer[],
+  contentType = 'application/json',
 ): Promise<{ status: number; body: string }> {
   const url = new URL(pathname, harness.baseUrl)
   return new Promise((resolve, reject) => {
@@ -345,7 +375,7 @@ async function postChunked(
         headers: {
           Origin: harness.origin,
           Host: url.host,
-          'Content-Type': 'application/json',
+          'Content-Type': contentType,
           'Transfer-Encoding': 'chunked',
         },
       },
@@ -393,11 +423,7 @@ async function registerProposal(
       }
     },
   )
-  const response = await post(
-    harness,
-    '/__design_ai/canvas/chat',
-    chatBody(),
-  )
+  const response = await postChat(harness)
   expect(response.status).toBe(200)
   await response.text()
 }
@@ -787,10 +813,10 @@ describe('canvasAssistantPlugin', () => {
   it('rejects a cross-origin chat POST with 403', async () => {
     const harness = await startHarness()
 
-    const response = await post(
+    const response = await postChat(
       harness,
-      '/__design_ai/canvas/chat',
       chatBody(),
+      {},
       { Origin: 'https://attacker.invalid' },
     )
 
@@ -799,43 +825,256 @@ describe('canvasAssistantPlugin', () => {
     expect(harness.overrides.modelRunner.run).not.toHaveBeenCalled()
   })
 
-  it('rejects non-JSON and bodies larger than 512 KiB', async () => {
+  it('rejects non-multipart chat and a request field larger than 512 KiB', async () => {
     const harness = await startHarness()
 
-    const nonJson = await post(
+    const nonMultipart = await post(
       harness,
       '/__design_ai/canvas/chat',
       chatBody(),
-      { 'Content-Type': 'text/plain' },
     )
-    const tooLarge = await post(
-      harness,
-      '/__design_ai/canvas/chat',
-      'x'.repeat(512 * 1024 + 1),
+    const form = new FormData()
+    form.set('request', 'x'.repeat(512 * 1024 + 1))
+    const tooLarge = await fetch(
+      `${harness.baseUrl}/__design_ai/canvas/chat`,
+      {
+        method: 'POST',
+        headers: {
+          Origin: harness.origin,
+          Host: new URL(harness.baseUrl).host,
+        },
+        body: form,
+      },
     )
 
-    expect(nonJson.status).toBe(415)
+    expect(nonMultipart.status).toBe(415)
     expect(tooLarge.status).toBe(413)
   })
 
-  it('rejects a chunked-transfer body larger than 512 KiB', async () => {
+  it('rejects an oversized multipart transport before model work', async () => {
     const harness = await startHarness()
-    const chunks = Array.from(
-      { length: 8 },
-      () => Buffer.alloc(64 * 1024, 0x20),
+    const form = chatForm()
+    form.set(
+      'unexpected',
+      new Blob([new Uint8Array(34 * 1024 * 1024)], {
+        type: 'application/octet-stream',
+      }),
+      'oversized.bin',
     )
-    chunks.push(Buffer.from('x'))
+
+    const response = await fetch(
+      `${harness.baseUrl}/__design_ai/canvas/chat`,
+      {
+        method: 'POST',
+        headers: {
+          Origin: harness.origin,
+          Host: new URL(harness.baseUrl).host,
+        },
+        body: form,
+      },
+    )
+
+    const boundary = 'transport-limit'
+    const chunked = await postChunked(
+      harness,
+      '/__design_ai/canvas/chat',
+      [
+        Buffer.from(
+          `--${boundary}\r\n` +
+            'Content-Disposition: form-data; name="request"\r\n\r\n' +
+            `${JSON.stringify(chatBody())}\r\n` +
+            `--${boundary}\r\n` +
+            'Content-Disposition: form-data; name="unexpected"; filename="oversized.bin"\r\n' +
+            'Content-Type: application/octet-stream\r\n\r\n',
+        ),
+        Buffer.alloc(34 * 1024 * 1024),
+        Buffer.from(`\r\n--${boundary}--\r\n`),
+      ],
+      `multipart/form-data; boundary=${boundary}`,
+    )
+
+    expect(response.status).toBe(413)
+    expect(chunked.status).toBe(413)
+    expect(harness.overrides.modelRunner.run).not.toHaveBeenCalled()
+  })
+
+  it('rejects malformed multipart without calling the model', async () => {
+    const harness = await startHarness()
 
     const response = await postChunked(
       harness,
       '/__design_ai/canvas/chat',
-      chunks,
+      [Buffer.from('--missing\r\ninvalid\r\n--missing--\r\n')],
+      'multipart/form-data; boundary=missing',
     )
 
-    expect(response.status).toBe(413)
+    expect(response.status).toBe(400)
     expect(JSON.parse(response.body)).toEqual({
-      error: 'Canvas Assistant request body is too large.',
+      error: 'Canvas Assistant request is invalid.',
     })
+    expect(harness.overrides.modelRunner.run).not.toHaveBeenCalled()
+  })
+
+  it('rejects a missing referenced Blob and an unreferenced multipart image', async () => {
+    const harness = await startHarness()
+    const referenced = {
+      ...chatBody(),
+      messages: [
+        {
+          role: 'user' as const,
+          content: [
+            {
+              type: 'image' as const,
+              image: 'wn-attachment:image-1',
+            },
+          ],
+        },
+      ],
+    }
+
+    const missing = await postChat(harness, referenced)
+    const unreferenced = await postChat(harness, chatBody(), {
+      'image-1': new Blob([new Uint8Array([1])], {
+        type: 'image/png',
+      }),
+    })
+
+    expect(missing.status).toBe(400)
+    expect(unreferenced.status).toBe(400)
+    expect(harness.overrides.modelRunner.run).not.toHaveBeenCalled()
+  })
+
+  it('rejects more than eight images in the current user message', async () => {
+    const harness = await startHarness()
+    const ids = Array.from({ length: 9 }, (_, index) => `image-${index}`)
+    const request: CanvasChatRequest = {
+      ...chatBody(),
+      messages: [
+        {
+          role: 'user',
+          content: ids.map((id) => ({
+            type: 'image' as const,
+            image: `wn-attachment:${id}`,
+          })),
+        },
+      ],
+    }
+    const attachments = Object.fromEntries(
+      ids.map((id) => [
+        id,
+        new Blob([new Uint8Array([1])], { type: 'image/png' }),
+      ]),
+    )
+
+    const response = await postChat(harness, request, attachments)
+
+    expect(response.status).toBe(400)
+    expect(harness.overrides.modelRunner.run).not.toHaveBeenCalled()
+  })
+
+  it('rejects one image above 10 MiB or unique retained images above 30 MiB', async () => {
+    const harness = await startHarness()
+    const singleRequest: CanvasChatRequest = {
+      ...chatBody(),
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              image: 'wn-attachment:image-1',
+            },
+          ],
+        },
+      ],
+    }
+    const oversized = await postChat(harness, singleRequest, {
+      'image-1': new Blob(
+        [new Uint8Array(10 * 1024 * 1024 + 1)],
+        { type: 'image/png' },
+      ),
+    })
+    const ids = ['image-1', 'image-2', 'image-3', 'image-4']
+    const retainedRequest: CanvasChatRequest = {
+      ...chatBody(),
+      messages: ids.map((id) => ({
+        role: 'user',
+        content: [
+          {
+            type: 'image' as const,
+            image: `wn-attachment:${id}`,
+          },
+        ],
+      })),
+    }
+    const retained = await postChat(
+      harness,
+      retainedRequest,
+      Object.fromEntries(
+        ids.map((id, index) => [
+          id,
+          new Blob(
+            [new Uint8Array(index === ids.length - 1
+              ? 1
+              : 10 * 1024 * 1024)],
+            { type: 'image/png' },
+          ),
+        ]),
+      ),
+    )
+
+    expect(oversized.status).toBe(400)
+    expect(retained.status).toBe(400)
+    await expect(retained.json()).resolves.toEqual({
+      error:
+        'This conversation contains more than 30 MB of visual references. Start a new chat before sending more images.',
+    })
+    expect(harness.overrides.modelRunner.run).not.toHaveBeenCalled()
+  })
+
+  it('rejects retained visual history above 30 MiB without dropping old images', async () => {
+    const harness = await startHarness()
+    const ids = ['old-1', 'old-2', 'old-3', 'old-4']
+    const request: CanvasChatRequest = {
+      ...chatBody(),
+      messages: [
+        ...ids.map((id) => ({
+          role: 'user' as const,
+          content: [
+            {
+              type: 'image' as const,
+              image: `wn-attachment:${id}`,
+            },
+          ],
+        })),
+        {
+          role: 'user',
+          content: [{ type: 'text', text: 'Continue' }],
+        },
+      ],
+    }
+    const response = await postChat(
+      harness,
+      request,
+      Object.fromEntries(
+        ids.map((id, index) => [
+          id,
+          new Blob(
+            [new Uint8Array(index === ids.length - 1
+              ? 1
+              : 10 * 1024 * 1024)],
+            { type: 'image/png' },
+          ),
+        ]),
+      ),
+    )
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({
+      error:
+        'This conversation contains more than 30 MB of visual references. Start a new chat before sending more images.',
+    })
+    expect(harness.overrides.modelRunner.run).not.toHaveBeenCalled()
   })
 
   it('returns 404 for unknown Canvas Assistant routes', async () => {
@@ -892,11 +1131,7 @@ describe('canvasAssistantPlugin', () => {
   it('streams chat events with application/x-ndjson', async () => {
     const harness = await startHarness()
 
-    const response = await post(
-      harness,
-      '/__design_ai/canvas/chat',
-      chatBody(),
-    )
+    const response = await postChat(harness)
 
     expect(response.status).toBe(200)
     expect(response.headers.get('content-type')).toContain(
@@ -952,9 +1187,8 @@ describe('canvasAssistantPlugin', () => {
         headers: {
           Origin: harness.origin,
           Host: new URL(harness.baseUrl).host,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(chatBody()),
+        body: chatForm(),
         signal: controller.signal,
       },
     )

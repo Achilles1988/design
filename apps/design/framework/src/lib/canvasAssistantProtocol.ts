@@ -10,6 +10,10 @@ const AiConfigSchema = z.object({
 const MessagePartSchema = z.union([
   z.object({ type: z.literal('text'), text: z.string() }),
   z.object({
+    type: z.literal('image'),
+    image: z.string().regex(/^wn-attachment:.+$/),
+  }),
+  z.object({
     type: z.literal('tool-call'),
     toolCallId: z.string().min(1),
     toolName: z.string().min(1),

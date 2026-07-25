@@ -152,10 +152,15 @@ function proposalCard() {
 async function collect(
   runner: ReturnType<typeof createCanvasModelRunner>,
   request = chatRequest(),
+  attachments: Record<
+    string,
+    { bytes: Uint8Array; mimeType: 'image/png' | 'image/jpeg' | 'image/webp' }
+  > = {},
 ) {
   const events = []
   for await (const event of runner.run({
     request,
+    attachments: new Map(Object.entries(attachments)),
     context: context(),
     abortSignal: new AbortController().signal,
   })) {
@@ -507,5 +512,91 @@ describe('createCanvasModelRunner', () => {
         ],
       },
     ])
+  })
+
+  it('converts image references to AI SDK Uint8Array image parts in message order', async () => {
+    let providerMessages: unknown
+    const bytes = new Uint8Array([1, 2, 3])
+    const runner = createCanvasModelRunner({
+      streamTextImpl: (options) => {
+        providerMessages = options.messages
+        return fakeStream([])
+      },
+      createModelImpl: () => 'model',
+      stageProposal: vi.fn(),
+    })
+    const request = chatRequest([
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Before' },
+          { type: 'image', image: 'wn-attachment:image-1' },
+          { type: 'text', text: 'After' },
+        ],
+      },
+    ])
+
+    await collect(runner, request, {
+      'image-1': { bytes, mimeType: 'image/png' },
+    })
+
+    expect(providerMessages).toEqual([
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Before' },
+          { type: 'image', image: bytes, mimeType: 'image/png' },
+          { type: 'text', text: 'After' },
+        ],
+      },
+    ])
+  })
+
+  it('returns a stable English error when the model rejects visual input', async () => {
+    const stageProposal = vi.fn(() => proposalCard())
+    const runner = createCanvasModelRunner({
+      streamTextImpl: () =>
+        fakeStream([
+          {
+            type: 'error',
+            error: new Error(
+              'This model does not support image content types.',
+            ),
+          },
+          {
+            type: 'tool-call',
+            toolCallId: 'proposal-call-1',
+            toolName: 'propose_canvas_change',
+            args: proposalArgs(),
+          },
+        ]),
+      createModelImpl: () => 'model',
+      stageProposal,
+    })
+
+    const request = chatRequest([
+      {
+        role: 'user',
+        content: [
+          { type: 'image', image: 'wn-attachment:image-1' },
+        ],
+      },
+    ])
+
+    await expect(
+      collect(runner, request, {
+        'image-1': {
+          bytes: new Uint8Array([1]),
+          mimeType: 'image/png',
+        },
+      }),
+    ).resolves.toEqual([
+      {
+        type: 'error',
+        error:
+          'The configured model does not support image input. Choose a vision-capable model or remove the images.',
+      },
+    ])
+    expect(stageProposal).not.toHaveBeenCalled()
   })
 })

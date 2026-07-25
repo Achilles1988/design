@@ -26,6 +26,44 @@ describe('Canvas Assistant protocol', () => {
     ).toHaveLength(1)
   })
 
+  it('accepts only persisted visual attachment references', () => {
+    const input = {
+      appId: 'design',
+      canvasId: 'home',
+      aiConfig: {
+        provider: 'openai',
+        apiKey: 'secret',
+        model: 'gpt-test',
+      },
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'image', image: 'wn-attachment:image-1' },
+          ],
+        },
+      ],
+    }
+
+    expect(CanvasChatRequestSchema.parse(input).messages[0]?.content)
+      .toEqual([
+        { type: 'image', image: 'wn-attachment:image-1' },
+      ])
+    expect(() =>
+      CanvasChatRequestSchema.parse({
+        ...input,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image', image: 'data:image/png;base64,AAAA' },
+            ],
+          },
+        ],
+      }),
+    ).toThrow()
+  })
+
   it('rejects more than forty stable messages', () => {
     expect(() =>
       CanvasChatRequestSchema.parse({
