@@ -21,6 +21,7 @@ const assistantUi = vi.hoisted(() => ({
     status: { type: 'requires-action'; reason: 'composer-send' }
   }>,
   messageRole: 'assistant',
+  isRunning: false,
   references: [] as Array<{
     url: string
     state: 'uncaptured' | 'capturing' | 'ready' | 'failed' | 'dismissed'
@@ -88,6 +89,11 @@ vi.mock('@assistant-ui/react', () => ({
     Messages: (props: { children: (value: { message: { role: string } }) => unknown }) => (
       <>{props.children({ message: { role: assistantUi.messageRole } }) as never}</>
     ),
+    If: (props: { running?: boolean; children: unknown }) => (
+      props.running === assistantUi.isRunning
+        ? <>{props.children as never}</>
+        : null
+    ),
   },
   MessagePrimitive: {
     Root: (props: { children: unknown }) => <div>{props.children as never}</div>,
@@ -125,10 +131,12 @@ vi.mock('@assistant-ui/react', () => ({
     ),
     Send: (props: {
       children: unknown
+      disabled?: boolean
       onClick?: (event: MouseEvent<HTMLButtonElement>) => void
     }) => (
       <button
         type="button"
+        disabled={props.disabled ?? assistantUi.isRunning}
         onClick={(event) => {
           props.onClick?.(event)
           if (!event.defaultPrevented) assistantUi.send()
@@ -171,6 +179,7 @@ beforeEach(() => {
   })
   assistantUi.attachments = []
   assistantUi.messageRole = 'assistant'
+  assistantUi.isRunning = false
   assistantUi.references = []
   assistantUi.prepareAndMaybeSend.mockReset()
   assistantUi.prepareAndMaybeSend.mockResolvedValue('sent')
@@ -303,6 +312,24 @@ describe('AssistantThread', () => {
 
     expect(screen.queryByRole('button', { name: /add file/i })).toBeNull()
     expect(screen.queryByText(/drag and drop/i)).toBeNull()
+  })
+
+  it('shows Generating… while the thread is running', () => {
+    assistantUi.isRunning = true
+    render(<AssistantThread />)
+
+    const status = screen.getByRole('status')
+    expect(status.textContent).toBe('Generating…')
+    expect(status.className).toContain('aui-thread-generating')
+    expect(status.getAttribute('aria-live')).toBe('polite')
+    expect((screen.getByRole('button', { name: 'Send' }) as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  it('does not show Generating… when the thread is idle', () => {
+    render(<AssistantThread />)
+
+    expect(screen.queryByText('Generating…')).toBeNull()
+    expect((screen.getByRole('button', { name: 'Send' }) as HTMLButtonElement).disabled).toBe(false)
   })
 
   it('intercepts Send and renders URL captures for review', async () => {

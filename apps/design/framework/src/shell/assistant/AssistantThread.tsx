@@ -140,6 +140,11 @@ export function AssistantThread({
         <ThreadPrimitive.Messages>
           {({ message }) => (message.role === 'user' ? <UserBubble /> : <AssistantBubble />)}
         </ThreadPrimitive.Messages>
+        <ThreadPrimitive.If running>
+          <p className="aui-thread-generating" role="status" aria-live="polite">
+            Generating…
+          </p>
+        </ThreadPrimitive.If>
       </ThreadPrimitive.Viewport>
       <ComposerPrimitive.Root
         className="aui-composer"
