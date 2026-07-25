@@ -301,6 +301,69 @@ export function createContentStore(contentRoot: string) {
     await fs.rm(componentPath, { force: true })
   }
 
+  async function renameCanvas(
+    appId: string,
+    canvasId: string,
+    input: { id: string; name: string },
+  ): Promise<CanvasEntry> {
+    await getApp(appId)
+    if (!isValidAppId(input.id)) {
+      throw new Error(`Invalid canvas id: ${input.id}`)
+    }
+    const name = requireNonEmptyName(input.name, 'Canvas name')
+    const dir = appDir(appId)
+    const data = await readCanvasesFile(dir)
+    const idx = data.canvases.findIndex((c) => c.id === canvasId)
+    if (idx === -1) {
+      throw new Error(`Canvas not found: ${canvasId}`)
+    }
+    const current = data.canvases[idx]
+    const component = nameToComponentFile(name, input.id)
+
+    if (
+      current.id === input.id &&
+      current.name === name &&
+      current.component === component
+    ) {
+      return current
+    }
+
+    if (
+      data.canvases.some((c, i) => i !== idx && c.id === input.id)
+    ) {
+      throw new Error(`Canvas already exists: ${input.id}`)
+    }
+    if (
+      data.canvases.some((c, i) => i !== idx && c.component === component)
+    ) {
+      throw new Error(`Component already exists: ${component}`)
+    }
+
+    const fromPath = resolveContentPath(dir, 'canvases', current.component)
+    const toPath = resolveContentPath(dir, 'canvases', component)
+    let renamedFile = false
+    if (current.component !== component) {
+      await fs.rename(fromPath, toPath)
+      renamedFile = true
+    }
+
+    const updated: CanvasEntry = { id: input.id, name, component }
+    data.canvases[idx] = updated
+    try {
+      await writeCanvasesFile(dir, data)
+    } catch (err) {
+      if (renamedFile) {
+        try {
+          await fs.rename(toPath, fromPath)
+        } catch {
+          // best-effort rollback; rethrow original
+        }
+      }
+      throw err
+    }
+    return updated
+  }
+
   return {
     listApps,
     getApp,
@@ -312,5 +375,6 @@ export function createContentStore(contentRoot: string) {
     listCanvases,
     addCanvas,
     deleteCanvas,
+    renameCanvas,
   }
 }

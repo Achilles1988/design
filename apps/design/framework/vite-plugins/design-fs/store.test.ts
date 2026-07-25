@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createContentStore, normalizeAppConfig } from './store'
 
 describe('normalizeAppConfig', () => {
@@ -193,5 +193,82 @@ describe('createContentStore', () => {
     expect(source).toBe(
       'export default function NotFound() {\n  return null\n}\n',
     )
+  })
+
+  it('renames canvas id, name, and component file', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await store.addCanvas('orders', { id: 'home', name: 'Home' })
+
+    const renamed = await store.renameCanvas('orders', 'home', {
+      id: 'landing',
+      name: 'Landing',
+    })
+
+    expect(renamed).toEqual({
+      id: 'landing',
+      name: 'Landing',
+      component: 'Landing.tsx',
+    })
+    await expect(
+      fs.access(path.join(root, 'orders', 'canvases', 'Home.tsx')),
+    ).rejects.toThrow()
+    await expect(
+      fs.access(path.join(root, 'orders', 'canvases', 'Landing.tsx')),
+    ).resolves.toBeUndefined()
+    const data = JSON.parse(
+      await fs.readFile(path.join(root, 'orders', 'canvases.json'), 'utf8'),
+    ) as { canvases: Array<{ id: string }> }
+    expect(data.canvases.map((c) => c.id)).toEqual(['landing'])
+  })
+
+  it('rejects rename when the new id is taken by another canvas', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await store.addCanvas('orders', { id: 'home', name: 'Home' })
+    await store.addCanvas('orders', { id: 'about', name: 'About' })
+    await expect(
+      store.renameCanvas('orders', 'home', { id: 'about', name: 'Home' }),
+    ).rejects.toThrow(/exists/)
+    await expect(
+      fs.access(path.join(root, 'orders', 'canvases', 'Home.tsx')),
+    ).resolves.toBeUndefined()
+  })
+
+  it('returns the same entry when rename is a no-op', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    const canvas = await store.addCanvas('orders', { id: 'home', name: 'Home' })
+    const again = await store.renameCanvas('orders', 'home', {
+      id: 'home',
+      name: 'Home',
+    })
+    expect(again).toEqual(canvas)
+  })
+
+  it('rolls back the file rename when canvases.json write fails', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await store.addCanvas('orders', { id: 'home', name: 'Home' })
+    const canvasesJson = path.join(root, 'orders', 'canvases.json')
+    const realWrite = fs.writeFile.bind(fs)
+    const writeSpy = vi
+      .spyOn(fs, 'writeFile')
+      .mockImplementation(async (file, data, options) => {
+        if (path.resolve(String(file)) === path.resolve(canvasesJson)) {
+          throw new Error('disk full')
+        }
+        return realWrite(file, data, options as never)
+      })
+    await expect(
+      store.renameCanvas('orders', 'home', { id: 'landing', name: 'Landing' }),
+    ).rejects.toThrow(/disk full/)
+    writeSpy.mockRestore()
+    await expect(
+      fs.access(path.join(root, 'orders', 'canvases', 'Home.tsx')),
+    ).resolves.toBeUndefined()
+    await expect(
+      fs.access(path.join(root, 'orders', 'canvases', 'Landing.tsx')),
+    ).rejects.toThrow()
   })
 })
