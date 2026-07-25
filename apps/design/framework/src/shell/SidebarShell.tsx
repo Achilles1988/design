@@ -214,7 +214,7 @@ export function SidebarShell({ children }: SidebarShellProps) {
       <header className="sidebar-shell__header">
         <div className="sidebar-shell__brand">
           <div className="sidebar-shell__logo" aria-hidden="true">
-            D
+            <img src="/icon.svg" alt="" width={30} height={30} />
           </div>
           <span className="sidebar-shell__title">Design Engineering</span>
         </div>

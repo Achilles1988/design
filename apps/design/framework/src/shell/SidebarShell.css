@@ -37,13 +37,16 @@
   width: 30px;
   height: 30px;
   border-radius: var(--radius);
-  background: var(--color-primary);
   display: grid;
   place-items: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 13px;
   flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.sidebar-shell__logo img {
+  width: 30px;
+  height: 30px;
+  display: block;
 }
 
 .sidebar-shell__title {
