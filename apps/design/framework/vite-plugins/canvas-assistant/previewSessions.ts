@@ -16,6 +16,7 @@ const RUNTIME_MODULE_PATHS = new Set([
   '/node_modules/vite/dist/client/env.mjs',
   '/framework/src/preview/canvasPreviewFrame.tsx',
   '/framework/src/preview/loadCanvasModule.ts',
+  '/framework/src/preview/canvasReveal.css',
   '/framework/src/styles/global.css',
   '/framework/src/styles/tokens.css',
 ])
