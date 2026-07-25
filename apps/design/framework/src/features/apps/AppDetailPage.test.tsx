@@ -7,6 +7,10 @@ const events = vi.hoisted(() => ({
   emitCanvasesChanged: vi.fn(),
 }))
 
+const canvasRenameNotice = vi.hoisted(() => ({
+  writeCanvasRenameNotice: vi.fn(),
+}))
+
 const api = vi.hoisted(() => ({
   getApp: vi.fn(async (id: string) => ({
     id,
@@ -39,6 +43,7 @@ vi.mock('@/lib/confirmTip', () => ({
   confirmTip: vi.fn(async () => true),
 }))
 vi.mock('@/lib/canvasEvents', () => events)
+vi.mock('@/lib/canvasRenameNotice', () => canvasRenameNotice)
 
 import { AppDetailPage } from './AppDetailPage'
 
@@ -153,9 +158,36 @@ describe('AppDetailPage', () => {
         name: 'Landing',
       }),
     )
+    expect(canvasRenameNotice.writeCanvasRenameNotice).toHaveBeenCalledWith({
+      appId: 'acme',
+      fromId: 'home',
+      toId: 'landing',
+      name: 'Landing',
+    })
     expect(events.emitCanvasesChanged).toHaveBeenCalled()
     await waitFor(() => expect(screen.queryByLabelText('Name')).toBeNull())
     expect(screen.getByRole('button', { name: 'Edit canvas Home' })).toBeTruthy()
+  })
+
+  it('keeps edit mode when rename fails', async () => {
+    api.renameCanvas.mockRejectedValueOnce(new Error('Rename failed'))
+    renderPage()
+
+    await screen.findByRole('link', { name: 'Home' })
+    fireEvent.click(screen.getByRole('button', { name: 'Edit canvas Home' }))
+    fireEvent.change(screen.getByLabelText('Name'), {
+      target: { value: 'Landing' },
+    })
+    fireEvent.change(screen.getByLabelText('ID'), {
+      target: { value: 'landing' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => expect(api.renameCanvas).toHaveBeenCalledTimes(1))
+    expect(screen.getByLabelText('Name')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy()
+    expect(screen.getByText('Rename failed')).toBeTruthy()
+    expect(canvasRenameNotice.writeCanvasRenameNotice).not.toHaveBeenCalled()
   })
 
   it('keeps edit mode when the canvas id is invalid', async () => {
