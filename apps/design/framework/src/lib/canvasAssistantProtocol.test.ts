@@ -42,7 +42,7 @@ describe('Canvas Assistant protocol', () => {
     ).toThrow()
   })
 
-  it('keeps candidate source out of proposal card args', () => {
+  it('includes read-only candidate source in proposal card args', () => {
     const parsed = CanvasProposalCardArgsSchema.parse({
       proposalId: 'proposal-1',
       mode: 'update',
@@ -54,8 +54,20 @@ describe('Canvas Assistant protocol', () => {
       newSharedComponents: [],
       preserved: ['Existing navigation'],
       validationChecks: ['Vite transform'],
+      candidateFiles: [
+        {
+          path: 'canvases/Home.tsx',
+          source: 'export default function Home() { return null }',
+        },
+      ],
       expiresAt: '2026-07-24T12:30:00.000Z',
     })
+    expect(parsed.candidateFiles).toEqual([
+      {
+        path: 'canvases/Home.tsx',
+        source: 'export default function Home() { return null }',
+      },
+    ])
     expect(parsed).not.toHaveProperty('files')
   })
 

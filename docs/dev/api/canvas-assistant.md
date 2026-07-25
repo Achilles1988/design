@@ -23,7 +23,9 @@ All routes below accept `POST` only and require:
 
 A normal browser disconnect aborts the active model run. Request bodies, AI API
 keys, system prompts, current source, candidate source, and repair source are
-never written to server logs. Chat accepts at most 40 messages.
+never written to server logs. Candidate source is returned only as read-only
+proposal-card review data; it is never accepted back by apply. Chat accepts at
+most 40 messages.
 
 Unknown paths under `/__design_ai`, unsupported methods, and non-exact route
 variants receive `404`.
@@ -155,7 +157,8 @@ card from the index:
 
 Model arguments contain `mode`, summary, Layout decision, complete candidate
 `files`, reused and new shared components, preserved behavior, and validation
-checks. The server stages guarded candidate source in memory and emits only:
+checks. The server stages an authoritative guarded copy in memory and emits a
+separate read-only review copy:
 
 ```ts
 {
@@ -171,9 +174,14 @@ checks. The server stages guarded candidate source in memory and emits only:
   newSharedComponents: string[]
   preserved: string[]
   validationChecks: string[]
+  candidateFiles: Array<{ path: string; source: string }>
   expiresAt: string
 }
 ```
+
+The browser may display or mutate its local review copy, but apply still sends
+only `proposalId + aiConfig`; the transaction always uses the server-side
+candidate copy.
 
 ### Human result
 

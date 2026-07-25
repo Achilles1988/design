@@ -269,13 +269,19 @@ chips、匹配数量和可见资产三者变化；普通助手文本不得修改
 ## Canvas 页面 server adapter
 
 Canvas 页面使用 `useCanvasAssistant({ appId, canvasId, ready })` 独占当前页面的模型 adapter。
-`CanvasPreview` 会并行加载 Canvas module 与调用
+`CanvasPreview` 会并行加载隔离 Canvas preview 与调用
 `POST /__design_ai/canvas/context`；只有 context 成功后才传 `ready:true`，注册
 `createCanvasServerAdapter({ appId, canvasId })` 并点亮助手。Style、Layout 或其他 Canvas
 context 加载失败时，Canvas 预览仍可显示，但助手保持不可用并显示英文状态。空白 Canvas 也走同一
 context readiness 流程，不依赖已有页面内容。context 响应必须是 JSON
 `{ ready:true }`；缺失 middleware、HTML fallback 或非预期 content type 统一显示
 `Canvas Assistant is available only with npm run dev.`。
+
+Canvas module 只在 `sandbox="allow-scripts"` 且不含 `allow-same-origin`
+的 iframe 中执行，因此运行时 origin 为 opaque。Shell 继续持有 `designApi` 与 Canvas
+Assistant API 权限；preview 只能加载非 API 的只读 Vite 模块资源。父页面只接受来自当前
+iframe `contentWindow` 且符合严格 `ready` / `error` type 的消息，该通道不提供任何文件或
+API mutation 能力。
 
 页面 adapter 的所有权由 `usePageModelAdapter` 管理：Canvas 路由挂载时替换默认浏览器 adapter，
 `ready:false`、参数变化或卸载时写回 `null`。因此非 Canvas 页面不会请求
@@ -295,7 +301,8 @@ context readiness 流程，不依赖已有页面内容。context 响应必须是
   `designApi.applyAsset('layoutmd', layoutId, appId)`；只有安装成功后才
   `addResult({ status:'installed', layoutId })`。安装失败会写入 `failed` result，不能声称已安装。
 - `propose_canvas_change`：展示 Style、Layout、changed files、reused components 与 new shared
-  components。确认时调用 proposal apply endpoint，并按收到顺序显示全部 checking、writing、
+  components，并用英文 `<details>` 提供逐文件 path/source 的只读折叠审阅。确认时调用
+  proposal apply endpoint，并按收到顺序显示全部 checking、writing、
   validating、repairing status。若成功结果包含 repairing history，UI 会从最后一条
   repairing status 的 attempt 派生 `Repaired · attempt N` 成功行并放在 `Applied` 前；这是
   UI 终态，不增加公共协议 phase，协议 status phase 仍仅允许 checking、writing、validating、

@@ -122,10 +122,17 @@ JSON responses use `{ "error": "<message>" }` on failure with status:
 
 | Condition | Status |
 |-----------|--------|
+| Mutation request is not same-origin | `403` |
 | Validation / bad request | `400` |
 | Missing app, canvas, or asset | `404` |
 | Duplicate app/canvas/component | `409` |
 | Unexpected failure | `500` |
+
+Every mutating `POST` or `DELETE` request requires `Origin` to equal
+`${X-Forwarded-Proto ?? "http"}://${Host}` exactly. Sandboxed Canvas preview
+documents have an opaque `Origin: null` and therefore cannot create, install,
+change, or delete managed filesystem content. Normal Shell `designApi`
+mutations remain same-origin and are accepted.
 
 ### Apps
 

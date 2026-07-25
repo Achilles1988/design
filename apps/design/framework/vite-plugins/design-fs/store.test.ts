@@ -75,7 +75,7 @@ describe('createContentStore', () => {
     expect(canvases.canvases).toEqual([])
   })
 
-  it('rewrites legacy layout field to layouts on read', async () => {
+  it('normalizes a legacy layout in memory without writing during read', async () => {
     const store = createContentStore(root)
     await fs.mkdir(path.join(root, 'legacy'), { recursive: true })
     await fs.writeFile(
@@ -94,13 +94,11 @@ describe('createContentStore', () => {
       'utf8',
     )
 
+    const appPath = path.join(root, 'legacy', 'app.json')
+    const before = await fs.readFile(appPath, 'utf8')
     const app = await store.getApp('legacy')
     expect(app.layouts).toEqual(['split-screen'])
-    const disk = JSON.parse(
-      await fs.readFile(path.join(root, 'legacy', 'app.json'), 'utf8'),
-    ) as Record<string, unknown>
-    expect(disk.layouts).toEqual(['split-screen'])
-    expect(disk.layout).toBeUndefined()
+    expect(await fs.readFile(appPath, 'utf8')).toBe(before)
   })
 
   it('replaces style and appends layouts on apply', async () => {

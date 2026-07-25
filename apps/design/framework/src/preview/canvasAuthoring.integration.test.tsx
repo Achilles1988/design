@@ -125,6 +125,12 @@ function proposalArgs(
     newSharedComponents: [],
     preserved: ['App navigation'],
     validationChecks: ['Vite transform'],
+    candidateFiles: [
+      {
+        path: 'canvases/Home.tsx',
+        source: 'export default function Home() { return null }',
+      },
+    ],
     expiresAt: '2026-07-25T12:30:00.000Z',
   }
 }

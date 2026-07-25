@@ -91,6 +91,14 @@ export const CanvasProposalCardArgsSchema = z.object({
   newSharedComponents: z.array(z.string()),
   preserved: z.array(z.string()),
   validationChecks: z.array(z.string().min(1)).min(1),
+  candidateFiles: z
+    .array(
+      z.object({
+        path: z.string().min(1),
+        source: z.string(),
+      }),
+    )
+    .min(1),
   expiresAt: z.string().datetime(),
 })
 

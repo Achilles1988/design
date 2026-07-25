@@ -28,6 +28,17 @@ const CHAT_ROUTE = '/__design_ai/canvas/chat'
 const APPLY_ROUTE =
   /^\/__design_ai\/canvas\/proposals\/([^/]+)\/apply$/
 const MAX_BODY_BYTES = 512 * 1024
+const OPAQUE_PREVIEW_MODULE_PATHS = [
+  '/@react-refresh',
+  '/@vite/client',
+  '/node_modules/vite/dist/client/env.mjs',
+  '/node_modules/.vite/deps/',
+  '/framework/src/preview/canvasPreviewFrame.tsx',
+  '/framework/src/preview/loadCanvasModule.ts',
+  '/framework/src/styles/global.css',
+  '/framework/src/styles/tokens.css',
+  '/apps/',
+]
 
 class HttpError extends Error {
   constructor(
@@ -77,6 +88,45 @@ function forwardedProto(req: IncomingMessage): string {
   const value = req.headers['x-forwarded-proto']
   const first = Array.isArray(value) ? value[0] : value
   return first?.split(',')[0]?.trim() || 'http'
+}
+
+function appendVaryOrigin(res: ServerResponse): void {
+  const current = res.getHeader('Vary')
+  const values = new Set(
+    (Array.isArray(current) ? current.join(',') : String(current ?? ''))
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+  )
+  values.add('Origin')
+  res.setHeader('Vary', [...values].join(', '))
+}
+
+function isCrossSiteBrowserRequest(req: IncomingMessage): boolean {
+  const fetchSite = req.headers['sec-fetch-site']
+  const site = Array.isArray(fetchSite) ? fetchSite[0] : fetchSite
+  return req.headers.origin === 'null' || site === 'cross-site'
+}
+
+function allowOpaquePreviewModule(
+  req: IncomingMessage,
+  res: ServerResponse,
+  pathname: string,
+): void {
+  const method = (req.method ?? 'GET').toUpperCase()
+  if (
+    req.headers.origin !== 'null' ||
+    (method !== 'GET' && method !== 'HEAD') ||
+    !OPAQUE_PREVIEW_MODULE_PATHS.some(
+      (allowed) =>
+        pathname === allowed ||
+        (allowed.endsWith('/') && pathname.startsWith(allowed)),
+    )
+  ) {
+    return
+  }
+  res.setHeader('Access-Control-Allow-Origin', 'null')
+  appendVaryOrigin(res)
 }
 
 function requireSameOrigin(req: IncomingMessage): void {
@@ -296,6 +346,18 @@ export function canvasAssistantPlugin(
           pathname = new URL(rawUrl, 'http://localhost').pathname
         } catch {
           return next()
+        }
+        allowOpaquePreviewModule(req, res, pathname)
+        if (
+          pathname.startsWith('/__') &&
+          !pathname.startsWith(API_PREFIX) &&
+          isCrossSiteBrowserRequest(req)
+        ) {
+          sendJson(res, 403, {
+            error:
+              'Sandboxed previews cannot access privileged development routes.',
+          })
+          return
         }
         if (!pathname.startsWith(API_PREFIX)) return next()
 

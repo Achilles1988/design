@@ -480,6 +480,7 @@ export function createProposalStore({
       newSharedComponents: raw.newSharedComponents,
       preserved: raw.preserved,
       validationChecks: raw.validationChecks,
+      candidateFiles: raw.files.map((file) => ({ ...file })),
       expiresAt: new Date(expiresAt).toISOString(),
     })
     const contextFiles = new Map(

@@ -136,6 +136,12 @@ function proposalCard() {
     newSharedComponents: [],
     preserved: ['Navigation'],
     validationChecks: ['Vite transform'],
+    candidateFiles: [
+      {
+        path: 'canvases/Home.tsx',
+        source: CANDIDATE_SOURCE,
+      },
+    ],
     expiresAt: '2026-07-24T12:30:00.000Z',
   }
 }
@@ -348,7 +354,7 @@ describe('createCanvasModelRunner', () => {
     expect(yielded).toEqual(['tool-call'])
   })
 
-  it('never places candidate source in the NDJSON event', async () => {
+  it('places the staged read-only candidate review in the NDJSON event', async () => {
     const runner = createCanvasModelRunner({
       streamTextImpl: () =>
         fakeStream([
@@ -367,7 +373,7 @@ describe('createCanvasModelRunner', () => {
     const serialized = events.map(JSON.stringify).join('\n')
 
     expect(serialized).toContain('proposal-')
-    expect(serialized).not.toContain('export default function')
+    expect(serialized).toContain(CANDIDATE_SOURCE)
   })
 
   it('converts a prior human-tool result back into AI SDK tool messages', async () => {

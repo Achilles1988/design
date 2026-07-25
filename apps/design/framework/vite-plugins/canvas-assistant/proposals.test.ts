@@ -78,18 +78,26 @@ function store(now: () => number = () => START_TIME) {
 }
 
 describe('createProposalStore', () => {
-  it('sanitizes full candidate files out of card args', () => {
-    const card = store().stage(context(), rawProposal())
+  it('copies read-only candidate source into the card without making it authoritative', () => {
+    const proposalStore = store()
+    const card = proposalStore.stage(context(), rawProposal())
 
     expect(card).not.toHaveProperty('files')
-    expect(card).not.toHaveProperty('candidateFiles')
-    expect(JSON.stringify(card)).not.toContain(
-      'export default function Home',
-    )
+    expect(card.candidateFiles).toEqual(rawProposal().files)
     expect(card.changedFiles).toEqual([
       'canvases/Home.tsx',
       'components/Select.tsx',
     ])
+
+    card.candidateFiles[0]!.source = 'browser replacement'
+    const claimed = proposalStore.claim(
+      card.proposalId,
+      'design',
+      'home',
+    )
+    expect(claimed.candidateFiles[0]!.source).toBe(
+      'export default function Home() { return null }',
+    )
   })
 
   it('rejects candidate writes outside the current Canvas and components dir', () => {

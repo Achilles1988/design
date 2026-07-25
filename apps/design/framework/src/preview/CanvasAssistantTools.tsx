@@ -344,6 +344,19 @@ function CanvasProposalCard({
         title="New shared components"
         items={args.newSharedComponents}
       />
+      <details className="canvas-assistant-card__source-review">
+        <summary>Review candidate source</summary>
+        <div className="canvas-assistant-card__source-files">
+          {args.candidateFiles.map((file) => (
+            <section key={file.path}>
+              <h4>{file.path}</h4>
+              <pre>
+                <code>{file.source}</code>
+              </pre>
+            </section>
+          ))}
+        </div>
+      </details>
 
       {statuses.length > 0 || outcome ? (
         <div className="canvas-assistant-card__progress">

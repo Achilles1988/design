@@ -283,6 +283,14 @@
   background: var(--color-danger);
 }
 
+.canvas-preview-frame {
+  display: block;
+  width: 100%;
+  min-height: calc(100vh - var(--header-h) - calc(var(--space) * 7.5));
+  border: 0;
+  background: var(--color-surface);
+}
+
 .apps-empty {
   margin: 0;
   padding: calc(var(--space) * 4) calc(var(--space) * 2.5);

@@ -67,6 +67,16 @@ function card(): StoredProposal['card'] {
     newSharedComponents: ['components/Select.tsx'],
     preserved: ['Existing navigation'],
     validationChecks: ['Vite transform'],
+    candidateFiles: [
+      {
+        path: 'canvases/Home.tsx',
+        source: CANDIDATE_CANVAS,
+      },
+      {
+        path: 'components/Select.tsx',
+        source: NEW_SELECT,
+      },
+    ],
     expiresAt: '2026-07-24T12:30:00.000Z',
   }
 }

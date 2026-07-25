@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs'
-import { useEffect, useState } from 'react'
 import {
   act,
   cleanup,
@@ -175,7 +174,7 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     mocks.checkContext.mockReturnValue(context.promise)
     const view = renderCanvasPreview()
 
-    await screen.findByTestId('canvas')
+    await screen.findByTitle('Canvas preview')
     expect(view.getActiveAdapter()).toBeNull()
     expect(mocks.pageAssistant).toHaveBeenLastCalledWith({
       instructions: '',
@@ -346,23 +345,6 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     unsubscribe()
     expect(listeners.size).toBe(0)
 
-    let mounts = 0
-    let unmounts = 0
-    function StatefulCanvas() {
-      const [value, setValue] = useState('Initial')
-      useEffect(() => {
-        mounts += 1
-        return () => {
-          unmounts += 1
-        }
-      }, [])
-      return (
-        <button type="button" onClick={() => setValue('Edited')}>
-          Canvas {value}
-        </button>
-      )
-    }
-    mocks.loadCanvasModule.mockResolvedValue(StatefulCanvas)
     let notifyApplied: (() => void) | undefined
     const unsubscribeCanvas = vi.fn()
     const subscribe = vi.fn(
@@ -372,23 +354,19 @@ describe('CanvasPreview Canvas Assistant integration', () => {
       },
     )
     const view = renderCanvasPreview(subscribe)
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Canvas Initial' }),
-    )
-    await screen.findByRole('button', { name: 'Canvas Edited' })
+    const firstFrame = await screen.findByTitle('Canvas preview')
 
     act(() => notifyApplied?.())
 
-    await screen.findByRole('button', { name: 'Canvas Initial' })
-    expect(mounts).toBe(2)
-    expect(unmounts).toBe(1)
+    await waitFor(() =>
+      expect(screen.getByTitle('Canvas preview')).not.toBe(firstFrame),
+    )
     expect(subscribe).toHaveBeenCalledWith('design', 'home', expect.any(Function))
     view.unmount()
     expect(unsubscribeCanvas).toHaveBeenCalledTimes(1)
   })
 
   it('keeps a blank Canvas assistant-capable', async () => {
-    mocks.loadCanvasModule.mockResolvedValue(() => null)
     const view = renderCanvasPreview()
 
     await waitFor(() =>
@@ -399,6 +377,97 @@ describe('CanvasPreview Canvas Assistant integration', () => {
       instructions: '',
       available: true,
     })
+    expect(await screen.findByTitle('Canvas preview')).toBeTruthy()
+  })
+
+  it('executes the Canvas only in an opaque-origin sandboxed iframe', async () => {
+    renderCanvasPreview()
+
+    const frame = (await screen.findByTitle(
+      'Canvas preview',
+    )) as HTMLIFrameElement
+    expect(frame.tagName).toBe('IFRAME')
+    expect(frame.getAttribute('sandbox')).toBe('allow-scripts')
+    expect(frame.getAttribute('sandbox')).not.toContain('allow-same-origin')
+    expect(screen.queryByTestId('canvas')).toBeNull()
+    expect(mocks.loadCanvasModule).not.toHaveBeenCalled()
+  })
+
+  it('accepts preview errors only from the current frame with an exact message type', async () => {
+    renderCanvasPreview()
+    const frame = (await screen.findByTitle(
+      'Canvas preview',
+    )) as HTMLIFrameElement
+    const generation = frame.getAttribute('data-preview-generation')
+    expect(frame.getAttribute('data-preview-state')).toBe('loading')
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: 'null',
+          source: window,
+          data: {
+            type: 'canvas-preview:ready',
+            generation,
+          },
+        }),
+      )
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: 'null',
+          source: window,
+          data: {
+            type: 'canvas-preview:error',
+            generation,
+            message: 'Forged outside error',
+          },
+        }),
+      )
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: 'null',
+          source: frame.contentWindow,
+          data: {
+            type: 'canvas-preview:mutate',
+            generation,
+            message: 'Unsupported capability',
+          },
+        }),
+      )
+    })
+    expect(frame.getAttribute('data-preview-state')).toBe('loading')
+    expect(screen.queryByText('Forged outside error')).toBeNull()
+    expect(screen.queryByText('Unsupported capability')).toBeNull()
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: 'null',
+          source: frame.contentWindow,
+          data: {
+            type: 'canvas-preview:ready',
+            generation,
+          },
+        }),
+      )
+    })
+    expect(frame.getAttribute('data-preview-state')).toBe('ready')
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: 'null',
+          source: frame.contentWindow,
+          data: {
+            type: 'canvas-preview:error',
+            generation,
+            message: 'Canvas render failed.',
+          },
+        }),
+      )
+    })
+
+    expect(await screen.findByText('Canvas render failed.')).toBeTruthy()
   })
 
   it('announces an English context error when the preview is ready', async () => {
@@ -407,7 +476,7 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     )
     const view = renderCanvasPreview()
 
-    await screen.findByTestId('canvas')
+    await screen.findByTitle('Canvas preview')
     const alert = await screen.findByRole('alert')
     expect(alert.textContent).toBe(
       'Canvas Assistant unavailable: Installed Style could not be loaded.',
@@ -423,11 +492,24 @@ describe('CanvasPreview Canvas Assistant integration', () => {
   it('announces an asynchronously inserted context error when the preview also fails', async () => {
     const context = deferred<void>()
     mocks.checkContext.mockReturnValue(context.promise)
-    mocks.loadCanvasModule.mockRejectedValue(
-      new Error('Canvas preview could not be loaded.'),
-    )
     const view = renderCanvasPreview()
 
+    const frame = (await screen.findByTitle(
+      'Canvas preview',
+    )) as HTMLIFrameElement
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: 'null',
+          source: frame.contentWindow,
+          data: {
+            type: 'canvas-preview:error',
+            generation: frame.getAttribute('data-preview-generation'),
+            message: 'Canvas preview could not be loaded.',
+          },
+        }),
+      )
+    })
     await screen.findByText('Canvas preview could not be loaded.')
     context.reject(new Error('Installed Style could not be loaded.'))
 

@@ -429,6 +429,49 @@
   color: var(--color-text);
 }
 
+.canvas-assistant-card__source-review {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.canvas-assistant-card__source-review summary {
+  padding: var(--space) calc(var(--space) * 1.5);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.canvas-assistant-card__source-review summary:focus-visible {
+  outline: 2px solid var(--color-primary-content);
+  outline-offset: 2px;
+}
+
+.canvas-assistant-card__source-files {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 1.5);
+  padding: 0 calc(var(--space) * 1.5) calc(var(--space) * 1.5);
+}
+
+.canvas-assistant-card__source-files h4 {
+  overflow-wrap: anywhere;
+}
+
+.canvas-assistant-card__source-files pre {
+  max-height: calc(var(--space) * 30);
+  margin: calc(var(--space) * 0.75) 0 0;
+  padding: var(--space);
+  overflow: auto;
+  border-radius: var(--radius);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+}
+
 .canvas-assistant-card__progress {
   display: flex;
   flex-direction: column;

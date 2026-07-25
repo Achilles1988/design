@@ -69,6 +69,16 @@ const proposalArgs = {
   newSharedComponents: ['Metric'],
   preserved: ['Existing app routes'],
   validationChecks: ['TypeScript build'],
+  candidateFiles: [
+    {
+      path: 'src/canvases/home.tsx',
+      source: 'export default function Home() { return null }',
+    },
+    {
+      path: 'src/components/Metric.tsx',
+      source: 'export function Metric() { return null }',
+    },
+  ],
   expiresAt: '2026-07-25T12:00:00.000Z',
 }
 
@@ -239,11 +249,39 @@ describe('CanvasAssistantTools', () => {
     expect(screen.getByText('Layout')).toBeTruthy()
     expect(screen.getByText('sidebar-shell')).toBeTruthy()
     expect(screen.getByText('Changed files')).toBeTruthy()
-    expect(screen.getByText('src/canvases/home.tsx')).toBeTruthy()
+    expect(screen.getAllByText('src/canvases/home.tsx')).toHaveLength(2)
     expect(screen.getByText('Reused components')).toBeTruthy()
     expect(screen.getByText('Sidebar')).toBeTruthy()
     expect(screen.getByText('New shared components')).toBeTruthy()
     expect(screen.getByText('Metric')).toBeTruthy()
+  })
+
+  it('offers an accessible collapsible review of every candidate source', () => {
+    registerTools()
+    render(
+      <ToolHarness
+        toolName="propose_canvas_change"
+        args={proposalArgs}
+        addResult={vi.fn()}
+      />,
+    )
+
+    const review = screen.getByText('Review candidate source')
+    expect(review.tagName).toBe('SUMMARY')
+    const details = review.closest('details')
+    expect(details).not.toBeNull()
+    expect(details?.hasAttribute('open')).toBe(false)
+
+    fireEvent.click(review)
+
+    expect(screen.getAllByText('src/canvases/home.tsx')).toHaveLength(2)
+    expect(
+      screen.getByText('export default function Home() { return null }'),
+    ).toBeTruthy()
+    expect(screen.getAllByText('src/components/Metric.tsx')).toHaveLength(2)
+    expect(
+      screen.getByText('export function Metric() { return null }'),
+    ).toBeTruthy()
   })
 
   it('applies a proposal once and disables buttons while pending', async () => {

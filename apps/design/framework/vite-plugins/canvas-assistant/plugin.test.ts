@@ -95,6 +95,12 @@ function proposal(): StoredProposal {
       newSharedComponents: [],
       preserved: ['Navigation'],
       validationChecks: ['Vite transform'],
+      candidateFiles: [
+        {
+          path: 'canvases/Home.tsx',
+          source: CANDIDATE_SOURCE,
+        },
+      ],
       expiresAt: '2026-07-24T12:30:00.000Z',
     },
   }
@@ -333,6 +339,51 @@ afterEach(async () => {
 })
 
 describe('canvasAssistantPlugin', () => {
+  it('allows opaque-origin GETs only to continue into read-only Vite module handling', async () => {
+    const harness = await startHarness()
+
+    const moduleResponse = await fetch(
+      `${harness.baseUrl}/framework/src/preview/canvasPreviewFrame.tsx`,
+      {
+        headers: { Origin: 'null' },
+      },
+    )
+    const viteEnvironmentResponse = await fetch(
+      `${harness.baseUrl}/node_modules/vite/dist/client/env.mjs`,
+      {
+        headers: { Origin: 'null' },
+      },
+    )
+    const unrelatedPackageResponse = await fetch(
+      `${harness.baseUrl}/node_modules/unrelated-package/index.js`,
+      {
+        headers: { Origin: 'null' },
+      },
+    )
+    const apiResponse = await fetch(
+      `${harness.baseUrl}/__design_ai/canvas/context`,
+      {
+        headers: { Origin: 'null' },
+      },
+    )
+
+    expect(moduleResponse.status).toBe(599)
+    expect(moduleResponse.headers.get('access-control-allow-origin')).toBe(
+      'null',
+    )
+    expect(
+      viteEnvironmentResponse.headers.get(
+        'access-control-allow-origin',
+      ),
+    ).toBe('null')
+    expect(
+      unrelatedPackageResponse.headers.get(
+        'access-control-allow-origin',
+      ),
+    ).toBeNull()
+    expect(apiResponse.headers.get('access-control-allow-origin')).toBeNull()
+  })
+
   it('rejects a cross-origin chat POST with 403', async () => {
     const harness = await startHarness()
 

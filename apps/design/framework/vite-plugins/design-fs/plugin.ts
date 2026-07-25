@@ -4,6 +4,37 @@ import { createAssetsStore, isAssetKind } from './assets'
 import { createContentStore } from './store'
 
 const DESIGN_FS_NOT_FOUND = 'Not found'
+const DESIGN_FS_FORBIDDEN =
+  'design-fs requires a same-origin Shell request'
+
+function forwardedProto(req: IncomingMessage): string {
+  const value = req.headers['x-forwarded-proto']
+  const first = Array.isArray(value) ? value[0] : value
+  return first?.split(',')[0]?.trim() || 'http'
+}
+
+function isCrossSiteBrowserRequest(req: IncomingMessage): boolean {
+  const fetchSite = req.headers['sec-fetch-site']
+  const site = Array.isArray(fetchSite) ? fetchSite[0] : fetchSite
+  return req.headers.origin === 'null' || site === 'cross-site'
+}
+
+function isSameOrigin(req: IncomingMessage): boolean {
+  const host = req.headers.host
+  return (
+    typeof host === 'string' &&
+    req.headers.origin === `${forwardedProto(req)}://${host}`
+  )
+}
+
+function canAccessDesignFs(
+  req: IncomingMessage,
+  method: string,
+): boolean {
+  if (isCrossSiteBrowserRequest(req)) return false
+  if (method === 'GET' || method === 'HEAD') return true
+  return isSameOrigin(req)
+}
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -89,6 +120,10 @@ export function designFsPlugin(options: {
         try {
           const pathname = new URL(rawUrl, 'http://localhost').pathname
           const method = (req.method ?? 'GET').toUpperCase()
+          if (!canAccessDesignFs(req, method)) {
+            sendJson(res, 403, { error: DESIGN_FS_FORBIDDEN })
+            return
+          }
           const parts = pathname.split('/').filter(Boolean)
           // parts: ['__design_fs', ...]
           if (parts[0] !== '__design_fs') {

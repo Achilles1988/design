@@ -105,14 +105,7 @@ export function createContentStore(contentRoot: string) {
     const file = resolveContentPath(root, id, 'app.json')
     const raw = await fs.readFile(file, 'utf8')
     const parsed = JSON.parse(raw) as Record<string, unknown>
-    const app = normalizeAppConfig(parsed)
-    const needsRewrite =
-      Object.prototype.hasOwnProperty.call(parsed, 'layout') ||
-      !Array.isArray(parsed.layouts)
-    if (needsRewrite) {
-      await writeAppFile(app)
-    }
-    return app
+    return normalizeAppConfig(parsed)
   }
 
   async function writeAppFile(app: AppConfig): Promise<void> {

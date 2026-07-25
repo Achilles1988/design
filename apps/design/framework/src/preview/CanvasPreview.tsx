@@ -1,9 +1,10 @@
-import { useEffect, useState, type ComponentType } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
 import { checkCanvasAssistantContext } from '@/lib/canvasAssistantApi'
-import { loadCanvasModule } from './loadCanvasModule'
+import { getTheme, subscribeTheme, type ThemeMode } from '@/lib/theme'
 import { CanvasAssistantTools } from './CanvasAssistantTools'
+import { createCanvasPreviewDocument } from './canvasPreviewDocument'
 import {
   subscribeCanvasApplied,
   type CanvasAssistantHotContext,
@@ -14,7 +15,7 @@ import '../features/apps/apps.css'
 type PreviewState =
   | { status: 'loading' }
   | { status: 'error'; message: string }
-  | { status: 'ready'; Canvas: ComponentType }
+  | { status: 'ready'; componentFile: string }
 
 type AssistantContextState =
   | { status: 'loading'; appId: string; canvasId: string }
@@ -24,6 +25,7 @@ type AssistantContextState =
 const GLOB_MISS_HINT =
   'Canvas not found / restart dev server after adding files if glob cache stale'
 const CANVAS_ENTRY_MISSING = 'Canvas entry not found in canvases.json'
+const MAX_PREVIEW_ERROR_LENGTH = 4_000
 
 type SubscribeApplied = (
   appId: string,
@@ -49,6 +51,9 @@ export function CanvasPreview({
       canvasId: '',
     })
   const [previewRevision, setPreviewRevision] = useState(0)
+  const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
+  const frameRef = useRef<HTMLIFrameElement>(null)
+  const previewGeneration = `${appId}:${canvasId}:${previewRevision}`
   const assistantOwnsCurrentCanvas =
     assistantContext.appId === appId &&
     assistantContext.canvasId === canvasId
@@ -80,13 +85,8 @@ export function CanvasPreview({
           return
         }
 
-        const Canvas = await loadCanvasModule(appId, entry.component)
         if (cancelled) return
-        if (!Canvas) {
-          setState({ status: 'error', message: GLOB_MISS_HINT })
-          return
-        }
-        setState({ status: 'ready', Canvas })
+        setState({ status: 'ready', componentFile: entry.component })
       } catch (err: unknown) {
         if (!cancelled) {
           setState({
@@ -100,7 +100,44 @@ export function CanvasPreview({
     return () => {
       cancelled = true
     }
-  }, [appId, canvasId])
+  }, [appId, canvasId, previewRevision])
+
+  useEffect(() => subscribeTheme(setThemeState), [])
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent<unknown>) => {
+      if (
+        event.source !== frameRef.current?.contentWindow ||
+        event.origin !== 'null' ||
+        !event.data ||
+        typeof event.data !== 'object'
+      ) {
+        return
+      }
+      const message = event.data as Record<string, unknown>
+      if (
+        message.type === 'canvas-preview:ready' &&
+        message.generation === previewGeneration &&
+        Object.keys(message).length === 2
+      ) {
+        frameRef.current.dataset.previewState = 'ready'
+        return
+      }
+      if (
+        message.type !== 'canvas-preview:error' ||
+        message.generation !== previewGeneration ||
+        Object.keys(message).length !== 3 ||
+        typeof message.message !== 'string' ||
+        message.message.length === 0 ||
+        message.message.length > MAX_PREVIEW_ERROR_LENGTH
+      ) {
+        return
+      }
+      setState({ status: 'error', message: message.message })
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [previewGeneration])
 
   useEffect(() => {
     let cancelled = false
@@ -174,11 +211,25 @@ export function CanvasPreview({
     )
   }
 
-  const { Canvas } = state
+  const sourceDocument = createCanvasPreviewDocument({
+    appId,
+    componentFile: state.componentFile,
+    generation: previewGeneration,
+    theme,
+  })
   return (
     <>
       {assistantErrorAlert}
-      <Canvas key={previewRevision} />
+      <iframe
+        ref={frameRef}
+        key={previewGeneration}
+        className="canvas-preview-frame"
+        title="Canvas preview"
+        sandbox="allow-scripts"
+        srcDoc={sourceDocument}
+        data-preview-generation={previewGeneration}
+        data-preview-state="loading"
+      />
       {assistantTools}
     </>
   )
