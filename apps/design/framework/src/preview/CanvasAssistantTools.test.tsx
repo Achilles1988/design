@@ -292,7 +292,7 @@ describe('CanvasAssistantTools', () => {
     )
   })
 
-  it('renders streamed phases as pending, then settles them as success', async () => {
+  it('marks only the last repair attempt as repaired on success', async () => {
     let resolveApply:
       | ((value: {
           ok: true
@@ -306,6 +306,7 @@ describe('CanvasAssistantTools', () => {
         onEvent({ type: 'status', phase: 'writing' })
         onEvent({ type: 'status', phase: 'validating' })
         onEvent({ type: 'status', phase: 'repairing', attempt: 1 })
+        onEvent({ type: 'status', phase: 'repairing', attempt: 2 })
         return new Promise((resolve) => {
           resolveApply = resolve
         })
@@ -333,6 +334,7 @@ describe('CanvasAssistantTools', () => {
         'Writing files',
         'Validating changes',
         'Repairing · attempt 1',
+        'Repairing · attempt 2',
       ])
       expect(statuses.every((status) => status.dataset.state === 'pending')).toBe(
         true,
@@ -342,7 +344,7 @@ describe('CanvasAssistantTools', () => {
     resolveApply?.({
       ok: true,
       proposalId: 'proposal-1',
-      repairAttempts: 1,
+      repairAttempts: 2,
     })
 
     await waitFor(() => {
@@ -356,7 +358,8 @@ describe('CanvasAssistantTools', () => {
         'Writing files',
         'Validating changes',
         'Repairing · attempt 1',
-        'Repaired · attempt 1',
+        'Repairing · attempt 2',
+        'Repaired · attempt 2',
         'Applied',
       ])
       expect(statuses.every((status) => status.dataset.state === 'success')).toBe(

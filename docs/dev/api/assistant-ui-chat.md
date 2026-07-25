@@ -296,10 +296,10 @@ context readiness 流程，不依赖已有页面内容。context 响应必须是
   `addResult({ status:'installed', layoutId })`。安装失败会写入 `failed` result，不能声称已安装。
 - `propose_canvas_change`：展示 Style、Layout、changed files、reused components 与 new shared
   components。确认时调用 proposal apply endpoint，并按收到顺序显示全部 checking、writing、
-  validating、repairing status。若成功结果包含 repairing history，UI 会从其中已有的 attempt
-  派生 `Repaired · attempt N` 成功行并放在 `Applied` 前；这是 UI 终态，不增加公共协议 phase，
-  协议 status phase 仍仅允许 checking、writing、validating、repairing。按钮 pending 时全部
-  禁用，且 proposal 只能 apply 一次。
+  validating、repairing status。若成功结果包含 repairing history，UI 会从最后一条
+  repairing status 的 attempt 派生 `Repaired · attempt N` 成功行并放在 `Applied` 前；这是
+  UI 终态，不增加公共协议 phase，协议 status phase 仍仅允许 checking、writing、validating、
+  repairing。按钮 pending 时全部禁用，且 proposal 只能 apply 一次。
 
 两项工具的确认、拒绝和失败都必须在外部操作成功或失败后调用一次 `addResult`。由于
 `AssistantProvider` 已把两项工具名放入 `unstable_humanToolNames`，该 human result 会恢复同一
