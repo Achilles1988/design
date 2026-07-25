@@ -342,9 +342,52 @@
 }
 
 .apps-table__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(var(--space) * 0.75);
   width: 1%;
   white-space: nowrap;
   text-align: right;
+}
+
+.apps-table__actions .apps-btn--edit {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.apps-table tr:hover .apps-table__actions .apps-btn--edit,
+.apps-table tr:focus-within .apps-table__actions .apps-btn--edit,
+.apps-table__row--editing .apps-table__actions .apps-btn--edit {
+  opacity: 1;
+}
+
+.apps-table__edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 0.5);
+  min-width: 140px;
+}
+
+.apps-table__edit-field input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.apps-table__edit-field input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+
+.apps-table__edit-field input[aria-invalid='true'] {
+  border-color: color-mix(in srgb, var(--color-danger) 55%, transparent);
 }
 
 .apps-table th:last-child {

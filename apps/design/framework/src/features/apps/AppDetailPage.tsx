@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
 import { LAYOUT_INSTALL_TIP } from '@/lib/assetNotices'
 import { emitCanvasesChanged } from '@/lib/canvasEvents'
+import { writeCanvasRenameNotice } from '@/lib/canvasRenameNotice'
 import { confirmTip } from '@/lib/confirmTip'
 import { isValidAppId, slugify } from '@/lib/slug'
 import type { AppConfig, AssetEntry, CanvasEntry } from '@/lib/types'
@@ -39,19 +40,32 @@ export function AppDetailPage() {
   const [canvasName, setCanvasName] = useState('')
   const [canvasId, setCanvasId] = useState('')
   const [canvasIdDirty, setCanvasIdDirty] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editId, setEditId] = useState('')
+  const [editIdDirty, setEditIdDirty] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [editSubmitting, setEditSubmitting] = useState(false)
   const [busy, setBusy] = useState(false)
   const loadRun = useRef(0)
   const activeAppId = useRef(appId)
   const addCanvasButtonRef = useRef<HTMLButtonElement>(null)
   const canvasNameInputRef = useRef<HTMLInputElement>(null)
+  const editNameInputRef = useRef<HTMLInputElement>(null)
   const restoreAddCanvasFocus = useRef(false)
   activeAppId.current = appId
 
   const canvasIdValid = isValidAppId(canvasId)
   const canSubmit =
     canvasName.trim().length > 0 && canvasIdValid && !submitting && !busy
+  const editIdValid = isValidAppId(editId)
+  const canSaveEdit =
+    editName.trim().length > 0 &&
+    editIdValid &&
+    !editSubmitting &&
+    !busy &&
+    !submitting
 
   function isCurrentOperation(targetAppId: string, runId: number) {
     return targetAppId === activeAppId.current && runId === loadRun.current
@@ -74,8 +88,13 @@ export function AppDetailPage() {
     setCanvasName('')
     setCanvasId('')
     setCanvasIdDirty(false)
+    setEditingId(null)
+    setEditName('')
+    setEditId('')
+    setEditIdDirty(false)
     setFormError(null)
     setSubmitting(false)
+    setEditSubmitting(false)
     setBusy(false)
     restoreAddCanvasFocus.current = false
 
@@ -148,6 +167,10 @@ export function AppDetailPage() {
     }
   }, [addCanvasOpen])
 
+  useEffect(() => {
+    if (editingId) editNameInputRef.current?.focus()
+  }, [editingId])
+
   function onCanvasNameChange(value: string) {
     setCanvasName(value)
     if (!canvasIdDirty) setCanvasId(slugify(value))
@@ -156,6 +179,76 @@ export function AppDetailPage() {
   function onCanvasIdChange(value: string) {
     setCanvasIdDirty(true)
     setCanvasId(value)
+  }
+
+  function onEditNameChange(value: string) {
+    setEditName(value)
+    if (!editIdDirty) setEditId(slugify(value))
+  }
+
+  function onEditIdChange(value: string) {
+    setEditIdDirty(true)
+    setEditId(value)
+  }
+
+  function startEditCanvas(canvas: CanvasEntry) {
+    setFormError(null)
+    setAddCanvasOpen(false)
+    setCanvasName('')
+    setCanvasId('')
+    setCanvasIdDirty(false)
+    setEditingId(canvas.id)
+    setEditName(canvas.name)
+    setEditId(canvas.id)
+    setEditIdDirty(false)
+  }
+
+  function onCancelEditCanvas() {
+    setFormError(null)
+    setEditingId(null)
+    setEditName('')
+    setEditId('')
+    setEditIdDirty(false)
+    setEditSubmitting(false)
+  }
+
+  async function onSaveEditCanvas(canvas: CanvasEntry) {
+    if (!canSaveEdit) return
+
+    const targetAppId = appId
+    const runId = loadRun.current
+    const nextId = editId
+    const nextName = editName.trim()
+    setEditSubmitting(true)
+    setFormError(null)
+    try {
+      const result = await designApi.renameCanvas(targetAppId, canvas.id, {
+        id: nextId,
+        name: nextName,
+      })
+      if (canvas.id !== result.id || canvas.name !== result.name) {
+        writeCanvasRenameNotice({
+          appId: targetAppId,
+          fromId: canvas.id,
+          toId: result.id,
+          name: result.name,
+        })
+      }
+      emitCanvasesChanged()
+      if (!isCurrentOperation(targetAppId, runId)) return
+      setEditingId(null)
+      setEditName('')
+      setEditId('')
+      setEditIdDirty(false)
+      await reload(targetAppId, runId)
+    } catch (err: unknown) {
+      if (!isCurrentOperation(targetAppId, runId)) return
+      setFormError(
+        err instanceof Error ? err.message : 'Failed to rename canvas',
+      )
+    } finally {
+      if (isCurrentOperation(targetAppId, runId)) setEditSubmitting(false)
+    }
   }
 
   function onCancelAddCanvas() {
@@ -427,29 +520,157 @@ export function AppDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {canvases.map((canvas) => (
-                    <tr key={canvas.id}>
-                      <td>
-                        <Link to={`/apps/${appId}/canvases/${canvas.id}`}>
-                          {canvas.name}
-                        </Link>
-                      </td>
-                      <td>
-                        <code>{canvas.id}</code>
-                      </td>
-                      <td className="apps-table__actions">
-                        <button
-                          className="apps-btn apps-btn--ghost apps-btn--small"
-                          type="button"
-                          onClick={() => onDeleteCanvas(canvas)}
-                          disabled={busy || submitting}
-                          aria-label={`Delete canvas ${canvas.name}`}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {canvases.map((canvas) => {
+                    const isEditing = editingId === canvas.id
+                    return (
+                      <tr
+                        key={canvas.id}
+                        className={
+                          isEditing ? 'apps-table__row--editing' : undefined
+                        }
+                      >
+                        {isEditing ? (
+                          <>
+                            <td>
+                              <div className="apps-table__edit-field">
+                                <label
+                                  className="apps-sr-only"
+                                  htmlFor={`edit-canvas-name-${canvas.id}`}
+                                >
+                                  Name
+                                </label>
+                                <input
+                                  ref={editNameInputRef}
+                                  id={`edit-canvas-name-${canvas.id}`}
+                                  name="edit-name"
+                                  type="text"
+                                  value={editName}
+                                  onChange={(e) =>
+                                    onEditNameChange(e.target.value)
+                                  }
+                                  required
+                                  autoComplete="off"
+                                  disabled={busy || editSubmitting}
+                                />
+                              </div>
+                            </td>
+                            <td>
+                              <div className="apps-table__edit-field">
+                                <label
+                                  className="apps-sr-only"
+                                  htmlFor={`edit-canvas-id-${canvas.id}`}
+                                >
+                                  ID
+                                </label>
+                                <input
+                                  id={`edit-canvas-id-${canvas.id}`}
+                                  name="edit-id"
+                                  type="text"
+                                  value={editId}
+                                  onChange={(e) =>
+                                    onEditIdChange(e.target.value)
+                                  }
+                                  aria-invalid={
+                                    editId.length > 0 && !editIdValid
+                                      ? true
+                                      : undefined
+                                  }
+                                  aria-describedby={
+                                    editId.length > 0 && !editIdValid
+                                      ? `edit-canvas-id-error-${canvas.id}`
+                                      : undefined
+                                  }
+                                  required
+                                  autoComplete="off"
+                                  disabled={busy || editSubmitting}
+                                />
+                                {editId.length > 0 && !editIdValid ? (
+                                  <p
+                                    id={`edit-canvas-id-error-${canvas.id}`}
+                                    className="apps-field__error"
+                                  >
+                                    ID must start with a lowercase letter and
+                                    only contain lowercase letters, digits, or
+                                    hyphens.
+                                  </p>
+                                ) : null}
+                              </div>
+                            </td>
+                            <td className="apps-table__actions">
+                              <button
+                                className="apps-btn apps-btn--ghost apps-btn--small"
+                                type="button"
+                                onClick={onCancelEditCanvas}
+                                disabled={editSubmitting}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                className="apps-btn apps-btn--small"
+                                type="button"
+                                onClick={() => onSaveEditCanvas(canvas)}
+                                disabled={!canSaveEdit}
+                              >
+                                {editSubmitting ? 'Renaming…' : 'Save'}
+                              </button>
+                              <button
+                                className="apps-btn apps-btn--ghost apps-btn--small"
+                                type="button"
+                                onClick={() => onDeleteCanvas(canvas)}
+                                disabled
+                                aria-label={`Delete canvas ${canvas.name}`}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td>
+                              <Link
+                                to={`/apps/${appId}/canvases/${canvas.id}`}
+                              >
+                                {canvas.name}
+                              </Link>
+                            </td>
+                            <td>
+                              <code>{canvas.id}</code>
+                            </td>
+                            <td className="apps-table__actions">
+                              <button
+                                className="apps-btn apps-btn--ghost apps-btn--small apps-btn--edit"
+                                type="button"
+                                onClick={() => startEditCanvas(canvas)}
+                                disabled={
+                                  busy ||
+                                  submitting ||
+                                  editSubmitting ||
+                                  editingId !== null
+                                }
+                                aria-label={`Edit canvas ${canvas.name}`}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className="apps-btn apps-btn--ghost apps-btn--small"
+                                type="button"
+                                onClick={() => onDeleteCanvas(canvas)}
+                                disabled={
+                                  busy ||
+                                  submitting ||
+                                  editSubmitting ||
+                                  editingId !== null
+                                }
+                                aria-label={`Delete canvas ${canvas.name}`}
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

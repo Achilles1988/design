@@ -24,6 +24,11 @@ const api = vi.hoisted(() => ({
     name: 'Reports',
     component: 'ReportsCanvas',
   })),
+  renameCanvas: vi.fn(async () => ({
+    id: 'landing',
+    name: 'Landing',
+    component: 'Landing.tsx',
+  })),
   deleteCanvas: vi.fn(),
   removeAppLayout: vi.fn(),
   applyAsset: vi.fn(),
@@ -127,5 +132,59 @@ describe('AppDetailPage', () => {
     await waitFor(() => expect(api.addCanvas).toHaveBeenCalledTimes(1))
     expect(events.emitCanvasesChanged).toHaveBeenCalledTimes(1)
     await waitFor(() => expect(screen.queryByLabelText('Name')).toBeNull())
+  })
+
+  it('edits a canvas inline and saves the rename', async () => {
+    renderPage()
+
+    await screen.findByRole('link', { name: 'Home' })
+    const edit = screen.getByRole('button', { name: 'Edit canvas Home' })
+    fireEvent.click(edit)
+
+    const name = screen.getByLabelText('Name')
+    const id = screen.getByLabelText('ID')
+    fireEvent.change(name, { target: { value: 'Landing' } })
+    fireEvent.change(id, { target: { value: 'landing' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() =>
+      expect(api.renameCanvas).toHaveBeenCalledWith('acme', 'home', {
+        id: 'landing',
+        name: 'Landing',
+      }),
+    )
+    expect(events.emitCanvasesChanged).toHaveBeenCalled()
+    await waitFor(() => expect(screen.queryByLabelText('Name')).toBeNull())
+    expect(screen.getByRole('button', { name: 'Edit canvas Home' })).toBeTruthy()
+  })
+
+  it('keeps edit mode when the canvas id is invalid', async () => {
+    renderPage()
+
+    await screen.findByRole('link', { name: 'Home' })
+    fireEvent.click(screen.getByRole('button', { name: 'Edit canvas Home' }))
+    fireEvent.change(screen.getByLabelText('ID'), {
+      target: { value: 'Bad Id' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(api.renameCanvas).not.toHaveBeenCalled()
+    expect(screen.getByLabelText('Name')).toBeTruthy()
+    expect(screen.getByLabelText('ID')).toBeTruthy()
+  })
+
+  it('cancels edit mode without calling rename', async () => {
+    renderPage()
+
+    await screen.findByRole('link', { name: 'Home' })
+    fireEvent.click(screen.getByRole('button', { name: 'Edit canvas Home' }))
+    fireEvent.change(screen.getByLabelText('Name'), {
+      target: { value: 'Landing' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(api.renameCanvas).not.toHaveBeenCalled()
+    expect(screen.queryByLabelText('Name')).toBeNull()
+    expect(screen.getByRole('link', { name: 'Home' })).toBeTruthy()
   })
 })
