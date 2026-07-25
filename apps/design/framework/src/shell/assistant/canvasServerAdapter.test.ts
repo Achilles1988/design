@@ -309,9 +309,19 @@ describe('createCanvasServerAdapter', () => {
     ]
     const before = structuredClone(messages)
 
-    await expect(collect(adapter, runOptions(messages))).rejects.toThrow(
-      'The configured model does not support image input.',
-    )
+    await expect(collect(adapter, runOptions(messages))).resolves.toEqual([
+      {
+        status: {
+          type: 'incomplete',
+          reason: 'error',
+          error: {
+            code: 'unknown',
+            message:
+              'The configured model does not support image input. Choose a vision-capable model or remove the images.',
+          },
+        },
+      },
+    ])
     expect(messages).toEqual(before)
     expect(store.delete).not.toHaveBeenCalled()
     await expect(store.get('image-1')).resolves.toBe(record)
@@ -329,7 +339,7 @@ describe('createCanvasServerAdapter', () => {
     )
   })
 
-  it('yields each run-result and throws an error event', async () => {
+  it('yields each run-result and converts an error event to an incomplete status', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValueOnce(
@@ -345,6 +355,12 @@ describe('createCanvasServerAdapter', () => {
         ]),
       ).mockResolvedValueOnce(
         streamResponse([
+          JSON.stringify({
+            type: 'run-result',
+            value: {
+              content: [{ type: 'text', text: 'Partial response' }],
+            },
+          }),
           JSON.stringify({ type: 'error', error: 'Model failed safely.' }),
         ]),
       ),
@@ -358,9 +374,21 @@ describe('createCanvasServerAdapter', () => {
       { content: [{ type: 'text', text: 'One' }] },
       { content: [{ type: 'text', text: 'Two' }] },
     ])
-    await expect(collect(adapter, runOptions())).rejects.toThrow(
-      'Model failed safely.',
-    )
+    await expect(collect(adapter, runOptions())).resolves.toEqual([
+      {
+        content: [{ type: 'text', text: 'Partial response' }],
+      },
+      {
+        status: {
+          type: 'incomplete',
+          reason: 'error',
+          error: {
+            code: 'unknown',
+            message: 'Model failed safely.',
+          },
+        },
+      },
+    ])
   })
 
   it('aborts fetch when the LocalRuntime signal aborts', async () => {

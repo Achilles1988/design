@@ -305,12 +305,17 @@ async function runModel(
   messages?: CanvasChatRequest['messages'],
 ) {
   fixture.modelCalls.push(call)
+  const form = new FormData()
+  form.set('request', JSON.stringify(chatBody(messages)))
   return readNdjson(
-    await post(
-      fixture,
-      '/__design_ai/canvas/chat',
-      chatBody(messages),
-    ),
+    await fetch(`${fixture.baseUrl}/__design_ai/canvas/chat`, {
+      method: 'POST',
+      headers: {
+        Origin: fixture.origin,
+        Host: new URL(fixture.baseUrl).host,
+      },
+      body: form,
+    }),
   )
 }
 

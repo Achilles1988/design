@@ -642,7 +642,15 @@ export function serializeMessages(
     .map((message) => ({
       id: message.id,
       role: message.role,
-      content: message.content,
+      content:
+        message.role === 'user' && message.attachments?.length
+          ? [
+              ...message.content,
+              ...message.attachments.flatMap(
+                (attachment) => attachment.content,
+              ),
+            ]
+          : message.content,
       createdAt: message.createdAt.toISOString(),
     }))
     .filter(isPersistedMessage)

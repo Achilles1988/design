@@ -30,20 +30,33 @@ function isStableMessage(message: ThreadMessage): boolean {
   )
 }
 
+function userMessageContent(
+  message: ThreadMessage,
+): ThreadMessage['content'] {
+  if (message.role !== 'user' || !message.attachments?.length) {
+    return message.content
+  }
+  return [
+    ...message.content,
+    ...message.attachments.flatMap((attachment) => attachment.content),
+  ]
+}
+
 function toRequestMessage(
   message: ThreadMessage,
   attachments: ReadonlyMap<string, VisualAttachmentRecord>,
 ): CanvasChatRequest['messages'][number] {
   const content: CanvasChatRequest['messages'][number]['content'] = []
+  const messageContent = userMessageContent(message)
   if (
     message.role !== 'user' &&
-    message.content.some((part) => part.type === 'image')
+    messageContent.some((part) => part.type === 'image')
   ) {
     throw new Error(
       'Canvas Assistant supports image parts only in user messages.',
     )
   }
-  for (const part of message.content) {
+  for (const part of messageContent) {
     if (part.type === 'text') {
       content.push({ type: 'text', text: part.text })
       continue
@@ -90,7 +103,7 @@ function referencedAttachmentIds(
   const ids = new Set<string>()
   for (const message of messages) {
     if (message.role !== 'user') continue
-    for (const part of message.content) {
+    for (const part of userMessageContent(message)) {
       if (part.type !== 'image') continue
       const id = parseAttachmentUri(part.image)
       if (!id) {
@@ -168,7 +181,19 @@ export function createCanvasServerAdapter({
         response,
         CanvasRunEventSchema,
       )) {
-        if (event.type === 'error') throw new Error(event.error)
+        if (event.type === 'error') {
+          yield {
+            status: {
+              type: 'incomplete',
+              reason: 'error',
+              error: {
+                code: 'unknown',
+                message: event.error,
+              },
+            },
+          }
+          return
+        }
         yield event.value as ChatModelRunResult
       }
     },

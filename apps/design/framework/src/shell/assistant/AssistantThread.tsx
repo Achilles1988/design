@@ -39,6 +39,17 @@ function UserBubble() {
   return (
     <MessagePrimitive.Root className="aui-message aui-message--user">
       <MessagePrimitive.Parts components={{ Image: RestoredVisualAttachment }} />
+      <MessagePrimitive.Attachments>
+        {({ attachment }) => attachment.content.map((part, index) =>
+          part.type === 'image'
+            ? (
+                <RestoredVisualAttachment
+                  key={`${attachment.id}-${index}`}
+                  image={part.image}
+                />
+              )
+            : null)}
+      </MessagePrimitive.Attachments>
     </MessagePrimitive.Root>
   )
 }

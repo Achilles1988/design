@@ -104,9 +104,15 @@ type IntegrationProbe = {
   continuationReceivedToolResult: boolean
 }
 
+function ReadyAssistantThread() {
+  const session = useAssistantPageSession()
+  return session.ready ? <AssistantThread /> : null
+}
+
 function Harness({ probe }: { probe: IntegrationProbe }) {
   const [filter, setFilter] = useState<Filter>(emptyFilter())
   const filterRef = useRef(filter)
+  const epochRef = useRef(0)
   filterRef.current = filter
   const adapter = createStreamTextAdapter({
     streamTextImpl: (options) => {
@@ -193,30 +199,34 @@ function Harness({ probe }: { probe: IntegrationProbe }) {
   })
   const modelAdapter: ChatModelAdapter = createPageScopedModelAdapter(
     adapter,
-    () => 0,
+    () => epochRef.current,
   )
   const runtime = useLocalRuntime(modelAdapter, { maxSteps: 2 })
   const visible = applyFilter(index, filter)
 
   return (
-    <AssistantRuntimeProvider runtime={runtime}>
-      <AssetFilterTool
-        index={index}
-        filterRef={filterRef}
-        owner={{ pageKey: '/integration', generation: 1 }}
-        onFilterChange={setFilter}
-      />
-      <output aria-label="active filters">
-        {filter.chips.map((chip) => chip.label).join(',')}
-      </output>
-      <output aria-label="match count">{visible.length}</output>
-      <ul aria-label="visible assets">
-        {visible.map((item) => (
-          <li key={item.id}>{item.title}</li>
-        ))}
-      </ul>
-      <AssistantThread />
-    </AssistantRuntimeProvider>
+    <MemoryRouter initialEntries={['/integration']}>
+      <AssistantPageSessionProvider runtime={runtime} epochRef={epochRef}>
+        <AssistantRuntimeProvider runtime={runtime}>
+          <AssetFilterTool
+            index={index}
+            filterRef={filterRef}
+            owner={{ pageKey: '/integration', generation: 1 }}
+            onFilterChange={setFilter}
+          />
+          <output aria-label="active filters">
+            {filter.chips.map((chip) => chip.label).join(',')}
+          </output>
+          <output aria-label="match count">{visible.length}</output>
+          <ul aria-label="visible assets">
+            {visible.map((item) => (
+              <li key={item.id}>{item.title}</li>
+            ))}
+          </ul>
+          <ReadyAssistantThread />
+        </AssistantRuntimeProvider>
+      </AssistantPageSessionProvider>
+    </MemoryRouter>
   )
 }
 
@@ -380,7 +390,10 @@ describe('assistant filtering integration', () => {
       continuationReceivedToolResult: false,
     }
     render(<Harness probe={probe} />)
-    fireEvent.change(screen.getByPlaceholderText('Describe what you need…'), {
+    const input = await screen.findByPlaceholderText(
+      'Describe what you need…',
+    )
+    fireEvent.change(input, {
       target: { value: 'Show dark designs' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))

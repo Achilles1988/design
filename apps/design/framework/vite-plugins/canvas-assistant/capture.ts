@@ -152,6 +152,22 @@ export function createUrlCaptureService({
         activePage.on('download', (download) => {
           void download.cancel().catch(() => undefined)
         })
+        activePage.on('request', (request) => {
+          if (
+            !request.isNavigationRequest() ||
+            request.frame() !== activePage.mainFrame()
+          ) return
+          if (!isHttpUrl(request.url())) {
+            policyError =
+              'A redirect attempted to leave the HTTP/HTTPS URL policy.'
+            void activePage.close().catch(() => undefined)
+            return
+          }
+          if (redirectCount(request) > MAX_REDIRECTS) {
+            policyError = 'URL capture allows at most five redirects.'
+            void activePage.close().catch(() => undefined)
+          }
+        })
         await activePage.route('**/*', async (route) => {
           const request = route.request()
           if (!isHttpUrl(request.url())) {

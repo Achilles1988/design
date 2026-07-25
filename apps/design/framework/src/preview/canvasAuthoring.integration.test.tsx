@@ -199,7 +199,12 @@ class FakeCanvasApi {
           : input.url
 
     if (url === '/__design_ai/canvas/chat') {
-      const request = JSON.parse(String(init?.body)) as CanvasChatRequest
+      const form = init?.body
+      if (!(form instanceof FormData)) {
+        throw new Error('Canvas chat did not use FormData.')
+      }
+      const request = JSON.parse(String(form.get('request'))) as
+        CanvasChatRequest
       this.chatRequests.push(request)
       const responder = this.chatResponders.shift()
       if (!responder) {

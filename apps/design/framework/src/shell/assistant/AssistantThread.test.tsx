@@ -92,6 +92,7 @@ vi.mock('@assistant-ui/react', () => ({
   MessagePrimitive: {
     Root: (props: { children: unknown }) => <div>{props.children as never}</div>,
     Error: (props: { children: unknown }) => <>{props.children as never}</>,
+    Attachments: () => null,
     Parts: (props: { components?: {
       Text?: ComponentType
       Image?: ComponentType<{ image: string }>
