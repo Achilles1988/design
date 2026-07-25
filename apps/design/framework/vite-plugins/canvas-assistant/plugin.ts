@@ -1,13 +1,20 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin, ViteDevServer } from 'vite'
+import { chromium } from 'playwright'
 import {
   CanvasApplyEventSchema,
   CanvasApplyRequestSchema,
+  CanvasCaptureRequestSchema,
   CanvasChatRequestSchema,
   CanvasContextRequestSchema,
   CanvasPreviewSessionRequestSchema,
   CanvasRunEventSchema,
 } from '../../src/lib/canvasAssistantProtocol'
+import {
+  createUrlCaptureService,
+  type CaptureResult,
+  type UrlCaptureService,
+} from './capture'
 import { createCanvasContextLoader } from './context'
 import { createCanvasModelRunner } from './model'
 import {
@@ -34,9 +41,11 @@ const API_PREFIX = '/__design_ai'
 const CONTEXT_ROUTE = '/__design_ai/canvas/context'
 const CHAT_ROUTE = '/__design_ai/canvas/chat'
 const PREVIEW_SESSION_ROUTE = '/__design_ai/canvas/preview-session'
+const CAPTURE_ROUTE = '/__design_ai/references/capture'
 const APPLY_ROUTE =
   /^\/__design_ai\/canvas\/proposals\/([^/]+)\/apply$/
 const MAX_BODY_BYTES = 512 * 1024
+const MAX_CAPTURE_BYTES = 10 * 1024 * 1024
 const PREVIEW_TOKEN_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
 const FORBIDDEN_PREVIEW_QUERY_KEYS = new Set([
@@ -76,6 +85,7 @@ type CanvasAssistantPluginOverrides = {
   readSourceImpl?: typeof readSource
   validateCanvasImpl?: typeof validateCanvas
   loadPreviewTargetImpl?: PreviewTargetLoader
+  captureService?: UrlCaptureService
   send?: ViteDevServer['ws']['send']
 }
 
@@ -322,6 +332,32 @@ function publicError(error: unknown): HttpError {
   return new HttpError(400, 'Canvas Assistant request is invalid.')
 }
 
+function serializeCaptureResult(result: CaptureResult) {
+  const { bytes, mimeType, ...metadata } = result
+  if (!result.ok) return metadata
+  if (!bytes || mimeType !== 'image/png') {
+    return {
+      url: result.url,
+      finalUrl: result.finalUrl,
+      ok: false,
+      error: 'Captured image was unavailable.',
+    }
+  }
+  if (bytes.byteLength > MAX_CAPTURE_BYTES) {
+    return {
+      url: result.url,
+      finalUrl: result.finalUrl,
+      ok: false,
+      error: 'Captured image exceeds 10 MiB.',
+    }
+  }
+  return {
+    ...metadata,
+    mimeType,
+    base64: Buffer.from(bytes).toString('base64'),
+  }
+}
+
 export function canvasAssistantPlugin(
   options: {
     contentRoot: string
@@ -356,6 +392,12 @@ export function canvasAssistantPlugin(
       contentRoot: options.contentRoot,
     })
   const previewSessions = createCanvasPreviewSessionStore()
+  const captureService =
+    overrides.captureService ??
+    createUrlCaptureService({
+      launch: (launchOptions) => chromium.launch(launchOptions),
+      now: Date.now,
+    })
   const owners = new Map<
     string,
     { appId: string; canvasId: string }
@@ -365,6 +407,9 @@ export function canvasAssistantPlugin(
     name: 'canvas-assistant',
     configureServer(server) {
       const send = overrides.send ?? server.ws.send.bind(server.ws)
+      server.httpServer?.once('close', () => {
+        void captureService.close()
+      })
 
       server.middlewares.use(async (req, res, next) => {
         const rawUrl = req.url ?? ''
@@ -426,6 +471,7 @@ export function canvasAssistantPlugin(
           pathname === CONTEXT_ROUTE ||
           pathname === CHAT_ROUTE ||
           pathname === PREVIEW_SESSION_ROUTE ||
+          pathname === CAPTURE_ROUTE ||
           applyMatch !== null
         if (!knownRoute || method !== 'POST') {
           sendJson(res, 404, {
@@ -439,6 +485,18 @@ export function canvasAssistantPlugin(
           requireSameOrigin(req)
           requireJson(req)
           const rawBody = await parseJsonBody(req)
+
+          if (pathname === CAPTURE_ROUTE) {
+            const request = CanvasCaptureRequestSchema.parse(rawBody)
+            const results = await captureService.capture(
+              request.urls,
+              lifecycle.signal,
+            )
+            sendJson(res, 200, {
+              results: results.map(serializeCaptureResult),
+            })
+            return
+          }
 
           if (pathname === PREVIEW_SESSION_ROUTE) {
             const request =

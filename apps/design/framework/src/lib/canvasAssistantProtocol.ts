@@ -42,6 +42,23 @@ export const CanvasContextRequestSchema = z.object({
   canvasId: z.string().min(1),
 })
 
+export const CanvasCaptureRequestSchema = z.object({
+  urls: z.array(z.string().url()).min(1).max(4),
+}).strict()
+
+export const CanvasCaptureResultSchema = z.object({
+  url: z.string(),
+  finalUrl: z.string().optional(),
+  ok: z.boolean(),
+  mimeType: z.literal('image/png').optional(),
+  base64: z.string().optional(),
+  error: z.string().optional(),
+}).strict()
+
+export const CanvasCaptureResponseSchema = z.object({
+  results: z.array(CanvasCaptureResultSchema).min(1).max(4),
+}).strict()
+
 export const CanvasPreviewSessionRequestSchema = z.object({
   appId: z.string().regex(/^[a-z][a-z0-9-]*$/),
   canvasId: z.string().regex(/^[a-z][a-z0-9-]*$/),
@@ -167,6 +184,12 @@ export const CanvasApplyEventSchema = z.discriminatedUnion('type', [
 ])
 
 export type CanvasChatRequest = z.infer<typeof CanvasChatRequestSchema>
+export type CanvasCaptureRequest = z.infer<
+  typeof CanvasCaptureRequestSchema
+>
+export type CanvasCaptureResponse = z.infer<
+  typeof CanvasCaptureResponseSchema
+>
 export type CanvasApplyEvent = z.infer<typeof CanvasApplyEventSchema>
 export type CanvasPreviewSessionRequest = z.infer<
   typeof CanvasPreviewSessionRequestSchema

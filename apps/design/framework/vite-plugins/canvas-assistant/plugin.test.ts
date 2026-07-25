@@ -4,6 +4,7 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from 'node:http'
+import { EventEmitter } from 'node:events'
 import fs from 'node:fs/promises'
 import type { AddressInfo } from 'node:net'
 import os from 'node:os'
@@ -220,6 +221,16 @@ function defaultOverrides() {
     },
   )
   const send = vi.fn()
+  const capture = vi.fn(async (urls: string[]) =>
+    urls.map((url) => ({
+      url,
+      finalUrl: `${url}/final`,
+      ok: true as const,
+      mimeType: 'image/png' as const,
+      bytes: new Uint8Array([137, 80, 78, 71]),
+    })),
+  )
+  const closeCapture = vi.fn(async () => undefined)
 
   return {
     contextLoader: { load },
@@ -235,6 +246,7 @@ function defaultOverrides() {
     readSourceImpl: vi.fn(async () => null),
     validateCanvasImpl: vi.fn(),
     loadPreviewTargetImpl,
+    captureService: { capture, close: closeCapture },
     send,
   }
 }
@@ -403,6 +415,141 @@ afterEach(async () => {
 })
 
 describe('canvasAssistantPlugin', () => {
+  it('captures URL references only for same-origin JSON POSTs', async () => {
+    const harness = await startHarness()
+
+    const response = await post(
+      harness,
+      '/__design_ai/references/capture',
+      { urls: ['https://example.com/design'] },
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    await expect(response.json()).resolves.toEqual({
+      results: [
+        {
+          url: 'https://example.com/design',
+          finalUrl: 'https://example.com/design/final',
+          ok: true,
+          mimeType: 'image/png',
+          base64: 'iVBORw==',
+        },
+      ],
+    })
+    expect(harness.overrides.captureService.capture)
+      .toHaveBeenCalledWith(
+        ['https://example.com/design'],
+        expect.any(AbortSignal),
+      )
+
+    const crossOrigin = await post(
+      harness,
+      '/__design_ai/references/capture',
+      { urls: ['https://example.com'] },
+      { Origin: 'https://attacker.invalid' },
+    )
+    const nonJson = await post(
+      harness,
+      '/__design_ai/references/capture',
+      { urls: ['https://example.com'] },
+      { 'Content-Type': 'text/plain' },
+    )
+    expect(crossOrigin.status).toBe(403)
+    expect(nonJson.status).toBe(415)
+  })
+
+  it('returns per-URL capture errors and caps PNGs at 10 MiB', async () => {
+    const overrides = defaultOverrides()
+    overrides.captureService.capture.mockResolvedValueOnce([
+      {
+        url: 'https://large.example',
+        ok: true,
+        mimeType: 'image/png',
+        bytes: new Uint8Array(10 * 1024 * 1024 + 1),
+      },
+      {
+        url: 'https://failed.example',
+        ok: false,
+        error: 'Navigation failed.',
+      },
+    ])
+    const harness = await startHarness(overrides)
+
+    const response = await post(
+      harness,
+      '/__design_ai/references/capture',
+      {
+        urls: [
+          'https://large.example',
+          'https://failed.example',
+        ],
+      },
+    )
+
+    expect(response.status).toBe(200)
+    await expect(response.json()).resolves.toEqual({
+      results: [
+        {
+          url: 'https://large.example',
+          ok: false,
+          error: 'Captured image exceeds 10 MiB.',
+        },
+        {
+          url: 'https://failed.example',
+          ok: false,
+          error: 'Navigation failed.',
+        },
+      ],
+    })
+  })
+
+  it('rejects invalid capture bodies before browser work', async () => {
+    const harness = await startHarness()
+
+    const response = await post(
+      harness,
+      '/__design_ai/references/capture',
+      {
+        urls: [
+          'https://one.example',
+          'https://two.example',
+          'https://three.example',
+          'https://four.example',
+          'https://five.example',
+        ],
+      },
+    )
+
+    expect(response.status).toBe(400)
+    expect(harness.overrides.captureService.capture)
+      .not.toHaveBeenCalled()
+  })
+
+  it('closes the shared browser on Vite server shutdown', async () => {
+    const overrides = defaultOverrides()
+    const httpServer = new EventEmitter()
+    const plugin = canvasAssistantPlugin(
+      {
+        contentRoot: '/project/apps',
+        stylesRoot: '/project/styles',
+        layoutsRoot: '/project/layouts',
+      },
+      overrides,
+    )
+    plugin.configureServer?.({
+      middlewares: { use: vi.fn() },
+      ws: { send: overrides.send },
+      moduleGraph: {},
+      httpServer,
+    } as unknown as ViteDevServer)
+
+    httpServer.emit('close')
+    await vi.waitFor(() => {
+      expect(overrides.captureService.close).toHaveBeenCalledTimes(1)
+    })
+  })
+
   it('requires a current-Canvas preview capability for opaque-origin modules', async () => {
     const harness = await startHarness()
 

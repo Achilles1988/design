@@ -31,6 +31,67 @@ most 40 messages.
 Unknown paths under `/__design_ai`, unsupported methods, and non-exact route
 variants receive `404`.
 
+## URL reference capture
+
+### `POST /__design_ai/references/capture`
+
+The trusted Shell may request screenshots for one to four explicit URLs:
+
+```json
+{
+  "urls": [
+    "https://example.com/design",
+    "http://localhost:5173/reference"
+  ]
+}
+```
+
+The endpoint has the same exact-origin, JSON, body-size, no-store, and
+development-only requirements as the Canvas routes. It is not exposed to the
+opaque Canvas preview origin or through a preview module capability.
+
+Only absolute `http:` and `https:` URLs are accepted by the capture service.
+Public hosts, `localhost`, and private-network hosts are allowed. `file:`,
+`data:`, `javascript:`, `ftp:`, malformed URLs, and redirects to a non-HTTP(S)
+protocol are rejected. A main-frame navigation may follow at most five
+HTTP(S) redirects.
+
+Each URL uses a fresh Page in one shared isolated Chromium browser context.
+The context is headless, has no default browser profile, cookies, or signed-in
+session, disables downloads, and uses a `1440 × 1000` viewport. Popups are
+closed, downloads are cancelled, navigation waits for `DOMContentLoaded` for
+at most 15 seconds, and all work for one URL is capped at 20 seconds. The PNG
+screenshot captures only the viewport with animations disabled. Pages are
+always closed; the shared context and browser close when the Vite HTTP server
+closes. Disconnecting the request aborts active page work.
+
+Success is `200 application/json`. Results remain in input order, and one
+failure does not discard successful siblings:
+
+```json
+{
+  "results": [
+    {
+      "url": "https://example.com/design",
+      "finalUrl": "https://example.com/final",
+      "ok": true,
+      "mimeType": "image/png",
+      "base64": "iVBORw0KGgo..."
+    },
+    {
+      "url": "http://localhost:5173/reference",
+      "ok": false,
+      "error": "This page could not be captured."
+    }
+  ]
+}
+```
+
+Base64 exists only in this response and only for a successful PNG no larger
+than 10 MiB. An oversized PNG becomes an error for that URL. URLs, screenshot
+bytes, Base64 response data, and browser errors are not written to server
+logs.
+
 ## Context readiness
 
 ### `POST /__design_ai/canvas/context`
