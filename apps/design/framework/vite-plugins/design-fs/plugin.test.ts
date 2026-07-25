@@ -10,7 +10,37 @@ import os from 'node:os'
 import path from 'node:path'
 import type { ViteDevServer } from 'vite'
 import { afterEach, describe, expect, it } from 'vitest'
-import { designFsPlugin } from './plugin'
+import { designFsPlugin, rewriteCanvasSpaUrl } from './plugin'
+
+describe('rewriteCanvasSpaUrl', () => {
+  it('rewrites HTML navigations to extension-less canvas routes', () => {
+    expect(
+      rewriteCanvasSpaUrl(
+        '/apps/smoke/canvases/landing',
+        'text/html,application/xhtml+xml',
+      ),
+    ).toBe('/index.html')
+    expect(
+      rewriteCanvasSpaUrl('/apps/smoke/canvases/home/', 'text/html'),
+    ).toBe('/index.html')
+  })
+
+  it('leaves module and non-HTML requests alone', () => {
+    expect(
+      rewriteCanvasSpaUrl(
+        '/apps/smoke/canvases/Landing.tsx',
+        'text/html,application/xhtml+xml',
+      ),
+    ).toBeNull()
+    expect(
+      rewriteCanvasSpaUrl('/apps/smoke/canvases/landing', '*/*'),
+    ).toBeNull()
+    expect(
+      rewriteCanvasSpaUrl('/apps/smoke', 'text/html'),
+    ).toBeNull()
+  })
+})
+
 
 type Middleware = (
   req: IncomingMessage,

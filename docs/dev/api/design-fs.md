@@ -13,6 +13,16 @@ packages under `framework/public/assets/` (the plugin `assetsRoot`). Mounted at
   `/__design_fs` response as unavailable and surfaces:
   **Start with npm run dev to manage apps**.
 
+## Canvas SPA routing
+
+On case-insensitive filesystems, a document navigation to
+`/apps/<appId>/canvases/<canvasId>` can match an on-disk component such as
+`Landing.tsx` when `canvasId` is `landing`, and Vite would otherwise serve the
+transformed module instead of the Shell SPA. The design-fs middleware rewrites
+HTML navigations (`Accept` includes `text/html`) for extension-less canvas
+routes to `/index.html`. Module URLs that include a file extension (for
+example `.tsx` or `.css`) are unchanged.
+
 ## Content root
 
 All app/canvas filesystem operations resolve under `contentRoot`

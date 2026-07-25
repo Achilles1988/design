@@ -104,6 +104,22 @@ async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
   }
 }
 
+/**
+ * On case-insensitive filesystems, a canvas route like `/apps/a/canvases/home`
+ * can resolve to `Home.tsx` and Vite will serve the module instead of the SPA.
+ * Document navigations (Accept includes text/html) to extension-less canvas
+ * routes must rewrite to index.html; module URLs with `.tsx`/`.css` pass through.
+ */
+export function rewriteCanvasSpaUrl(
+  pathname: string,
+  acceptHeader: string | undefined,
+): string | null {
+  if (!acceptHeader?.includes('text/html')) return null
+  if (pathname.includes('.')) return null
+  if (!/^\/apps\/[^/]+\/canvases\/[^/]+\/?$/.test(pathname)) return null
+  return '/index.html'
+}
+
 export function designFsPlugin(options: {
   contentRoot: string
   assetsRoot: string
@@ -114,6 +130,16 @@ export function designFsPlugin(options: {
     name: 'design-fs',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
+        const originalUrl = req.url ?? ''
+        const requestUrl = new URL(originalUrl, 'http://localhost')
+        const accept = Array.isArray(req.headers.accept)
+          ? req.headers.accept.join(',')
+          : req.headers.accept
+        const spaTarget = rewriteCanvasSpaUrl(requestUrl.pathname, accept)
+        if (spaTarget) {
+          req.url = spaTarget + requestUrl.search
+        }
+
         const rawUrl = req.url ?? ''
         if (!rawUrl.startsWith('/__design_fs')) return next()
 
