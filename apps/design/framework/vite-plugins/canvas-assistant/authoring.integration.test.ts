@@ -541,6 +541,53 @@ describe('Canvas Assistant authoring server integration', () => {
     )
   })
 
+  it('does not treat allowed package and candidate CSS imports as a context conflict', async () => {
+    const fixture = await createFixture()
+    const componentCssFile = path.join(
+      fixture.componentsDir,
+      'Metric.css',
+    )
+    const proposal = canvasProposal({
+      files: [
+        {
+          path: 'canvases/Home.tsx',
+          source: [
+            "import 'normalize.css'",
+            "import '../components/Metric.css'",
+            'export default function Home() {',
+            '  return <main className="metric">Updated</main>',
+            '}',
+            '',
+          ].join('\n'),
+        },
+        {
+          path: 'components/Metric.css',
+          source: '.metric { font-variant-numeric: tabular-nums; }\n',
+        },
+      ],
+      newSharedComponents: ['components/Metric.css'],
+    })
+
+    const card = proposalCard(
+      await runModel(fixture, {
+        toolName: 'propose_canvas_change',
+        args: proposal,
+      }),
+    )
+    const events = await applyProposal(fixture, card.proposalId)
+
+    expect(events.at(-1)?.result).toMatchObject({
+      ok: true,
+      repairAttempts: 0,
+    })
+    expect(await fs.readFile(fixture.canvasFile, 'utf8')).toBe(
+      proposal.files[0]?.source,
+    )
+    expect(await fs.readFile(componentCssFile, 'utf8')).toBe(
+      proposal.files[1]?.source,
+    )
+  })
+
   it('rejects an IDE edit made between proposal and apply', async () => {
     const fixture = await createFixture()
     const proposal = canvasProposal()

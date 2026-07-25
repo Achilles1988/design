@@ -112,10 +112,19 @@ type ApplyProposalTransactionInput = {
 type CandidateTarget = {
   path: string
   absolutePath: string
+  expectedRealPath: string
   operation: 'write-existing' | 'create-shared'
   originalSource: string | null
   expectedSource: string | null
   lastWrittenSource?: string
+}
+
+type ReadOnlyBaselineTarget = {
+  path: string
+  absolutePath: string
+  expectedRealPath: string
+  expectedSource: string
+  allowContextOmission: boolean
 }
 
 class InvalidCandidateSetError extends Error {
@@ -129,6 +138,13 @@ class ConcurrentTargetEditError extends Error {
   constructor() {
     super(BASELINE_CHANGED_ERROR)
     this.name = 'ConcurrentTargetEditError'
+  }
+}
+
+class ProposalConflictError extends Error {
+  constructor() {
+    super(BASELINE_CHANGED_ERROR)
+    this.name = 'ProposalConflictError'
   }
 }
 
@@ -384,10 +400,10 @@ function compactDiagnostic(error: unknown): string {
   )
 }
 
-function baselineTargets(
+async function baselineTargets(
   proposal: StoredProposal,
   context: CanvasAuthoringContext,
-): CandidateTarget[] {
+): Promise<CandidateTarget[]> {
   if (
     context.app.id !== proposal.appId ||
     context.canvas.id !== proposal.canvasId
@@ -452,26 +468,164 @@ function baselineTargets(
   }
 
   const appDir = path.dirname(context.componentsDir)
-  return writableEntries.map((entry) => {
-    if (entry.operation === 'write-existing') {
-      const current = currentFiles.get(entry.path)
-      if (!current) throw new Error(BASELINE_CHANGED_ERROR)
+  const realAppDir = await fs.realpath(appDir)
+  return Promise.all(
+    writableEntries.map(async (entry) => {
+      if (entry.operation === 'write-existing') {
+        const current = currentFiles.get(entry.path)
+        if (!current) throw new Error(BASELINE_CHANGED_ERROR)
+        const stat = await fs.lstat(current.absolutePath)
+        if (!stat.isFile() || stat.isSymbolicLink()) {
+          throw new Error(BASELINE_CHANGED_ERROR)
+        }
+        return {
+          path: entry.path,
+          absolutePath: current.absolutePath,
+          expectedRealPath: await fs.realpath(current.absolutePath),
+          operation: entry.operation,
+          originalSource: current.source,
+          expectedSource: current.source,
+        }
+      }
+      const absolutePath = path.resolve(appDir, entry.path)
       return {
         path: entry.path,
-        absolutePath: current.absolutePath,
+        absolutePath,
+        expectedRealPath: path.resolve(
+          realAppDir,
+          path.relative(appDir, absolutePath),
+        ),
         operation: entry.operation,
-        originalSource: current.source,
-        expectedSource: current.source,
+        originalSource: null,
+        expectedSource: null,
+      }
+    }),
+  )
+}
+
+async function readOnlyBaselineTargets(
+  proposal: StoredProposal,
+  context: CanvasAuthoringContext,
+): Promise<ReadOnlyBaselineTarget[]> {
+  if (
+    context.app.id !== proposal.appId ||
+    context.canvas.id !== proposal.canvasId
+  ) {
+    throw new ProposalConflictError()
+  }
+  const currentFiles = new Map(
+    context.files.map((file) => [file.relativePath, file]),
+  )
+  const canvasDirectory = path.posix.dirname(
+    `canvases/${context.canvas.component}`,
+  )
+  const targets: ReadOnlyBaselineTarget[] = []
+  for (const entry of proposal.baseline) {
+    if (entry.operation !== 'read-only') continue
+    const current = currentFiles.get(entry.path)
+    if (
+      typeof entry.hash !== 'string' ||
+      !current ||
+      current.hash !== entry.hash
+    ) {
+      throw new ProposalConflictError()
+    }
+    const stat = await fs.lstat(current.absolutePath)
+    if (!stat.isFile() || stat.isSymbolicLink()) {
+      throw new ProposalConflictError()
+    }
+    targets.push({
+      path: entry.path,
+      absolutePath: current.absolutePath,
+      expectedRealPath: await fs.realpath(current.absolutePath),
+      expectedSource: current.source,
+      allowContextOmission:
+        path.posix.extname(entry.path) === '.css' &&
+        path.posix.dirname(entry.path) === canvasDirectory,
+    })
+  }
+  return targets
+}
+
+function candidateDependencyContext(
+  approvedContext: CanvasAuthoringContext,
+  refreshedContext: CanvasAuthoringContext,
+  createSharedPaths: Set<string>,
+): CanvasAuthoringContext {
+  const files = new Map(
+    approvedContext.files
+      .filter(
+        (file) => !createSharedPaths.has(file.relativePath),
+      )
+      .map((file) => [file.relativePath, file]),
+  )
+  for (const file of refreshedContext.files) {
+    if (!createSharedPaths.has(file.relativePath)) {
+      files.set(file.relativePath, file)
+    }
+  }
+  return {
+    ...refreshedContext,
+    files: [...files.values()].sort((left, right) =>
+      left.relativePath < right.relativePath
+        ? -1
+        : left.relativePath > right.relativePath
+        ? 1
+        : 0,
+    ),
+  }
+}
+
+async function reloadAndVerifyContext({
+  proposal,
+  reloadContext,
+  expectedCanvasRelativePath,
+  readOnlyTargets,
+  readSource,
+}: {
+  proposal: StoredProposal
+  reloadContext: ApplyProposalTransactionInput['reloadContext']
+  expectedCanvasRelativePath?: string
+  readOnlyTargets?: ReadOnlyBaselineTarget[]
+  readSource?: ApplyProposalTransactionInput['readSource']
+}): Promise<{
+  context: CanvasAuthoringContext
+  repairContext: TrustedRepairContext
+}> {
+  try {
+    const context = await reloadContext()
+    if (
+      expectedCanvasRelativePath !== undefined &&
+      `canvases/${context.canvas.component}` !==
+        expectedCanvasRelativePath
+    ) {
+      throw new ProposalConflictError()
+    }
+    const repairContext = trustedRepairContext(proposal, context)
+    if (readOnlyTargets && readSource) {
+      const currentFiles = new Map(
+        context.files.map((file) => [file.relativePath, file]),
+      )
+      for (const target of readOnlyTargets) {
+        await assertRegularTargetIdentity(target)
+        const current = currentFiles.get(target.path)
+        if (
+          (!current && !target.allowContextOmission) ||
+          (current &&
+            (current.absolutePath !== target.absolutePath ||
+              current.source !== target.expectedSource)) ||
+          (await readSource(target.absolutePath)) !==
+            target.expectedSource
+        ) {
+          throw new ProposalConflictError()
+        }
+        await assertRegularTargetIdentity(target)
       }
     }
-    return {
-      path: entry.path,
-      absolutePath: path.resolve(appDir, entry.path),
-      operation: entry.operation,
-      originalSource: null,
-      expectedSource: null,
-    }
-  })
+    return { context, repairContext }
+  } catch {
+    throw new ProposalConflictError()
+  }
 }
 
 async function rollbackTargets(
@@ -482,20 +636,112 @@ async function rollbackTargets(
   const results = await Promise.allSettled(
     targets.map(async (target) => {
       if (target.lastWrittenSource === undefined) return
-      const currentSource = await reader(target.absolutePath)
-      if (currentSource !== target.lastWrittenSource) {
-        throw new ConcurrentTargetEditError()
-      }
+      await assertTargetState(
+        target,
+        target.lastWrittenSource,
+        reader,
+      )
       if (target.operation === 'write-existing') {
         await writer(target.absolutePath, target.originalSource ?? '')
+        await assertTargetState(
+          target,
+          target.originalSource ?? '',
+          reader,
+        )
         return
       }
       await fs.rm(target.absolutePath, { force: true })
+      await assertTargetState(target, null, reader)
     }),
   )
   return results.every(
     (result) => result.status === 'fulfilled',
   )
+}
+
+async function assertRegularTargetIdentity(
+  target: Pick<
+    CandidateTarget,
+    'absolutePath' | 'expectedRealPath'
+  >,
+): Promise<void> {
+  try {
+    const stat = await fs.lstat(target.absolutePath)
+    if (!stat.isFile() || stat.isSymbolicLink()) {
+      throw new ConcurrentTargetEditError()
+    }
+    if (
+      (await fs.realpath(target.absolutePath)) !==
+      target.expectedRealPath
+    ) {
+      throw new ConcurrentTargetEditError()
+    }
+  } catch {
+    throw new ConcurrentTargetEditError()
+  }
+}
+
+async function assertMissingTargetIdentity(
+  target: CandidateTarget,
+): Promise<void> {
+  try {
+    await fs.lstat(target.absolutePath)
+    throw new ConcurrentTargetEditError()
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw new ConcurrentTargetEditError()
+    }
+  }
+
+  let existingAncestor = path.dirname(target.absolutePath)
+  for (;;) {
+    try {
+      const stat = await fs.lstat(existingAncestor)
+      if (!stat.isDirectory() || stat.isSymbolicLink()) {
+        throw new ConcurrentTargetEditError()
+      }
+      const realAncestor = await fs.realpath(existingAncestor)
+      if (
+        path.resolve(
+          realAncestor,
+          path.relative(existingAncestor, target.absolutePath),
+        ) !== target.expectedRealPath
+      ) {
+        throw new ConcurrentTargetEditError()
+      }
+      return
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw new ConcurrentTargetEditError()
+      }
+      const parent = path.dirname(existingAncestor)
+      if (parent === existingAncestor) {
+        throw new ConcurrentTargetEditError()
+      }
+      existingAncestor = parent
+    }
+  }
+}
+
+async function assertTargetState(
+  target: CandidateTarget,
+  expectedSource: string | null,
+  reader: ApplyProposalTransactionInput['readSource'],
+): Promise<void> {
+  if (expectedSource === null) {
+    await assertMissingTargetIdentity(target)
+    if ((await reader(target.absolutePath)) !== null) {
+      throw new ConcurrentTargetEditError()
+    }
+    await assertMissingTargetIdentity(target)
+    return
+  }
+
+  await assertRegularTargetIdentity(target)
+  if ((await reader(target.absolutePath)) !== expectedSource) {
+    throw new ConcurrentTargetEditError()
+  }
+  await assertRegularTargetIdentity(target)
 }
 
 export async function readSource(
@@ -618,11 +864,15 @@ export async function applyProposalTransaction({
   onStatus({ phase: 'checking' })
   let context: CanvasAuthoringContext
   let targets: CandidateTarget[]
-  let repairContext: TrustedRepairContext
+  let readOnlyTargets: ReadOnlyBaselineTarget[]
   try {
-    context = await reloadContext()
-    repairContext = trustedRepairContext(proposal, context)
-    targets = baselineTargets(proposal, context)
+    const verified = await reloadAndVerifyContext({
+      proposal,
+      reloadContext,
+    })
+    context = verified.context
+    targets = await baselineTargets(proposal, context)
+    readOnlyTargets = await readOnlyBaselineTargets(proposal, context)
   } catch {
     return {
       ok: false,
@@ -649,6 +899,12 @@ export async function applyProposalTransaction({
 
   const originalCandidatePaths = proposal.candidateFiles.map(
     (file) => file.path,
+  )
+  const approvedDependencyContext = context
+  const createSharedPaths = new Set(
+    targets
+      .filter((target) => target.operation === 'create-shared')
+      .map((target) => target.path),
   )
   const targetsByPath = new Map(
     targets.map((target) => [target.path, target]),
@@ -690,18 +946,45 @@ export async function applyProposalTransaction({
   const assertWrittenTargetsUnchanged = async (): Promise<void> => {
     for (const target of targets) {
       if (!writtenTargetPaths.has(target.path)) continue
-      const currentSource = await reader(target.absolutePath)
-      if (currentSource !== target.expectedSource) {
-        throw new ConcurrentTargetEditError()
-      }
+      await assertTargetState(
+        target,
+        target.expectedSource,
+        reader,
+      )
     }
+  }
+  const refreshContext = async (
+    candidateSet: CandidateFile[],
+  ): Promise<TrustedRepairContext> => {
+    const verified = await reloadAndVerifyContext({
+      proposal,
+      reloadContext,
+      expectedCanvasRelativePath: canvasRelativePath,
+      readOnlyTargets,
+      readSource: reader,
+    })
+    await assertWrittenTargetsUnchanged()
+    try {
+      validateCandidateDependencies(
+        candidateDependencyContext(
+          approvedDependencyContext,
+          verified.context,
+          createSharedPaths,
+        ),
+        candidateSet,
+        proposal.card.reusedComponents,
+      )
+    } catch {
+      throw new ProposalConflictError()
+    }
+    return verified.repairContext
   }
   const applyCandidateSet = async (
     candidateSet: CandidateFile[],
   ): Promise<void> => {
     assertCandidateSet(candidateSet, originalCandidatePaths)
     validateCandidateDependencies(
-      context,
+      approvedDependencyContext,
       candidateSet,
       proposal.card.reusedComponents,
     )
@@ -709,20 +992,23 @@ export async function applyProposalTransaction({
     for (const candidate of candidateSet) {
       const target = targetsByPath.get(candidate.path)
       if (!target) throw new InvalidCandidateSetError()
-      const currentSource = await reader(target.absolutePath)
-      if (currentSource !== target.expectedSource) {
-        throw new ConcurrentTargetEditError()
-      }
+      await assertTargetState(
+        target,
+        target.expectedSource,
+        reader,
+      )
       await writer(target.absolutePath, candidate.source)
       target.expectedSource = candidate.source
       target.lastWrittenSource = candidate.source
       writtenTargetPaths.add(target.path)
+      await assertTargetState(target, candidate.source, reader)
     }
   }
 
   try {
     for (;;) {
       await applyCandidateSet(candidates)
+      await refreshContext(candidates)
       onStatus({ phase: 'validating' })
       let validationFailed = false
       let validationError: unknown
@@ -732,7 +1018,7 @@ export async function applyProposalTransaction({
         validationFailed = true
         validationError = error
       }
-      await assertWrittenTargetsUnchanged()
+      const repairContext = await refreshContext(candidates)
       if (!validationFailed) {
         return {
           ok: true,
@@ -754,12 +1040,24 @@ export async function applyProposalTransaction({
       repairAttempts += 1
       const attempt = repairAttempts as 1 | 2
       onStatus({ phase: 'repairing', attempt })
-      candidates = await repair({
-        attempt,
-        diagnostic: compactDiagnostic(validationError),
-        candidateFiles: candidates,
-        ...repairContext,
-      })
+      let repairedCandidates: CandidateFile[] | undefined
+      let repairFailed = false
+      let repairError: unknown
+      try {
+        repairedCandidates = await repair({
+          attempt,
+          diagnostic: compactDiagnostic(validationError),
+          candidateFiles: candidates,
+          ...repairContext,
+        })
+      } catch (error) {
+        repairFailed = true
+        repairError = error
+      }
+      await refreshContext(candidates)
+      if (repairFailed) throw repairError
+      if (!repairedCandidates) throw new InvalidCandidateSetError()
+      candidates = repairedCandidates
       assertCandidateSet(candidates, originalCandidatePaths)
     }
   } catch (error) {
@@ -773,7 +1071,8 @@ export async function applyProposalTransaction({
           ? ROLLBACK_INCOMPLETE_ERROR
           : error instanceof InvalidCandidateSetError
           ? INVALID_REPAIR_ERROR
-          : error instanceof ConcurrentTargetEditError
+          : error instanceof ConcurrentTargetEditError ||
+            error instanceof ProposalConflictError
           ? BASELINE_CHANGED_ERROR
           : APPLY_FAILED_ERROR,
       rolledBack,

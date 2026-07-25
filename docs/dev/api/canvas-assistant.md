@@ -47,6 +47,12 @@ Body:
 The route loads the same trusted authoring context used by chat, including the
 configured Canvas Style contract. It does not call an AI model.
 
+Only direct same-directory `./*.css` imports are discovered as writable Canvas
+CSS. Package CSS and CSS under `components/` are not reclassified as Canvas
+files during a reload; proposal dependency validation and the final Vite
+transform remain authoritative for those allowed imports. Unsupported relative
+CSS paths are still rejected by dependency validation before a candidate write.
+
 Success is `200 application/json`:
 
 ```json
@@ -319,10 +325,20 @@ fingerprints. The proposal also stores only the latest sanitized user intent
 plus its authoritative Style id, Layout decision, and preservation constraints;
 it never stores `aiConfig`, API keys, or unrelated chat history.
 
-Read-only baseline enforcement belongs to the apply transaction, which reloads
-trusted context and rejects with the normal proposal-conflict result before any
-write when the App configuration, Style contract, selected installed Layout
-contract, or a bound source file changed.
+Read-only baseline enforcement belongs to the apply transaction. It reloads
+trusted context at apply start, immediately before and after each asynchronous
+Vite validation, immediately after each asynchronous repair, and immediately
+before a successful return. Every reload rechecks the App configuration, Style
+contract, selected installed Layout contract, current Canvas identity, and all
+read-only file baselines. A change rejects with the normal proposal-conflict
+result. Read-only baselines retain their initial absolute path, real path, and
+source and are rechecked as regular non-symlink files at every checkpoint.
+When the refreshed context still discovers one, its path and source must match
+too. A reused component must remain present in the refreshed context; omission
+is fail-closed even when the bound path still reads the same source. Only a
+same-directory Canvas CSS baseline may disappear from refreshed discovery
+while its bound identity and source remain unchanged, because the
+transaction's own Canvas candidate can remove that CSS import.
 
 ## Apply stream
 
@@ -380,42 +396,59 @@ type CanvasApplyComplete =
     }
 ```
 
-Apply reloads context, checks all candidate and read-only baselines, and runs
-the same candidate dependency and exact `reusedComponents` validation before
-writing the initial candidate set and before writing every repaired candidate
-set. It then writes atomically and asks the production Vite server to invalidate
-and transform every candidate `.ts`, `.tsx`, and `.css` target in stable
-relative-path order. Validation is never limited to the Canvas entry, so a
-newly created or otherwise unvisited dependency must transform successfully
-before apply can complete. Validation may run at most two AI repairs. A repair
-must return the same complete path set. Each repair request is rebuilt from the
-server-side proposal and reloaded trusted context and includes the sanitized
-original user intent, complete current Style contract, selected installed
-Layout contract or temporary Layout decision, authoritative preservation
-constraints, compact diagnostic, and complete candidate set. Browser state is
-never used to supply repair constraints. The repair model receives a fully
-static system authority policy and one JSON data envelope. Trusted domain
-requirements and untrusted validation/candidate evidence occupy separate
-fields; no dynamic value can change roles, the allowed path set, the task, or
-the output protocol. Candidate comments, diagnostics, strings, and fake
-delimiters are evidence only, never repair instructions.
+Apply checks all candidate and read-only baselines and runs the same candidate
+dependency and exact `reusedComponents` validation before writing the initial
+candidate set and before writing every repaired candidate set. It then writes
+atomically and asks the production Vite server to invalidate and transform every
+candidate `.ts`, `.tsx`, and `.css` target in stable relative-path order.
+Validation is never limited to the Canvas entry, so a newly created or
+otherwise unvisited dependency must transform successfully before apply can
+complete. Validation may run at most two AI repairs. A repair must return the
+same complete path set. Each repair request is rebuilt after validation from
+the latest successfully reloaded context and includes the sanitized original
+user intent, complete current Style contract, selected installed Layout
+contract or temporary Layout decision, authoritative preservation constraints,
+compact diagnostic, and complete candidate set. The context is reloaded again
+after the repair resolves or rejects before any returned candidate can be
+written. Browser state is never used to supply repair constraints. The repair
+model receives a fully static system authority policy and one JSON data
+envelope. Trusted domain requirements and untrusted validation/candidate
+evidence occupy separate fields; no dynamic value can change roles, the allowed
+path set, the task, or the output protocol. Candidate comments, diagnostics,
+strings, and fake delimiters are evidence only, never repair instructions.
 
 The transaction tracks the exact expected source, including expected absence,
-for every writable target. Immediately before each atomic write in the initial
-or repaired candidate set, it rereads that target and compares it with the
-transaction's expected source. The expectation advances only after that
+for every writable target and binds its expected real path. Immediately before
+and after each atomic write in the initial or repaired candidate set, it checks
+that an existing target is a regular non-symlink file at that real path, or that
+an absent create target still resolves through the bound directory identity,
+then compares the exact source. The expectation advances only after that
 transaction write succeeds. Immediately after every asynchronous Vite
-validation, the transaction rereads every written target before it can report
-success, request repair, or begin terminal rollback. A concurrent IDE edit
-therefore cannot be overwritten or mistaken for a successfully applied
-candidate after a validation or repair boundary.
+validation, the transaction repeats the identity and source checks for every
+written target before it can report success, request repair, or begin terminal
+rollback. A concurrent IDE edit or same-source symlink substitution therefore
+cannot be overwritten or mistaken for a successfully applied candidate after a
+validation or repair boundary. Repeated context checks do not compare writable
+files with the proposal's original hashes: writable targets remain governed by
+this `expectedSource` / `lastWrittenSource` state machine, so the transaction's
+own atomic writes are not mistaken for context conflicts.
+Files staged as `create-shared` also remain candidate dependencies rather than
+being reclassified as reused read-only components when a reload discovers the
+new file. At every reload checkpoint, dependency and exact
+`reusedComponents` validation uses the refreshed file set overlaid on the
+approval-time authorized set, with transaction-owned `create-shared` paths
+removed. This retains unchanged Canvas CSS that disappeared only because the
+candidate removed its import, while fresh files still expose resolution
+changes such as a newly introduced `.ts` / `.tsx` extensionless-import
+ambiguity. Repaired candidates are additionally checked against the original
+approval-time dependency authority before any write.
 
 Exhausted or invalid repairs run a best-effort rollback across every written
 target; one restore or delete failure never prevents attempts on the remaining
 targets. Rollback also rereads each target and restores or deletes it only when
-its current source exactly equals the last source written by this transaction.
-An intervening IDE edit is preserved while rollback continues for other
-targets.
+its file identity still matches and its current source exactly equals the last
+source written by this transaction. An intervening IDE edit or same-source
+symlink substitution is preserved while rollback continues for other targets.
 
 `rolledBack: true` means every required restore/delete succeeded, or no file
 was written before the failure. `rolledBack: false` means at least one restore

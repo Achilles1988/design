@@ -60,7 +60,21 @@ function importedCssFiles(canvasSource: string): string[] {
     .preProcessFile(canvasSource, true, true)
     .importedFiles
     .map((item) => item.fileName)
-    .filter((fileName) => path.extname(fileName) === CANVAS_STYLE_EXTENSION)
+    .filter(
+      (fileName) =>
+        path.posix.extname(fileName) === CANVAS_STYLE_EXTENSION,
+    )
+    .filter((fileName) => {
+      if (
+        !fileName.startsWith('./') &&
+        !fileName.startsWith('../')
+      ) {
+        return false
+      }
+      return !path.posix
+        .normalize(fileName)
+        .startsWith('../components/')
+    })
 }
 
 function isWithin(allowedRoot: string, resolved: string): boolean {

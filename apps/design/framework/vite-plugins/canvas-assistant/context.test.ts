@@ -272,16 +272,17 @@ describe('createCanvasContextLoader', () => {
     )
   })
 
-  it('rejects bare, nested, or sibling-directory Canvas CSS imports', async () => {
+  it('ignores package CSS and rejects nested or sibling-directory Canvas CSS discovery', async () => {
     const bareFixture = await createFixture()
     await fs.writeFile(
       path.join(bareFixture.canvasesDir, 'Home.tsx'),
       "import 'Home.css'\nexport default function Home() { return null }\n",
       'utf8',
     )
-    await expect(bareFixture.loader.load('shop', 'home')).rejects.toThrow(
-      'Canvas source could not be loaded.',
-    )
+    const bareContext = await bareFixture.loader.load('shop', 'home')
+    expect(
+      bareContext.files.map((file) => file.relativePath),
+    ).not.toContain('canvases/Home.css')
 
     const nestedFixture = await createFixture()
     const nestedCssDir = path.join(nestedFixture.canvasesDir, 'nested')

@@ -527,6 +527,34 @@ describe('applyProposalTransaction', () => {
     expect(repair).not.toHaveBeenCalled()
   })
 
+  it('does not mistake transaction-driven CSS discovery changes for a conflict', async () => {
+    let reloads = 0
+    const reloadAfterCanvasWrite = async () => {
+      reloads += 1
+      const current = await reloadContext()
+      return reloads === 1
+        ? current
+        : {
+            ...current,
+            files: current.files.filter(
+              (file) =>
+                file.relativePath !== 'canvases/Home.css',
+            ),
+          }
+    }
+
+    const result = await applyProposalTransaction(
+      input({ reloadContext: reloadAfterCanvasWrite }),
+    )
+
+    expect(result).toEqual({
+      ok: true,
+      proposalId: 'proposal-1',
+      repairAttempts: 0,
+    })
+    expect(await fs.readFile(cssPath, 'utf8')).toBe(ORIGINAL_CSS)
+  })
+
   it('does not report success when an IDE edit lands during validation', async () => {
     const validationStarted = deferred<void>()
     const validationResult = deferred<void>()
@@ -553,6 +581,229 @@ describe('applyProposalTransaction', () => {
     })
     expect(await fs.readFile(canvasPath, 'utf8')).toBe(ideSource)
     expect(await exists(selectPath)).toBe(false)
+  })
+
+  it('preserves a same-source symlink swapped into a create target during validation', async () => {
+    const validationStarted = deferred<void>()
+    const validationResult = deferred<void>()
+    const validate = vi.fn(async () => {
+      validationStarted.resolve()
+      return validationResult.promise
+    })
+
+    const pending = applyProposalTransaction(input({ validate }))
+    await validationStarted.promise
+    const externalSelectPath = path.join(
+      appDir,
+      'canvases/ExternalSelect.tsx',
+    )
+    await fs.writeFile(externalSelectPath, NEW_SELECT, 'utf8')
+    await fs.rm(selectPath)
+    await fs.symlink(externalSelectPath, selectPath)
+    validationResult.resolve()
+
+    const result = await pending
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'Canvas proposal rollback was incomplete. Some files may need manual inspection.',
+      rolledBack: false,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(ORIGINAL_CANVAS)
+    expect((await fs.lstat(selectPath)).isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(externalSelectPath, 'utf8')).toBe(
+      NEW_SELECT,
+    )
+  })
+
+  it('rejects a reused read-only component change during validation', async () => {
+    const validationStarted = deferred<void>()
+    const validationResult = deferred<void>()
+    const validate = vi.fn(async () => {
+      validationStarted.resolve()
+      return validationResult.promise
+    })
+
+    const pending = applyProposalTransaction(input({ validate }))
+    await validationStarted.promise
+    const externalButton =
+      'export function Button() { return <button>Changed externally</button> }'
+    await fs.writeFile(buttonPath, externalButton, 'utf8')
+    validationResult.resolve()
+
+    const result = await pending
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'The Canvas changed after this proposal was created. Generate a new proposal.',
+      rolledBack: true,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(ORIGINAL_CANVAS)
+    expect(await exists(selectPath)).toBe(false)
+    expect(await fs.readFile(buttonPath, 'utf8')).toBe(externalButton)
+  })
+
+  it('rejects a same-source symlink swapped into a read-only baseline', async () => {
+    const validationStarted = deferred<void>()
+    const validationResult = deferred<void>()
+    const validate = vi.fn(async () => {
+      validationStarted.resolve()
+      return validationResult.promise
+    })
+
+    const pending = applyProposalTransaction(input({ validate }))
+    await validationStarted.promise
+    const externalButtonPath = path.join(
+      appDir,
+      'canvases/ExternalButton.tsx',
+    )
+    await fs.writeFile(externalButtonPath, READ_ONLY_BUTTON, 'utf8')
+    await fs.rm(buttonPath)
+    await fs.symlink(externalButtonPath, buttonPath)
+    validationResult.resolve()
+
+    const result = await pending
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'The Canvas changed after this proposal was created. Generate a new proposal.',
+      rolledBack: true,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(ORIGINAL_CANVAS)
+    expect(await exists(selectPath)).toBe(false)
+    expect((await fs.lstat(buttonPath)).isSymbolicLink()).toBe(true)
+    expect(await fs.readFile(externalButtonPath, 'utf8')).toBe(
+      READ_ONLY_BUTTON,
+    )
+  })
+
+  it('rejects a reused component omitted from the fresh context', async () => {
+    let reloads = 0
+    const reloadWithoutButtonAfterWrite = async () => {
+      reloads += 1
+      const current = await reloadContext()
+      return reloads === 1
+        ? current
+        : {
+            ...current,
+            files: current.files.filter(
+              (file) =>
+                file.relativePath !== 'components/Button.tsx',
+            ),
+          }
+    }
+
+    const result = await applyProposalTransaction(
+      input({ reloadContext: reloadWithoutButtonAfterWrite }),
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'The Canvas changed after this proposal was created. Generate a new proposal.',
+      rolledBack: true,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(ORIGINAL_CANVAS)
+    expect(await exists(selectPath)).toBe(false)
+    expect(await fs.readFile(buttonPath, 'utf8')).toBe(
+      READ_ONLY_BUTTON,
+    )
+  })
+
+  it('rejects a new extensionless import ambiguity during validation', async () => {
+    const candidateCanvas = [
+      "import { Button } from '../components/Button'",
+      'export default function Home() {',
+      '  return <Button />',
+      '}',
+    ].join('\n')
+    const transactionCard = card()
+    const transactionProposal = proposal({
+      candidateFiles: [
+        {
+          path: 'canvases/Home.tsx',
+          source: candidateCanvas,
+        },
+        {
+          path: 'components/Select.tsx',
+          source: NEW_SELECT,
+        },
+      ],
+      card: {
+        ...transactionCard,
+        reusedComponents: ['components/Button.tsx'],
+        candidateFiles: [
+          {
+            path: 'canvases/Home.tsx',
+            source: candidateCanvas,
+          },
+          transactionCard.candidateFiles[1],
+        ],
+      },
+    })
+    const validationStarted = deferred<void>()
+    const validationResult = deferred<void>()
+    const validate = vi.fn(async () => {
+      validationStarted.resolve()
+      return validationResult.promise
+    })
+    const ambiguousButtonPath = path.join(
+      appDir,
+      'components/Button.ts',
+    )
+    const reloadWithAmbiguousButton = async () => {
+      const current = await reloadContext()
+      if (!(await exists(ambiguousButtonPath))) return current
+      const source = await fs.readFile(ambiguousButtonPath, 'utf8')
+      return {
+        ...current,
+        files: [
+          ...current.files,
+          {
+            relativePath: 'components/Button.ts',
+            absolutePath: ambiguousButtonPath,
+            permission: 'read-only' as const,
+            source,
+            hash: sha256(source),
+          },
+        ],
+      }
+    }
+
+    const pending = applyProposalTransaction(
+      input({
+        proposal: transactionProposal,
+        reloadContext: reloadWithAmbiguousButton,
+        validate,
+      }),
+    )
+    await validationStarted.promise
+    const externalButton =
+      'export function Button() { return "Different resolution" }'
+    await fs.writeFile(ambiguousButtonPath, externalButton, 'utf8')
+    validationResult.resolve()
+
+    const result = await pending
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'The Canvas changed after this proposal was created. Generate a new proposal.',
+      rolledBack: true,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(ORIGINAL_CANVAS)
+    expect(await exists(selectPath)).toBe(false)
+    expect(await fs.readFile(ambiguousButtonPath, 'utf8')).toBe(
+      externalButton,
+    )
   })
 
   it('passes a temporary Layout decision to repair without an installed contract', async () => {
@@ -707,6 +958,43 @@ describe('applyProposalTransaction', () => {
     ])
   })
 
+  it('rebuilds each repair request from the latest verified context', async () => {
+    let reloads = 0
+    const reloadFreshContext = async () => {
+      reloads += 1
+      const current = await reloadContext()
+      return reloads === 1
+        ? current
+        : {
+            ...current,
+            style: {
+              ...current.style,
+              source: '# Reloaded Dashboard',
+            },
+          }
+    }
+    const validate = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Vite rejected the candidate.'))
+      .mockResolvedValueOnce(undefined)
+    const repair = vi.fn(
+      async (request: RepairRequest) => request.candidateFiles,
+    )
+
+    const result = await applyProposalTransaction(
+      input({
+        reloadContext: reloadFreshContext,
+        validate,
+        repair,
+      }),
+    )
+
+    expect(result).toMatchObject({ ok: true, repairAttempts: 1 })
+    expect(repair.mock.calls[0]?.[0].styleContract.source).toBe(
+      '# Reloaded Dashboard',
+    )
+  })
+
   it('does not overwrite an IDE edit made while repair is pending', async () => {
     const repairStarted = deferred<void>()
     const repairResult = deferred<StoredProposal['candidateFiles']>()
@@ -752,6 +1040,65 @@ describe('applyProposalTransaction', () => {
     expect(
       writer.mock.calls.some(([, source]) => source === REPAIRED_CANVAS),
     ).toBe(false)
+  })
+
+  it('rejects a Style contract change while repair is pending', async () => {
+    let styleChanged = false
+    const reloadChangingContext = async () => {
+      const current = await reloadContext()
+      return styleChanged
+        ? {
+            ...current,
+            style: {
+              ...current.style,
+              source: '# Changed during repair',
+              hash: 'changed-style-contract-hash',
+            },
+          }
+        : current
+    }
+    const repairStarted = deferred<void>()
+    const repairResult = deferred<StoredProposal['candidateFiles']>()
+    const validate = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Vite rejected the candidate.'))
+      .mockResolvedValueOnce(undefined)
+    const repair = vi.fn(async () => {
+      repairStarted.resolve()
+      return repairResult.promise
+    })
+
+    const pending = applyProposalTransaction(
+      input({
+        reloadContext: reloadChangingContext,
+        validate,
+        repair,
+      }),
+    )
+    await repairStarted.promise
+    styleChanged = true
+    repairResult.resolve([
+      {
+        path: 'canvases/Home.tsx',
+        source: REPAIRED_CANVAS,
+      },
+      {
+        path: 'components/Select.tsx',
+        source: NEW_SELECT,
+      },
+    ])
+
+    const result = await pending
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'The Canvas changed after this proposal was created. Generate a new proposal.',
+      rolledBack: true,
+    })
+    expect(await fs.readFile(canvasPath, 'utf8')).toBe(ORIGINAL_CANVAS)
+    expect(await exists(selectPath)).toBe(false)
   })
 
   const credentialLabels = [
