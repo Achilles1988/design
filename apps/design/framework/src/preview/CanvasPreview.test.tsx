@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs'
+import { StrictMode } from 'react'
 import {
   act,
   cleanup,
@@ -101,12 +102,13 @@ function renderCanvasPreview(
     canvasId: string,
     callback: () => void,
   ) => () => void = () => () => undefined,
+  options: { strictMode?: boolean } = {},
 ) {
   let activeAdapter: ChatModelAdapter | null = null
   const setPageAdapter = vi.fn((adapter: ChatModelAdapter | null) => {
     activeAdapter = adapter
   })
-  const view = render(
+  const preview = (
     <AssistantModelModeProvider
       api={{
         getPageAdapter: () => activeAdapter,
@@ -123,7 +125,10 @@ function renderCanvasPreview(
           <Route path="/settings" element={<div>Settings page</div>} />
         </Routes>
       </MemoryRouter>
-    </AssistantModelModeProvider>,
+    </AssistantModelModeProvider>
+  )
+  const view = render(
+    options.strictMode ? <StrictMode>{preview}</StrictMode> : preview,
   )
   return {
     ...view,
@@ -349,6 +354,53 @@ describe('CanvasPreview Canvas Assistant integration', () => {
         'Canvas preview',
       ) as HTMLIFrameElement
       expect(nextFrame.srcdoc).toMatch(/"reveal"\s*:\s*true/)
+    })
+  })
+
+  it('keeps reveal in srcDoc under StrictMode double render after apply', async () => {
+    let notifyApplied: (() => void) | undefined
+    const subscribe = vi.fn(
+      (_appId: string, _canvasId: string, next: () => void) => {
+        notifyApplied = next
+        return () => undefined
+      },
+    )
+    renderCanvasPreview(subscribe, { strictMode: true })
+    await screen.findByTitle('Canvas preview')
+
+    act(() => notifyApplied?.())
+
+    await waitFor(() => {
+      const frame = screen.getByTitle('Canvas preview') as HTMLIFrameElement
+      expect(frame.srcdoc).toMatch(/"reveal"\s*:\s*true/)
+    })
+  })
+
+  it('does not carry a pending apply reveal to another canvas', async () => {
+    mocks.listCanvases.mockImplementation(async (appId: string) => [
+      appId === 'design'
+        ? { id: 'home', name: 'Home', component: 'Home.tsx' }
+        : { id: 'about', name: 'About', component: 'About.tsx' },
+    ])
+    mocks.checkContext.mockImplementation(({ appId }: { appId: string }) =>
+      appId === 'design' ? Promise.resolve() : Promise.resolve(),
+    )
+    let notifyApplied: (() => void) | undefined
+    const subscribe = vi.fn(
+      (_appId: string, _canvasId: string, next: () => void) => {
+        notifyApplied = next
+        return () => undefined
+      },
+    )
+    renderCanvasPreview(subscribe)
+    await screen.findByTitle('Canvas preview')
+
+    act(() => notifyApplied?.())
+    fireEvent.click(screen.getByRole('button', { name: 'Open other Canvas' }))
+
+    await waitFor(() => {
+      const frame = screen.getByTitle('Canvas preview') as HTMLIFrameElement
+      expect(frame.srcdoc).not.toMatch(/"reveal"\s*:\s*true/)
     })
   })
 
