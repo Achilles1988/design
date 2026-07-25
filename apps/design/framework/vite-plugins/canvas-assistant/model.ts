@@ -16,6 +16,7 @@ import {
 } from '../../src/lib/canvasAssistantProtocol'
 import type { CanvasAuthoringContext } from './context'
 import { buildCanvasSystemPrompt } from './prompt'
+import { sanitizeOriginalUserIntent } from './proposals'
 
 const LayoutRecommendationRequestSchema = z.object({
   layoutId: z.string().min(1),
@@ -57,6 +58,7 @@ type ModelRunnerOptions = {
   stageProposal: (
     context: CanvasAuthoringContext,
     rawToolArgs: unknown,
+    originalUserIntent: string,
   ) => CanvasProposalCardArgs
 }
 
@@ -151,6 +153,24 @@ function toCoreMessages(
   }
 
   return output
+}
+
+function minimalOriginalUserIntent(
+  messages: CanvasChatRequest['messages'],
+): string {
+  const latestUserMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === 'user')
+  const raw =
+    latestUserMessage?.content
+      .filter(
+        (part): part is Extract<typeof part, { type: 'text' }> =>
+          part.type === 'text',
+      )
+      .map((part) => part.text)
+      .join('\n')
+      .trim() ?? ''
+  return sanitizeOriginalUserIntent(raw)
 }
 
 function recommendLayout(
@@ -255,7 +275,11 @@ export function createCanvasModelRunner(options: ModelRunnerOptions) {
           return
         }
         if (part.toolName === 'propose_canvas_change') {
-          const args = options.stageProposal(context, part.args)
+          const args = options.stageProposal(
+            context,
+            part.args,
+            minimalOriginalUserIntent(request.messages),
+          )
           yield runResult(text, {
             type: 'tool-call',
             toolCallId,

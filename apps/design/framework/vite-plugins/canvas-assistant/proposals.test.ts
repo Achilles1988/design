@@ -15,6 +15,7 @@ function context(
       style: 'dashboard',
       layouts: ['sidebar-shell'],
     },
+    appConfigHash: 'app-config-hash',
     canvas: {
       id: 'home',
       name: 'Home',
@@ -24,12 +25,14 @@ function context(
       id: 'dashboard',
       relativePath: 'dashboard/DESIGN.md',
       source: '# Dashboard Style',
+      hash: 'style-contract-hash',
     },
     installedLayouts: [
       {
         id: 'sidebar-shell',
         relativePath: 'sidebar-shell/LAYOUT.md',
         source: '# Sidebar Shell',
+        hash: 'layout-contract-hash',
       },
     ],
     layoutIndex: [],
@@ -74,10 +77,90 @@ function rawProposal() {
 }
 
 function store(now: () => number = () => START_TIME) {
-  return createProposalStore({ now, ttlMs: PROPOSAL_TTL_MS })
+  const proposalStore = createProposalStore({
+    now,
+    ttlMs: PROPOSAL_TTL_MS,
+  })
+  return {
+    ...proposalStore,
+    stage(
+      stageContext: CanvasAuthoringContext,
+      rawToolArgs: unknown,
+      originalUserIntent = 'Update the current Canvas.',
+    ) {
+      return proposalStore.stage(
+        stageContext,
+        rawToolArgs,
+        originalUserIntent,
+      )
+    },
+  }
 }
 
 describe('createProposalStore', () => {
+  it('stores trusted design fingerprints, constraints, and minimal intent', () => {
+    const proposalStore = store()
+    const card = proposalStore.stage(
+      context(),
+      rawProposal(),
+      'Build an account form.',
+    )
+
+    const claimed = proposalStore.claim(
+      card.proposalId,
+      'design',
+      'home',
+    )
+    expect(claimed.trusted).toEqual({
+      appConfigHash: 'app-config-hash',
+      styleContract: {
+        id: 'dashboard',
+        hash: 'style-contract-hash',
+      },
+      selectedLayoutContract: {
+        id: 'sidebar-shell',
+        hash: 'layout-contract-hash',
+      },
+      originalUserIntent: 'Build an account form.',
+      constraints: {
+        styleId: 'dashboard',
+        layout: rawProposal().layout,
+        preserved: ['Navigation'],
+      },
+    })
+  })
+
+  it('stores no installed Layout fingerprint for a temporary Layout', () => {
+    const proposalStore = store()
+    const raw = rawProposal()
+    raw.layout = {
+      kind: 'temporary',
+      reason: 'Use a one-off comparison workspace.',
+    }
+    const card = proposalStore.stage(
+      context(),
+      raw,
+      'Compare the account cohorts.',
+    )
+
+    const claimed = proposalStore.claim(
+      card.proposalId,
+      'design',
+      'home',
+    )
+    expect(claimed.trusted.selectedLayoutContract).toBeNull()
+    expect(claimed.trusted.constraints.layout).toEqual(raw.layout)
+  })
+
+  it('rejects an installed Layout whose contract is unavailable', () => {
+    expect(() =>
+      store().stage(
+        context({ installedLayouts: [] }),
+        rawProposal(),
+      ),
+    ).toThrow('The selected Layout contract could not be loaded.')
+  })
+
   it('copies read-only candidate source into the card without making it authoritative', () => {
     const proposalStore = store()
     const card = proposalStore.stage(context(), rawProposal())
@@ -90,6 +173,8 @@ describe('createProposalStore', () => {
     ])
 
     card.candidateFiles[0]!.source = 'browser replacement'
+    card.layout.reason = 'browser replacement'
+    card.preserved[0] = 'browser replacement'
     const claimed = proposalStore.claim(
       card.proposalId,
       'design',
@@ -98,6 +183,12 @@ describe('createProposalStore', () => {
     expect(claimed.candidateFiles[0]!.source).toBe(
       'export default function Home() { return null }',
     )
+    expect(claimed.trusted.constraints.layout.reason).toBe(
+      'Fits navigation',
+    )
+    expect(claimed.trusted.constraints.preserved).toEqual([
+      'Navigation',
+    ])
   })
 
   it('rejects candidate writes outside the current Canvas and components dir', () => {

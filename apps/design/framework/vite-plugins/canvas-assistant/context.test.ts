@@ -128,7 +128,24 @@ describe('createCanvasContextLoader', () => {
       ['components/Select.tsx', 'read-only'],
     ])
     expect(context.files.every((file) => file.hash.length === 64)).toBe(true)
+    expect(context.appConfigHash).toHaveLength(64)
+    expect(context.style.hash).toHaveLength(64)
+    expect(context.installedLayouts).toHaveLength(1)
+    expect(context.installedLayouts[0]?.hash).toHaveLength(64)
     expect(context.componentsDir).toBe(fixture.componentsDir)
+  })
+
+  it('fingerprints the exact current app.json bytes', async () => {
+    const fixture = await createFixture()
+    const appConfigPath = path.join(fixture.appDir, 'app.json')
+    const first = await fixture.loader.load('shop', 'home')
+    const source = await fs.readFile(appConfigPath, 'utf8')
+    await fs.writeFile(appConfigPath, `${source}\n`, 'utf8')
+
+    const second = await fixture.loader.load('shop', 'home')
+
+    expect(second.app).toEqual(first.app)
+    expect(second.appConfigHash).not.toBe(first.appConfigHash)
   })
 
   it('does not read another Canvas', async () => {
@@ -463,6 +480,7 @@ describe('createCanvasContextLoader', () => {
       id: 'studio',
       relativePath: 'studio/DESIGN.md',
       source: '# Studio Style\n',
+      hash: expect.stringMatching(/^[a-f0-9]{64}$/),
     })
 
     await fs.rename(
@@ -498,6 +516,7 @@ describe('createCanvasContextLoader', () => {
         id: 'sidebar',
         relativePath: 'sidebar/LAYOUT.md',
         source: '# Sidebar Layout\n',
+        hash: expect.stringMatching(/^[a-f0-9]{64}$/),
       },
     ])
   })

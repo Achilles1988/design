@@ -34,6 +34,7 @@ function context(): CanvasAuthoringContext {
       style: 'dashboard',
       layouts: ['sidebar-shell'],
     },
+    appConfigHash: 'app-config-hash',
     canvas: {
       id: 'home',
       name: 'Home',
@@ -43,8 +44,16 @@ function context(): CanvasAuthoringContext {
       id: 'dashboard',
       relativePath: 'dashboard/DESIGN.md',
       source: '# Dashboard',
+      hash: 'style-contract-hash',
     },
-    installedLayouts: [],
+    installedLayouts: [
+      {
+        id: 'sidebar-shell',
+        relativePath: 'sidebar-shell/LAYOUT.md',
+        source: '# Sidebar Shell',
+        hash: 'layout-contract-hash',
+      },
+    ],
     layoutIndex: [],
     files: [
       {
@@ -80,6 +89,27 @@ function proposal(): StoredProposal {
         source: CANDIDATE_SOURCE,
       },
     ],
+    trusted: {
+      appConfigHash: 'app-config-hash',
+      styleContract: {
+        id: 'dashboard',
+        hash: 'style-contract-hash',
+      },
+      selectedLayoutContract: {
+        id: 'sidebar-shell',
+        hash: 'layout-contract-hash',
+      },
+      originalUserIntent: 'Build the Canvas.',
+      constraints: {
+        styleId: 'dashboard',
+        layout: {
+          kind: 'installed',
+          id: 'sidebar-shell',
+          reason: 'It fits',
+        },
+        preserved: ['Navigation'],
+      },
+    },
     card: {
       proposalId: 'proposal-1',
       mode: 'update',

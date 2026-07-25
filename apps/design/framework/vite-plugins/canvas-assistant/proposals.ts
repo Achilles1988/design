@@ -5,6 +5,7 @@ import {
   CanvasProposalCardArgsSchema,
   RawCanvasProposalSchema,
   type CanvasProposalCardArgs,
+  type RawCanvasProposal,
 } from '../../src/lib/canvasAssistantProtocol'
 import {
   validateCandidatePath,
@@ -13,6 +14,33 @@ import {
 } from './context'
 
 export const PROPOSAL_TTL_MS = 30 * 60 * 1000
+const MAX_ORIGINAL_USER_INTENT_LENGTH = 4_000
+const INTENT_CREDENTIAL_LABEL =
+  String.raw`(?:[A-Za-z_][A-Za-z0-9_]*(?:API_KEY|ACCESS_TOKEN|AUTH_TOKEN|SECRET_KEY)|api[-_ ]?key|authorization)`
+const INTENT_CREDENTIAL_VALUE =
+  String.raw`(?:"(?:Bearer\s+)?[^"\r\n]*"|'(?:Bearer\s+)?[^'\r\n]*'|Bearer\s+[^\s,;]+|[^\s,;]+)`
+const INTENT_CREDENTIAL_PATTERN = new RegExp(
+  String.raw`(?:"${INTENT_CREDENTIAL_LABEL}"|'${INTENT_CREDENTIAL_LABEL}'|\b${INTENT_CREDENTIAL_LABEL}\b)\s*[:=]\s*${INTENT_CREDENTIAL_VALUE}`,
+  'gi',
+)
+
+export type TrustedProposalContext = {
+  appConfigHash: string
+  styleContract: {
+    id: string
+    hash: string
+  }
+  selectedLayoutContract: {
+    id: string
+    hash: string
+  } | null
+  originalUserIntent: string
+  constraints: {
+    styleId: string
+    layout: RawCanvasProposal['layout']
+    preserved: string[]
+  }
+}
 
 export type StoredProposal = {
   id: string
@@ -27,12 +55,23 @@ export type StoredProposal = {
     operation: 'write-existing' | 'create-shared' | 'read-only'
   }>
   candidateFiles: Array<{ path: string; source: string }>
+  trusted: TrustedProposalContext
   card: CanvasProposalCardArgs
 }
 
 type ProposalStoreOptions = {
   now: () => number
   ttlMs: number
+}
+
+export function sanitizeOriginalUserIntent(value: string): string {
+  const sanitized = value
+    .replace(INTENT_CREDENTIAL_PATTERN, '[credential]')
+    .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, '[credential]')
+    .replace(/\bsk-[A-Za-z0-9_-]+\b/g, '[credential]')
+    .slice(0, MAX_ORIGINAL_USER_INTENT_LENGTH)
+    .trim()
+  return sanitized || '[redacted]'
 }
 
 function exactlyMatches(
@@ -423,6 +462,7 @@ export function createProposalStore({
   function stage(
     context: CanvasAuthoringContext,
     rawToolArgs: unknown,
+    originalUserIntent: string,
   ): CanvasProposalCardArgs {
     const raw = RawCanvasProposalSchema.parse(rawToolArgs)
     const candidatePaths = raw.files.map((file) => file.path)
@@ -464,6 +504,18 @@ export function createProposalStore({
       !context.app.layouts.includes(raw.layout.id)
     ) {
       throw new Error('The selected Layout is not installed.')
+    }
+    const selectedLayoutId =
+      raw.layout.kind === 'installed' ? raw.layout.id : null
+    const selectedLayoutContract = selectedLayoutId
+      ? context.installedLayouts.find(
+          (contract) => contract.id === selectedLayoutId,
+        )
+      : null
+    if (raw.layout.kind === 'installed' && !selectedLayoutContract) {
+      throw new Error(
+        'The selected Layout contract could not be loaded.',
+      )
     }
 
     const createdAt = now()
@@ -530,6 +582,26 @@ export function createProposalStore({
       state: 'ready',
       baseline,
       candidateFiles: raw.files.map((file) => ({ ...file })),
+      trusted: {
+        appConfigHash: context.appConfigHash,
+        styleContract: {
+          id: context.style.id,
+          hash: context.style.hash,
+        },
+        selectedLayoutContract: selectedLayoutContract
+          ? {
+              id: selectedLayoutContract.id,
+              hash: selectedLayoutContract.hash,
+            }
+          : null,
+        originalUserIntent:
+          sanitizeOriginalUserIntent(originalUserIntent),
+        constraints: {
+          styleId: context.style.id,
+          layout: { ...raw.layout },
+          preserved: [...raw.preserved],
+        },
+      },
       card,
     }
     proposals.set(id, stored)

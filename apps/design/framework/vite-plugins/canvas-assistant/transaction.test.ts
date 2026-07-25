@@ -168,6 +168,7 @@ describe('applyProposalTransaction', () => {
         style: 'dashboard',
         layouts: ['sidebar-shell'],
       },
+      appConfigHash: 'app-config-hash',
       canvas: {
         id: 'home',
         name: 'Home',
@@ -177,8 +178,16 @@ describe('applyProposalTransaction', () => {
         id: 'dashboard',
         relativePath: 'dashboard/DESIGN.md',
         source: '# Dashboard',
+        hash: 'style-contract-hash',
       },
-      installedLayouts: [],
+      installedLayouts: [
+        {
+          id: 'sidebar-shell',
+          relativePath: 'sidebar-shell/LAYOUT.md',
+          source: '# Sidebar Shell',
+          hash: 'layout-contract-hash',
+        },
+      ],
       layoutIndex: [],
       files,
       componentsDir: path.join(appDir, 'components'),
@@ -227,6 +236,27 @@ describe('applyProposalTransaction', () => {
           source: NEW_SELECT,
         },
       ],
+      trusted: {
+        appConfigHash: 'app-config-hash',
+        styleContract: {
+          id: 'dashboard',
+          hash: 'style-contract-hash',
+        },
+        selectedLayoutContract: {
+          id: 'sidebar-shell',
+          hash: 'layout-contract-hash',
+        },
+        originalUserIntent: 'Update the current Canvas.',
+        constraints: {
+          styleId: 'dashboard',
+          layout: {
+            kind: 'installed',
+            id: 'sidebar-shell',
+            reason: 'Fits the Canvas',
+          },
+          preserved: ['Existing navigation'],
+        },
+      },
       card: card(),
       ...overrides,
     }
@@ -234,6 +264,7 @@ describe('applyProposalTransaction', () => {
 
   function input(overrides: {
     proposal?: StoredProposal
+    reloadContext?: () => Promise<CanvasAuthoringContext>
     validate?: (targets: CandidateValidationTarget[]) => Promise<void>
     repair?: ReturnType<typeof vi.fn>
     onStatus?: ReturnType<typeof vi.fn>
@@ -241,7 +272,7 @@ describe('applyProposalTransaction', () => {
   } = {}) {
     return {
       proposal: overrides.proposal ?? proposal(),
-      reloadContext,
+      reloadContext: overrides.reloadContext ?? reloadContext,
       writeAtomically:
         overrides.writer ?? vi.fn(writeAtomically),
       validate: overrides.validate ?? vi.fn(async () => undefined),
@@ -345,6 +376,60 @@ describe('applyProposalTransaction', () => {
     )
   })
 
+  it.each([
+    {
+      name: 'App configuration',
+      change: (current: CanvasAuthoringContext) => ({
+        ...current,
+        appConfigHash: 'changed-app-config-hash',
+      }),
+    },
+    {
+      name: 'Style contract',
+      change: (current: CanvasAuthoringContext) => ({
+        ...current,
+        style: {
+          ...current.style,
+          source: '# Changed Dashboard',
+          hash: 'changed-style-contract-hash',
+        },
+      }),
+    },
+    {
+      name: 'selected installed Layout contract',
+      change: (current: CanvasAuthoringContext) => ({
+        ...current,
+        installedLayouts: current.installedLayouts.map((layout) => ({
+          ...layout,
+          source: '# Changed Sidebar',
+          hash: 'changed-layout-contract-hash',
+        })),
+      }),
+    },
+  ])(
+    'rejects a changed $name before writing',
+    async ({ change }) => {
+      const current = await reloadContext()
+      const writer = vi.fn(writeAtomically)
+
+      const result = await applyProposalTransaction(
+        input({
+          reloadContext: async () => change(current),
+          writer,
+        }),
+      )
+
+      expect(result).toEqual({
+        ok: false,
+        proposalId: 'proposal-1',
+        error:
+          'The Canvas changed after this proposal was created. Generate a new proposal.',
+        rolledBack: true,
+      })
+      expect(writer).not.toHaveBeenCalled()
+    },
+  )
+
   it('rejects a create-shared path that no longer is absent', async () => {
     await fs.writeFile(selectPath, 'created by another actor')
     const writer = vi.fn(writeAtomically)
@@ -398,6 +483,36 @@ describe('applyProposalTransaction', () => {
       repairAttempts: 0,
     })
     expect(repair).not.toHaveBeenCalled()
+  })
+
+  it('passes a temporary Layout decision to repair without an installed contract', async () => {
+    const transactionProposal = proposal()
+    transactionProposal.trusted.selectedLayoutContract = null
+    transactionProposal.trusted.constraints.layout = {
+      kind: 'temporary',
+      reason: 'Use a one-off comparison workspace.',
+    }
+    const validate = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Vite rejected the candidate.'))
+      .mockResolvedValueOnce(undefined)
+    const repair = vi.fn(
+      async (request: RepairRequest) => request.candidateFiles,
+    )
+
+    const result = await applyProposalTransaction(
+      input({
+        proposal: transactionProposal,
+        validate,
+        repair,
+      }),
+    )
+
+    expect(result).toMatchObject({ ok: true, repairAttempts: 1 })
+    expect(repair.mock.calls[0]?.[0].layoutDecision).toEqual({
+      kind: 'temporary',
+      reason: 'Use a one-off comparison workspace.',
+    })
   })
 
   it('validates the current Canvas when only its CSS changes', async () => {
@@ -485,6 +600,20 @@ describe('applyProposalTransaction', () => {
     )
     const repairRequest = repair.mock.calls[0][0]
     expect(repairRequest.attempt).toBe(1)
+    expect(repairRequest).toMatchObject({
+      originalUserIntent: 'Update the current Canvas.',
+      styleContract: {
+        id: 'dashboard',
+        source: '# Dashboard',
+      },
+      layoutDecision: {
+        kind: 'installed',
+        id: 'sidebar-shell',
+        reason: 'Fits the Canvas',
+        contractSource: '# Sidebar Shell',
+      },
+      preservationConstraints: ['Existing navigation'],
+    })
     expect(repairRequest.diagnostic).not.toContain(appDir)
     expect(repairRequest.diagnostic).not.toContain('Alice Smith')
     expect(repairRequest.diagnostic).not.toContain('AIza-secret')
@@ -1236,6 +1365,20 @@ describe('createCanvasRepair', () => {
       source: NEW_SELECT,
     },
   ]
+  const trustedRepairContext = {
+    originalUserIntent: 'Build an account analytics Canvas.',
+    styleContract: {
+      id: 'dashboard',
+      source: '# Dashboard Style\nUse compact metric cards.',
+    },
+    layoutDecision: {
+      kind: 'installed' as const,
+      id: 'sidebar-shell',
+      reason: 'Keep persistent navigation.',
+      contractSource: '# Sidebar Shell\nKeep navigation visible.',
+    },
+    preservationConstraints: ['Existing navigation', 'Account filters'],
+  }
 
   afterEach(() => {
     vi.clearAllMocks()
@@ -1250,6 +1393,7 @@ describe('createCanvasRepair', () => {
       attempt: 1,
       diagnostic: 'Vite transform failed.',
       candidateFiles,
+      ...trustedRepairContext,
     })
 
     expect(createModel).toHaveBeenCalledWith(aiConfig)
@@ -1266,6 +1410,12 @@ describe('createCanvasRepair', () => {
         ],
       }).success,
     ).toBe(false)
+    const prompt = String(options.prompt)
+    expect(prompt).toContain('Build an account analytics Canvas.')
+    expect(prompt).toContain('# Dashboard Style')
+    expect(prompt).toContain('# Sidebar Shell')
+    expect(prompt).toContain('Existing navigation')
+    expect(prompt).not.toContain(aiConfig.apiKey)
   })
 
   it.each([
@@ -1303,6 +1453,7 @@ describe('createCanvasRepair', () => {
         attempt: 2,
         diagnostic: 'still invalid',
         candidateFiles,
+        ...trustedRepairContext,
       }),
     ).rejects.toThrow(
       'Canvas repair returned an invalid candidate set.',

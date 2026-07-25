@@ -12,6 +12,7 @@ function context(
       style: 'dashboard',
       layouts: ['sidebar-shell'],
     },
+    appConfigHash: 'app-config-hash',
     canvas: {
       id: 'home',
       name: 'Home',
@@ -21,12 +22,14 @@ function context(
       id: 'dashboard',
       relativePath: 'dashboard/DESIGN.md',
       source: '# Dashboard Style\nUse the configured tokens.',
+      hash: 'style-contract-hash',
     },
     installedLayouts: [
       {
         id: 'sidebar-shell',
         relativePath: 'sidebar-shell/LAYOUT.md',
         source: '# Sidebar Shell\nUse persistent navigation.',
+        hash: 'layout-contract-hash',
       },
     ],
     layoutIndex: [

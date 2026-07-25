@@ -8,7 +8,10 @@ import {
   type AssetMeta,
 } from '../../src/lib/ai/assetIndex'
 import type { AppConfig, CanvasEntry } from '../../src/lib/types'
-import { createContentStore } from '../design-fs/store'
+import {
+  createContentStore,
+  normalizeAppConfig,
+} from '../design-fs/store'
 
 const USER_COMPONENT_EXTENSIONS = new Set(['.ts', '.tsx', '.css'])
 const NEW_COMPONENT_EXTENSIONS = new Set(['.tsx', '.css'])
@@ -22,14 +25,16 @@ export type AuthoringFile = {
   permission: 'write-existing' | 'read-only'
 }
 
-type AuthoringContract = {
+export type AuthoringContract = {
   id: string
   relativePath: string
   source: string
+  hash: string
 }
 
 export type CanvasAuthoringContext = {
   app: AppConfig
+  appConfigHash: string
   canvas: CanvasEntry
   style: AuthoringContract
   installedLayouts: AuthoringContract[]
@@ -156,10 +161,12 @@ async function loadContract(
     const contractPath = resolveWithin(packageDir, fileName)
     try {
       await existingPathWithin(root, contractPath)
+      const source = await fs.readFile(contractPath, 'utf8')
       return {
         id,
         relativePath: toRelativePath(root, contractPath),
-        source: await fs.readFile(contractPath, 'utf8'),
+        source,
+        hash: sha256(source),
       }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
@@ -323,11 +330,27 @@ export function createCanvasContextLoader(
   ): Promise<CanvasAuthoringContext> {
     const appDir = resolveWithin(contentRoot, appId)
     await existingPathWithin(contentRoot, appDir)
+    const appConfigPath = resolveWithin(appDir, 'app.json')
+    await existingPathWithin(appDir, appConfigPath)
 
-    const [app, canvases] = await Promise.all([
-      store.getApp(appId),
-      store.listCanvases(appId),
-    ])
+    const appConfigSource = await fs.readFile(appConfigPath, 'utf8')
+    let app: AppConfig
+    try {
+      app = normalizeAppConfig(
+        JSON.parse(appConfigSource) as Record<string, unknown>,
+      )
+    } catch {
+      throw new Error('The App configuration could not be loaded.')
+    }
+    if (app.id !== appId) {
+      throw new Error('The App configuration could not be loaded.')
+    }
+    const canvases = await store.listCanvases(appId)
+    if (
+      (await fs.readFile(appConfigPath, 'utf8')) !== appConfigSource
+    ) {
+      throw new Error('The App configuration changed while loading.')
+    }
     const canvas = canvases.find((entry) => entry.id === canvasId)
     if (!canvas) {
       throw new Error('Canvas source could not be loaded.')
@@ -423,6 +446,7 @@ export function createCanvasContextLoader(
 
     return {
       app,
+      appConfigHash: sha256(appConfigSource),
       canvas,
       style,
       installedLayouts,

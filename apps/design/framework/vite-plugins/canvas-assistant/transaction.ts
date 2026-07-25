@@ -49,6 +49,23 @@ export type RepairRequest = {
   attempt: 1 | 2
   diagnostic: string
   candidateFiles: CandidateFile[]
+  originalUserIntent: string
+  styleContract: {
+    id: string
+    source: string
+  }
+  layoutDecision:
+    | {
+        kind: 'installed'
+        id: string
+        reason: string
+        contractSource: string
+      }
+    | {
+        kind: 'temporary'
+        reason: string
+      }
+  preservationConstraints: string[]
 }
 
 export type ApplyResult =
@@ -93,6 +110,72 @@ class InvalidCandidateSetError extends Error {
   constructor() {
     super(INVALID_REPAIR_ERROR)
     this.name = 'InvalidCandidateSetError'
+  }
+}
+
+type TrustedRepairContext = Pick<
+  RepairRequest,
+  | 'originalUserIntent'
+  | 'styleContract'
+  | 'layoutDecision'
+  | 'preservationConstraints'
+>
+
+function trustedRepairContext(
+  proposal: StoredProposal,
+  context: CanvasAuthoringContext,
+): TrustedRepairContext {
+  const trusted = proposal.trusted
+  if (
+    !trusted ||
+    context.appConfigHash !== trusted.appConfigHash ||
+    context.style.id !== trusted.styleContract.id ||
+    context.style.hash !== trusted.styleContract.hash ||
+    trusted.constraints.styleId !== trusted.styleContract.id ||
+    !trusted.originalUserIntent
+  ) {
+    throw new Error(BASELINE_CHANGED_ERROR)
+  }
+
+  const layout = trusted.constraints.layout
+  let layoutDecision: TrustedRepairContext['layoutDecision']
+  if (layout.kind === 'installed') {
+    const fingerprint = trusted.selectedLayoutContract
+    const currentContract = context.installedLayouts.find(
+      (contract) => contract.id === layout.id,
+    )
+    if (
+      !fingerprint ||
+      fingerprint.id !== layout.id ||
+      !currentContract ||
+      currentContract.hash !== fingerprint.hash
+    ) {
+      throw new Error(BASELINE_CHANGED_ERROR)
+    }
+    layoutDecision = {
+      kind: 'installed',
+      id: layout.id,
+      reason: layout.reason,
+      contractSource: currentContract.source,
+    }
+  } else {
+    if (trusted.selectedLayoutContract !== null) {
+      throw new Error(BASELINE_CHANGED_ERROR)
+    }
+    layoutDecision = {
+      kind: 'temporary',
+      reason: layout.reason,
+    }
+  }
+
+  return {
+    originalUserIntent: trusted.originalUserIntent,
+    styleContract: {
+      id: context.style.id,
+      source: context.style.source,
+    },
+    layoutDecision,
+    preservationConstraints: [...trusted.constraints.preserved],
   }
 }
 
@@ -465,6 +548,12 @@ export function createCanvasRepair(
         'Repair the complete candidate file set so the current Canvas passes validation.',
         'Return every candidate path exactly once. Do not add, remove, or rename files.',
         `Repair attempt: ${request.attempt}`,
+        `Original user intent:\n${request.originalUserIntent}`,
+        `Trusted Style contract (${request.styleContract.id}):\n${request.styleContract.source}`,
+        request.layoutDecision.kind === 'installed'
+          ? `Trusted installed Layout contract (${request.layoutDecision.id}; ${request.layoutDecision.reason}):\n${request.layoutDecision.contractSource}`
+          : `Trusted temporary Layout decision:\n${request.layoutDecision.reason}`,
+        `Preservation constraints:\n${JSON.stringify(request.preservationConstraints)}`,
         `Validation diagnostic:\n${request.diagnostic}`,
         `Candidate files:\n${JSON.stringify(request.candidateFiles)}`,
       ].join('\n\n'),
@@ -486,8 +575,10 @@ export async function applyProposalTransaction({
   onStatus({ phase: 'checking' })
   let context: CanvasAuthoringContext
   let targets: CandidateTarget[]
+  let repairContext: TrustedRepairContext
   try {
     context = await reloadContext()
+    repairContext = trustedRepairContext(proposal, context)
     targets = baselineTargets(proposal, context)
   } catch {
     return {
@@ -600,6 +691,7 @@ export async function applyProposalTransaction({
           attempt,
           diagnostic: compactDiagnostic(error),
           candidateFiles: candidates,
+          ...repairContext,
         })
         assertCandidateSet(candidates, originalCandidatePaths)
       }

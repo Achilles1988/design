@@ -257,6 +257,8 @@ async function createFixture(options: {
     modelCalls,
     origin: baseUrl,
     repair,
+    stylesRoot,
+    layoutsRoot,
     validator,
   }
 }
@@ -564,6 +566,70 @@ describe('Canvas Assistant authoring server integration', () => {
     expect(await fs.readFile(fixture.canvasFile, 'utf8')).toBe(ideSource)
     expect(fixture.validator).not.toHaveBeenCalled()
   })
+
+  it.each([
+    {
+      name: 'App configuration',
+      mutate: async (fixture: Fixture) => {
+        const source = await fs.readFile(fixture.appJson, 'utf8')
+        await fs.writeFile(fixture.appJson, `${source}\n`, 'utf8')
+      },
+    },
+    {
+      name: 'Style contract',
+      mutate: async (fixture: Fixture) => {
+        await fs.writeFile(
+          path.join(
+            fixture.stylesRoot,
+            'dashboard',
+            'DESIGN.md',
+          ),
+          '# Changed Dashboard Style\n',
+          'utf8',
+        )
+      },
+    },
+    {
+      name: 'selected installed Layout contract',
+      mutate: async (fixture: Fixture) => {
+        await fs.writeFile(
+          path.join(
+            fixture.layoutsRoot,
+            'sidebar-shell',
+            'LAYOUT.md',
+          ),
+          '# Changed Sidebar Shell\n',
+          'utf8',
+        )
+      },
+    },
+  ])(
+    'rejects a changed $name between proposal and apply',
+    async ({ mutate }) => {
+      const fixture = await createFixture()
+      const card = proposalCard(
+        await runModel(fixture, {
+          toolName: 'propose_canvas_change',
+          args: canvasProposal(),
+        }),
+      )
+      await mutate(fixture)
+
+      const events = await applyProposal(fixture, card.proposalId)
+
+      expect(events.at(-1)?.result).toEqual({
+        ok: false,
+        proposalId: card.proposalId,
+        error:
+          'The Canvas changed after this proposal was created. Generate a new proposal.',
+        rolledBack: true,
+      })
+      expect(await fs.readFile(fixture.canvasFile, 'utf8')).toBe(
+        ORIGINAL_CANVAS,
+      )
+      expect(fixture.validator).not.toHaveBeenCalled()
+    },
+  )
 
   it('rolls back Canvas and new components after two failed repairs', async () => {
     const repairedSources = ['Repair one', 'Repair two'].map(

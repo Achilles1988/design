@@ -117,8 +117,9 @@ type CanvasRunEvent =
 
 `value.content` is a cumulative LocalRuntime snapshot, not a delta. On either
 human tool call the final snapshot has `requires-action`; that server model run
-stops immediately. Proposal events contain only sanitized card arguments and
-never contain candidate file source.
+stops immediately. Proposal events contain sanitized card arguments plus the
+read-only candidate path/source review copy. That browser-visible copy is not
+accepted by apply and cannot replace the authoritative server-side candidate.
 
 Model failures after stream start produce one generic English `error` event.
 Pre-stream request failures use JSON with the status codes described above.
@@ -246,10 +247,18 @@ The set of directly imported existing read-only App component files must equal
 `reusedComponents` exactly: missing, extra, and duplicate declarations are
 invalid.
 
-The proposal stores candidate source and baseline hashes but never stores
-`aiConfig`. Read-only baseline enforcement belongs to the apply transaction,
-which reloads trusted context and checks every bound hash immediately before
-writing.
+The proposal stores candidate source, file baselines, the raw current
+`app.json` fingerprint, the mandatory Style-contract fingerprint, and the
+selected installed Layout-contract fingerprint. A temporary AI Layout has no
+installed Layout-contract fingerprint, but remains bound to the App and Style
+fingerprints. The proposal also stores only the latest sanitized user intent
+plus its authoritative Style id, Layout decision, and preservation constraints;
+it never stores `aiConfig`, API keys, or unrelated chat history.
+
+Read-only baseline enforcement belongs to the apply transaction, which reloads
+trusted context and rejects with the normal proposal-conflict result before any
+write when the App configuration, Style contract, selected installed Layout
+contract, or a bound source file changed.
 
 ## Apply stream
 
@@ -315,7 +324,12 @@ and transform every candidate `.ts`, `.tsx`, and `.css` target in stable
 relative-path order. Validation is never limited to the Canvas entry, so a
 newly created or otherwise unvisited dependency must transform successfully
 before apply can complete. Validation may run at most two AI repairs. A repair
-must return the same complete path set.
+must return the same complete path set. Each repair request is rebuilt from the
+server-side proposal and reloaded trusted context and includes the sanitized
+original user intent, complete current Style contract, selected installed
+Layout contract or temporary Layout decision, authoritative preservation
+constraints, compact diagnostic, and complete candidate set. Browser state is
+never used to supply repair constraints.
 Exhausted or invalid repairs run a best-effort rollback across every written
 target; one restore or delete failure never prevents attempts on the remaining
 targets.

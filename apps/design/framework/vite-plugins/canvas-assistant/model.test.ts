@@ -15,6 +15,7 @@ function context(): CanvasAuthoringContext {
       style: 'dashboard',
       layouts: ['sidebar-shell'],
     },
+    appConfigHash: 'app-config-hash',
     canvas: {
       id: 'home',
       name: 'Home',
@@ -24,12 +25,14 @@ function context(): CanvasAuthoringContext {
       id: 'dashboard',
       relativePath: 'dashboard/DESIGN.md',
       source: '# Dashboard',
+      hash: 'style-contract-hash',
     },
     installedLayouts: [
       {
         id: 'sidebar-shell',
         relativePath: 'sidebar-shell/LAYOUT.md',
         source: '# Sidebar',
+        hash: 'layout-contract-hash',
       },
     ],
     layoutIndex: [
@@ -295,7 +298,11 @@ describe('createCanvasModelRunner', () => {
 
     const events = await collect(runner)
 
-    expect(stageProposal).toHaveBeenCalledWith(context(), raw)
+    expect(stageProposal).toHaveBeenCalledWith(
+      context(),
+      raw,
+      'Build the page',
+    )
     expect(events.at(-1)).toMatchObject({
       type: 'run-result',
       value: {
@@ -308,6 +315,53 @@ describe('createCanvasModelRunner', () => {
         ],
       },
     })
+  })
+
+  it('stages only the latest sanitized user intent', async () => {
+    const stageProposal = vi.fn(() => proposalCard())
+    const runner = createCanvasModelRunner({
+      streamTextImpl: () =>
+        fakeStream([
+          {
+            type: 'tool-call',
+            toolCallId: 'proposal-call-1',
+            toolName: 'propose_canvas_change',
+            args: proposalArgs(),
+          },
+        ]),
+      createModelImpl: () => 'model',
+      stageProposal,
+    })
+    const request = chatRequest([
+      {
+        role: 'user',
+        content: [{ type: 'text', text: 'Unrelated earlier request' }],
+      },
+      {
+        role: 'assistant',
+        content: [{ type: 'text', text: 'Earlier response' }],
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text:
+              'Build the analytics Canvas. OPENAI_API_KEY=sk-super-secret',
+          },
+        ],
+      },
+    ])
+
+    await collect(runner, request)
+
+    const intent = stageProposal.mock.calls[0]?.[2]
+    expect(intent).toContain('Build the analytics Canvas.')
+    expect(intent).not.toContain('Unrelated earlier request')
+    expect(intent).not.toContain('sk-super-secret')
+    expect(JSON.stringify(stageProposal.mock.calls)).not.toContain(
+      request.aiConfig.apiKey,
+    )
   })
 
   it.each([
