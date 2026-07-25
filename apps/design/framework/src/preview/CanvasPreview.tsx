@@ -71,6 +71,8 @@ export function CanvasPreview({
   )
   const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const revealAtRevision = useRef<number | null>(null)
+  const loadedRevision = useRef(-1)
   const previewGeneration = `${appId}:${canvasId}:${previewRevision}`
   const assistantOwnsCurrentCanvas =
     assistantContext.appId === appId &&
@@ -115,6 +117,7 @@ export function CanvasPreview({
           canvasId,
         })
         if (cancelled) return
+        loadedRevision.current = previewRevision
         setState({
           status: 'ready',
           componentFile: session.componentFile,
@@ -220,7 +223,10 @@ export function CanvasPreview({
   useEffect(() => {
     if (!appId || !canvasId) return
     return subscribeApplied(appId, canvasId, () => {
-      setPreviewRevision((revision) => revision + 1)
+      setPreviewRevision((revision) => {
+        revealAtRevision.current = revision + 1
+        return revision + 1
+      })
     })
   }, [appId, canvasId, subscribeApplied])
 
@@ -273,12 +279,19 @@ export function CanvasPreview({
     )
   }
 
+  const reveal =
+    revealAtRevision.current === previewRevision &&
+    loadedRevision.current === previewRevision
+  if (reveal) {
+    revealAtRevision.current = null
+  }
   const sourceDocument = createCanvasPreviewDocument({
     appId,
     componentFile: state.componentFile,
     generation: previewGeneration,
     moduleBase: state.moduleBase,
     theme,
+    ...(reveal ? { reveal: true } : {}),
   })
   return (
     <>

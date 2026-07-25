@@ -7,6 +7,7 @@ import {
 import { createRoot } from 'react-dom/client'
 import { loadCanvasModule } from './loadCanvasModule'
 import type { CanvasPreviewConfiguration } from './canvasPreviewDocument'
+import './canvasReveal.css'
 import '../styles/global.css'
 
 declare global {
@@ -95,6 +96,18 @@ async function mount(): Promise<void> {
       </CanvasErrorBoundary>
     </StrictMode>,
   )
+  if (configuration.reveal) {
+    const root = rootElement
+    root.setAttribute('data-canvas-reveal', 'true')
+    const children = Array.from(root.children) as HTMLElement[]
+    children.forEach((el, index) => {
+      el.style.setProperty('--reveal-index', String(index))
+    })
+    window.setTimeout(() => {
+      root.removeAttribute('data-canvas-reveal')
+      children.forEach((el) => el.style.removeProperty('--reveal-index'))
+    }, 900)
+  }
   requestAnimationFrame(() => {
     post({
       type: 'canvas-preview:ready',

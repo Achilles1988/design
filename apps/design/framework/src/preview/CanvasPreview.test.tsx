@@ -328,6 +328,30 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     expect(cleanups[1]).toHaveBeenCalledTimes(1)
   })
 
+  it('passes reveal into the preview document only after apply remount', async () => {
+    let notifyApplied: (() => void) | undefined
+    const subscribe = vi.fn(
+      (_appId: string, _canvasId: string, next: () => void) => {
+        notifyApplied = next
+        return () => undefined
+      },
+    )
+    renderCanvasPreview(subscribe)
+    const frame = (await screen.findByTitle(
+      'Canvas preview',
+    )) as HTMLIFrameElement
+    expect(frame.srcdoc).not.toMatch(/"reveal"\s*:\s*true/)
+
+    act(() => notifyApplied?.())
+
+    await waitFor(() => {
+      const nextFrame = screen.getByTitle(
+        'Canvas preview',
+      ) as HTMLIFrameElement
+      expect(nextFrame.srcdoc).toMatch(/"reveal"\s*:\s*true/)
+    })
+  })
+
   it('remounts the Canvas only for a matching canvas-assistant:applied event', async () => {
     const listeners = new Map<
       string,

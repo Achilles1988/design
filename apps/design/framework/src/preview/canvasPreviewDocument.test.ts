@@ -26,6 +26,15 @@ describe('createCanvasPreviewDocument', () => {
     )
   })
 
+  it('embeds reveal in configuration when requested', () => {
+    const document = createCanvasPreviewDocument({
+      ...configuration,
+      reveal: true,
+    })
+
+    expect(document).toMatch(/"reveal"\s*:\s*true/)
+  })
+
   it('reports bootstrap import rejection instead of remaining loading', () => {
     const document = createCanvasPreviewDocument(configuration)
     const firstImport = document.indexOf('await import(')

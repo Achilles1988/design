@@ -1,0 +1,32 @@
+@media (prefers-reduced-motion: no-preference) {
+  [data-canvas-reveal] > * {
+    animation: canvas-reveal-in 220ms ease-out both;
+    animation-delay: calc(var(--reveal-index, 0) * 80ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-canvas-reveal] > * {
+    animation: canvas-reveal-in-reduced 150ms ease-out both;
+  }
+}
+
+@keyframes canvas-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes canvas-reveal-in-reduced {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

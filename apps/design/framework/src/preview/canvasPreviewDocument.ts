@@ -6,6 +6,7 @@ export type CanvasPreviewConfiguration = {
   generation: string
   moduleBase: string
   theme: ThemeMode
+  reveal?: boolean
 }
 
 function safeJson(value: unknown): string {
