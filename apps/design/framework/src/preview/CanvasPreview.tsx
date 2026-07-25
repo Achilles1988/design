@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Link, useParams } from 'react-router-dom'
 import { designApi } from '@/lib/api'
 import {
@@ -234,11 +235,14 @@ export function CanvasPreview({
   useEffect(() => {
     if (!appId || !canvasId) return
     return subscribeApplied(appId, canvasId, () => {
-      setPreviewRevision((revision) => {
-        const nextRevision = revision + 1
-        setRevealRevision(nextRevision)
-        return nextRevision
+      let nextRevision = 0
+      flushSync(() => {
+        setPreviewRevision((revision) => {
+          nextRevision = revision + 1
+          return nextRevision
+        })
       })
+      setRevealRevision(nextRevision)
     })
   }, [appId, canvasId, subscribeApplied])
 

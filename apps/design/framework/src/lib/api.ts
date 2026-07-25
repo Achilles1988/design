@@ -60,9 +60,12 @@ export const designApi = {
       body: JSON.stringify(body),
     }),
   deleteCanvas: (appId: string, canvasId: string) =>
-    request<{ ok: true }>(`/__design_fs/apps/${appId}/canvases/${canvasId}`, {
-      method: 'DELETE',
-    }),
+    request<{ ok: true }>(
+      `/__design_fs/apps/${appId}/canvases/${encodeURIComponent(canvasId)}`,
+      {
+        method: 'DELETE',
+      },
+    ),
   renameCanvas: (
     appId: string,
     canvasId: string,
