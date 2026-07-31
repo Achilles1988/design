@@ -4,6 +4,7 @@ import { DesignFsError, designApi } from '@/lib/api'
 import { LAYOUT_INSTALL_TIP, STYLE_INSTALL_TIP } from '@/lib/assetNotices'
 import { chooseStyleSlot } from '@/lib/chooseStyleSlot'
 import { confirmTip } from '@/lib/confirmTip'
+import { resolveAppliedSlot } from '@/lib/resolveAppliedSlot'
 import {
   applyThemeToFrame,
   getTheme,
@@ -353,11 +354,19 @@ export function AssetBrowserPage({
     try {
       for (;;) {
         try {
+          // `slot` is undefined only when the server auto-picks a single
+          // slot for a light-only/dark-only style; snapshot the App's style
+          // first so the notice can report which slot actually changed.
+          const before =
+            kind === 'designmd' && slot === undefined
+              ? await designApi
+                  .getApp(appId)
+                  .then((app) => app.style)
+                  .catch(() => undefined)
+              : undefined
           const app = await designApi.applyAsset(kind, entry.id, appId, slot)
           if (kind === 'designmd') {
-            const light = app.style.light === entry.id
-            const dark = app.style.dark === entry.id
-            const slotLabel = light && dark ? 'both' : light ? 'light' : dark ? 'dark' : null
+            const slotLabel = slot ?? resolveAppliedSlot(before, app.style, entry.id)
             setNotice(
               `Installed style on “${app.name}” (${app.id})${slotLabel ? ` — ${slotLabel}` : ''}.`,
             )
