@@ -183,27 +183,31 @@ export function createContentStore(contentRoot: string) {
     id: string,
     patch: { light?: string | null; dark?: string | null },
   ): Promise<AppConfig> {
-    if (!('light' in patch) && !('dark' in patch)) {
+    const hasLight = 'light' in patch && patch.light !== undefined
+    const hasDark = 'dark' in patch && patch.dark !== undefined
+    if (!hasLight && !hasDark) {
       throw new Error('style patch requires light and/or dark')
     }
     const app = await readAppFile(id)
     const next = { ...app.style }
-    if ('light' in patch) {
-      if (patch.light === null) {
+    if ('light' in patch && patch.light !== undefined) {
+      const light = patch.light
+      if (light === null) {
         delete next.light
       } else {
-        const trimmed = patch.light.trim()
+        const trimmed = light.trim()
         if (!trimmed) {
           throw new Error('light style id is required')
         }
         next.light = trimmed
       }
     }
-    if ('dark' in patch) {
-      if (patch.dark === null) {
+    if ('dark' in patch && patch.dark !== undefined) {
+      const dark = patch.dark
+      if (dark === null) {
         delete next.dark
       } else {
-        const trimmed = patch.dark.trim()
+        const trimmed = dark.trim()
         if (!trimmed) {
           throw new Error('dark style id is required')
         }
