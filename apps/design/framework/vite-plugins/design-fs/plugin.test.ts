@@ -182,7 +182,7 @@ describe('designFsPlugin mutation origin boundary', () => {
       {
         id: 'victim',
         name: 'Victim',
-        style: 'dashboard',
+        style: { dark: 'dashboard' },
         layout: 'sidebar-shell',
       },
       null,

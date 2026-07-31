@@ -90,7 +90,7 @@ See also: [Design project marker and contract resolution](design-project.md).
 | `id` | string | Directory name; must match `^[a-z][a-z0-9-]*$` |
 | `name` | string | Display name; trimmed, must be non-empty |
 | `path` | string? | Optional relative path metadata (no `..`, not absolute) |
-| `style` | string | Design-rule id under stock `stylesRoot` (default: `dashboard`) |
+| `style` | object | `{ light?: string; dark?: string }` — design-rule ids under stock `stylesRoot`, one per theme slot; both optional (default: `{}`); the legacy single-string shape is rejected |
 | `layouts` | string[] | Layout package ids under stock `layoutsRoot` (default: `["sidebar-shell"]`) |
 
 ### `canvases.json`

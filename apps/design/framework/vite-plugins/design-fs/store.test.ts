@@ -10,13 +10,13 @@ describe('normalizeAppConfig', () => {
       normalizeAppConfig({
         id: 'orders',
         name: 'Orders',
-        style: 'dashboard',
+        style: { dark: 'dashboard' },
         layout: 'split-screen',
       }),
     ).toEqual({
       id: 'orders',
       name: 'Orders',
-      style: 'dashboard',
+      style: { dark: 'dashboard' },
       layouts: ['split-screen'],
     })
   })
@@ -29,7 +29,7 @@ describe('normalizeAppConfig', () => {
         layouts: ['sidebar-shell', '', 3, 'split-screen'],
       }),
     ).toMatchObject({
-      style: 'dashboard',
+      style: {},
       layouts: ['sidebar-shell', 'split-screen'],
     })
 
@@ -40,6 +40,16 @@ describe('normalizeAppConfig', () => {
         layouts: [],
       }).layouts,
     ).toEqual(['sidebar-shell'])
+  })
+
+  it('rejects legacy single-string style', () => {
+    expect(() =>
+      normalizeAppConfig({
+        id: 'orders',
+        name: 'Orders',
+        style: 'dashboard',
+      }),
+    ).toThrow(/object/i)
   })
 })
 
@@ -60,7 +70,7 @@ describe('createContentStore', () => {
     expect(app).toMatchObject({
       id: 'orders',
       name: 'Orders',
-      style: 'dashboard',
+      style: {},
       layouts: ['sidebar-shell'],
     })
     const raw = await fs.readFile(path.join(root, 'orders', 'app.json'), 'utf8')
@@ -83,7 +93,7 @@ describe('createContentStore', () => {
       `${JSON.stringify({
         id: 'legacy',
         name: 'Legacy',
-        style: 'dashboard',
+        style: { dark: 'dashboard' },
         layout: 'split-screen',
       }, null, 2)}\n`,
       'utf8',
@@ -101,12 +111,48 @@ describe('createContentStore', () => {
     expect(await fs.readFile(appPath, 'utf8')).toBe(before)
   })
 
-  it('replaces style and appends layouts on apply', async () => {
+  it('sets, updates, and clears style slots independently', async () => {
     const store = createContentStore(root)
     await store.createApp({ id: 'orders', name: 'Orders' })
 
-    const afterStyle = await store.setAppStyle('orders', 'totality')
-    expect(afterStyle.style).toBe('totality')
+    const afterLight = await store.setAppStyle('orders', { light: 'default' })
+    expect(afterLight.style).toEqual({ light: 'default' })
+
+    const afterDark = await store.setAppStyle('orders', { dark: 'dashboard' })
+    expect(afterDark.style).toEqual({ light: 'default', dark: 'dashboard' })
+
+    const afterBoth = await store.setAppStyle('orders', {
+      light: 'totality',
+      dark: 'totality',
+    })
+    expect(afterBoth.style).toEqual({ light: 'totality', dark: 'totality' })
+
+    const afterRemove = await store.removeAppStyle('orders', 'light')
+    expect(afterRemove.style).toEqual({ dark: 'totality' })
+  })
+
+  it('rejects an empty style patch', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await expect(store.setAppStyle('orders', {})).rejects.toThrow(
+      /light and\/or dark/,
+    )
+  })
+
+  it('rejects blank style ids', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await expect(
+      store.setAppStyle('orders', { light: '   ' }),
+    ).rejects.toThrow(/light style id is required/)
+    await expect(
+      store.setAppStyle('orders', { dark: '' }),
+    ).rejects.toThrow(/dark style id is required/)
+  })
+
+  it('appends layouts on apply', async () => {
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
 
     const afterLayout = await store.addAppLayout('orders', 'split-screen')
     expect(afterLayout.layouts).toEqual(['sidebar-shell', 'split-screen'])

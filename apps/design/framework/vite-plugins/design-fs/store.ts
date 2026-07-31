@@ -2,11 +2,12 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import {
   DEFAULT_LAYOUT,
-  DEFAULT_STYLE,
   type AppConfig,
   type CanvasEntry,
   type CanvasesFile,
+  type StyleSlot,
 } from '../../src/lib/types'
+import { normalizeStyleSlots } from '../../src/lib/styleSlots'
 import { isValidAppId } from '../../src/lib/slug'
 import { validatePathMeta } from '../../src/lib/pathMeta'
 import { resolveContentPath } from './paths'
@@ -26,10 +27,7 @@ function toPascalCase(value: string): string {
 export function normalizeAppConfig(raw: Record<string, unknown>): AppConfig {
   const id = typeof raw.id === 'string' ? raw.id : ''
   const name = typeof raw.name === 'string' ? raw.name : ''
-  const style =
-    typeof raw.style === 'string' && raw.style.trim()
-      ? raw.style.trim()
-      : DEFAULT_STYLE
+  const style = normalizeStyleSlots(raw.style)
 
   let layouts: string[] = []
   if (Array.isArray(raw.layouts)) {
@@ -169,7 +167,7 @@ export function createContentStore(contentRoot: string) {
     const app: AppConfig = {
       id,
       name,
-      style: DEFAULT_STYLE,
+      style: {},
       layouts: [DEFAULT_LAYOUT],
     }
     if (pathMeta.value !== undefined) {
@@ -181,15 +179,44 @@ export function createContentStore(contentRoot: string) {
     return app
   }
 
-  async function setAppStyle(id: string, style: string): Promise<AppConfig> {
-    const trimmed = style.trim()
-    if (!trimmed) {
-      throw new Error('style is required')
+  async function setAppStyle(
+    id: string,
+    patch: { light?: string | null; dark?: string | null },
+  ): Promise<AppConfig> {
+    if (!('light' in patch) && !('dark' in patch)) {
+      throw new Error('style patch requires light and/or dark')
     }
     const app = await readAppFile(id)
-    app.style = trimmed
+    const next = { ...app.style }
+    if ('light' in patch) {
+      if (patch.light === null) {
+        delete next.light
+      } else {
+        const trimmed = patch.light.trim()
+        if (!trimmed) {
+          throw new Error('light style id is required')
+        }
+        next.light = trimmed
+      }
+    }
+    if ('dark' in patch) {
+      if (patch.dark === null) {
+        delete next.dark
+      } else {
+        const trimmed = patch.dark.trim()
+        if (!trimmed) {
+          throw new Error('dark style id is required')
+        }
+        next.dark = trimmed
+      }
+    }
+    app.style = next
     await writeAppFile(app)
     return app
+  }
+
+  async function removeAppStyle(id: string, slot: StyleSlot): Promise<AppConfig> {
+    return setAppStyle(id, { [slot]: null })
   }
 
   async function addAppLayout(id: string, layoutId: string): Promise<AppConfig> {
@@ -370,6 +397,7 @@ export function createContentStore(contentRoot: string) {
     createApp,
     deleteApp,
     setAppStyle,
+    removeAppStyle,
     addAppLayout,
     removeAppLayout,
     listCanvases,

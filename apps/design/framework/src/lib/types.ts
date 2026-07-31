@@ -1,8 +1,11 @@
+import type { AppStyleSlots } from './styleSlots'
+export type { AppStyleSlots, StyleApplySlot, StyleSlot } from './styleSlots'
+
 export type AppConfig = {
   id: string
   name: string
   path?: string
-  style: string
+  style: AppStyleSlots
   /** Installed layout package ids for this App (order preserved). */
   layouts: string[]
 }
@@ -25,5 +28,4 @@ export type AssetEntry = {
   previewUrl: string
 }
 
-export const DEFAULT_STYLE = 'dashboard'
 export const DEFAULT_LAYOUT = 'sidebar-shell'

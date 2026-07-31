@@ -62,19 +62,29 @@ project-local tree, and do not edit stock packages from the App/project side.
 
 ## Resolve formulas
 
-Given `<designRoot>` from discovery and an App’s `app.json` (`style` is an id;
+Given `<designRoot>` from discovery and an App’s `app.json` (`style` is
+`{ light?: string; dark?: string }`, one design-rule id per theme slot;
 `layouts` is an array of ids — not paths):
 
 - App directory: `<designRoot>/<contentRoot>/<appId>/`
-- Style contract (required): first existing of
-  `<designRoot>/<stylesRoot>/<app.json.style>/DESIGN.md` or
-  `…/design.md`
+- Style contract per slot (at least one slot recommended; each configured
+  independently): for each of `light` and `dark`, if `app.json.style.<slot>` is
+  set, resolve first existing of
+  `<designRoot>/<stylesRoot>/<app.json.style.<slot>>/DESIGN.md` or `…/design.md`
+- Preview resolution (falls back to the other slot when the current theme's
+  slot is empty): resolve the current theme's slot; if unset, resolve the
+  other slot instead
+- Display resolution (no fallback): resolve only the current theme's slot;
+  render "not set" when that slot is empty, even if the other slot has a value
 - Layout contracts (preferred; each id optional if missing):
   `<designRoot>/<layoutsRoot>/<layoutId>/LAYOUT.md` for each entry in
   `app.json.layouts`
 
 Stock validity: a style id is valid when its package directory contains `DESIGN.md` or
 `design.md`. A layout id is preferred when its package contains `LAYOUT.md`.
+
+The legacy single-string `style` shape is retired; there is no runtime
+compatibility fallback — `app.json` files must use the `{ light?, dark? }` object.
 
 Dev server: run `npm run dev` from `<designRoot>`. Preview URLs follow that
 engineering app’s routing (e.g. `/apps/<appId>/canvases/<canvasId>`).
