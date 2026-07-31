@@ -22,3 +22,19 @@ GEMINI.md
 AGENTS.md
 .cursor/
 # <<< wn-ide-compatible (managed) <<<
+
+# >>> wn-dev-cleanup
+temp/**
+**/.DS_Store
+Thumbs.db
+**/Thumbs.db
+desktop.ini
+**/desktop.ini
+.wn-ai/.scratch/
+.wn-ai/wn-dev-scaffold/
+**/.wn-product-docs/
+**/.wn-dev-docs/
+.superpowers/
+**/__pycache__/
+*.pyc
+# <<< wn-dev-cleanup
