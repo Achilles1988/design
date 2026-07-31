@@ -10,16 +10,23 @@ summary: 'Runway''s interface is a cinematic reel brought to life as a website â
   manifesto for AI-powered creativity. Every section feels like a frame from a film:
   dramatic lighting, sweeping landscapes, and intimate human moments captured in high-quality
   imagery that dominates the viewport.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- editorial
+- cinematic
+- high-contrast
+- minimal
+tags_content_hash: 604048b6cb4916f7da2c5e063ed1ad1b65793c98f66119cff44d70df94b364fa
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/runwayml/DESIGN.md
 content_hash: b0e69bf643f89bb57ac0b82a3bf025e59ff1478c244cb0528ad1e38b3f80dac9
 license: MIT

@@ -11,16 +11,23 @@ summary: An inspired interpretation of Sentri's design language — a developer-
   Monaco for code, then leans on dark-on-light pricing surfaces, sticker-style mascots,
   and a single-color CTA hierarchy where black-violet buttons read as the primary
   action against either polarity.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- playful
+- colorful
+- illustrated
+- high-contrast
+tags_content_hash: bc6cdbb01bc8d68364618ce82ed164314721941d451557d3ee76d0de4a1f5e41
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/sentry/DESIGN.md
 content_hash: 655c91d7d23b5e869a966b7f1b63ae650567ad5d69003cfc64b0ee62c8e02c1f
 license: MIT

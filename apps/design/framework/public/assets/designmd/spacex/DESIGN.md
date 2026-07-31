@@ -10,16 +10,23 @@ summary: An inspired interpretation of Spasex's design language — a mission-or
   leading. UI chrome is intentionally minimal a single ghost outlined pill button
   per band, all-caps eyebrow microtext, and a fixed top nav over photography. The
   system is unapologetically austere — black, white, and the imagery itself.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- high-contrast
+- editorial
+- futuristic
+tags_content_hash: 110fc26d2b195e69ba41662b522e1031592932c6087654c6a38d6fca73d64b75
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/spacex/DESIGN.md
 content_hash: 495450c79faab54d12d677649ca0a2c30a60f64f536a802e945ad54185c5baad
 license: MIT

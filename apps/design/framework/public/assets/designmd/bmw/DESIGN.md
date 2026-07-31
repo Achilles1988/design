@@ -11,16 +11,23 @@ summary: BMW's corporate site — distinct from BMW M's motorsport-bombastic var
   on two weights — heavy 700 display and Light 300 body. Configuration and reservation
   flows ride a card-based 4-up grid, where each card holds a model render, a name,
   and a "Learn More" link.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- elegant
+- minimal
+- geometric
+- luxury
+tags_content_hash: f0a7e85b01e038b509a57946545dcafa4b165d4c7a3d95df689fc41fa80c10fa
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/bmw/DESIGN.md
 content_hash: b7268279e7c98e85fb80890e06765f4ee8340ba1ea1ccb5a8a5b134de43dac3e
 license: MIT

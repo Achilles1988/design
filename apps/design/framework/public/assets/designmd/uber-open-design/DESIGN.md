@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/uber
 source_date: '2026-04-28'
 title: Design System Inspired by Uber
 summary: Mobility platform. Bold black and white, tight type, urban energy.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- high-contrast
+- editorial
+- flat
+tags_content_hash: 5125b9b2cad16c1a072bfdf42e7b33d15b64937e42f52c80a7d5d599832036e7
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/uber/DESIGN.md
 content_hash: 1defaaf4677a0ffd9bcd799ac58a8558dedd08e0066900741e1992d99f860dbc
 preview_image: components.html

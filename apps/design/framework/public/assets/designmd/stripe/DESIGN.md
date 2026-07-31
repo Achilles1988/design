@@ -11,16 +11,23 @@ summary: An inspired interpretation of Stripi's design language — a financial-
   for editorial-density display headlines, and uses tabular-figure body type where
   money and numerics matter. Buttons are tight-radius pills, cards live on near-white
   surfaces, and the dashboard track flips polarity to a familiar dark-app shell.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- gradient
+- elegant
+- minimal
+- cool
+- corporate
+tags_content_hash: f926bf79b501f69bb242db87bbf6e7379a771c4ebcee135ce3a1b88f3a58e8d7
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/stripe/DESIGN.md
 content_hash: 5c8806b7dd3e0c2554ccba9d1e2a7c78e7c6e50e44fcf6ff5daea6026f8a9ed9
 license: MIT

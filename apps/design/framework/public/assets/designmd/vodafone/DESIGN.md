@@ -9,16 +9,23 @@ summary: An inspired interpretation of Vodafone's design language — a telecom 
   uppercase display headlines and clean white content bands, anchored by the company's
   signature scarlet red CTA and the proprietary Vodafone display sans set at impossibly
   heavy 800 weight.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- high-contrast
+- bold
+- corporate
+- minimal
+tags_content_hash: 7a16467c149eeab887a63d8a59887a04cac09c0f07b08fdcd37e2069551edbfe
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/vodafone/DESIGN.md
 content_hash: 293a40951e654283978fa744b24177a159d8f2a60f402bc735bf081618af0ef6
 license: MIT

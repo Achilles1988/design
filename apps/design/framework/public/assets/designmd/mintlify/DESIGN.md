@@ -13,16 +13,24 @@ summary: Mintlify presents documentation infrastructure with a dual-mode aesthet
   bands, and a 3-column documentation layout (sidebar / prose / TOC) anchors the developer
   experience. Coverage spans homepage, startups program, pricing comparison, and the
   live tabs documentation page.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- minimal
+- gradient
+- soft
+- corporate
+- cool
+tags_content_hash: 38da0435f75129b1fd021c5e8b8854cd9a95818c61b752c260064bf244555ca7
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/mintlify/DESIGN.md
 content_hash: 754ffcf35dcd39ef8aef450085ce936aaca5b872ff92caa66be99e91a5c3d5ec
 license: MIT

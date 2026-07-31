@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/zapi
 source_date: '2026-04-28'
 title: Design System Inspired by Zapier
 summary: Automation platform. Warm orange, friendly illustration-driven.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- colorful
+- illustrated
+- rounded
+- soft
+tags_content_hash: 0da3dc3b8790ada1c7bea667412fc5105b830cf98b6012f567c0cc5db76fe011
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/zapier/DESIGN.md
 content_hash: 01a80cc76a4c32defdca2efa34ebb34ba5a14ee6553894252a705d8e52228de4
 preview_image: components.html

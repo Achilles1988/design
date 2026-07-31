@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/curs
 source_date: '2026-04-28'
 title: Design System Inspired by Cursor
 summary: AI-first code editor. Sleek dark interface, gradient accents.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- minimal
+- muted
+- soft
+tags_content_hash: 4fd7323a6f68caaa9e43aad075801af28bb0a4ab5d5318db469f609d85023b00
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/cursor/DESIGN.md
 content_hash: 66f4f737a2fbc17cd37489f321bbfa799b202a28bcf0df2b86a70b7773926a69
 preview_image: components.html

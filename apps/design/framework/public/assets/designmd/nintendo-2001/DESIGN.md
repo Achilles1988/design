@@ -9,16 +9,24 @@ summary: An analysis of Nintendo.com's 2001 design language — a brushed-periwi
   glows amber over a halftone-dotted carbon bar, and bold outlined display type sits
   on circuit-board hero fields. A Y2K hardware aesthetic that treats the web page
   like the faceplate of a game system.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- retro
+- skeuomorphic
+- metallic
+- textured
+- colorful
+- playful
+tags_content_hash: dd3d83f809bab8ade74030bd0a44f5c775c53fbbb33fe29537dbb45f61a24f67
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/nintendo-2001/DESIGN.md
 content_hash: 9630af17090d5c39ba9d8b5915a597a96c7552efe1422b3b8c3f31fb3e636716
 license: MIT

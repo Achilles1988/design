@@ -6,16 +6,23 @@ source_date: '2026-04-28'
 title: Design System Inspired by The Verge
 summary: Tech editorial media. Acid-mint and ultraviolet accents, Manuka display,
   rave-flyer story tiles.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- maximalist
+- high-contrast
+- colorful
+- editorial
+tags_content_hash: 8799673a87e59ec3a40fcc3f2c638a4d223f53ad4dfef809aa98cad43864a75f
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/theverge/DESIGN.md
 content_hash: 094db6e7a6369bef4539f7319b5bca116ed1b8e8784c51f8f36be84e566b46ce
 preview_image: components.html

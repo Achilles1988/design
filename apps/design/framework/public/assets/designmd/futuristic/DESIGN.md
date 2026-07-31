@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Futuristic
 summary: Forward-looking design with tech-inspired typography, modern layouts, and
   a sleek, innovation-driven aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- futuristic
+- minimal
+- cool
+- high-contrast
+- geometric
+tags_content_hash: 90a7347f6e74defe325367afa44197ede4a779c6e9cd55c568eea5fca61681cc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/futuristic/DESIGN.md
 content_hash: 7aca9e082a2c20876331e7aca13e3c16847e3f51c37db19612e009a247bde376
 preview_image: components.html

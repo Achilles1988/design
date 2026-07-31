@@ -16,16 +16,24 @@ summary: 'A three-surface marketing system organized around alternating black, w
   atmospheric mesh, no drop shadows beyond a faint section-divide. Imagery does all
   the heavy lifting: console glamour shots, game key art, and PS Plus tier illustrations
   occupy 60-90% of every section, with copy compressed into a small editorial slot.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- high-contrast
+- corporate
+- rounded
+- cool
+- editorial
+tags_content_hash: 9396b9e7c6c55b8081bd68da705633886cafafa6cfdf4bb212b8b7e3240449d0
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/playstation/DESIGN.md
 content_hash: 2a56c109af6cb847fa091b768f719b498ac56b582d010860e73ea5fb72a1590d
 license: MIT

@@ -12,16 +12,24 @@ summary: 'A photography-first commerce system built on extreme typographic contr
   surface gray, and a deliberately small set of semantic accents (sale red, success
   green, restrained category tints) — every chromatic moment is reserved for editorial
   photography or pricing signal, never decorative chrome.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- high-contrast
+- editorial
+- bold
+- sharp
+tags_content_hash: fa9e2b430b491e110d014dc87cbc604783f452b6d8dae09367c4c34b070dcc63
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/nike/DESIGN.md
 content_hash: d2a3d363665839e2ddc15c91b8a9f3e92b1962ff55a7ca5d964ab3bb88b8186c
 license: MIT

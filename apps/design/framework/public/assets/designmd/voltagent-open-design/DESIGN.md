@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/volt
 source_date: '2026-04-28'
 title: Design System Inspired by VoltAgent
 summary: AI agent framework. Void-black canvas, emerald accent, terminal-native.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- monochrome
+- futuristic
+- industrial
+tags_content_hash: 39b491291bb837b0103bac2f53a66b31692f747846f0c7b11daa341a6ef7a7cf
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/voltagent/DESIGN.md
 content_hash: 2f58cadf75642185b09493a7bf00e81461acd67bdd543c021b22e254e3b2a32f
 preview_image: components.html

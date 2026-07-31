@@ -10,16 +10,24 @@ summary: A vibrant claymation-meets-data interface for Clay.com (GTM data-orches
   peach, ochre — that punctuate long-scroll explainer pages. Brand voltage comes from
   3D-rendered claymation illustrations (mountains, characters, mascots) used as full-bleed
   hero artifacts and the bright multi-color card surfaces showing product UI fragments.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- colorful
+- playful
+- 3d
+- claymorphism
+- organic
+tags_content_hash: 15f5f462eb52e45ce11749c26915fdc80798404b868409b732cb9175e07bf43e
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/clay/DESIGN.md
 content_hash: 1abd803a207fbe950a06e155adcd6013c2e149b13e7b88844f5069f9d3d99eb3
 license: MIT

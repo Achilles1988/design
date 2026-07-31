@@ -10,16 +10,23 @@ summary: An inspired interpretation of Zapier's design language — a workflow-a
   (`#ff4f00`); typography pairs the proprietary Degular Display family at hero scale
   with Inter for sub-displays and body, giving the brand a confident-warm rather than
   cool-tech voice.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- colorful
+- rounded
+- editorial
+- soft
+tags_content_hash: 1d1a278e146046fb8f73dc63e388c3ada79ce7d4f5b120351d5736ff0c280aa7
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/zapier/DESIGN.md
 content_hash: 9aee43ba8ece1b4fd0753b4cad0a29f3497331882fa376f0dd4fea8a018c32fc
 license: MIT

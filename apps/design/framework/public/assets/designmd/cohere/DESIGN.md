@@ -8,16 +8,23 @@ summary: Cohere's 2026 web system is a controlled enterprise AI interface built 
   stark white editorial space, deep green-black product bands, soft mineral surfaces,
   rounded media cards, and a distinctive type split between monospaced-feeling display
   headlines and precise Unica77 UI text.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- corporate
+- editorial
+- rounded
+- cool
+tags_content_hash: f2c108a8b79470a1bc43e4da815ccb8820dcc414c9f3f02319a74c4e061c49c6
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/cohere/DESIGN.md
 content_hash: 1c49a5a5f88d43841d4f4afa33831328d47a5715048700a3b75086a822575883
 license: MIT

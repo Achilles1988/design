@@ -6,16 +6,24 @@ source_date: '2026-04-28'
 title: Design System Inspired by PlayStation
 summary: Gaming console retail. Three-surface channel layout, quiet-authority display
   type, cyan hover-scale.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- high-contrast
+- editorial
+- corporate
+- cool
+- minimal
+tags_content_hash: 978070747e0a16e95a849996c74726dfdf7ef4d9b9011c58262cb211f2c2255a
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/playstation/DESIGN.md
 content_hash: aa328bc329428dd69daee224a64d8ad793dbdd340d9bb1cb8df2794dbbafabd6
 preview_image: components.html

@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/pint
 source_date: '2026-04-28'
 title: Design System Inspired by Pinterest
 summary: Visual discovery. Red accent, masonry grid, image-first.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- rounded
+- soft
+- colorful
+- minimal
+tags_content_hash: 2cf8a4fa754e110d5fdb0af771e94c3ef59dd3803e85c997e5e07a6ed4d06838
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/pinterest/DESIGN.md
 content_hash: e6cb634aca8404b43b9eaeaf650bb64b0d26b1240bb3c33da643fded1fe1ecaa
 preview_image: components.html

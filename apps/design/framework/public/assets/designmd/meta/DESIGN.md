@@ -12,16 +12,24 @@ summary: Meta's design system spans hardware commerce (Quest VR, Ray-Ban Meta AI
   100px-radius buttons, generous 24-32px card rounding, and tight three-tier text
   hierarchy carry across homepage, product detail (PDP), buy-now configurator, and
   accessory subpages.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- minimal
+- corporate
+- rounded
+- colorful
+- high-contrast
+tags_content_hash: 27326ec508ab6633ae1e31274c89950f3f2b14272a127514ca1571a7a45b1744
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/meta/DESIGN.md
 content_hash: 306dfad97c006d47b134fb0dbd55ff68d3baa526844d6eb37346373c9ef35339
 license: MIT

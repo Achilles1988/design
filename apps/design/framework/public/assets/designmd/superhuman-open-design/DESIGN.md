@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/supe
 source_date: '2026-04-28'
 title: Design System Inspired by Superhuman
 summary: Fast email client. Premium dark UI, keyboard-first, purple glow.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- gradient
+- elegant
+- premium
+- cool
+tags_content_hash: 1205b0c5d872997f901dcbf30d97e75317bc40344354ff48087445111ef4fc61
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/superhuman/DESIGN.md
 content_hash: 93f9375d392f77255f9a98640b53f181076515378b83326782c6e6e12dc51f8e
 preview_image: components.html

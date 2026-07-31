@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/comp
 source_date: '2026-04-28'
 title: Design System Inspired by Composio
 summary: Tool integration platform. Modern dark with colorful integration icons.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- cool
+- high-contrast
+- colorful
+- industrial
+tags_content_hash: 3bcd9560e96cba262cefc7aa779896cd70d08f35a4f38c667bd186dce3595520
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/composio/DESIGN.md
 content_hash: c844f7873b28076dcce380204f5c79fbf3b63ce48a4f435907a36ad02bf5337d
 preview_image: components.html

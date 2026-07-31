@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Ant
 summary: Structured, enterprise-focused design system emphasizing clarity, consistency,
   and efficiency for data-dense web applications.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- flat
+- minimal
+- dense
+- geometric
+tags_content_hash: caf304ad20f1bc0ae9d8172601e1328957ee13a01afded39bcdb19e16d067c41
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/ant/DESIGN.md
 content_hash: c41abccc721cf0eb6f2a0bf2e9282be3bcbdaf649adc1320b86f8df9721a0aa0
 preview_image: components.html

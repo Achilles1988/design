@@ -6,16 +6,24 @@ source_date: '2026-06-06'
 title: Design System Inspired by GitHub
 summary: Code-forward platform. Functional density, blue-on-white precision, Primer
   foundations.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- flat
+- dense
+- corporate
+- minimal
+- monochrome
+tags_content_hash: 8a6cef603e3a5383a1ad568152c5a4c0ddc45a5342160088b20a5ad846052855
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/github/DESIGN.md
 content_hash: 931769d326652380ea31e791a45c216bc1c04b614ec82d06b51b2d1a1ce829e3
 preview_image: components.html

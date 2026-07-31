@@ -6,16 +6,23 @@ source_date: '2026-04-28'
 title: Design System Inspired by Bugatti
 summary: Hypercar brand. Cinema-black canvas, monochrome austerity, monumental display
   type.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- luxury
+- minimal
+- monochrome
+- high-contrast
+tags_content_hash: f60384b6106936bce28ae399966daf78229ab54588a074f918a0a3de4202da62
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/bugatti/DESIGN.md
 content_hash: 67f88865f620c03d2582af03fa2a1ca87599633deaab240035feb1ab8255cd05
 preview_image: components.html

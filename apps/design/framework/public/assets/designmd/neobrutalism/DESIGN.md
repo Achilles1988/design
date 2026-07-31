@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Neobrutalism
 summary: Modern take on brutalism with bold borders, vivid accent colors, and raw,
   high-contrast layouts on warm surfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- neobrutalism
+- sharp
+- high-contrast
+- colorful
+- bold
+tags_content_hash: afb679d2d1bdfaba5bb72993608363daf80307b2f1b58c90d4a98648087a7639
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/neobrutalism/DESIGN.md
 content_hash: f6f9e7021c231dcb42ab647770c5a5ff2df485e06bc582acae44fbb7ebb6583e
 preview_image: components.html

@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Neumorphism
 summary: Soft, extruded UI elements with inner and outer shadows on monochromatic
   surfaces for a tactile, embedded look.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- neumorphism
+- soft
+- monochrome
+- minimal
+- muted
+tags_content_hash: 1733d9e3a9816833c56ca74fa51faf67c029af45fa7dea6a9cbf5920545b2f5f
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/neumorphism/DESIGN.md
 content_hash: e0dbc739d3ddedcc43e04462a29cedb4ab97ab4fc4c68c7692fbdbf853334863
 preview_image: components.html

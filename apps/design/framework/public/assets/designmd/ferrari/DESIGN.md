@@ -15,16 +15,23 @@ summary: A luxury-automotive brand whose marketing surfaces read as cinematic ed
   signature is the **full-bleed cinematic hero photograph** that fills the viewport
   top with car photography, model details, or trackside livery — followed by a tighter
   editorial body layout below.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- luxury
+- elegant
+- editorial
+- high-contrast
+tags_content_hash: 1e82e9ca8ba3881ed07acfe1d6cfc657807aa4ba4394f83e18e57df4b1015c6c
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/ferrari/DESIGN.md
 content_hash: 1199e2832641cac7e384aaf3b1f3db87f992240cea5d3d1eee04d9dc00acb17c
 license: MIT

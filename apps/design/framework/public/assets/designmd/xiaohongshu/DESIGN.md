@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/xiao
 source_date: '2026-05-01'
 title: Design System Inspired by Xiaohongshu
 summary: Lifestyle UGC social platform. Singular brand red, generous radius, content-first.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- rounded
+- soft
+- colorful
+- clean
+tags_content_hash: fff4082aa20179fe6811ef916d85299ce7a26648ec2cf20c7278879165297613
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/xiaohongshu/DESIGN.md
 content_hash: e1a103ef765f4dd20d814372d7d18f3a5e99bfcce085537bb289d5d59b4bc2d9
 preview_image: components.html

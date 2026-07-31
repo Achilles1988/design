@@ -6,16 +6,24 @@ source_date: '2026-05-09'
 title: Trading Terminal Design System
 summary: Bloomberg-style financial trading terminal. Dark-only, data-dense, cyan/coral
   buy/sell signals. Everything readable at a glance from two meters away.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- dense
+- monochrome
+- futuristic
+- industrial
+- high-contrast
+tags_content_hash: 07b5ab8f4184de6c39c12d508e5e6559b28921d3407e7591b855022cb94883b8
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/trading-terminal/DESIGN.md
 content_hash: 6b4ae69f76fb4f697af01e335c61c4b8d4114a36871d134eec62f665c2170f18
 preview_image: components.html

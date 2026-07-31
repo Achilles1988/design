@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/clau
 source_date: '2026-04-28'
 title: Design System Inspired by Claude (Anthropic)
 summary: Anthropic's AI assistant. Warm terracotta accent, clean editorial layout.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- elegant
+- soft
+- textured
+tags_content_hash: af94dc663f738245f9094b1a16ee5c3363d9c263530f1f35065e728ea04138fb
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/claude/DESIGN.md
 content_hash: 79063565b490ace245dbca4d134c5aff849d16b7004c1e8e23cea1ea98fa7eb5
 preview_image: components.html

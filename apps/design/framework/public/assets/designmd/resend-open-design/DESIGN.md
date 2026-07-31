@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/rese
 source_date: '2026-04-28'
 title: Design System Inspired by Resend
 summary: Email API. Minimal dark theme, monospace accents.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- monochrome
+- elegant
+- cool
+tags_content_hash: 572026fe4b01b548918aec367094489d43f203b8a4e946f0742cd306e4e33a56
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/resend/DESIGN.md
 content_hash: c6c22baba6e185d30e8da94dac45ebf5d1ae0f21ec88f5e1b3ceeacc14bfe00e
 preview_image: components.html

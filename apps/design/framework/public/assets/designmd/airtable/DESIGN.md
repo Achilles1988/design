@@ -9,16 +9,23 @@ summary: A sober, editorial workflow-software interface anchored on white canvas
   dark green, peach, and dark navy that punctuate long-scroll explainer pages. Primary
   actions use a near-black pill CTA; secondary actions sit in a white outlined button.
   Type runs Haas Grotesk in modest weights — never bold for its own sake.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- corporate
+- editorial
+- colorful
+- rounded
+tags_content_hash: 9f0f9e9e2885b03e13a8ad59c3faa284779700392bdb159f7f11cf58904a2fa8
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/airtable/DESIGN.md
 content_hash: 1d225e511213044d3c705bde50265ad010932bfd8a15740a144dd4f480128889
 license: MIT

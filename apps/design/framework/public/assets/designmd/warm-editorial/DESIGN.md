@@ -6,16 +6,23 @@ source_date: '2026-04-28'
 title: Warm Editorial
 summary: A serif-led magazine aesthetic. Terracotta accent on warm off-white paper
   —
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- elegant
+- textured
+- muted
+tags_content_hash: 34d3547d18b99671f9137f6e8a8f587d76255419eca459a5f0b6c8d03351bc38
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/warm-editorial/DESIGN.md
 content_hash: d478c0b23c15f0ef6b8863048d7ac809d0627216aa1efd6c303c242c6c470a5d
 preview_image: components.html

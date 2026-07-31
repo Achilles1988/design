@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Editorial
 summary: Magazine-inspired editorial layout with refined serif typography, structured
   grids, and elegant reading experiences.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- elegant
+- minimal
+- geometric
+tags_content_hash: c515bd20b3af42dbf0138b03424b5885a990814d7d91cd4898ad09ff4b3c47d4
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/editorial/DESIGN.md
 content_hash: fc2b9e3dddf4911796911cd0d11b8a02f039d74a96a361e67fea4fc2b1775e31
 preview_image: components.html

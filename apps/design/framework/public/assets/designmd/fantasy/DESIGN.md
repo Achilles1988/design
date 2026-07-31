@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Fantasy
 summary: Game-inspired fantasy aesthetic with bold, premium visuals, rich color palettes,
   and immersive thematic elements.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- maximalist
+- colorful
+- luxury
+- illustrated
+tags_content_hash: 77779e0831af12d4eb92f395a89acdd23f03f9892819784f4c689a68e1831c8f
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/fantasy/DESIGN.md
 content_hash: 27fc64237cab1aa8c4de24463ff92987ad46c541e7f91448d4397773353f126f
 preview_image: components.html

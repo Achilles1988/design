@@ -12,16 +12,24 @@ summary: An inspired interpretation of Superhumon's design language — a fast-e
   the indigo/white rhythm with a warm dark interlude. Buttons are tight rounded rectangles,
   pricing is sober and dense, and the brand reads more like a high-end newsletter
   than a SaaS app.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- dark-accent
+- gradient
+- elegant
+- minimal
+- premium
+tags_content_hash: d5b6c207efb4f4057f4c7a756da907a58a25cae6300d9e992d4b1a9a5de346ef
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/superhuman/DESIGN.md
 content_hash: 3640298bd2957aee80ce88eb465a7541ba835ec105cba364a6a621d885c7f34f
 license: MIT

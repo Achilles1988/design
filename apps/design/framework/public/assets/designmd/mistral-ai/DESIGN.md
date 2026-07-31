@@ -11,16 +11,23 @@ summary: Mistral AI brands itself with a singular signature — atmospheric suns
   an elegant near-serif voice for hero displays. Coverage spans homepage (Frontier
   AI hero), Le Studio product page, Coding solutions, news article surfaces, contact
   form, and services tier page — all anchored by the signature gradient closing band.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- gradient
+- colorful
+- editorial
+- elegant
+tags_content_hash: f6238e45978db553bcac5d6a8ad82dba40d7d683b63c4239ec76e2cb7525b36f
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/mistral.ai/DESIGN.md
 content_hash: 40e2c692d72c54bae1e43446e2d059b71d773668d39d71ccb7ededa9fa07d145
 license: MIT

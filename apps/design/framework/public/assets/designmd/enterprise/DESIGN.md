@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Enterprise
 summary: Clean, high-contrast enterprise design for data-driven workflows with intuitive
   drag-and-drop patterns and structured layouts.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- flat
+- high-contrast
+- dense
+- geometric
+tags_content_hash: 1cc87ec1229daa80e1c9a71733db7cad3d8a67cd768e454d5aa2ed54af20a16d
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/enterprise/DESIGN.md
 content_hash: 13b943a0c0de43ac84bbb0951ae13f7d613d2cbf2279ff08e0ced3e187b11cf7
 preview_image: components.html

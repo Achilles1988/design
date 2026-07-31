@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/spot
 source_date: '2026-04-28'
 title: Design System Inspired by Spotify
 summary: Music streaming. Vibrant green on dark, bold type, album-art-driven.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- colorful
+- bold
+- high-contrast
+- monochrome
+tags_content_hash: bcb3ae5d35455c4d7f08c9bf04eba5a3a2eca4ca3eaaf26a80a3fe3c39ff0eb2
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/spotify/DESIGN.md
 content_hash: d7f3bc8413a01de9ef15cac8807990be3561f1897c37d1db9ccf23d84b5b1386
 preview_image: components.html

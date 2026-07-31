@@ -10,16 +10,24 @@ summary: A photography-first interface that turns marketing into a museum galler
   color. UI chrome recedes so the product can speak — no decorative gradients, no
   shadows on chrome, only the one signature drop-shadow under product imagery resting
   on a surface.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- minimal
+- elegant
+- premium
+- editorial
+- high-contrast
+tags_content_hash: 9b3d36da619171542fa4c7e3a0535ebcf7261dda5aa28d9399ae0e6ab351df53
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/apple/DESIGN.md
 content_hash: 83fbc614443a9b3d7569e9956a43e7b8740f9d0f939f58b8154f7a7cec3002b2
 license: MIT

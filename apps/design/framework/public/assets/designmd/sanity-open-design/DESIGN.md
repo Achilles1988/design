@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/sani
 source_date: '2026-04-28'
 title: Design System Inspired by Sanity
 summary: Headless CMS. Red accent, content-first editorial layout.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- editorial
+- minimal
+- corporate
+- cool
+tags_content_hash: d7ea18690b6c5bfeb57636ba94620b8726a8e90cd42b46832bab98abf43d2e6a
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/sanity/DESIGN.md
 content_hash: 52354c55c1c62dd16aeffc037fad7494a6de918a59bd65843ebcb9e6357928fa
 preview_image: components.html

@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Simple
 summary: Straightforward, no-frills design with clean typography, neutral colors,
   and intuitive layouts that stay out of the way.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- flat
+- clean
+- airy
+tags_content_hash: b5beee6a25739bdb1e959ef42799f1301aa284ff7e2e50e4000363d99a4999c1
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/simple/DESIGN.md
 content_hash: 20f4214be65d854fb71da9fabcb5256d3bbc8a1a4de8e4a32b7a03e70a450af7
 preview_image: components.html

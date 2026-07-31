@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Retro
 summary: Throwback design with vintage-inspired typography, high-contrast retro palettes,
   and nostalgic visual elements.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- retro
+- high-contrast
+- colorful
+- textured
+- vintage
+tags_content_hash: b0a9078597263778634d5e2bd767788b4741abd1df1a7eac22e79cee83dbb2b8
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/retro/DESIGN.md
 content_hash: ba3fdc8e5be058513ea6ff5f19938db831e94d7bbfc03da8383327a2f7e3a86e
 preview_image: components.html

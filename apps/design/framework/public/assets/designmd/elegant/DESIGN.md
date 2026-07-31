@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Elegant
 summary: Graceful, refined aesthetic with delicate typography, minimal palettes, and
   polished layouts that exude sophistication.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- elegant
+- minimal
+- soft
+- muted
+tags_content_hash: 103edf9cf912aa43aa60f34f71d84931de8ece5337065d6b2c08c385623c1e20
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/elegant/DESIGN.md
 content_hash: aab8a3bce10d8fac8763b7dee99168083963e1a0ec79c18546be75b46dd36cae
 preview_image: components.html

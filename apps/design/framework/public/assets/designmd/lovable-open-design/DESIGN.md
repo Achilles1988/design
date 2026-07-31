@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/lova
 source_date: '2026-04-28'
 title: Design System Inspired by Lovable
 summary: AI full-stack builder. Playful gradients, friendly dev aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- soft
+- gradient
+- playful
+- muted
+tags_content_hash: cc89725a26e2aa4ee3eff381a197130f304dfb4e3c533912eb5ce4c8b9d8a74e
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/lovable/DESIGN.md
 content_hash: 8a568b388dca500e2eeb631eb05c6d10b7f64a6bdbd7401634a86ec4e1fd5191
 preview_image: components.html

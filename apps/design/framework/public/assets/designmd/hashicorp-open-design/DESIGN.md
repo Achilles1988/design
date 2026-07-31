@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/hash
 source_date: '2026-04-28'
 title: Design System Inspired by HashiCorp
 summary: Infrastructure automation. Enterprise-clean, black and white.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- corporate
+- minimal
+- high-contrast
+- flat
+tags_content_hash: 7aaeed592d9f1f1c3d6503d38ab502909768e8e3f986650a84df8a40f1f34b5e
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/hashicorp/DESIGN.md
 content_hash: 7532880ef6c1bd586a5fb6229563b69f26ee841994f5616c698e0316813042c6
 preview_image: components.html

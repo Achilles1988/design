@@ -2,21 +2,29 @@
 id: atelier-zero
 source: crawled
 source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/atelier-zero/DESIGN.md
-source_date: '2026-05-04'
+source_date: '2026-07-18'
 title: Atelier Zero
 summary: 'A magazine-grade, collage-driven visual system: warm paper canvas, surreal'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- warm
+- textured
+- muted
+- elegant
+- organic
+tags_content_hash: 53a992f1a53ecb218b937b433462695c79654594083e8853b0be2fc50719bdf8
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/atelier-zero/DESIGN.md
-content_hash: 0312e65201e4411f7f1f648f2a5ce093473a9fa8e43395357bc8ad76a47cdedc
+content_hash: ce5780e84162c38aeb6ea3b9ba58f97cc88d9cf5eef496f53f4bd6592fdc2081
 preview_image: components.html
 assets:
 - path: components.html
@@ -320,7 +328,7 @@ generated to match these constraints:
   dotted matrices, numbered tags. Never typography that conflicts
   with on-page copy.
 
-See `skills/open-design-landing/assets/imagegen-prompts.md` for the
+See `design-templates/open-design-landing/assets/imagegen-prompts.md` for the
 working prompt pack and per-section variants. All renders should be
 at 16:9 (heroes) or 1:1 (cards / about / cta), saved as PNG, ≥1024px
 on the long edge.

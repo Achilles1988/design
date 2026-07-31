@@ -6,16 +6,23 @@ source_date: '2026-05-16'
 title: Design System Inspired by Perplexity AI
 summary: Conversational AI search engine. Deep-dark canvas, sharp typography, single
   violet accent, dense information hierarchy.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- dense
+- cool
+- high-contrast
+tags_content_hash: 802ed0a54e3779f347dde3aec71d8cba5c49e0664081f955a6b190baebde8c10
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/perplexity/DESIGN.md
 content_hash: e747bcc529b74d82c52549a2355f6b8a546bd4a90a09f91e22f74a1a142564fd
 preview_image: components.html

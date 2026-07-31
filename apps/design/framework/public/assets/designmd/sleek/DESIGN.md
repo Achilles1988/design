@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Sleek
 summary: Modern minimalist aesthetic with clean lines, intentional color palette,
   subtle interactions, and consistent spacing.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- flat
+- clean
+- elegant
+tags_content_hash: 54b985a77214c1ecd9e2fa544f06313fb597bb908ae4e051a2629e45413109ae
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/sleek/DESIGN.md
 content_hash: cf29cb7c9e679f02c2311a664d95cffd64009b858b363fdd19b492ad1a98649f
 preview_image: components.html

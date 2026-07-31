@@ -10,16 +10,23 @@ summary: 'An inspired interpretation of Supabaze''s design language — an open-
   composited above the hero. The brand reads as quietly technical: minimal chrome,
   a near-monochrome palette, and the green primary acting as the only chromatic event
   on the page.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- flat
+- corporate
+- cool
+tags_content_hash: 8dd026df5b8dddb8d2f427f10dc5b691c0767f350802220eb99a81faddb45bed
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/supabase/DESIGN.md
 content_hash: f57287d7f44d59e8169dc4b4304ff03c1a2efb37f5433b9c04460caae7710880
 license: MIT

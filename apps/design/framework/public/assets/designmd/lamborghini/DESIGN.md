@@ -12,16 +12,24 @@ summary: Lamborghini's website is a cathedral of darkness — a digital stage wh
   are deployed with surgical precision, creating a visual language that feels like
   walking through a nighttime motorsport event where every surface absorbs light except
   the things that matter.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- luxury
+- high-contrast
+- sharp
+- minimal
+- industrial
+tags_content_hash: b80187f3c0af168d4cf4ff57d43ae79e69a053db1fe1876dff15e0874661fb5b
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/lamborghini/DESIGN.md
 content_hash: 9aa68c53b481a0befdf72859db5625f85454122294509989aa58414aaee04b34
 license: MIT

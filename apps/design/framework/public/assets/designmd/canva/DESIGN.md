@@ -6,16 +6,23 @@ source_date: '2026-06-06'
 title: Design System Inspired by Canva
 summary: Visual creation platform. Vivid purple-blue gradient, generous spacing, friendly
   geometry.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- gradient
+- colorful
+- rounded
+- soft
+- playful
+tags_content_hash: cdd7db650d7d741c654ee65b0f7e33beee608ae3ebc602931d3fef2c0e1f9adc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/canva/DESIGN.md
 content_hash: 03d903992ea7414926c86ca9ebfd2fa20c006653645b078fb2e0cbb782dc03a6
 preview_image: components.html

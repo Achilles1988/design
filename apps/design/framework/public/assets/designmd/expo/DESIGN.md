@@ -13,16 +13,23 @@ summary: A React Native developer-platform whose marketing site reads like a qui
   body 400) with JetBrains Mono on every code surface. The brand's strongest visual
   signature is the **device-mockup hero** — a centered MacBook + iPhone composite
   showing real Expo dev surfaces — over the gradient sky wash.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- corporate
+- cool
+- gradient
+- airy
+tags_content_hash: 1f00e7cbaad62c554cf1d37707b8e503e125ffa075c1115f084f059fd13e7502
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/expo/DESIGN.md
 content_hash: 1be7e129b6f75afaa12318a7c51ab22f6f74a214dec22c4827cecc519f112363
 license: MIT

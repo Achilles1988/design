@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Minimal
 summary: Stripped-back design emphasizing whitespace, clean typography, and restrained
   color for maximum clarity and focus.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- flat
+- airy
+- monochrome
+tags_content_hash: d895941856f7899d5fd6927376db8baf1e9b25382310cbdb6ff836829d11c3fc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/minimal/DESIGN.md
 content_hash: 70f28c2c184ed4634d1d1ab03a88fd940aca526f4c04603209caf03561d6d6bb
 preview_image: components.html

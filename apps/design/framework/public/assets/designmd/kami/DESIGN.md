@@ -8,16 +8,23 @@ summary: 'Editorial paper system: warm parchment canvas, ink-blue accent, serif-
   hierarchy. Built for resumes, one-pagers, white papers, portfolios, slide decks
   — anything that should feel like high-quality print rather than UI. Multilingual
   by design (EN · zh-CN · ja).'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- warm
+- elegant
+- textured
+- muted
+tags_content_hash: 46a34d513d89602d9822985e366b7489d949b40c015545578a9dd390ba339a65
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/kami/DESIGN.md
 content_hash: 1699afb7a8edaab78f6829a140c273b7556ec730a8dd5a0e797642735ccf8cd5
 preview_image: components.html

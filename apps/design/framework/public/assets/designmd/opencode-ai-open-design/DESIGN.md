@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/open
 source_date: '2026-04-28'
 title: Design System Inspired by OpenCode
 summary: AI coding platform. Developer-centric dark theme.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- monochrome
+- warm
+- minimal
+- flat
+tags_content_hash: b88b8e0365bdecfaa348ae6f4a328de104c99d0073b105e5cacec0d2c3ae82a6
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/opencode-ai/DESIGN.md
 content_hash: beaa5092524e38e89825f4f59818e2b2dfdf86b6344c734c1fba3295d2d7bc90
 preview_image: components.html

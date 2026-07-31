@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Friendly
 summary: Approachable, intuitive design with rounded elements, ample whitespace, and
   soft pastel color palettes.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- soft
+- rounded
+- playful
+- colorful
+- airy
+tags_content_hash: a53f553b77f2d61a9ad97ca725f65eb68e20942f32e7dffafbf5d7d27f09aa7e
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/friendly/DESIGN.md
 content_hash: 837c798e10342a6e1281fdeeb05fc80ce4b74d1467543155bf6db13c935c4ce2
 preview_image: components.html

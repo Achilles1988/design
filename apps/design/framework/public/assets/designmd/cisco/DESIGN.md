@@ -6,16 +6,23 @@ source_date: '2026-05-09'
 title: Design System Inspired by Cisco
 summary: Enterprise infrastructure brand. Dark trust surfaces, Cisco Blue signal,
   technical clarity.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- corporate
+- cool
+- minimal
+- high-contrast
+tags_content_hash: 118bda22fe0bb3bcf22736a13e6285a46964642b30e4e1803408ffbe63e9a8ec
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/cisco/DESIGN.md
 content_hash: 6bda99efa005b8db1074e387e059b21ca91a98d6e58c8c8cf6b9985b46559037
 preview_image: components.html

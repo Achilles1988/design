@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Corporate
 summary: Professional, brand-aligned design with structured grids, minimalist layouts,
   and consistent enterprise patterns.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- minimal
+- geometric
+- flat
+tags_content_hash: 5a6b1835a065968068cce710935e95a4e8018af20c8fb19c53dddd98d25cfa84
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/corporate/DESIGN.md
 content_hash: 3c8c80294a48d3295738d8575e93f0cd5d85f092eae3fc9e192cb39864f0453b
 preview_image: components.html

@@ -6,16 +6,23 @@ source_date: '2026-06-06'
 title: Design System Inspired by Arc Browser
 summary: '"The browser that browses for you." Translucent surfaces, gradient warmth,
   sidebar-first layout.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- glassmorphism
+- gradient
+- soft
+- colorful
+- playful
+tags_content_hash: 702a5af0006c6e37176a2387632d1b130255aae33ddf7c42b01b00d1e80b7ffa
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/arc/DESIGN.md
 content_hash: f1bb6983a6fb68dc9351edbf77c83c4ee05f74a84f9ef5d3af348205b3475e92
 preview_image: components.html

@@ -14,16 +14,23 @@ summary: An almost defiantly minimal documentation-first system that treats the 
   for code. Pricing tiers, FAQs, and "your data stays yours" guarantees all sit on
   the same flat canvas inside thin-border cards — the system is the documentation,
   and the documentation is the system.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- flat
+- rounded
+- monochrome
+- hand-drawn
+tags_content_hash: 1cc272e714600f1cb4eefa4e4091544b1b75ae95178166de413109c639176db2
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/ollama/DESIGN.md
 content_hash: 3f36f897e5aad870344dd97e282c8f125ad208dc99449bb08dd38b9259d2f451
 license: MIT

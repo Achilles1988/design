@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Expressive
 summary: Vibrant, personality-driven design with bold colors, playful graphics, and
   dynamic layouts that balance creativity with structure.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- playful
+- colorful
+- maximalist
+- bold
+tags_content_hash: 7ce1ab60877bc8fd81dbe1bd3169f51a3962d1070cf6d093b67b2167f15b55b9
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/expressive/DESIGN.md
 content_hash: 6c7b3bd5952e1857a96485c692652e06ca29826fcf98e28884f12b6e36b361fe
 preview_image: components.html

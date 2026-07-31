@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Bento
 summary: Modular grid layout with card-like blocks, clear hierarchy, soft spacing,
   and subtle visual contrast for organized, scannable interfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- geometric
+- flat
+- soft
+- rounded
+tags_content_hash: ba839605ce432160a98ffc61ea38eb82e5ce79fb98808e0308a941daecec1a09
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/bento/DESIGN.md
 content_hash: ee9bf8da9e4f7615e22d4417a39540891b9312ce63b318ce480dfb6441ca8f59
 preview_image: components.html

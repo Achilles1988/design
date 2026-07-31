@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Dashboard
 summary: Dark-themed cloud-platform aesthetic with modular grids, glass-like panels,
   and strong data hierarchy for productivity dashboards.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- glassmorphism
+- gradient
+- soft
+- rounded
+tags_content_hash: b506559b94d3c63cc460aa28adb5373def0fd770bf164185267c0efcf9eac46c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/dashboard/DESIGN.md
 content_hash: b87278ceecc58ad91ac97c14a1b8d657782f498f652e8100b9caf546742de4c2
 preview_image: components.html

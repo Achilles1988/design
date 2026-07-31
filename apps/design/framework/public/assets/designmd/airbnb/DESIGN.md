@@ -14,16 +14,24 @@ summary: A warm, generous consumer marketplace anchored on a clean white canvas 
   a marketplace expansion rather than a feature dump. Pill-shaped search bars (`{rounded.full}`),
   softly rounded property cards (`{rounded.lg}` ~14px), and 32px button radii read
   as friendly and human — there is no hard corner anywhere except the body grid.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- rounded
+- soft
+- warm
+- minimal
+- elegant
+- colorful
+tags_content_hash: c232c50b357e471ada582b6c072e194b4428cab0297731624c803ea993990ac5
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/airbnb/DESIGN.md
 content_hash: add34130d67209ad105346d60fe2b290728b9711683969db4b7760e29477a5fe
 license: MIT

@@ -11,16 +11,24 @@ summary: A motorsport-engineering interface anchored on a near-black canvas with
   stripe (light blue → dark blue → red) used sparingly as a brand signature on logos,
   dividers, and motorsport chrome. Type stays light to medium weight to feel European-engineered,
   never American-bombastic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- luxury
+- sharp
+- high-contrast
+- industrial
+- corporate
+tags_content_hash: 0c3e0c699139994b04c4fe270e7b51c4c08ec689891c2364f287ccd071e911cd
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/bmw-m/DESIGN.md
 content_hash: 824a1707c0a8d1609d72477d0fa211b9ebe4bdeb3e1fd701790af7b7bb669a4a
 license: MIT

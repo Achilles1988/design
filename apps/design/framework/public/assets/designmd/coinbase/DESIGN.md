@@ -13,16 +13,23 @@ summary: An institutional-grade crypto exchange whose marketing surfaces read li
   between bright white sections, soft gray elevation bands, and full-bleed dark editorial
   heroes (`#0a0b0d`) carrying product-ui mockup cards. Iconography is geometric and
   minimal; depth comes from card-on-card layering, never decorative shadows.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- corporate
+- elegant
+- editorial
+- cool
+tags_content_hash: f5294a683ad36ee338300a7b864d74a4836e3e2e16c58bd33a7a0599789fdb68
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/coinbase/DESIGN.md
 content_hash: c8c67800dd7f58fcc87ed7d267a3bba862e3419e499e8a66d67731a69d2de1d6
 license: MIT

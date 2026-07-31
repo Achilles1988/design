@@ -11,16 +11,23 @@ summary: A confident black-and-white editorial frame interrupted by oversized, h
   reads like a sticky note placed on a clean desk. The result is a design system that
   feels both technical and joyful — a tool for serious work, made by people who like
   color.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- monochrome
+- colorful
+- playful
+- geometric
+- high-contrast
+tags_content_hash: 8e5a5f6f3b6fad0fbc9f01020305b29e03c7b7b3ed4696fb770a8986155fed03
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/figma/DESIGN.md
 content_hash: 716ce8431f47eb8b8135552710e3c4d538bccccf1202e4ceac5428c9aada9972
 license: MIT

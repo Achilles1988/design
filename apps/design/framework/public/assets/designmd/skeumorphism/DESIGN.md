@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Skeumorphism
 summary: Real-world mimicry with textured surfaces, 3D effects, and familiar physical
   metaphors for intuitive digital interfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- skeuomorphic
+- textured
+- 3d
+- playful
+- colorful
+tags_content_hash: e2a44193f3a52a145ea3dfa9c6416a628eaa1929efa7a1585a53b3a06bf0d392
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/skeumorphism/DESIGN.md
 content_hash: 258614e400520f95a4c1d722ad5633c4a2a10be52de8e326e68837260aabd3ff
 preview_image: components.html

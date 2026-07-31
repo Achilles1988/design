@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Dramatic
 summary: High-contrast, theatrical design with bold layouts, immersive visuals, and
   unconventional compositions that command attention.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- high-contrast
+- maximalist
+- dramatic
+- bold
+tags_content_hash: a6b42deb0d6c56de7c934affaf9c257d8c5f792b6a5bc7fb553b9abb542da8c7
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/dramatic/DESIGN.md
 content_hash: 40756ea224d42ae4a579cc6c771226b0d9d20e48b953f49e221dfd1382791d16
 preview_image: components.html

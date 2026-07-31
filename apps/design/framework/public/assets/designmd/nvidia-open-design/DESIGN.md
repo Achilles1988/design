@@ -5,16 +5,24 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/nvid
 source_date: '2026-04-28'
 title: Design System Inspired by NVIDIA
 summary: GPU computing. Green-black energy, technical power aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- high-contrast
+- sharp
+- industrial
+- corporate
+- minimal
+tags_content_hash: d3b2485d231c04718cdec3922e6a3fe825fe98a1230523088f707e7f44e29662
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/nvidia/DESIGN.md
 content_hash: f1000c03abd65cd10835069bffc2e3e6f9a704e53e9e16d7134e12e2aa3d5fb9
 preview_image: components.html

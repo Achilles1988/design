@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/figm
 source_date: '2026-04-28'
 title: Design System Inspired by Figma
 summary: Collaborative design tool. Vibrant multi-color, playful yet professional.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- colorful
+- playful
+- geometric
+- high-contrast
+- corporate
+tags_content_hash: cdd3b936444cd34302e28e32c69de19ef0d2ce7053fd9b4b9b513e3bc9d1fde8
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/figma/DESIGN.md
 content_hash: 69ec480da3a8befab7b44ffd5cc4deca0c8ae8ac5ee690335413063fa1a38292
 preview_image: components.html

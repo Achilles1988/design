@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/stri
 source_date: '2026-04-28'
 title: Design System Inspired by Stripe
 summary: Payment infrastructure. Signature purple gradients, weight-300 elegance.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- gradient
+- elegant
+- minimal
+- cool
+- corporate
+tags_content_hash: ccef650a2881e5b8c2702a19e1004e200ae7cbfe2fd381b435e9d5da6449a3dd
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/stripe/DESIGN.md
 content_hash: 66dea910aa4e4d7a2cbda9ad93496da5d464f40f343e7a14b8b8029d873535ae
 preview_image: components.html

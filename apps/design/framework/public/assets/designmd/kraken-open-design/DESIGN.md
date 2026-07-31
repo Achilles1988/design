@@ -5,16 +5,24 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/krak
 source_date: '2026-04-28'
 title: Design System Inspired by Kraken
 summary: Crypto trading. Purple-accented dark UI, data-dense dashboards.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- corporate
+- dense
+- cool
+- minimal
+- colorful
+tags_content_hash: a6e842a6db615a3062e26824841e72c40b2f5876e93435c91d2d75943b0d5da6
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/kraken/DESIGN.md
 content_hash: 8b9a1b5eebcce82881debd4ab815e780ba98b091fc9568475ddfb36be94c0c24
 preview_image: components.html

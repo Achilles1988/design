@@ -12,16 +12,23 @@ summary: Miro presents itself as the AI-powered visual workspace through a confi
   mockups serve as feature illustrations, and a 4-tier pricing grid leads into a dense
   comparison table. Roobert PRO carries display headlines; the system supports homepage,
   pricing, AI Workflows product page, agile vertical, and customer stories surfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- playful
+- colorful
+- rounded
+- geometric
+- soft
+tags_content_hash: 61e8ab1ec5ebcefe43994ef4f6e2499b8ee9e28073522a0260ca26fbd23865d2
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/miro/DESIGN.md
 content_hash: 87c71f76297277d64f9679e015a50da88e72d86d7b41badf8733eae1e4cde335
 license: MIT

@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Neon
 summary: Electric neon glow effects with high-contrast color pairings for bold, attention-grabbing
   interfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- neon
+- high-contrast
+- colorful
+- futuristic
+tags_content_hash: 1b3724f98d031f4eaba9a481268a327de20908e5332bec12873da70b84fa2ad3
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/neon/DESIGN.md
 content_hash: 0e118c1a6b97210dac891eb7bd3a5047e0abc247aa8942542131053b89b7dc52
 preview_image: components.html

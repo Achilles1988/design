@@ -5,16 +5,22 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/clic
 source_date: '2026-04-28'
 title: Design System Inspired by ClickHouse
 summary: Fast analytics database. Yellow-accented, technical documentation style.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- high-contrast
+- monochrome
+- industrial
+tags_content_hash: 3a0d173b60f619ce09b0de0b2834130ec3d38d552901bbab8d8fe02f739837d5
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/clickhouse/DESIGN.md
 content_hash: 71b0f6cf864dd276afe3d8d3c93f8b6c969006fc8fd25b667b39ea07f32df496
 preview_image: components.html

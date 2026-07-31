@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/mist
 source_date: '2026-04-28'
 title: Design System Inspired by Mistral AI
 summary: Open-weight LLM provider. French-engineered minimalism, purple-toned.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- gradient
+- colorful
+- organic
+- elegant
+tags_content_hash: 2aa9ecf81952157ef3ce8d9be37930a328e9896843e558c3388453864d0d7c81
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/mistral-ai/DESIGN.md
 content_hash: 59424032ca98c9d00103a9dc65e3a0a25de1bf44c7e618cdb094376af72b84c1
 preview_image: components.html

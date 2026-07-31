@@ -6,16 +6,24 @@ source_date: '2026-05-01'
 title: Design System Inspired by Material
 summary: Google's Material Design with layered surfaces, dynamic theming, built-in
   motion, and responsive cross-platform patterns.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- flat
+- colorful
+- geometric
+- soft
+- rounded
+tags_content_hash: 83f02d3bb440716eb658764e7801f6f2c597f367ed084f7018984240d1127911
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/material/DESIGN.md
 content_hash: 689368b14fc1c48c4d792f9c90e4369a582d9259e05a768d3d4966484fd56a1c
 preview_image: components.html

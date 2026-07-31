@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Shadcn
 summary: Shadcn/ui-inspired design with minimal, clean components, monochrome palette,
   and utility-first patterns.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- flat
+- clean
+tags_content_hash: 91330e4b6f357962df8bde852a545f1cdad814408c7e78e4f784d352e530c6f7
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/shadcn/DESIGN.md
 content_hash: 6fcc1709c608fd815944c17a8919c8ed4e28a29f02f6a4927a9bcb0ecc9aa943
 preview_image: components.html

@@ -9,16 +9,23 @@ summary: An inspired interpretation of Voltagent's design language — a develop
   broken only by a single electric-green brand accent, code-editor mockups inside
   the hero, and a precise grid of dark feature cards that read like a documentation
   site dressed as marketing.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- monochrome
+- geometric
+- industrial
+tags_content_hash: ee8d9f34f056e530e0458436fbbc4a293f4276ee79228196fc3b8d7410840840
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/voltagent/DESIGN.md
 content_hash: 4457887741ae5e965e205282b03c4bff83e47dd7a03cd7f38c64623a17569fcd
 license: MIT

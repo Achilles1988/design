@@ -10,16 +10,23 @@ summary: Lovable's website radiates warmth through restraint. The entire page si
   for minimalism's sake — it's a deliberate choice to feel approachable, almost analog,
   like a well-crafted notebook. The near-black text (`#1c1c1c`) against this warm
   cream creates a contrast ratio that's easy on the eyes while maintaining sharp readability.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- soft
+- minimal
+- muted
+- organic
+tags_content_hash: 670e31f59161a1d599f030cc9339c8091f2aaba106cb848a1a411034d243d699
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/lovable/DESIGN.md
 content_hash: 92790895c833104072643929ba56ebbf42c8f88ffb7bff1926462545d0ace6c7
 license: MIT

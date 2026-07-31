@@ -13,16 +13,24 @@ summary: 'The Verge''s 2024 redesign feels like somebody wired a Condé Nast mag
   blue, purple) that feel like pasted-up rave flyers arranged into a timeline. The
   mood is "developer console meets club night meets tech tabloid": serious enough
   to cover a congressional hearing, loud enough to review a synthesizer.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- maximalist
+- high-contrast
+- colorful
+- editorial
+- neon
+tags_content_hash: cc0303e268949f669788b8193a20845b35304b5d7b53da4783f5e124e5af5a01
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/theverge/DESIGN.md
 content_hash: 5da2c3116e6845826b043ac115a80896a399efda2cebc0188981fba2ef9bb526
 license: MIT

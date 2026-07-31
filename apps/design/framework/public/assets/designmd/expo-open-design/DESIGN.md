@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/expo
 source_date: '2026-04-28'
 title: Design System Inspired by Expo
 summary: React Native platform. Dark theme, tight letter-spacing, code-centric.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- airy
+- cool
+- corporate
+- geometric
+tags_content_hash: a8637dcdf8805cc26f505175f6a604bb011c2ce327756e0190a3863ea98962be
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/expo/DESIGN.md
 content_hash: a1135f6a50e65ade8d129422922d7f63df41ed2929c2507e893e2582048c2849
 preview_image: components.html

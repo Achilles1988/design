@@ -5,16 +5,24 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/bmw/
 source_date: '2026-04-28'
 title: Design System Inspired by BMW
 summary: Luxury automotive. Dark premium surfaces, precise German engineering aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- luxury
+- corporate
+- elegant
+- geometric
+- high-contrast
+tags_content_hash: 074bda64960fb76c78e9eaa0bd8fcd0fc0bde2a56211f4cb78223bb1a62a501c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/bmw/DESIGN.md
 content_hash: f04fb9e29769c567674bfbba43bebaa01760f303d5bd544770dd80bdf7e807fb
 preview_image: components.html

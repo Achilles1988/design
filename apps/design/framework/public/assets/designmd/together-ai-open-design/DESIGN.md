@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/toge
 source_date: '2026-04-28'
 title: Design System Inspired by Together AI
 summary: Open-source AI infrastructure. Technical, blueprint-style design.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- gradient
+- soft
+- colorful
+- airy
+- illustrated
+tags_content_hash: a32efc6600cd0e26ef132b7894ab90ae233a4ed41a4e3aa2bff93391c0446b7f
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/together-ai/DESIGN.md
 content_hash: e1b6715a344774cf315eb011bc67252871531b0d8d8c55f650cb5a92aac52b4b
 preview_image: components.html

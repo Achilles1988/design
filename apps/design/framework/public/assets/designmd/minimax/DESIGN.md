@@ -12,16 +12,23 @@ summary: MiniMax presents itself as a premium AI infrastructure brand through a 
   near-black pills, and layers content density via a 3-column documentation grid with
   sidebar nav, prose body, and TOC. Coverage spans the marketing homepage, model showcase
   pages, developer documentation, and platform pricing surfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- gradient
+- colorful
+- high-contrast
+- corporate
+tags_content_hash: 82e13f5c9ffab6dddef519c86b317f113de36900d546a914150fdc997b193ff2
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/minimax/DESIGN.md
 content_hash: 2658b96488bb629749259b152c5ba2912a0e8feb6a03477e265879abd9264c50
 license: MIT

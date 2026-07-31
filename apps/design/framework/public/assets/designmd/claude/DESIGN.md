@@ -11,16 +11,24 @@ summary: A warm-canvas editorial interface for Anthropic's Claude product. The s
   most AI brands use cool blue + slate. Type voice runs a slab-serif display ("Copernicus"
   / Tiempos Headline) for h1/h2 and a humanist sans for body. The signature Anthropic
   black-radial-spike mark anchors the wordmark.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- elegant
+- soft
+- muted
+- organic
+tags_content_hash: f69256820a1b096c2ef11dd9f3ff28afa446f5a0cc70f2fa1add78b37b62ead3
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/claude/DESIGN.md
 content_hash: 3d972f34f8d4f33b442fa28220cf3b7ca2f13c0a97c468e3988148f82521f9df
 license: MIT

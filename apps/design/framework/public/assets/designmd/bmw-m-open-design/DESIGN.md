@@ -6,16 +6,23 @@ source_date: '2026-05-08'
 title: Design System Inspired by BMW M
 summary: Motorsport performance sub-brand. Near-black cockpit surfaces, BMW M tricolor
   accents, sharp engineering geometry.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- luxury
+- sharp
+- high-contrast
+- industrial
+tags_content_hash: 9fba8c340c14f7d6184c6ac95db91ed8f0cef116bf4d846d311c64aa2ab218fc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/bmw-m/DESIGN.md
 content_hash: 0e89c34f2a24ad5fe2413dfbe970c31b55d53c04bd9e90134acb315b545377ce
 preview_image: components.html

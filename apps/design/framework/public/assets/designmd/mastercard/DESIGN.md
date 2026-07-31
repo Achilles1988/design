@@ -12,16 +12,24 @@ summary: 'Mastercard''s experience reads like a warm, editorial magazine built f
   carry 40-point corners, cards go fully pill-shaped, service images are cropped into
   circular orbits, and buttons either complete the pill or fit snugly at 20 points.
   There are almost no sharp corners anywhere on the page.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- rounded
+- soft
+- colorful
+- elegant
+tags_content_hash: 3e8a872e4dcab6b2e6949f6faf0e1be1e1c2fda511a6cbda5f471a1bb38d3846
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/mastercard/DESIGN.md
 content_hash: e76ceaa187f43bd24b8338d2b2314e71e9225b36492e40f32a55782281a10437
 license: MIT

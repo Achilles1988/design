@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/supa
 source_date: '2026-04-28'
 title: Design System Inspired by Supabase
 summary: Open-source Firebase alternative. Dark emerald theme, code-first.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- monochrome
+- cool
+- corporate
+tags_content_hash: 02d65b67cda24f36f444937d426657df4dbf4c7b06d8691be70b8d6eabe3f86c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/supabase/DESIGN.md
 content_hash: 341a8ad07bedf9134060f4c279007d6f920483e3b846ab6ce1d95a7c7b5b6914
 preview_image: components.html

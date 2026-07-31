@@ -5,16 +5,24 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/appl
 source_date: '2026-04-28'
 title: Design System Inspired by Apple
 summary: Consumer electronics. Premium white space, SF Pro, cinematic imagery.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- minimal
+- elegant
+- editorial
+- premium
+- airy
+tags_content_hash: d1a96ad05b13b20423a94bd7c70e619be77fb84f4adfe82f344f2fb1ae022571
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/apple/DESIGN.md
 content_hash: 001c06b02855b8443b397bfef583be5dedfd96391dcae94d7e3050e64841ed4d
 preview_image: components.html

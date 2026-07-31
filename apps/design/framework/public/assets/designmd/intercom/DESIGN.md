@@ -11,16 +11,23 @@ summary: 'An editorial customer-service marketing canvas built around a soft cre
   headlines run Saans at weight 500 with measured negative tracking. The system reads
   as a careful, product-led publication: product screenshots dominate, ornament is
   rare, and the only place chromatic energy enters is the Fin Orange CTA.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- warm
+- minimal
+- corporate
+- soft
+tags_content_hash: fd3a6cc247a8f1b695054692c271c0df08ec51d0267e358f01c527149ac67a89
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/intercom/DESIGN.md
 content_hash: 962be23cd947e87a86b2ffbc0440e9d0808243a6ef3af2aa04e8e7cc04d48ba3
 license: MIT

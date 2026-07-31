@@ -21,16 +21,23 @@ summary: 'Renault''s web presence pairs the freshly-modernised Renault diamond
   surface (white card, yellow accent dots, neutral product chrome) carry the
 
   mass-market dealership tone without crossing into luxury.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- geometric
+- sharp
+- corporate
+- high-contrast
+tags_content_hash: 31add2c75a72ce40b8ce0ec6f912551a0f9af8dd17a3cbc38608e7828ba6d6d5
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/renault/DESIGN.md
 content_hash: b343df9a67e57f248e9eee704f52b17dff9cf6a46d1dc9f8d7ab36741940db59
 license: MIT

@@ -6,16 +6,24 @@ source_date: '2026-05-09'
 title: HUD Design System
 summary: Fighter jet / helicopter head-up display. Phosphor green on near-black, all-caps
   data overlays, angular geometry. Zero ambiguity at speed and altitude.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- futuristic
+- monochrome
+- high-contrast
+- industrial
+- geometric
+tags_content_hash: 8300cb023ea3452bc0ada73f79d404940dffe8d97e0dcb7443947464c1841887
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/hud/DESIGN.md
 content_hash: 63edbd0d98b521e71a84d32ce7e982740247f5e148dd65d499ea78b9919fcfaa
 preview_image: components.html

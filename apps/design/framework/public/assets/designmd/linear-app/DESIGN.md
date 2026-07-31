@@ -13,16 +13,24 @@ summary: 'A near-black product-focused marketing canvas built around #010102 (th
   with hairline borders. The accent lavender appears on the brand mark, focus rings,
   and a few intentional CTAs — never decoratively. Page rhythm leans on product UI
   screenshots framed in dark panels rather than atmospheric color.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- elegant
+- luxury
+- cool
+- high-contrast
+tags_content_hash: 1a6cc6de16ed109d68e8c16f68cff64fcd0cb9a9062bf2ba9a7fb34d41fec041
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/linear.app/DESIGN.md
 content_hash: 30bd30e72c48a16e4bdbd010f2d1c85fab657c6fae3cc85389399aab10f9cb5f
 license: MIT

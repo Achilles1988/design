@@ -6,16 +6,24 @@ source_date: '2026-05-27'
 title: Mission Control Design System
 summary: Space/aerospace mission monitoring. Dark command center, amber telemetry,
   monospace precision. Functional clarity above all else.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- futuristic
+- monochrome
+- dense
+- industrial
+- geometric
+tags_content_hash: 23faa86acc2d0aa05e99a00c494a5d2f3e74999dfac4478fe42899686f28b606
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/mission-control/DESIGN.md
 content_hash: d3af3a0bc546a2c2f4901d36337c51a1d69406798926694182bb3b2c4308086d
 preview_image: components.html

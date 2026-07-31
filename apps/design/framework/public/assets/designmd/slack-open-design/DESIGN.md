@@ -6,16 +6,23 @@ source_date: '2026-05-09'
 title: Design System Inspired by Slack
 summary: Workplace communication platform. Aubergine-primary, multi-accent logo palette,
   light surfaces with dark sidebar, warm and approachable.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- colorful
+- playful
+- warm
+- rounded
+- soft
+tags_content_hash: aa94ffd815584130403391c27bce0717c8c70e582e37c63f9a184acea4fcf972
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/slack/DESIGN.md
 content_hash: 5eb2a9646e9916d3f36df34e466b1a37dddaa20283d2370b54f3a1eef3ceea42
 preview_image: components.html

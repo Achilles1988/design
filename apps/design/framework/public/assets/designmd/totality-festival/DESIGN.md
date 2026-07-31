@@ -5,16 +5,24 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/tota
 source_date: '2026-05-06'
 title: Totality Festival Design System
 summary: 'Surface: web'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- glassmorphism
+- gradient
+- futuristic
+- cosmic
+- colorful
+tags_content_hash: 6bf2299bb6a2f0400ea9df4bfdddd30814e30dafb31fa645ec26a6d31464b001
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/totality-festival/DESIGN.md
 content_hash: 0b334c8a1aeaff1cc72bf5036357d41cdffcefd283b180282592705907964ac6
 preview_image: components.html

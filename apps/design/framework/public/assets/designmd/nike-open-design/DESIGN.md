@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/nike
 source_date: '2026-04-28'
 title: Design System Inspired by Nike
 summary: Athletic retail. Monochrome UI, massive uppercase type, full-bleed photography.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- high-contrast
+- editorial
+- bold
+tags_content_hash: 51da9b3dcb858567577e32d36af0c1d62fc1b1a1e48a85420cc806095717c07e
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/nike/DESIGN.md
 content_hash: 44b623b34e5b6cabd50f2fe391578f05dbd2fe91ee517f1e38c2c1e4ed9f647a
 preview_image: components.html

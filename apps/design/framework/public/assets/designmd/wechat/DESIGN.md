@@ -6,16 +6,22 @@ source_date: '2026-05-10'
 title: WeChat Design System
 summary: Brand visual language for WeChat Mini Programs, official accounts, and open
   ecosystem extensions.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- flat
+- clean
+- corporate
+tags_content_hash: 2223efa2b63684b18f5c0afa738639ca0395263d80456f4ce3c640b215cb1665
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/wechat/DESIGN.md
 content_hash: cf050a372ba152b8e979a1da93b3cc120beeb89118cf4a2f3375226e8a02aadf
 preview_image: components.html

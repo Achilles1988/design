@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Creative
 summary: Playful, character-driven design with expressive typography and bold graphics
   for landing pages and creative projects.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- playful
+- colorful
+- maximalist
+- illustrated
+- editorial
+tags_content_hash: 948e788f03ac30021d8e5d89a44687fcd8b8152c120c683416ff5d112535677f
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/creative/DESIGN.md
 content_hash: b374f6485153043b9eb07c2d5d56aa189f5721354d66791d88df2f80d43e9032
 preview_image: components.html

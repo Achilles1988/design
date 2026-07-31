@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Application
 summary: App dashboard with purple-themed aesthetic, top-bar navigation, card-based
   layouts, and developer-first workflows.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- glassmorphism
+- rounded
+- soft
+- colorful
+- high-contrast
+tags_content_hash: bb59d0ee1dbddc6975da4aa289301a89bb065f3f81e1a0235910d4cd8ed95efe
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/application/DESIGN.md
 content_hash: 129690c16ee13cc430e7fd4bbc310078ca058269990f800f7142f9c5c7628ed8
 preview_image: components.html

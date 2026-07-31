@@ -13,16 +13,24 @@ summary: Notion presents itself as the all-in-one workspace through a confident,
   pricing comparison (Free / Plus / Business / Enterprise), and presents the live
   workspace UI mockup directly inside the hero band. Coverage spans homepage, Enterprise,
   Product AI, Product Agents, Startups, and Pricing surfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- colorful
+- playful
+- soft
+- illustrated
+- rounded
+tags_content_hash: a52cc327e695a884db4422c2d8c956ac751e769c2ce7c45abfd9075d9c5a88bd
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/notion/DESIGN.md
 content_hash: fa9d6e78216d8f3e5d3990709ca2de6bc2e268e945bb94f255fd1bfb15455266
 license: MIT

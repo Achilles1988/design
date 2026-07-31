@@ -11,16 +11,23 @@ summary: A developer-tools brand for AI-agent tool integration whose marketing s
   400-600. The brand's strongest visual signature is a four-pane terminal-style mockup
   (a 2×2 grid of dark code/output panels) with a central blue spotlight glow — used
   as the homepage hero anchor.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- high-contrast
+- cool
+- minimal
+- industrial
+tags_content_hash: 3b962840b9963e01549ab6e0581c3411447bca4a18f80a1aa02e526082fbba12
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/composio/DESIGN.md
 content_hash: e7db886dabecca61f29b83e8f46d7a1e8a43889d30b81bc6e48162ccaafcbb2f
 license: MIT

@@ -9,16 +9,23 @@ summary: An inspired interpretation of Uber's design language — a transportati
   geometric display sans, accented by a single signature pill shape (radius 999px)
   on every interactive element, and decorated only by editorial 4:3 illustrations
   of riders, drivers, and city objects.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- high-contrast
+- rounded
+- editorial
+tags_content_hash: 451db74cdd491bdc438f444ba9612899298b926105b3757f664854652b34494f
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/uber/DESIGN.md
 content_hash: f30d2257d2d090790332d00ccb16cd2516c3c6008be61ad2ce83c4e991bcc803
 license: MIT

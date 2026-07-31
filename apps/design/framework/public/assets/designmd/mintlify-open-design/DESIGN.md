@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/mint
 source_date: '2026-04-28'
 title: Design System Inspired by Mintlify
 summary: Documentation platform. Clean, green-accented, reading-optimized.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- airy
+- corporate
+- cool
+- flat
+tags_content_hash: 8962826c0de4ddbc00e11029a49ede91770a732861164ec66faae44fd8f5a801
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/mintlify/DESIGN.md
 content_hash: ada2deafc02f37cc83570319e5309e767164a6a52b1b097d85f667bfa0c911df
 preview_image: components.html

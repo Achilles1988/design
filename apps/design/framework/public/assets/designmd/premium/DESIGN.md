@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Premium
 summary: Apple-inspired premium aesthetic with precise spacing, modern typography,
   and a refined, polished visual language.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- premium
+- minimal
+- elegant
+- corporate
+tags_content_hash: 058326897e679d52659456de91ead637dcceb6352bc88be9ab65c8c8b722fad4
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/premium/DESIGN.md
 content_hash: 4bece56047e4faac9efc18afc38f067d4087fa33cf8a62477b2878beb794bbad
 preview_image: components.html

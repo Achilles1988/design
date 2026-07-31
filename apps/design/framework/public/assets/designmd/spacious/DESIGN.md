@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Spacious
 summary: Generous whitespace, consistent padding, and grid-based layouts for clean,
   readable, and breathing interfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- airy
+- flat
+- clean
+tags_content_hash: cb83c7e288cb8d45a4d415e619bb676ae00e9a53e9605a66ec8838823f6c4459
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/spacious/DESIGN.md
 content_hash: 6dc6e07b5890d214c171cc74c8a7491f3e26ab1294921fac0b089b29229f93a0
 preview_image: components.html

@@ -12,16 +12,23 @@ summary: A confident dark-canvas builder marketing site that treats the page lik
   as living showcase tiles, not decoration. Every CTA is a white pill on dark; every
   card is a translucent or charcoal surface; every section title pulls letter-spacing
   tight enough to feel like a poster.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- gradient
+- colorful
+- high-contrast
+- futuristic
+tags_content_hash: 93a18b4bb0ac5924860f264a6100f55f660a10ac5d06da3f6bb4294abd47279b
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/framer/DESIGN.md
 content_hash: a5d47dddacf5a04577cec0be6fe0fc53b7402254c7686874af3e59bcc7588cb4
 license: MIT

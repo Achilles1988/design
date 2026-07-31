@@ -6,16 +6,24 @@ source_date: '2026-05-01'
 title: Design System Inspired by Claymorphism
 summary: Soft, rounded 3D-like shapes mimicking malleable clay with playful, puffy
   elements and colorful surfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- claymorphism
+- soft
+- rounded
+- playful
+- colorful
+- 3d
+tags_content_hash: 008b23f0febe98f5d4a66247f369de86d651f5746b42a77eb595db1dc5923804
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/claymorphism/DESIGN.md
 content_hash: f1154851ecdeb2e8356e097e1675a5db6c102c0df4cf11d4df27cd7e710b1cbc
 preview_image: components.html

@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/coin
 source_date: '2026-04-28'
 title: Design System Inspired by Coinbase
 summary: Crypto exchange. Clean blue identity, trust-focused, institutional feel.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- corporate
+- cool
+- high-contrast
+- flat
+tags_content_hash: 4170f9aa2bd4314118e0582257502c4b8a791262e30d9af690963bbdf1e9499c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/coinbase/DESIGN.md
 content_hash: 52d6851e1cf6701d7b2344d148868e12f46b08ac80a65a31026e08e8ea6af66c
 preview_image: components.html

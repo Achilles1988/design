@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Professional
 summary: Polished, business-ready design with modern typography, structured layouts,
   and a trustworthy visual identity.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- minimal
+- professional
+- flat
+tags_content_hash: 850aa8e86c4dcf1a1cc1428ad45e4706c5f8d017b731ac3790710cb39c057fad
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/professional/DESIGN.md
 content_hash: c3c652fdf2c08441088b79b859ed0e25a48c0bcd679333b7bc909e7199e61cb6
 preview_image: components.html

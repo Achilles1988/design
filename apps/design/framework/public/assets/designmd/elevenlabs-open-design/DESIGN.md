@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/elev
 source_date: '2026-04-28'
 title: Design System Inspired by ElevenLabs
 summary: AI voice platform. Dark cinematic UI, audio-waveform aesthetics.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- editorial
+- airy
+- soft
+- elegant
+tags_content_hash: 3a89b8ef8163cd557fe78cb993617db922c1357a6b6d07d05df7b11d9daaf3d3
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/elevenlabs/DESIGN.md
 content_hash: 272e7f135ed7413ed666907c23a4d7ef2f4b7940fd5b796ae1b736927f45e011
 preview_image: components.html

@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Cafe
 summary: Cozy cafe-inspired interface with warm tones, soft typography, and clean
   layouts for a relaxed browsing experience.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- soft
+- minimal
+- muted
+- rounded
+tags_content_hash: 96267deda68281a3f58bc9b709cfc921a0396d4fad40af21451f69ba6f457e75
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/cafe/DESIGN.md
 content_hash: e26e9bf3a43cf547a985d1b879a8b4bb36033cb95185c6f900380a74e5722ddf
 preview_image: components.html

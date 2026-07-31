@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Pacman
 summary: Retro arcade-inspired design with pixel fonts, dotted borders, playful high-contrast
   colors, and 8-bit game aesthetics.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- pixel
+- retro
+- playful
+- high-contrast
+- colorful
+tags_content_hash: 883b3062dfab6b724d37ac2ba6c77b07a7b196b55a148cbc747d24df1718b645
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/pacman/DESIGN.md
 content_hash: 61e11bcf09a3f3943739d07f16248d9cdfc8e98892c2a9a4a1d09b60a5a7e243
 preview_image: components.html

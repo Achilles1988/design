@@ -6,16 +6,24 @@ source_date: '2026-05-01'
 title: Design System Inspired by Contemporary
 summary: Current-era minimalist design with bento grids, dark mode support, and high-performance
   accessible layouts.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- minimal
+- geometric
+- bento
+- flat
+- playful
+tags_content_hash: bf4eb9fd0dcbc8f9a4e2ad7430a25611fea0242258dc5d1e3ccdc714d9c238b3
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/contemporary/DESIGN.md
 content_hash: 09aa3e111754ea8b6c55669da8b455e8731f2cd823ccd35b4755f921e04de12f
 preview_image: components.html

@@ -21,16 +21,24 @@ summary: 'Revolut''s marketing surfaces pair a stark black canvas with the brand
   off-white; pill-shaped buttons and rounded-12/20px content cards carry the
 
   consumer-financial-app feel without crossing into playful territory.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- dark-accent
+- minimal
+- colorful
+- corporate
+- high-contrast
+tags_content_hash: 26002fcbaede2074a33b234562a484e7784c8fa2ec5bda2d3fc4d491db600459
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/revolut/DESIGN.md
 content_hash: b7fa8473315541f5d7e7d76f68a77105d255e6dae00d31d5eb34621d1d52de59
 license: MIT

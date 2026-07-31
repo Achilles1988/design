@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/lamb
 source_date: '2026-04-28'
 title: Design System Inspired by Lamborghini
 summary: Supercar brand. True black surfaces, gold accents, dramatic uppercase typography.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- luxury
+- high-contrast
+- sharp
+- minimal
+tags_content_hash: 2faaf7247c77f78115990a54de52597a4b51e858cc12f5b056af045c544d04b4
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/lamborghini/DESIGN.md
 content_hash: ee84e6d0b5a779f53032fa8fec721c632d936a05006e97101150a882e43d7178
 preview_image: components.html

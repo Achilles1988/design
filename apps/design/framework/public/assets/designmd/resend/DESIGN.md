@@ -21,16 +21,23 @@ summary: 'Resend''s marketing surfaces sit on a near-pure black canvas with off-
   rounded-12px container vocabulary. There is no decorative chrome — just
 
   type, code, and atmospheric depth.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- editorial
+- minimal
+- elegant
+- monochrome
+tags_content_hash: 574085e8bbf8b3d4777d92afac0981280c98dd061845d0394305c87d427a6b22
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/resend/DESIGN.md
 content_hash: 99536f1b2380511a539f7f3466d46d351e4bf35a5af0c0df395bdc20af05c9be
 license: MIT

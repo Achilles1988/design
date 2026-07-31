@@ -10,16 +10,23 @@ summary: An inspired interpretation of Webflow's design language — a visual we
   / orange / green) that maps to the brand's product categories, and anchored by the
   proprietary WF Visual Sans family used at restrained 500 / 600 weights with negative
   tracking.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- colorful
+- geometric
+- corporate
+- high-contrast
+tags_content_hash: 6904bbb8e83fb9935e94aa75cc97332c7376078e9393f835c7dc48189c7675b0
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/webflow/DESIGN.md
 content_hash: 9230c7b3951371fc2edc04958962e32bb7ec9a9b703aa6b72eaf5c7991b7c984
 license: MIT

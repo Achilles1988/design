@@ -6,16 +6,23 @@ source_date: '2026-06-06'
 title: Design System Inspired by Discord
 summary: Voice / chat platform. Deep blurple, dark-first surfaces, playful accent
   moments.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- rounded
+- soft
+- playful
+- colorful
+tags_content_hash: 89d252c8170aa12b562f7bfe9c2020ec2b34e4c349b8872831d4c9747b34042d
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/discord/DESIGN.md
 content_hash: 034a98430bdbe579a97c5edb0dd53276675a5efff1d0f369f8d64914f17b5fd5
 preview_image: components.html

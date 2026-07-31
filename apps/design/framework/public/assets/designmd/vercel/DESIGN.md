@@ -9,16 +9,23 @@ summary: An inspired interpretation of Vercel's design language — a developer-
   hero scale by a multi-color mesh gradient (cyan / blue / magenta / amber) that acts
   as the entire decorative system, paired with a custom geometric sans for headlines
   and a monospaced caption face for technical labels.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- gradient
+- geometric
+- high-contrast
+tags_content_hash: 4f7e8e212fd4872789ab192e91a96ee825b4cf0c1c95f1b4ab8b4e1bcd677b91
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/vercel/DESIGN.md
 content_hash: d0951b93c2b4ce9840c715c9f9b3e58a386c6c58ae5cc0f804dec3b116b95bd8
 license: MIT

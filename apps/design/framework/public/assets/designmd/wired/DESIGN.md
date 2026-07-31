@@ -9,16 +9,23 @@ summary: An inspired interpretation of Wired's design language — a flagship te
   canvas, anchored by a tall narrow custom display serif for hero headlines, a humanist
   serif body face for long-form reading, and a clean sans face for metadata; layout
   reads like a printed magazine ported to the web with very little marketing chrome.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- monochrome
+- high-contrast
+- dense
+- sharp
+tags_content_hash: a46ade8504009cd14dfba1e1fa11eefabaa18e56d193dfb6300e68a05b4c4f67
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/wired/DESIGN.md
 content_hash: eb439dcc573401dc30583f40e7eef8a60b769232da59e524de6dce56d5c3593e
 license: MIT

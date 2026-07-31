@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/spac
 source_date: '2026-04-28'
 title: Design System Inspired by SpaceX
 summary: Space technology. Stark black and white, full-bleed imagery, futuristic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- high-contrast
+- futuristic
+- cinematic
+tags_content_hash: c80593cedca0b420bd3ebc4d295d75f1b37a4274b91e7faa32eaff79f2dc58c8
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/spacex/DESIGN.md
 content_hash: ead7689f96a1c44f43cee4831b1525d52757c6aca820b9cf85569651d46ab0b7
 preview_image: components.html

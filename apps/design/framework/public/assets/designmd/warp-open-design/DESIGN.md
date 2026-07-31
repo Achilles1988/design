@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/warp
 source_date: '2026-04-28'
 title: Design System Inspired by Warp
 summary: Modern terminal. Dark IDE-like interface, block-based command UI.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- warm
+- minimal
+- textured
+- organic
+tags_content_hash: f961d1630ccb348dd4271e4e8ae3b0d59585fef97ced26e32c734b3a97cd5535
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/warp/DESIGN.md
 content_hash: 41e2006c2ee0c018673f8eed59de198d8ae08b0a4d3bca2a6bdf90a323e6463c
 preview_image: components.html

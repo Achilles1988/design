@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/rena
 source_date: '2026-04-28'
 title: Design System Inspired by Renault
 summary: French automotive. Vibrant aurora gradients, NouvelR typography, bold energy.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- gradient
+- colorful
+- bold
+- corporate
+- high-contrast
+tags_content_hash: 9806898c2767efe8f62405ef1cf14e3b6a757e12e6b2ca919b73d5a0831b504c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/renault/DESIGN.md
 content_hash: db03bb3402edff5e5e84395856777ea6629c40e12fc737c5ae935de5d613be37
 preview_image: components.html

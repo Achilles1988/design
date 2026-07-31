@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/revo
 source_date: '2026-04-28'
 title: Design System Inspired by Revolut
 summary: Digital banking. Sleek dark interface, gradient cards, fintech precision.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- corporate
+- gradient
+- high-contrast
+- cool
+tags_content_hash: 503368ea724430dc939c05bd9c24524cb4daf44564f972467e120ff4d384c072
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/revolut/DESIGN.md
 content_hash: 62501c2f1441717ee7e93f7df4f8acd637cdd25bc983db45c5d6c69be10a797a
 preview_image: components.html

@@ -9,16 +9,24 @@ summary: An inspired interpretation of Dell.com's 1996 design language — a cat
   "ribbon cards" tinted in sage, salmon, periwinkle, sky, peach and lime, chunky Helvetica-Black
   display titles, Times Roman body copy, and an entire visual vocabulary of pre-Photoshop
   hand-cut GIF stickers (NEW! bursts, award seals, beveled product photos).
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- retro
+- skeuomorphic
+- colorful
+- textured
+- maximalist
+- high-contrast
+tags_content_hash: 3095c591c97bb9b5e02c5b3ef0a32778145a7f745ba3cb19019ceffec791186c
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/dell-1996/DESIGN.md
 content_hash: e186c614b1223fe7015670472ac6bc84b5b3fdd5de5325b3ce5bfb7fbe9c8d6e
 license: MIT

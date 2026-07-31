@@ -12,16 +12,24 @@ summary: MongoDB carries a strong dual-mode visual identity — dark deep-teal h
   and presents extensive course catalogs in card grids with colored category tags.
   Coverage spans homepage, Atlas product page, Community Edition, MongoDB University,
   AI use cases, and pricing.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- dark-accent
+- corporate
+- colorful
+- organic
+- high-contrast
+tags_content_hash: 397ebae9286067e4769e9858e1abb69bbbc7672d32f71587443d3770fcd252d3
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/mongodb/DESIGN.md
 content_hash: 4523f10efd5ccd46f9aeac3b98626e24bcf907bc0c1e46500cb0e3920f932e71
 license: MIT

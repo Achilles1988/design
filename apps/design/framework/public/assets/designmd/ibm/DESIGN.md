@@ -12,16 +12,23 @@ summary: 'An enterprise-marketing canvas faithful to Carbon Design System: white
   rows. The chrome is square, the typography is light, and the only color in the system
   is one assertive blue — the result reads as old-world enterprise gravitas reframed
   for the cloud era.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- flat
+- sharp
+- minimal
+- geometric
+tags_content_hash: 6e417b6090b26a4eb3c0420256e3c98d84960616b09cba02a7821d04aca64fe3
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/ibm/DESIGN.md
 content_hash: 46f6fd65b5e7524fed1133b9b3c0dd619f9a0f145fbb2b87f3675c701a88f3bd
 license: MIT

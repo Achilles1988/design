@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/wise
 source_date: '2026-04-28'
 title: Design System Inspired by Wise
 summary: Money transfer. Bright green accent, friendly and clear.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- bold
+- colorful
+- rounded
+- warm
+- high-contrast
+tags_content_hash: d893948c91a1815eedf04b6bccea06af9c60b38b1e68605f20b55bcabe9037cc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/wise/DESIGN.md
 content_hash: 71f1c384405e4641784aa0917b3eebb1ccb478fe11ea0cd6098b4979d4aaf59f
 preview_image: components.html

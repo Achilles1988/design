@@ -6,16 +6,24 @@ source_date: '2026-04-28'
 title: Design System Inspired by Vodafone
 summary: Global telecom brand. Monumental uppercase display, Vodafone Red chapter
   bands.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- dark-accent
+- editorial
+- high-contrast
+- bold
+- corporate
+tags_content_hash: f27daaec8896c4be01e24263ad2d97d7d110140124125282dcdcd26b278d3147
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/vodafone/DESIGN.md
 content_hash: 53a9b5279d5405a16952eaa9477f363519710a80a58db7d87fb6570327ccc860
 preview_image: components.html

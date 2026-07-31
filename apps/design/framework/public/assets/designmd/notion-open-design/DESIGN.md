@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/noti
 source_date: '2026-04-28'
 title: Design System Inspired by Notion
 summary: All-in-one workspace. Warm minimalism, serif headings, soft surfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- minimal
+- editorial
+- soft
+- muted
+tags_content_hash: 11efd26d406751981600181b2c0866ffb6a67d57bfe3c617d68659c8613bc2bc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/notion/DESIGN.md
 content_hash: 94c550cc035a90aa08b6645e7b3105d2e579453f8415e57b3639319fdb7e5b23
 preview_image: components.html

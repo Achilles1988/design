@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/hugg
 source_date: '2026-06-06'
 title: Design System Inspired by Hugging Face
 summary: ML community hub. Sunny yellow accent, monospace identity, cheerful and dense.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- playful
+- colorful
+- dense
+- flat
+- warm
+tags_content_hash: 4c7d35b4ab02b0f1325ba05e584887b49f9f18afe004683b46fb7d78178af0d5
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/huggingface/DESIGN.md
 content_hash: 33f4633058c7cd6b46fb9737de91c370315033dfeca9e0a67bdca7f091b3ed47
 preview_image: components.html

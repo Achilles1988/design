@@ -13,16 +13,24 @@ summary: 'Starbucks'' design system is a **warm, confident retail flagship** wea
   calibrated shades (Starbucks, Accent, House, Uplift) each mapped to a specific surface
   role, and gold (`#cba258`) appears only around Rewards-status ceremony — not as
   a general accent.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- rounded
+- soft
+- textured
+- organic
+- elegant
+tags_content_hash: 7cf75b197b0e1c892ea924dc7ea1c06367d210b3d7e9f9a7583b9e221008ded4
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/starbucks/DESIGN.md
 content_hash: e20338ee10226c63cf2588207288c08e12d60754a53f681657adaf364dfe8fa7
 license: MIT

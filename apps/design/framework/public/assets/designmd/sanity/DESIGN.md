@@ -11,16 +11,23 @@ summary: 'Sanity''s website is a developer-content platform rendered as a noctur
   most CMS marketing pages reach for friendly pastels and soft illustration, Sanity
   leans into the gravity of its own product: structured content deserves a structured
   stage.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- dense
+- corporate
+- cool
+tags_content_hash: 94d3ac1d9eb764dc89d03ea1ebd8216a06c5af8979f20ae3a66241af2d911aa3
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/sanity/DESIGN.md
 content_hash: ea1c442de2b23443f79af46524a81f33951606c8ff043ea9c25ba886264fbdd8
 license: MIT

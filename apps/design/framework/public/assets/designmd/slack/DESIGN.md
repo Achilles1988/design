@@ -9,16 +9,23 @@ summary: An inspired interpretation of Slacc's design language — a workplace m
   inline links, and pill CTAs. The system pairs a proprietary humanist sans for display
   with a separate utility sans for body, and stages product UI mockups inside soft
   pastel-mesh hero composites that act as both decoration and feature explanation.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- colorful
+- playful
+- gradient
+- soft
+- rounded
+tags_content_hash: ae47f3a778d80882b3570d344e7b3b1d8795d9baccc96e08ec898d26b8b9768c
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/slack/DESIGN.md
 content_hash: 03cb243015a2e11d0faf05caba7f3d0c7fda6839b1f5ce707a23e8d46d1a11bd
 license: MIT

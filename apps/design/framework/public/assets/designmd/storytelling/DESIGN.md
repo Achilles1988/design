@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Storytelling
 summary: Narrative-driven design using visuals, copy, and interaction to guide users
   through engaging, emotionally resonant journeys.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- playful
+- illustrated
+- colorful
+tags_content_hash: 9de989eb10fb2ccf9daa0720b94234fca3e411d9331e67ce5d4b0960a6e46344
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/storytelling/DESIGN.md
 content_hash: 79089b7ba5171656f2576e39425b9557afe392af4167395192527a8f338af1bc
 preview_image: components.html

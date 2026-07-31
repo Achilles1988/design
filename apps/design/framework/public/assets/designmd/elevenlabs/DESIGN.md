@@ -13,16 +13,24 @@ summary: 'A voice-AI brand whose marketing surfaces read like a quietly editoria
   ink pill is the primary, a transparent outline is the secondary. The brand trusts
   atmospheric photography and modest type weights to do all of the brand work; there
   is no neon accent, no saturated CTA color, no developer-tools dark canvas.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- minimal
+- soft
+- muted
+- gradient
+- elegant
+tags_content_hash: 2af953ff0dac017e7d8df2e7f74a2b2f9734f684f362b068ad92897a33e7fdc1
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/elevenlabs/DESIGN.md
 content_hash: 3b359acfaafadbb499c7ed3eebe813a76e0be497a7157b77de207fe275068a66
 license: MIT

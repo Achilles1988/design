@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Vintage
 summary: 1950s-1990s nostalgia with skeuomorphic touches, grainy textures, retro color
   palettes, and pixel-style typography.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- vintage
+- retro
+- skeuomorphic
+- textured
+- muted
+tags_content_hash: 9104253ee770f9e31a4294347be9fdb4efd0f77e0fb91c42d411c4c469bcd22b
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/vintage/DESIGN.md
 content_hash: e6fcac37919ecb4458748a814ec39b6038ca85d1ee5e1acf2d36b6e133ca894a
 preview_image: components.html

@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Glassmorphism
 summary: Frosted glass effect with translucent layers, subtle blur, and luminous borders
   for depth and modern elegance.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- glassmorphism
+- soft
+- gradient
+- high-contrast
+- cool
+tags_content_hash: 6fda2267142340e49cb95a9eb03d8793232a3bde742876ac3a981a636622f207
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/glassmorphism/DESIGN.md
 content_hash: e2c75dbd21f932336d59767c2042551cc859780248f17857b3da2334e82388f6
 preview_image: components.html

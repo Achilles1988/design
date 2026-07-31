@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Agentic
 summary: Conversational AI-first interface with minimal controls, clear outcomes,
   and delegated task flows for agentic workflows.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- minimal
+- flat
+- corporate
+- cool
+- dark-accent
+tags_content_hash: 240eaa9e5700a06490bf2768772b9cd922ff4d43ebcee5cb49b391c43e64eef5
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/agentic/DESIGN.md
 content_hash: ce14e4eeab155ae072d31859a3a1867cc793ec2a725d0a5826ceaf417e919309
 preview_image: components.html

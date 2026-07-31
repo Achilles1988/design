@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Gradient
 summary: Smooth color transitions and gradient-rich surfaces for modern, playful interfaces
   with visual depth.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- gradient
+- colorful
+- soft
+- playful
+tags_content_hash: 5cc5b34a14f9a4fdda619e15e5db8531c160f80e34db71c249cf81fb56fedbf3
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/gradient/DESIGN.md
 content_hash: 7af0a637064eb9b0bd4244e93792adc1948e79cd4939c0dd36610298ce496c54
 preview_image: components.html

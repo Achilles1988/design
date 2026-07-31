@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Flat
 summary: Two-dimensional minimalist style with vibrant colors, clean typography, and
   no 3D effects for fast, user-friendly interfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- flat
+- minimal
+- colorful
+- geometric
+tags_content_hash: 70cbd7d790cc5131654b0d7dfc3c7e346e1d627a51e67b002f3edbbc9867757e
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/flat/DESIGN.md
 content_hash: 9d2d86cb15bfbb3f94748e06452f5a55023db2053cb62888a902f8b6d923bcf6
 preview_image: components.html

@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/airt
 source_date: '2026-04-28'
 title: Design System Inspired by Airtable
 summary: Spreadsheet-database hybrid. Colorful, friendly, structured data aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- colorful
+- geometric
+- flat
+- cool
+tags_content_hash: 2b370d32588b523acf6b7ae8cc7ec0aebcbe5556881860367786a56c8f28b9b8
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/airtable/DESIGN.md
 content_hash: 2bf4a6f853c23c8cf04f890654ad3cebec849a98de1655425b65e3ad25b69476
 preview_image: components.html

@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/fram
 source_date: '2026-04-28'
 title: Design System Inspired by Framer
 summary: Website builder. Bold black and blue, motion-first, design-forward.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- high-contrast
+- monochrome
+- futuristic
+- minimal
+tags_content_hash: 241b6e10b3d346ad6cde989ee9ed21b859b4356502e4bc1ba69de4d97c6074dd
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/framer/DESIGN.md
 content_hash: 35d8767071c0d155864e1abbceb6c874b6c461986092e0bceb9f8bdf6dfdf0cc
 preview_image: components.html

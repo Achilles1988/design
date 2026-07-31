@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Colorful
 summary: Vibrant, high-contrast palettes and gradients for engaging, memorable, and
   modern user experiences.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- colorful
+- gradient
+- high-contrast
+- playful
+- maximalist
+tags_content_hash: 961ce7dca8deaccb42a9fcac9fa4549d2a5edba8715f46c2762441062c1d7d5d
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/colorful/DESIGN.md
 content_hash: 079966ac25cd11f71b2cb4f657da51b6cdf93edf95fe051a00495a2336bbb330
 preview_image: components.html

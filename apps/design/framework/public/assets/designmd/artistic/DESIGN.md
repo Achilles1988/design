@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Artistic
 summary: High-contrast, expressive style with creative typography and bold color choices
   for visually striking interfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- maximalist
+- colorful
+- high-contrast
+- playful
+- editorial
+tags_content_hash: d0422ef8b7520383cc67830b1a1b66cb3fa282fc3a3371e6a4ae0a535928a31c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/artistic/DESIGN.md
 content_hash: 93e7d039b0465848ca0c00ca0546552ad9c6c70bbb3f991e18a9303d7844f8fa
 preview_image: components.html

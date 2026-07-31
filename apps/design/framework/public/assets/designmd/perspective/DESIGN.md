@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Perspective
 summary: Spatial depth design with isometric views, vanishing points, and layered
   elements that guide attention through 3D-like realism.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- geometric
+- 3d
+- high-contrast
+- minimal
+tags_content_hash: ae3cda59a5ee0b171d3feb6f0bb7ee569bfd13bf57d33ef01b9a89da524abbcc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/perspective/DESIGN.md
 content_hash: 69196e2707b397e70c43cab0b4f2affe0830c04eae9bda2149be734deab3435e
 preview_image: components.html

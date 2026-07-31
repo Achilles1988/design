@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/rayc
 source_date: '2026-04-28'
 title: Design System Inspired by Raycast
 summary: Productivity launcher. Sleek dark chrome, vibrant gradient accents.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- gradient
+- colorful
+- elegant
+- minimal
+tags_content_hash: 5b1cd3c694f78f7059c98e8f35b38dad6537acfcf21335c86a92684b0ba238c6
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/raycast/DESIGN.md
 content_hash: 20e65e05ed2eee597dcdb6c7b056bd70842d786c0888592dda255ef672d8dd60
 preview_image: components.html

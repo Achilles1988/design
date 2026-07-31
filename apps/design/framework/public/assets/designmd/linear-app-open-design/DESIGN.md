@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/line
 source_date: '2026-04-28'
 title: Design System Inspired by Linear
 summary: Project management. Ultra-minimal, precise, purple accent.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- cool
+- elegant
+- high-contrast
+tags_content_hash: ad6d406bf08f8baed2effa4107a8ef857626f0d03388dc9a9f9d4196a2b502a8
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/linear-app/DESIGN.md
 content_hash: 4c7264d8bc0e26de761c550e9f0445b0e7d92078c1a288f3fdb604b4f6df8fb7
 preview_image: components.html

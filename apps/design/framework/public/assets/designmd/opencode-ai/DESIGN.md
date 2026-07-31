@@ -14,16 +14,23 @@ summary: 'A terminal-native marketing system rendered entirely in Berkeley Mono 
   and a wordmark rendered as block-pixel ASCII. Every section sits as a hairline-bordered
   text block on the cream canvas with no shadows, no gradients, no decorative imagery,
   and no non-monospaced character anywhere in the system.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- warm
+- flat
+- editorial
+tags_content_hash: f1fa4327cd2b2124e268756ded8a66f16834e4275f0861236b905e4472b2bd39
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/opencode.ai/DESIGN.md
 content_hash: d1a8893c4b8ac90b1e86230eee2effa8bd15add3582853477920e32432336dda
 license: MIT

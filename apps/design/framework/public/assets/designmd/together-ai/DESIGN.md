@@ -9,16 +9,24 @@ summary: An inspired interpretation of Together AI's design language — an AI i
   orange-magenta-periwinkle gradient as the single piece of brand chrome) and bright
   white research / pricing / docs bands, knit together by a custom display sans and
   an uppercase mono eyebrow face.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- dark-accent
+- gradient
+- colorful
+- minimal
+- corporate
+tags_content_hash: beee05332c4579c2ad31bdbfc9ce3cc78febbf04d79ac472f3dacf0edef3e6b9
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/together.ai/DESIGN.md
 content_hash: aee472c583f55a2f2c7ee1c403a96dddadb3ff6dc518335451f431e313bf43cf
 license: MIT

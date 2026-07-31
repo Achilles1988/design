@@ -14,16 +14,24 @@ summary: 'An engineering-grade marketing system organized around two surface mod
   There is no decorative gradient, no atmospheric mesh, no soft drop shadow — just
   black, white, gray, and green stacked into a structured editorial grid that scales
   from product cards to massive industry landing pages without bending its rules.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- high-contrast
+- sharp
+- industrial
+- corporate
+- flat
+tags_content_hash: 58d3eeeeac1d8d723d5e418fa7a36699262905809bd77c8d489271d87eb7b27d
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/nvidia/DESIGN.md
 content_hash: d649be85daf075c98a17071e707e3901c6e19150044a81716acd01ef1169cc83
 license: MIT

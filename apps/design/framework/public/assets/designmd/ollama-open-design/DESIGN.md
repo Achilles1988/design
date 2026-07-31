@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/olla
 source_date: '2026-04-28'
 title: Design System Inspired by Ollama
 summary: Run LLMs locally. Terminal-first, monochrome simplicity.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- flat
+- monochrome
+- airy
+- clean
+tags_content_hash: e3ecec1182e696d988c02ccf7fe153c791bb34aa30d212917aefc95f828b7aee
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/ollama/DESIGN.md
 content_hash: a40ef634612c07706462e081b1b77ba18915faa60d2dea1a19c2945aa448b3f7
 preview_image: components.html

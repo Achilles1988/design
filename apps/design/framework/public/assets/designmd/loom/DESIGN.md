@@ -6,16 +6,23 @@ source_date: '2026-05-09'
 title: Loom Design System
 summary: Loom async video. Purple primary, friendly surfaces, video-first layout.
   Clean and professional without being corporate.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- soft
+- rounded
+- colorful
+- minimal
+- friendly
+tags_content_hash: 93e18bebd20bf23549488754332a07c5cb634651ced17354c7cae00daa38ffa1
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/loom/DESIGN.md
 content_hash: fbecdab1694568940729aee118c0bbcac9676668d9fdda70b68e1e8f2fa3b057
 preview_image: components.html

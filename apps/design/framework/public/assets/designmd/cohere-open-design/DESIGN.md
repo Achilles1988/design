@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/cohe
 source_date: '2026-04-28'
 title: Design System Inspired by Cohere
 summary: Enterprise AI platform. Vibrant gradients, data-rich dashboard aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- rounded
+- minimal
+- airy
+- cool
+tags_content_hash: f0a681c9a272c6a36c8a710aecfb86c8ce84bc31bbcf0872e6967a4437e0f5c7
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/cohere/DESIGN.md
 content_hash: c0a7270cd888b74a4cebb9621f075f9f2e2bca9712723110e890fe2366032668
 preview_image: components.html

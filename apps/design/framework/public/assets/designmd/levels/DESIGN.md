@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Levels
 summary: Conversion-focused design that removes friction and guides users toward action
   through clarity, trust, and speed.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- flat
+- clean
+- corporate
+tags_content_hash: de414bbf95d13dc920d1593c5746b59258a3e701d3368b32da045e4e7da78252
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/levels/DESIGN.md
 content_hash: 84c9e015136ad981bf1c4c67e9268d489abfac45d31153f6771d7d3549a2fc56
 preview_image: components.html

@@ -19,16 +19,24 @@ summary: 'Replicate''s marketing surfaces pair the warm-cream developer-tools ae
   consequential CTA. Photography of contributors and example outputs is
 
   square-ish with mid-radius corners; everything else is borderless or hairline.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- colorful
+- gradient
+- textured
+- maximalist
+tags_content_hash: 04ed28b852e1a523abe7eec36211a6b709f9d237d2e1f8bb1ee048daa3dc0605
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/replicate/DESIGN.md
 content_hash: c22062d7b4174bf9ced7bc61c48389086cf6eed96a958e098ee70389893b0a15
 license: MIT

@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Publication
 summary: Print-inspired visual language for books, magazines, and reports with editorial
   grids and expressive typography.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- textured
+- elegant
+- geometric
+tags_content_hash: b3b8a1da16b1ce568dbe745fd2c8afb1fffa428ff816b2a495dcb37a79a4b1d4
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/publication/DESIGN.md
 content_hash: f0aaeed691caeecf624bb510482baee6a5d1fe2593ac72b87e691c3009e37b03
 preview_image: components.html

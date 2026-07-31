@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Mono
 summary: Monospace-driven, matrix-inspired design with high-contrast elements, compact
   density, and a hacker-chic aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- monochrome
+- minimal
+- high-contrast
+- dense
+- pixel
+tags_content_hash: 503d6fc0a091c0b8580d4677b422aecb63634acc17a490ca09abf7e524f53dc4
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/mono/DESIGN.md
 content_hash: e9f9b45362e23e70c7147003ade1214a83f524b623f5c29ab7174d8eb45ffdd9
 preview_image: components.html

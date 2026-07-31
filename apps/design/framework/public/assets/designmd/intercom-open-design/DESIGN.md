@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/inte
 source_date: '2026-04-28'
 title: Design System Inspired by Intercom
 summary: Customer messaging. Friendly blue palette, conversational UI patterns.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- minimal
+- corporate
+- soft
+tags_content_hash: 49855a8082dffaca4295b3e8e0ce85cc64a107d0cd2b6cc142d516a10da349e5
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/intercom/DESIGN.md
 content_hash: 00015191406ee315f7d9ef97a72f5272d9f47ce6fa7899332584a1990800aa72
 preview_image: components.html

@@ -5,16 +5,24 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/clay
 source_date: '2026-04-28'
 title: Design System Inspired by Clay
 summary: Creative agency. Organic shapes, soft gradients, art-directed layout.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- colorful
+- playful
+- organic
+- textured
+- soft
+tags_content_hash: 8d3ef67bc78f6e295a4c6ee8c75ebbeb0a93779adb4fb96987134a462fc50dcf
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/clay/DESIGN.md
 content_hash: 885f8be9e2d5c61b4cd024c9d5c308a791a0d4b0d464a2015094b67884890375
 preview_image: components.html

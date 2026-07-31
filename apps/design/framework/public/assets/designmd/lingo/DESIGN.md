@@ -6,16 +6,24 @@ source_date: '2026-05-01'
 title: Design System Inspired by Lingo
 summary: Playful, minimal design with bright colors, rounded shapes, tactile 3D borders,
   and friendly illustrations for approachable interfaces.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- playful
+- rounded
+- colorful
+- 3d
+- soft
+- illustrated
+tags_content_hash: abf47aa24045639a6eb360dd9f572b60b4838b0269af9e64810957ac734e4a1c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/lingo/DESIGN.md
 content_hash: 9d86b1386ecc5d568e5b708b442aa126a6405d94f3b15087b4b75d0c040af4c0
 preview_image: components.html

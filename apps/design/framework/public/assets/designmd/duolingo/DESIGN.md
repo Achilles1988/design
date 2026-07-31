@@ -5,16 +5,24 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/duol
 source_date: '2026-06-06'
 title: Design System Inspired by Duolingo
 summary: Language-learning platform. Bright owl green, chunky shadows, gamified joy.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- playful
+- rounded
+- colorful
+- 3d
+- soft
+- high-contrast
+tags_content_hash: a12a6575582f218ea6ec6ce9c960956c65a62ff428dbd518ccdecba3288825a3
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/duolingo/DESIGN.md
 content_hash: 95e369814be3044eff4c5a893fb42a6068e1c7df971f0f36905ab877751171a9
 preview_image: components.html

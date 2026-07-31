@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/bina
 source_date: '2026-04-28'
 title: Design System Inspired by Binance.US
 summary: Crypto exchange. Bold yellow accent on monochrome, trading-floor urgency.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- high-contrast
+- monochrome
+- corporate
+- flat
+tags_content_hash: b0939b9c1df221376212835fe84c77d03f8d57c9f3d30ace75de016bf704912e
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/binance/DESIGN.md
 content_hash: 7e86c5ac3bb21e1a8f210dab37cf6f5fad0252015ce8959afe5ddffca55abde8
 preview_image: components.html

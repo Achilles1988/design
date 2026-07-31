@@ -6,16 +6,23 @@ source_date: '2026-04-28'
 title: Design System Inspired by Mastercard
 summary: Global payments network. Warm cream canvas, orbital pill shapes, editorial
   warmth.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- rounded
+- soft
+- colorful
+tags_content_hash: 906737aeb042bd7f4a5e61cfa40425e37084c52aac35402c7849ff7f70759b4e
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/mastercard/DESIGN.md
 content_hash: ba5a4f889cd52286b87cd06ebb9646ed91ea631dc6249491c0d27dde940f05c6
 preview_image: components.html

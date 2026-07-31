@@ -6,16 +6,23 @@ source_date: '2026-06-06'
 title: Design System Inspired by OpenAI
 summary: Calm, near-monochrome system anchored in deep teal-black with generous white
   space and editorial typography.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- editorial
+- airy
+- monochrome
+- cool
+tags_content_hash: acad307f1ec4080d5738a8908544b4bcf63c14701c15b1564dca0aee5aabaef5
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/openai/DESIGN.md
 content_hash: 8dc42258ca6c5dea1c498068b6054abdd40b9b81d1607887b5c0a3a1d788a505
 preview_image: components.html

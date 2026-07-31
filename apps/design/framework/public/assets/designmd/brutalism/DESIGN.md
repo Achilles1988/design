@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Brutalism
 summary: Raw, anti-design aesthetic inspired by concrete architecture with unadorned
   elements, jarring layouts, and functional minimalism.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- brutalism
+- sharp
+- minimal
+- high-contrast
+- monochrome
+tags_content_hash: ca49ebc60361bbac6ade2094a5a519d308c3ddecafe0b3cf1f2b4e8bfc104b61
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/brutalism/DESIGN.md
 content_hash: c0abb32cad80011f3001bd9645f2a2478f52ddcd9928a4624767148f786c818a
 preview_image: components.html

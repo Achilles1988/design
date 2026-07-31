@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Energetic
 summary: Dynamic, vibrant style with thick borders, geometric shapes, high-contrast
   colors, and expressive typography conveying motion and vitality.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- bold
+- geometric
+- high-contrast
+- neobrutalism
+- colorful
+tags_content_hash: b4dc25c7b7d347e5ac3fdb48ea42136d717f6fb17094cedb19f8e22841edcdcc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/energetic/DESIGN.md
 content_hash: 86ef6124eccf8d85f9ba66d48cff44031fdeb67b470aea7186da0cdf815ba168
 preview_image: components.html

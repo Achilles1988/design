@@ -17,16 +17,24 @@ summary: 'A playful developer-tools system rendered on a warm cream canvas with 
   decoration. Code samples and product analytics charts live inside white-on-cream
   cards with thin olive borders; the contrast between the playful illustration and
   the data-dense product imagery is the brand''s signature voice.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- playful
+- hand-drawn
+- colorful
+- illustrated
+- organic
+tags_content_hash: 6afbaca82f2469bbb5ce07dac122018d8dc2317c1eb5c25a686078abdddef8b8
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/posthog/DESIGN.md
 content_hash: 01f497f751d56296bfcd5eb8806325a4bb4786d364941ec6e65c65fa9ee6d362
 license: MIT

@@ -10,16 +10,23 @@ summary: Kraken's website is a clean, trustworthy crypto exchange that uses purp
   identity. The proprietary Kraken-Brand font handles display headings with bold (700)
   weight and negative tracking, while Kraken-Product (with IBM Plex Sans fallback)
   serves as the UI workhorse.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- minimal
+- colorful
+- elegant
+- cool
+tags_content_hash: 9d33c1ebacc34c643b11a239ad5b428c33c7be31775eb21354a36ef3ae26cc6d
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/kraken/DESIGN.md
 content_hash: 41bcbd5642c926a549f0d50f1151484c5776b4536233240c8415cfb79bcf1f38
 license: MIT

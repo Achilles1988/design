@@ -6,16 +6,23 @@ source_date: '2026-04-28'
 title: Design System Inspired by Starbucks
 summary: Global coffee retail brand. Four-tier green system, warm cream canvas, full-pill
   buttons.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- rounded
+- soft
+- organic
+- elegant
+tags_content_hash: c16198cb3dee35d8cd24758bc8887b6a0a88be520acf79af87a0bcc1a4f5cd2c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/starbucks/DESIGN.md
 content_hash: 25b116f858b197796ed4962457d07c9f0484e2d3c8e9a7604928358957bd61a3
 preview_image: components.html

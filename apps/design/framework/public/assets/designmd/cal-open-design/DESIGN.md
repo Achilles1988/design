@@ -5,16 +5,22 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/cal/
 source_date: '2026-04-28'
 title: Design System Inspired by Cal.com
 summary: Open-source scheduling. Clean neutral UI, developer-oriented simplicity.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- high-contrast
+- corporate
+tags_content_hash: 906a13274dda21dfe079fc52247cff229e764fa1e977c537aa3b335bb32cd682
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/cal/DESIGN.md
 content_hash: 520e5c64e4dc6e368e4870ae2b0470225d587a41e426399475046e3932c690a1
 preview_image: components.html

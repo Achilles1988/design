@@ -5,16 +5,22 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/defa
 source_date: '2026-04-28'
 title: Neutral Modern
 summary: A clean, product-oriented default. Use when the brief doesn't call for a
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- flat
+- clean
+- airy
+tags_content_hash: a97ad4e3ff94a2d3e7e328f16d2761145d7390e99c0926b2e7028177241c323c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/default/DESIGN.md
 content_hash: aeba1b5aa9db00f7e08616c0ffb2ee3408ff96edaa2fc26709743eecf13045d7
 preview_image: components.html

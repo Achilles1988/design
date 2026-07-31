@@ -11,16 +11,23 @@ summary: Spotify's web interface is a dark, immersive music player that wraps li
   surface is a shade of charcoal, creating a theater-like environment where the only
   true color comes from the iconic Spotify Green (`#1ed760`) and the album artwork
   itself.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- monochrome
+- colorful
+- bold
+- high-contrast
+tags_content_hash: 16c169a93d2cc03595f0df7e44309ef650b227f1b863009c4072dd832ca0f4c4
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/spotify/DESIGN.md
 content_hash: 72e964a6cf551d0603f9854f2f42ee08e97ad4d9e17e037f50f6233508288295
 license: MIT

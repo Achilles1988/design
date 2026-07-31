@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/sent
 source_date: '2026-04-28'
 title: Design System Inspired by Sentry
 summary: Error monitoring. Dark dashboard, data-dense, pink-purple accent.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- colorful
+- dense
+- playful
+- high-contrast
+tags_content_hash: 5d3094fa1e3e6f86d0586d6159eb5c3abed05c02f0b8c4ce2d568a3fc049b813
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/sentry/DESIGN.md
 content_hash: a5140c9bbf0bd45426646f087691abed9f8bd70d94d3e4368745622e5163cdaa
 preview_image: components.html

@@ -6,16 +6,24 @@ source_date: '2026-05-09'
 title: Design System Inspired by Webex
 summary: Collaboration platform. Momentum typography, blue action system, multi-user
   accent spectrum.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- corporate
+- colorful
+- cool
+- minimal
+- rounded
+tags_content_hash: cbb916ed4007a5ef87da0812aeb23f394cbc1b48dbf613d52b0894b749bf33d6
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/webex/DESIGN.md
 content_hash: 86613900466a274e192ff2bd61759c2a82569df5cf2269a1d24a20554ff34fe2
 preview_image: components.html

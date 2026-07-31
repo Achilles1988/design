@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/webf
 source_date: '2026-04-28'
 title: Design System Inspired by Webflow
 summary: Visual web builder. Blue-accented, polished marketing site aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- colorful
+- corporate
+- geometric
+- flat
+tags_content_hash: e6b3195c84e2e010850e0cdf6aeae0fe4e3bfe8036f5ebcb1435ee78612c445c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/webflow/DESIGN.md
 content_hash: 0610a10e26546550ee70e8e1804d1222aaff6b355b68eacf8cab95f395516aba
 preview_image: components.html

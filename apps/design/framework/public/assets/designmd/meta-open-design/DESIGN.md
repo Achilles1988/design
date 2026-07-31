@@ -6,16 +6,24 @@ source_date: '2026-04-28'
 title: Design System Inspired by Meta (Store)
 summary: Tech retail store. Photography-first, binary light/dark surfaces, Meta Blue
   CTAs.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dark
+- minimal
+- editorial
+- corporate
+- high-contrast
+- airy
+tags_content_hash: 04061f99b8f4e864ed2da6a8483e5db5dccc50884f66fa7991f5c6c8309fed11
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/meta/DESIGN.md
 content_hash: 1d981f34450ed843495c5d1680b7c8e4ff13a48851c17001a376941c6b45a547
 preview_image: components.html

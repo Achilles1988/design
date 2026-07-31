@@ -13,16 +13,24 @@ summary: An enterprise-infrastructure marketing canvas built around a near-black
   product showcase cards lift into per-product chromatic gradients. The system reads
   as confident, technical, and intentionally multi-product — every section quietly
   signals which HashiCorp tool it represents.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- corporate
+- flat
+- minimal
+- colorful
+- geometric
+tags_content_hash: 0f7f46b0514c0338c3983b29c587d03fb7bd457364b62896e3acc04f0414f20b
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/hashicorp/DESIGN.md
 content_hash: d2df9be72d867e48d318fd18db04e60a78357c27e392ab921fc2ba7f46951442
 license: MIT

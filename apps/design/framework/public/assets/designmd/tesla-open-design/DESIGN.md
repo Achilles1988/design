@@ -6,16 +6,23 @@ source_date: '2026-04-28'
 title: Design System Inspired by Tesla
 summary: Electric automotive. Radical subtraction, full-viewport photography, near-zero
   UI.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- high-contrast
+- editorial
+- monochrome
+- airy
+tags_content_hash: 807068a342280df7405e2685ff23f532c2b914b468abed234009931502dcfe4d
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/tesla/DESIGN.md
 content_hash: ee98b4b8acb7a0e5d25921e085661bb855e3dbd04c98a5f2885c458a680594e3
 preview_image: components.html

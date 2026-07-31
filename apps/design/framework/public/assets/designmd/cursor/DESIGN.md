@@ -14,16 +14,23 @@ summary: An AI-first code editor whose marketing site reads like a quietly-confi
   / Editing / Grepping / Done) — only inside in-product timeline visualizations. Cards
   use minimal hairlines, no shadows, generous 80px section rhythm. CursorGothic for
   display/body, JetBrains Mono on every code surface (which is roughly half the page).
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- warm
+- editorial
+- minimal
+- muted
+- soft
+tags_content_hash: c9f57a71885ddb8b99f026c7cf1acbcfc8d6a0e1e8e99d3cf3042785b8dda082
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/cursor/DESIGN.md
 content_hash: a3db9b3019dc2f514fdee7cd0ca0a5232c0bd0119e23178e8eebaf6916258d9d
 license: MIT

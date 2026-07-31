@@ -12,16 +12,23 @@ summary: A confident financial-platform interface anchored on a deep near-black 
   (buy crypto, deposit, exchange) flip to a light theme that shares the same yellow
   CTAs and gray-blue hairlines. Trading green (up) and red (down) accents thread through
   both modes for price-direction signals.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- high-contrast
+- corporate
+- flat
+- monochrome
+tags_content_hash: ee9ff24d44ada4f51deb7d179aa0c13c99343967b9063d35718e89e01f8384f0
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/binance/DESIGN.md
 content_hash: 378ff97d568ccbc316519b9d45a29d6649ed8961c9c486c3ed4cea7501d72371
 license: MIT

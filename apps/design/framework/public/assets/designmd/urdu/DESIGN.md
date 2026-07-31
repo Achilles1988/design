@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/urdu
 source_date: '2026-05-08'
 title: Urdu Modern (Indus Script System)
 summary: '> Category: Editorial / Personal / Publication'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- minimal
+- elegant
+- warm
+- airy
+tags_content_hash: 53da4a5866d25a5c6ae8ea3b06f9b03d9696fee1c03a2fb49603ebc02126f321
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/urdu/DESIGN.md
 content_hash: 5f081207895f86e1c874ff11322ac1aeec62efba1a18af1fd1592ce33cb414a2
 preview_image: components.html

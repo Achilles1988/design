@@ -10,16 +10,23 @@ summary: A clean, calendar-software-first interface anchored on white canvas wit
   shown directly inside cards, and a dark navy footer that visually closes long-scroll
   pages. Brand voltage comes from the Cal Sans display headline (a custom geometric
   face) and from product UI artifacts shown in-card rather than from accent colors.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- rounded
+- soft
+- corporate
+- monochrome
+tags_content_hash: b2b49b2cade15a7608315b399a92edd6dbd3c8e858374aa6b2fb54b356d3d3b5
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/cal/DESIGN.md
 content_hash: 8cd21b7d67e94c899843d517f4b426e4fee33d47354a433d6a63ebcf79d5a654
 license: MIT

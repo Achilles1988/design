@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/verc
 source_date: '2026-04-28'
 title: Design System Inspired by Vercel
 summary: Frontend deployment. Black and white precision, Geist font.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- monochrome
+- high-contrast
+- flat
+- geometric
+tags_content_hash: 44050c2f4307f6aa8d1a4aa816f3e982b6dbd99bca96fd2a4747f8734633b4a1
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/vercel/DESIGN.md
 content_hash: 17d533f0ff2e1b5d9be3e69335ab7fc599d1ddf52bc9ac2f2dd36479676cbd3d
 preview_image: components.html

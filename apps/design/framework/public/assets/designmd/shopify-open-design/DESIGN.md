@@ -6,16 +6,23 @@ source_date: '2026-04-28'
 title: Design System Inspired by Shopify
 summary: E-commerce platform. Dark-first cinematic, neon green accent, ultra-light
   type.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- editorial
+- minimal
+- elegant
+- cinematic
+tags_content_hash: 5a872373bdc2c786fe9d51a6528525f7e39b4a570ed3ae374cf9a3de29082fdc
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/shopify/DESIGN.md
 content_hash: ab10135212d6d8a0eaf4003f29cf5072f9390c27fb5e109a7bb8d4e2a28f4931
 preview_image: components.html

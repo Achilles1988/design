@@ -6,16 +6,22 @@ source_date: '2026-05-01'
 title: Design System Inspired by Bold
 summary: Strong visual presence with heavyweight typography, high-contrast colors,
   and commanding layouts.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- maximalist
+- high-contrast
+- geometric
+- sharp
+tags_content_hash: 05bb77b80a0cda3fc4e69865604049229001466bc06d56b75a654fc90fa6ae39
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/bold/DESIGN.md
 content_hash: 91ccb39dbfdf2388d28c4dad2a8b88bf4340a98c0e72dd2a829d26507ecc1f8c
 preview_image: components.html

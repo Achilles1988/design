@@ -6,16 +6,23 @@ source_date: '2026-04-28'
 title: Design System Inspired by WIRED
 summary: Tech magazine. Paper-white broadsheet density, custom serif display, mono
   kickers, ink-blue links.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- editorial
+- monochrome
+- high-contrast
+- dense
+- sharp
+tags_content_hash: 9762caa41b94e54c7ea15b2f64cccd887e3d5b387c1319b24cdc2f2bd105b07c
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/wired/DESIGN.md
 content_hash: 2c370c20aec5d1a8ccb42e8788cb68b768f0f26f69e0e7f995f468fd96cac57f
 preview_image: components.html

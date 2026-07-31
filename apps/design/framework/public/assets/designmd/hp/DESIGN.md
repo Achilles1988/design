@@ -10,16 +10,23 @@ summary: An inspired interpretation of HP's design language — a white-paper en
   blue-chevron decorations that nod to the HP wordmark's slashes. Cards round at 8–16px,
   photos sit in soft 16px frames, and dark navy slabs anchor the customer-story and
   "how can we help" closing bands.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- corporate
+- geometric
+- flat
+- rounded
+- cool
+tags_content_hash: 82efdbc7955af1bff5537221c06e1ac97d8175013ab9f38efa95dec886a6884a
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/hp/DESIGN.md
 content_hash: 4c9a248046684bdde5311a0c9881814f50e2381c2b0f3c75b02a35fc64bc8bb8
 license: MIT

@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/runw
 source_date: '2026-04-28'
 title: Design System Inspired by Runway
 summary: AI video generation. Cinematic dark UI, media-rich layout.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- editorial
+- cinematic
+- high-contrast
+- minimal
+tags_content_hash: f1f391c6218990396238781898fbc6e278ee906cbb8a874eec72bd15b26090fa
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/runwayml/DESIGN.md
 content_hash: f873f90495a932a50d899f72600c231c76b3e706cdb17f90188747ad36613afc
 preview_image: components.html

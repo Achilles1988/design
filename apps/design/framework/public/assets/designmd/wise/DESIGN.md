@@ -9,16 +9,24 @@ summary: An inspired interpretation of Wise's design language — a global money
   900 at 64–126 px) with a vivid lime-green brand accent, sage-tinted surface neutrals,
   and rounded white cards on a pale green-tinted canvas; the whole system reads more
   like a Scandinavian fintech magazine than a bank.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- bold
+- colorful
+- rounded
+- soft
+- warm
+- high-contrast
+tags_content_hash: 7ff4ad3177ddbbf148dc954a824e105cf3a8edf7ae09b3fc7b8fa3372ffc7962
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/wise/DESIGN.md
 content_hash: 442df0ad7380efd8712f5574bdca34a73cfb41a2a43454ff459863a6258af547
 license: MIT

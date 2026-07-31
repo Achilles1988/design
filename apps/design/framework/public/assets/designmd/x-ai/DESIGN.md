@@ -9,16 +9,24 @@ summary: An inspired interpretation of xAI's design language — Elon Musk's fro
   outlines, occasional warm sunset / dusk gradient accents, a custom geometric sans
   (Universal Sans) for display, and an uppercase tracked monospace caption face; the
   whole system reads as engineered-cosmic, unmarketed.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- monochrome
+- futuristic
+- geometric
+- high-contrast
+tags_content_hash: 72a8573ff1c35f5fc4a62dc5046508297484ff149d32cc3f0f1ecd96e21bfe1f
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/x.ai/DESIGN.md
 content_hash: 9c9ef45d8c0c3b9a7622833cdff8bd125ed6bf296a82cc7274215276706e52eb
 license: MIT

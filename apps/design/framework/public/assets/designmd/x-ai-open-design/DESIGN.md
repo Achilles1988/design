@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/x-ai
 source_date: '2026-04-28'
 title: Design System Inspired by xAI
 summary: Elon Musk's AI lab. Stark monochrome, futuristic minimalism.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- minimal
+- monochrome
+- futuristic
+- high-contrast
+tags_content_hash: ad18315583355777e97a5e326ffcee2279b146d48b16a0e118aae9ff06c9ce45
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/x-ai/DESIGN.md
 content_hash: 83107b1981e877d7e772f6bfc383b68d1349a84882e22e0c2cba0409e70d82e6
 preview_image: components.html

@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/miro
 source_date: '2026-04-28'
 title: Design System Inspired by Miro
 summary: Visual collaboration. Bright yellow accent, infinite canvas aesthetic.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- playful
+- colorful
+- rounded
+- soft
+- geometric
+tags_content_hash: c9dacde115def947414427b74a5a9130e54f29dc7d5bff6820ff34b95dc2ec03
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/miro/DESIGN.md
 content_hash: 51f348feaf10f92873854e49dccb1c03a32bbb573f1de0bc87981d4d540f91d8
 preview_image: components.html

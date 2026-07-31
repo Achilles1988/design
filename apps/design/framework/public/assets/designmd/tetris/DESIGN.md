@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Tetris
 summary: Classic block-game inspired design with playful colors, bold display fonts,
   and compact, high-energy layouts.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- pixel
+- retro
+- playful
+- colorful
+- high-contrast
+tags_content_hash: 668dff296ecc8525c10a2ecb7ad1d2b8d23189278fc3901786a9fa4ec7457a94
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/tetris/DESIGN.md
 content_hash: 1df18ad978601796a78740a7705a41b7793fc8ad65041e46218d406b09c5dec8
 preview_image: components.html

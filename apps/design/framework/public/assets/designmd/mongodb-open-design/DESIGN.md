@@ -5,16 +5,23 @@ source_url: https://github.com/nexu-io/open-design/blob/main/design-systems/mong
 source_date: '2026-04-28'
 title: Design System Inspired by MongoDB
 summary: Document database. Green leaf branding, developer documentation focus.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- colorful
+- organic
+- high-contrast
+- corporate
+tags_content_hash: cdd4da02504f4386639d683c108ba960a37f6cbaa2c8a2a65320c84cd311e74f
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/mongodb/DESIGN.md
 content_hash: 8ade6a733fe3d4d264d3ce13dc8720203898c514568f39e9fcd26438c34a2ec7
 preview_image: components.html

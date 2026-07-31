@@ -5,16 +5,23 @@ source_url: https://github.com/voltagent/awesome-design-md/blob/main/design-md/r
 source_date: '2026-05-17'
 title: Raycast-design-analysis
 summary: '|'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- gradient
+- colorful
+- minimal
+- elegant
+tags_content_hash: cdf20bf068dfd405788cbdc4925fd054489159e5102c9517136dae91238d6ffe
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/raycast/DESIGN.md
 content_hash: 6e2c5137e4d914b70996d589688374a801b6f29a35c9c019c22abb5e0170bda3
 license: MIT

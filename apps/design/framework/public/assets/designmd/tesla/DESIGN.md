@@ -13,16 +13,23 @@ summary: 'Tesla''s website is an exercise in radical subtraction — a digital s
   enough navigational structure to get out of the way. Every pixel that isn''t product
   imagery is white space, and that restraint is the design system''s most powerful
   statement.'
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- minimal
+- high-contrast
+- editorial
+- airy
+- monochrome
+tags_content_hash: 064555350a5a3317c39378f495b1c508c8d8ff2b0010831892d99b2b9c56e043
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/tesla/DESIGN.md
 content_hash: 19f2f7e6073d708f46d2512e6bab3c7c417cf2b4d9f57ff6ec6f2e056ea942b0
 license: MIT

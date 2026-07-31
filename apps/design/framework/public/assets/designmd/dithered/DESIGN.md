@@ -6,16 +6,23 @@ source_date: '2026-05-01'
 title: Design System Inspired by Dithered
 summary: Dot-pattern rendering technique that simulates shades with a limited palette
   for nostalgic, retro, high-contrast visuals.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- light
+- dithered
+- pixel
+- retro
+- high-contrast
+- monochrome
+tags_content_hash: f65091bad42ac45fd7e1a99b7cbdc9dfaf5bff023171a4a4f58baa475c0fa03e
 category: spec
 design_domain:
 - UI
 author: nexu-io
 origin_site: open-design
-source_commit: 1eb3898795861fd73db4ca027f7abdf9ce117786
+source_commit: 517f39acde402c1a7af2189167a8d6957a3dac71
 source_item_path: design-systems/dithered/DESIGN.md
 content_hash: b5988f7803ec4fbfae0ce58b2427f8885a829d8a89a45b7086750902be14049e
 preview_image: components.html

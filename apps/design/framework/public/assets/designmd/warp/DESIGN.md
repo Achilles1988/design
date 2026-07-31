@@ -9,16 +9,23 @@ summary: An inspired interpretation of Warp's design language — an agentic ter
   broken only by clean Inter typography, the occasional Instrument Serif italic moment,
   and dense terminal-mockup imagery; CTAs are unusually understated, with shape geometry
   running tighter than most marketing sites.
-ingested_at: '2026-07-06T17:00:49+02:00'
+ingested_at: '2026-08-01T02:27:30+08:00'
 status: cleaned
 tags:
 - spec
+- dark
+- dark-accent
+- warm
+- minimal
+- editorial
+- textured
+tags_content_hash: ee739b490ceb916f17124a54c5c7abda1aeb099ea5fb678b2d88a9f5666f155f
 category: spec
 design_domain:
 - UI
 author: voltagent
 origin_site: awesome-design-md
-source_commit: 664b3e78fd1a298ba11973822da988483256d4b4
+source_commit: 8147538b4226ae41e2487a9179e3bcc1f68e8554
 source_item_path: design-md/warp/DESIGN.md
 content_hash: 5b1201f7b1b4e72570d148d1f980fd1cb35e6e4122d48dd271787aa3538a25ad
 license: MIT
