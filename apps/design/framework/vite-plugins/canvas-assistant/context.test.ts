@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
+import type { AppStyleSlots } from '../../src/lib/styleSlots'
 import {
   createCanvasContextLoader,
   validateCandidatePath,
@@ -13,7 +14,9 @@ async function writeJson(filePath: string, value: unknown): Promise<void> {
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
 }
 
-async function createFixture() {
+async function createFixture(
+  style: AppStyleSlots = { light: 'studio', dark: 'midnight' },
+) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'canvas-context-'))
   temporaryRoots.push(root)
 
@@ -28,6 +31,7 @@ async function createFixture() {
     fs.mkdir(canvasesDir, { recursive: true }),
     fs.mkdir(componentsDir, { recursive: true }),
     fs.mkdir(path.join(stylesRoot, 'studio'), { recursive: true }),
+    fs.mkdir(path.join(stylesRoot, 'midnight'), { recursive: true }),
     fs.mkdir(path.join(layoutsRoot, 'sidebar'), { recursive: true }),
     fs.mkdir(path.join(layoutsRoot, 'uninstalled'), { recursive: true }),
   ])
@@ -36,7 +40,7 @@ async function createFixture() {
     writeJson(path.join(appDir, 'app.json'), {
       id: 'shop',
       name: 'Shop',
-      style: 'studio',
+      style,
       layouts: ['sidebar'],
     }),
     writeJson(path.join(appDir, 'canvases.json'), {
@@ -65,6 +69,11 @@ async function createFixture() {
     fs.writeFile(
       path.join(stylesRoot, 'studio', 'DESIGN.md'),
       '# Studio Style\n',
+      'utf8',
+    ),
+    fs.writeFile(
+      path.join(stylesRoot, 'midnight', 'DESIGN.md'),
+      '# Midnight Style\n',
       'utf8',
     ),
     fs.writeFile(
@@ -129,7 +138,7 @@ describe('createCanvasContextLoader', () => {
     ])
     expect(context.files.every((file) => file.hash.length === 64)).toBe(true)
     expect(context.appConfigHash).toHaveLength(64)
-    expect(context.style.hash).toHaveLength(64)
+    expect(context.styles.light?.hash).toHaveLength(64)
     expect(context.installedLayouts).toHaveLength(1)
     expect(context.installedLayouts[0]?.hash).toHaveLength(64)
     expect(context.componentsDir).toBe(fixture.componentsDir)
@@ -472,16 +481,24 @@ describe('createCanvasContextLoader', () => {
     ).toThrow()
   })
 
-  it('loads DESIGN.md for the configured Style', async () => {
+  it('loads DESIGN.md for every configured Style slot', async () => {
     const fixture = await createFixture()
 
     const context = await fixture.loader.load('shop', 'home')
 
-    expect(context.style).toEqual({
-      id: 'studio',
-      relativePath: 'studio/DESIGN.md',
-      source: '# Studio Style\n',
-      hash: expect.stringMatching(/^[a-f0-9]{64}$/),
+    expect(context.styles).toEqual({
+      light: {
+        id: 'studio',
+        relativePath: 'studio/DESIGN.md',
+        source: '# Studio Style\n',
+        hash: expect.stringMatching(/^[a-f0-9]{64}$/),
+      },
+      dark: {
+        id: 'midnight',
+        relativePath: 'midnight/DESIGN.md',
+        source: '# Midnight Style\n',
+        hash: expect.stringMatching(/^[a-f0-9]{64}$/),
+      },
     })
 
     await fs.rename(
@@ -489,15 +506,41 @@ describe('createCanvasContextLoader', () => {
       path.join(fixture.stylesRoot, 'studio', 'design.md'),
     )
     const lowercaseContext = await fixture.loader.load('shop', 'home')
-    expect(lowercaseContext.style.relativePath).toBe('studio/design.md')
+    expect(lowercaseContext.styles.light?.relativePath).toBe(
+      'studio/design.md',
+    )
   })
 
-  it('fails when the mandatory Style contract is missing', async () => {
-    const fixture = await createFixture()
-    await fs.rm(path.join(fixture.stylesRoot, 'studio', 'DESIGN.md'))
+  it('loads only the configured slot when one slot is empty', async () => {
+    const fixture = await createFixture({ dark: 'midnight' })
+
+    const context = await fixture.loader.load('shop', 'home')
+
+    expect(context.styles.light).toBeUndefined()
+    expect(context.styles.dark?.id).toBe('midnight')
+  })
+
+  it('fails when a configured Style contract is missing', async () => {
+    const lightFixture = await createFixture()
+    await fs.rm(path.join(lightFixture.stylesRoot, 'studio', 'DESIGN.md'))
+
+    await expect(lightFixture.loader.load('shop', 'home')).rejects.toThrow(
+      'The configured light Style contract could not be loaded.',
+    )
+
+    const darkFixture = await createFixture()
+    await fs.rm(path.join(darkFixture.stylesRoot, 'midnight', 'DESIGN.md'))
+
+    await expect(darkFixture.loader.load('shop', 'home')).rejects.toThrow(
+      'The configured dark Style contract could not be loaded.',
+    )
+  })
+
+  it('fails when no Style slot is configured', async () => {
+    const fixture = await createFixture({})
 
     await expect(fixture.loader.load('shop', 'home')).rejects.toThrow(
-      'The configured Style contract could not be loaded.',
+      'No Style is configured for this App.',
     )
   })
 
@@ -506,7 +549,7 @@ describe('createCanvasContextLoader', () => {
     await writeJson(path.join(fixture.appDir, 'app.json'), {
       id: 'shop',
       name: 'Shop',
-      style: 'studio',
+      style: { light: 'studio' },
       layouts: ['sidebar', 'missing'],
     })
 

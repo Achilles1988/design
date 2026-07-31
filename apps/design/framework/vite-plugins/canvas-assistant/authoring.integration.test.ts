@@ -98,6 +98,7 @@ async function createFixture(options: {
     fs.mkdir(canvasesDir, { recursive: true }),
     fs.mkdir(componentsDir, { recursive: true }),
     fs.mkdir(path.join(stylesRoot, 'dashboard'), { recursive: true }),
+    fs.mkdir(path.join(stylesRoot, 'daylight'), { recursive: true }),
     fs.mkdir(path.join(layoutsRoot, 'sidebar-shell'), { recursive: true }),
     fs.mkdir(path.join(layoutsRoot, 'centered'), { recursive: true }),
   ])
@@ -105,7 +106,7 @@ async function createFixture(options: {
     writeJson(appJson, {
       id: 'design',
       name: 'Design',
-      style: 'dashboard',
+      style: { light: 'daylight', dark: 'dashboard' },
       layouts: ['sidebar-shell'],
     }),
     writeJson(path.join(appDir, 'canvases.json'), {
@@ -120,6 +121,11 @@ async function createFixture(options: {
     fs.writeFile(
       path.join(stylesRoot, 'dashboard', 'DESIGN.md'),
       '# Dashboard Style\n',
+      'utf8',
+    ),
+    fs.writeFile(
+      path.join(stylesRoot, 'daylight', 'DESIGN.md'),
+      '# Daylight Style\n',
       'utf8',
     ),
     fs.writeFile(
@@ -409,7 +415,7 @@ describe('Canvas Assistant authoring server integration', () => {
     expect(JSON.parse(await fs.readFile(fixture.appJson, 'utf8'))).toEqual({
       id: 'design',
       name: 'Design',
-      style: 'dashboard',
+      style: { light: 'daylight', dark: 'dashboard' },
       layouts: ['sidebar-shell'],
     })
 
@@ -422,7 +428,7 @@ describe('Canvas Assistant authoring server integration', () => {
     expect(JSON.parse(await fs.readFile(fixture.appJson, 'utf8'))).toEqual({
       id: 'design',
       name: 'Design',
-      style: 'dashboard',
+      style: { light: 'daylight', dark: 'dashboard' },
       layouts: ['sidebar-shell', 'centered'],
     })
 
@@ -628,7 +634,7 @@ describe('Canvas Assistant authoring server integration', () => {
       },
     },
     {
-      name: 'Style contract',
+      name: 'dark Style contract',
       mutate: async (fixture: Fixture) => {
         await fs.writeFile(
           path.join(
@@ -637,6 +643,16 @@ describe('Canvas Assistant authoring server integration', () => {
             'DESIGN.md',
           ),
           '# Changed Dashboard Style\n',
+          'utf8',
+        )
+      },
+    },
+    {
+      name: 'light Style contract',
+      mutate: async (fixture: Fixture) => {
+        await fs.writeFile(
+          path.join(fixture.stylesRoot, 'daylight', 'DESIGN.md'),
+          '# Changed Daylight Style\n',
           'utf8',
         )
       },

@@ -12,7 +12,7 @@ function context(
     app: {
       id: 'design',
       name: 'Design',
-      style: 'dashboard',
+      style: { light: 'daylight', dark: 'dashboard' },
       layouts: ['sidebar-shell'],
     },
     appConfigHash: 'app-config-hash',
@@ -21,11 +21,19 @@ function context(
       name: 'Home',
       component: 'Home.tsx',
     },
-    style: {
-      id: 'dashboard',
-      relativePath: 'dashboard/DESIGN.md',
-      source: '# Dashboard Style',
-      hash: 'style-contract-hash',
+    styles: {
+      light: {
+        id: 'daylight',
+        relativePath: 'daylight/DESIGN.md',
+        source: '# Daylight Style',
+        hash: 'light-style-contract-hash',
+      },
+      dark: {
+        id: 'dashboard',
+        relativePath: 'dashboard/DESIGN.md',
+        source: '# Dashboard Style',
+        hash: 'style-contract-hash',
+      },
     },
     installedLayouts: [
       {
@@ -113,9 +121,15 @@ describe('createProposalStore', () => {
     )
     expect(claimed.trusted).toEqual({
       appConfigHash: 'app-config-hash',
-      styleContract: {
-        id: 'dashboard',
-        hash: 'style-contract-hash',
+      styleContracts: {
+        light: {
+          id: 'daylight',
+          hash: 'light-style-contract-hash',
+        },
+        dark: {
+          id: 'dashboard',
+          hash: 'style-contract-hash',
+        },
       },
       selectedLayoutContract: {
         id: 'sidebar-shell',
@@ -123,11 +137,48 @@ describe('createProposalStore', () => {
       },
       originalUserIntent: 'Build an account form.',
       constraints: {
-        styleId: 'dashboard',
+        styleIds: { light: 'daylight', dark: 'dashboard' },
         layout: rawProposal().layout,
         preserved: ['Navigation'],
       },
     })
+    expect(claimed.card.styleIds).toEqual({
+      light: 'daylight',
+      dark: 'dashboard',
+    })
+  })
+
+  it('stores only the configured slot when one Style slot is empty', () => {
+    const proposalStore = store()
+    const card = proposalStore.stage(
+      context({
+        app: {
+          id: 'design',
+          name: 'Design',
+          style: { dark: 'dashboard' },
+          layouts: ['sidebar-shell'],
+        },
+        styles: {
+          dark: {
+            id: 'dashboard',
+            relativePath: 'dashboard/DESIGN.md',
+            source: '# Dashboard Style',
+            hash: 'style-contract-hash',
+          },
+        },
+      }),
+      rawProposal(),
+      'Build an account form.',
+    )
+
+    const claimed = proposalStore.claim(card.proposalId, 'design', 'home')
+    expect(claimed.trusted.styleContracts).toEqual({
+      dark: { id: 'dashboard', hash: 'style-contract-hash' },
+    })
+    expect(claimed.trusted.constraints.styleIds).toEqual({
+      dark: 'dashboard',
+    })
+    expect(card.styleIds).toEqual({ dark: 'dashboard' })
   })
 
   it('stores no installed Layout fingerprint for a temporary Layout', () => {

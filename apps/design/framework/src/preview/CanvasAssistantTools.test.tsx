@@ -9,6 +9,7 @@ import {
   waitFor,
 } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { setTheme, THEME_STORAGE_KEY } from '@/lib/theme'
 import { CanvasAssistantTools } from './CanvasAssistantTools'
 
 const captured = vi.hoisted(() => ({
@@ -58,7 +59,7 @@ const proposalArgs = {
   proposalId: 'proposal-1',
   mode: 'create' as const,
   summary: ['Builds the dashboard shell.', 'Adds the overview content.'],
-  styleId: 'dashboard',
+  styleIds: { light: 'daylight', dark: 'dashboard' },
   layout: {
     kind: 'installed' as const,
     id: 'sidebar-shell',
@@ -135,7 +136,11 @@ function expectFocusedStatus(name: string, text: string) {
 }
 
 describe('CanvasAssistantTools', () => {
-  afterEach(cleanup)
+  afterEach(() => {
+    cleanup()
+    document.documentElement.removeAttribute('data-theme')
+    localStorage.removeItem(THEME_STORAGE_KEY)
+  })
 
   beforeEach(() => {
     captured.tools = []
@@ -244,7 +249,7 @@ describe('CanvasAssistantTools', () => {
       />,
     )
 
-    expect(screen.getByText('Style')).toBeTruthy()
+    expect(screen.getByText('Style (dark)')).toBeTruthy()
     expect(screen.getByText('dashboard')).toBeTruthy()
     expect(screen.getByText('Layout')).toBeTruthy()
     expect(screen.getByText('sidebar-shell')).toBeTruthy()
@@ -254,6 +259,40 @@ describe('CanvasAssistantTools', () => {
     expect(screen.getByText('Sidebar')).toBeTruthy()
     expect(screen.getByText('New shared components')).toBeTruthy()
     expect(screen.getByText('Metric')).toBeTruthy()
+  })
+
+  it('shows the Style slot of the current theme and follows theme changes', async () => {
+    registerTools()
+    render(
+      <ToolHarness
+        toolName="propose_canvas_change"
+        args={proposalArgs}
+        addResult={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText('dashboard')).toBeTruthy()
+
+    setTheme('light')
+
+    await waitFor(() => {
+      expect(screen.getByText('Style (light)')).toBeTruthy()
+    })
+    expect(screen.getByText('daylight')).toBeTruthy()
+  })
+
+  it('shows "not set" when the current theme has no Style slot', () => {
+    registerTools()
+    render(
+      <ToolHarness
+        toolName="propose_canvas_change"
+        args={{ ...proposalArgs, styleIds: { light: 'daylight' } }}
+        addResult={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Style (dark)')).toBeTruthy()
+    expect(screen.getByText('not set')).toBeTruthy()
   })
 
   it('offers an accessible collapsible review of every candidate source', () => {

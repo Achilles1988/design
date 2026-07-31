@@ -107,8 +107,12 @@ logs.
 }
 ```
 
-The route loads the same trusted authoring context used by chat, including the
-configured Canvas Style contract. It does not call an AI model.
+The route loads the same trusted authoring context used by chat, including one
+Style contract per configured `app.json.style` slot (`light`, `dark`). Every
+configured slot must resolve; a configured id whose contract cannot be loaded
+and an App with no configured slot both fail the load. Loading is independent
+of the Shell theme, so generation always covers every configured slot. It does
+not call an AI model.
 
 Only direct same-directory `./*.css` imports are discovered as writable Canvas
 CSS. Package CSS and CSS under `components/` are not reclassified as Canvas
@@ -347,7 +351,7 @@ separate read-only review copy:
   proposalId: string
   mode: 'create' | 'update'
   summary: string[]
-  styleId: string
+  styleIds: { light?: string; dark?: string }
   layout:
     | { kind: 'installed'; id: string; reason: string }
     | { kind: 'temporary'; reason: string }
@@ -360,6 +364,11 @@ separate read-only review copy:
   expiresAt: string
 }
 ```
+
+`styleIds` carries every configured slot and always has at least one entry. The
+proposal card displays only the slot matching the current Shell theme and shows
+`not set` when that slot is empty; unlike preview resolution, display never
+falls back to the other slot.
 
 The browser may display or mutate its local review copy, but apply still sends
 only `proposalId + aiConfig`; the transaction always uses the server-side
@@ -429,19 +438,21 @@ The set of directly imported existing read-only App component files must equal
 invalid.
 
 The proposal stores candidate source, file baselines, the raw current
-`app.json` fingerprint, the mandatory Style-contract fingerprint, and the
+`app.json` fingerprint, one mandatory Style-contract fingerprint per configured
+slot (`styleContracts: { light?: { id, hash }, dark?: { id, hash } }`), and the
 selected installed Layout-contract fingerprint. A temporary AI Layout has no
 installed Layout-contract fingerprint, but remains bound to the App and Style
 fingerprints. The proposal also stores only the latest sanitized user intent
-plus its authoritative Style id, Layout decision, and preservation constraints;
-it never stores `aiConfig`, API keys, or unrelated chat history.
+plus its authoritative Style ids per slot, Layout decision, and preservation
+constraints; it never stores `aiConfig`, API keys, or unrelated chat history.
 
 Read-only baseline enforcement belongs to the apply transaction. It reloads
 trusted context at apply start, immediately before and after each asynchronous
 Vite validation, immediately after each asynchronous repair, and immediately
-before a successful return. Every reload rechecks the App configuration, Style
-contract, selected installed Layout contract, current Canvas identity, and all
-read-only file baselines. A change rejects with the normal proposal-conflict
+before a successful return. Every reload rechecks the App configuration, every
+configured Style contract, selected installed Layout contract, current Canvas
+identity, and all read-only file baselines. A slot added, cleared, repointed,
+or edited after staging rejects the proposal. A change rejects with the normal proposal-conflict
 result. Read-only baselines retain their initial absolute path, real path, and
 source and are rechecked as regular non-symlink files at every checkpoint.
 When the refreshed context still discovers one, its path and source must match
@@ -517,7 +528,7 @@ otherwise unvisited dependency must transform successfully before apply can
 complete. Validation may run at most two AI repairs. A repair must return the
 same complete path set. Each repair request is rebuilt after validation from
 the latest successfully reloaded context and includes the sanitized original
-user intent, complete current Style contract, selected installed Layout
+user intent, every configured current Style contract, selected installed Layout
 contract or temporary Layout decision, authoritative preservation constraints,
 compact diagnostic, and complete candidate set. The context is reloaded again
 after the repair resolves or rejects before any returned candidate can be

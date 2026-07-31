@@ -3,13 +3,27 @@ import type { CanvasAuthoringContext } from './context'
 import { buildCanvasSystemPrompt } from './prompt'
 
 function context(
-  overrides: { canvasSource?: string } = {},
+  overrides: {
+    canvasSource?: string
+    styles?: CanvasAuthoringContext['styles']
+  } = {},
 ): CanvasAuthoringContext {
+  const styles = overrides.styles ?? {
+    light: {
+      id: 'dashboard',
+      relativePath: 'dashboard/DESIGN.md',
+      source: '# Dashboard Style\nUse the configured tokens.',
+      hash: 'style-contract-hash',
+    },
+  }
   return {
     app: {
       id: 'design',
       name: 'Design',
-      style: 'dashboard',
+      style: {
+        light: styles.light?.id,
+        dark: styles.dark?.id,
+      },
       layouts: ['sidebar-shell'],
     },
     appConfigHash: 'app-config-hash',
@@ -18,12 +32,7 @@ function context(
       name: 'Home',
       component: 'Home.tsx',
     },
-    style: {
-      id: 'dashboard',
-      relativePath: 'dashboard/DESIGN.md',
-      source: '# Dashboard Style\nUse the configured tokens.',
-      hash: 'style-contract-hash',
-    },
+    styles,
     installedLayouts: [
       {
         id: 'sidebar-shell',
@@ -89,6 +98,53 @@ describe('buildCanvasSystemPrompt', () => {
     )
   })
 
+  it('formats one Style section per configured slot in light-then-dark order', () => {
+    const prompt = buildCanvasSystemPrompt(
+      context({
+        styles: {
+          light: {
+            id: 'daylight',
+            relativePath: 'daylight/DESIGN.md',
+            source: '# Daylight Style',
+            hash: 'light-hash',
+          },
+          dark: {
+            id: 'midnight',
+            relativePath: 'midnight/DESIGN.md',
+            source: '# Midnight Style',
+            hash: 'dark-hash',
+          },
+        },
+      }),
+    )
+
+    expect(prompt).toContain('## Mandatory Style (light)')
+    expect(prompt).toContain('Style ID: daylight')
+    expect(prompt).toContain('## Mandatory Style (dark)')
+    expect(prompt).toContain('Style ID: midnight')
+    expect(prompt.indexOf('## Mandatory Style (light)')).toBeLessThan(
+      prompt.indexOf('## Mandatory Style (dark)'),
+    )
+  })
+
+  it('formats only the configured slot when one slot is empty', () => {
+    const prompt = buildCanvasSystemPrompt(
+      context({
+        styles: {
+          dark: {
+            id: 'midnight',
+            relativePath: 'midnight/DESIGN.md',
+            source: '# Midnight Style',
+            hash: 'dark-hash',
+          },
+        },
+      }),
+    )
+
+    expect(prompt).toContain('## Mandatory Style (dark)')
+    expect(prompt).not.toContain('## Mandatory Style (light)')
+  })
+
   it('states the Layout decision precedence and configuration effects', () => {
     const prompt = buildCanvasSystemPrompt(context())
 
@@ -128,6 +184,8 @@ describe('buildCanvasSystemPrompt', () => {
       'Follow its colors, typography, spacing, components, motion, and anti-patterns.',
       "The user's request determines product intent; Style determines visual language.",
       'Never invent or ignore Style rules.',
+      'The App configures a Style per theme; every provided Style section is mandatory for its theme.',
+      'When two Style sections are provided, the UI must satisfy both without duplicating page structure.',
       'Evaluate each installed Layout first',
       'requires confirmed installation before use.',
       'Never claim an uninstalled Layout is installed.',
@@ -166,7 +224,7 @@ describe('buildCanvasSystemPrompt', () => {
     const headings = [
       '## Non-negotiable rules',
       '## Current App and Canvas',
-      '## Mandatory Style',
+      '## Mandatory Style (light)',
       '## Installed Layouts',
       '## Layout library index',
       '## Existing user shared components',

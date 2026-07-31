@@ -80,6 +80,16 @@ export const CanvasPreviewSessionResponseSchema = z.object({
   expiresAt: z.string().datetime(),
 }).strict()
 
+/** Configured Style ids per theme slot; at least one slot is always set. */
+export const StyleSlotIdsSchema = z
+  .object({
+    light: z.string().min(1).optional(),
+    dark: z.string().min(1).optional(),
+  })
+  .refine((ids) => Boolean(ids.light ?? ids.dark), {
+    message: 'At least one Style slot must be configured.',
+  })
+
 const LayoutDecisionSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('installed'),
@@ -122,7 +132,7 @@ export const CanvasProposalCardArgsSchema = z.object({
   proposalId: z.string().min(1),
   mode: z.enum(['create', 'update']),
   summary: z.array(z.string().min(1)).min(1),
-  styleId: z.string().min(1),
+  styleIds: StyleSlotIdsSchema,
   layout: LayoutDecisionSchema,
   changedFiles: z.array(z.string().min(1)).min(1),
   reusedComponents: z.array(z.string()),
@@ -202,6 +212,7 @@ export type CanvasPreviewSessionResponse = z.infer<
   typeof CanvasPreviewSessionResponseSchema
 >
 export type RawCanvasProposal = z.infer<typeof RawCanvasProposalSchema>
+export type StyleSlotIds = z.infer<typeof StyleSlotIdsSchema>
 export type CanvasProposalCardArgs = z.infer<
   typeof CanvasProposalCardArgsSchema
 >

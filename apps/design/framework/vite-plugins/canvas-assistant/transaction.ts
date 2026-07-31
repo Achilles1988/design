@@ -6,7 +6,9 @@ import type { ViteDevServer } from 'vite'
 import { z } from 'zod'
 import { createModel } from '../../src/lib/ai/client'
 import type { AiConfig } from '../../src/lib/ai/config'
+import type { StyleSlot } from '../../src/lib/styleSlots'
 import {
+  STYLE_SLOTS,
   validateCandidatePath,
   type CanvasAuthoringContext,
 } from './context'
@@ -59,10 +61,9 @@ export type RepairRequest = {
   diagnostic: string
   candidateFiles: CandidateFile[]
   originalUserIntent: string
-  styleContract: {
-    id: string
-    source: string
-  }
+  styleContracts: Partial<
+    Record<StyleSlot, { id: string; source: string }>
+  >
   layoutDecision:
     | {
         kind: 'installed'
@@ -151,10 +152,42 @@ class ProposalConflictError extends Error {
 type TrustedRepairContext = Pick<
   RepairRequest,
   | 'originalUserIntent'
-  | 'styleContract'
+  | 'styleContracts'
   | 'layoutDecision'
   | 'preservationConstraints'
 >
+
+function trustedStyleContracts(
+  proposal: StoredProposal,
+  context: CanvasAuthoringContext,
+): RepairRequest['styleContracts'] {
+  const fingerprints = proposal.trusted.styleContracts
+  const constrainedIds = proposal.trusted.constraints.styleIds
+  const styleContracts: RepairRequest['styleContracts'] = {}
+  for (const slot of STYLE_SLOTS) {
+    const fingerprint = fingerprints[slot]
+    const contract = context.styles[slot]
+    if (!fingerprint) {
+      if (contract || constrainedIds[slot]) {
+        throw new Error(BASELINE_CHANGED_ERROR)
+      }
+      continue
+    }
+    if (
+      !contract ||
+      contract.id !== fingerprint.id ||
+      contract.hash !== fingerprint.hash ||
+      constrainedIds[slot] !== fingerprint.id
+    ) {
+      throw new Error(BASELINE_CHANGED_ERROR)
+    }
+    styleContracts[slot] = { id: contract.id, source: contract.source }
+  }
+  if (!styleContracts.light && !styleContracts.dark) {
+    throw new Error(BASELINE_CHANGED_ERROR)
+  }
+  return styleContracts
+}
 
 function trustedRepairContext(
   proposal: StoredProposal,
@@ -164,13 +197,11 @@ function trustedRepairContext(
   if (
     !trusted ||
     context.appConfigHash !== trusted.appConfigHash ||
-    context.style.id !== trusted.styleContract.id ||
-    context.style.hash !== trusted.styleContract.hash ||
-    trusted.constraints.styleId !== trusted.styleContract.id ||
     !trusted.originalUserIntent
   ) {
     throw new Error(BASELINE_CHANGED_ERROR)
   }
+  const styleContracts = trustedStyleContracts(proposal, context)
 
   const layout = trusted.constraints.layout
   let layoutDecision: TrustedRepairContext['layoutDecision']
@@ -205,10 +236,7 @@ function trustedRepairContext(
 
   return {
     originalUserIntent: trusted.originalUserIntent,
-    styleContract: {
-      id: context.style.id,
-      source: context.style.source,
-    },
+    styleContracts,
     layoutDecision,
     preservationConstraints: [...trusted.constraints.preserved],
   }
@@ -836,7 +864,7 @@ export function createCanvasRepair(
         allowedCandidatePaths: candidatePaths,
         trustedRequirements: {
           originalUserIntent: request.originalUserIntent,
-          styleContract: request.styleContract,
+          styleContracts: request.styleContracts,
           layoutDecision: request.layoutDecision,
           preservationConstraints: request.preservationConstraints,
         },

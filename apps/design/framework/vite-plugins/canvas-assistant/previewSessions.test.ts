@@ -29,7 +29,7 @@ describe('Canvas preview sessions', () => {
         JSON.stringify({
           id: 'design',
           name: 'Design',
-          style: 'dashboard',
+          style: { light: 'default', dark: 'dashboard' },
           layouts: ['sidebar-shell'],
         }),
       ),

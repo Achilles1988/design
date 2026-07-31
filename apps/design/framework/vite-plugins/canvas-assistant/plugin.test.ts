@@ -38,7 +38,7 @@ function context(): CanvasAuthoringContext {
     app: {
       id: 'design',
       name: 'Design',
-      style: 'dashboard',
+      style: { light: 'daylight', dark: 'dashboard' },
       layouts: ['sidebar-shell'],
     },
     appConfigHash: 'app-config-hash',
@@ -47,11 +47,19 @@ function context(): CanvasAuthoringContext {
       name: 'Home',
       component: 'Home.tsx',
     },
-    style: {
-      id: 'dashboard',
-      relativePath: 'dashboard/DESIGN.md',
-      source: '# Dashboard',
-      hash: 'style-contract-hash',
+    styles: {
+      light: {
+        id: 'daylight',
+        relativePath: 'daylight/DESIGN.md',
+        source: '# Daylight',
+        hash: 'light-style-contract-hash',
+      },
+      dark: {
+        id: 'dashboard',
+        relativePath: 'dashboard/DESIGN.md',
+        source: '# Dashboard',
+        hash: 'style-contract-hash',
+      },
     },
     installedLayouts: [
       {
@@ -98,9 +106,15 @@ function proposal(): StoredProposal {
     ],
     trusted: {
       appConfigHash: 'app-config-hash',
-      styleContract: {
-        id: 'dashboard',
-        hash: 'style-contract-hash',
+      styleContracts: {
+        light: {
+          id: 'daylight',
+          hash: 'light-style-contract-hash',
+        },
+        dark: {
+          id: 'dashboard',
+          hash: 'style-contract-hash',
+        },
       },
       selectedLayoutContract: {
         id: 'sidebar-shell',
@@ -108,7 +122,7 @@ function proposal(): StoredProposal {
       },
       originalUserIntent: 'Build the Canvas.',
       constraints: {
-        styleId: 'dashboard',
+        styleIds: { light: 'daylight', dark: 'dashboard' },
         layout: {
           kind: 'installed',
           id: 'sidebar-shell',
@@ -121,7 +135,7 @@ function proposal(): StoredProposal {
       proposalId: 'proposal-1',
       mode: 'update',
       summary: ['Update the Canvas'],
-      styleId: 'dashboard',
+      styleIds: { light: 'daylight', dark: 'dashboard' },
       layout: {
         kind: 'installed',
         id: 'sidebar-shell',

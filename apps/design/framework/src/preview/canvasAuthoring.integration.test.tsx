@@ -114,7 +114,7 @@ function proposalArgs(
     proposalId,
     mode: 'update',
     summary: ['Build the text-only Canvas proposal.'],
-    styleId: 'dashboard',
+    styleIds: { light: 'default', dark: 'dashboard' },
     layout: {
       kind: 'installed',
       id: 'centered',
@@ -223,7 +223,7 @@ class FakeCanvasApi {
         JSON.stringify({
           id: 'design',
           name: 'Design',
-          style: 'dashboard',
+          style: { light: 'default', dark: 'dashboard' },
           layouts: [...this.disk.layouts],
         }),
         {

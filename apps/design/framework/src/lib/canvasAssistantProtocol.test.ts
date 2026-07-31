@@ -87,7 +87,7 @@ describe('Canvas Assistant protocol', () => {
       proposalId: 'proposal-1',
       mode: 'update',
       summary: ['Add account menu'],
-      styleId: 'dashboard',
+      styleIds: { light: 'daylight', dark: 'dashboard' },
       layout: { kind: 'installed', id: 'sidebar-shell', reason: 'Fits' },
       changedFiles: ['canvases/Home.tsx'],
       reusedComponents: [],
@@ -109,6 +109,31 @@ describe('Canvas Assistant protocol', () => {
       },
     ])
     expect(parsed).not.toHaveProperty('files')
+    expect(parsed.styleIds).toEqual({ light: 'daylight', dark: 'dashboard' })
+  })
+
+  it('rejects proposal card args without a configured Style slot', () => {
+    expect(() =>
+      CanvasProposalCardArgsSchema.parse({
+        proposalId: 'proposal-1',
+        mode: 'update',
+        summary: ['Add account menu'],
+        styleIds: {},
+        layout: { kind: 'installed', id: 'sidebar-shell', reason: 'Fits' },
+        changedFiles: ['canvases/Home.tsx'],
+        reusedComponents: [],
+        newSharedComponents: [],
+        preserved: ['Existing navigation'],
+        validationChecks: ['Vite transform'],
+        candidateFiles: [
+          {
+            path: 'canvases/Home.tsx',
+            source: 'export default function Home() { return null }',
+          },
+        ],
+        expiresAt: '2026-07-24T12:30:00.000Z',
+      }),
+    ).toThrow()
   })
 
   it('requires AI config for repair during apply', () => {

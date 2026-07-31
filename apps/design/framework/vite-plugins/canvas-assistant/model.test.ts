@@ -12,7 +12,7 @@ function context(): CanvasAuthoringContext {
     app: {
       id: 'design',
       name: 'Design',
-      style: 'dashboard',
+      style: { light: 'daylight', dark: 'dashboard' },
       layouts: ['sidebar-shell'],
     },
     appConfigHash: 'app-config-hash',
@@ -21,11 +21,19 @@ function context(): CanvasAuthoringContext {
       name: 'Home',
       component: 'Home.tsx',
     },
-    style: {
-      id: 'dashboard',
-      relativePath: 'dashboard/DESIGN.md',
-      source: '# Dashboard',
-      hash: 'style-contract-hash',
+    styles: {
+      light: {
+        id: 'daylight',
+        relativePath: 'daylight/DESIGN.md',
+        source: '# Daylight',
+        hash: 'light-style-contract-hash',
+      },
+      dark: {
+        id: 'dashboard',
+        relativePath: 'dashboard/DESIGN.md',
+        source: '# Dashboard',
+        hash: 'style-contract-hash',
+      },
     },
     installedLayouts: [
       {
@@ -128,7 +136,7 @@ function proposalCard() {
     proposalId: 'proposal-1',
     mode: 'update' as const,
     summary: ['Update the current Canvas'],
-    styleId: 'dashboard',
+    styleIds: { light: 'daylight', dark: 'dashboard' },
     layout: {
       kind: 'installed' as const,
       id: 'sidebar-shell',

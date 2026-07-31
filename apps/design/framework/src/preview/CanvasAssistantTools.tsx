@@ -11,6 +11,8 @@ import {
   type LayoutRecommendationArgs,
 } from '@/lib/canvasAssistantProtocol'
 import { applyCanvasProposal } from '@/lib/canvasAssistantApi'
+import { displayStyleForTheme } from '@/lib/styleSlots'
+import { getTheme, subscribeTheme, type ThemeMode } from '@/lib/theme'
 
 type ApplyStatus = Extract<CanvasApplyEvent, { type: 'status' }>
 
@@ -200,12 +202,16 @@ function CanvasProposalCard({
   const [outcome, setOutcome] = useState<'applied' | 'failed' | null>(null)
   const [localError, setLocalError] = useState<string | null>(null)
   const [focusRequest, setFocusRequest] = useState(0)
+  const [theme, setThemeState] = useState<ThemeMode>(() => getTheme())
   const settledRef = useRef(result !== undefined)
   const pendingRef = useRef(false)
   const statusRef = useRef<HTMLSpanElement>(null)
   const settled = settledRef.current || result !== undefined
   const layoutLabel =
     args.layout.kind === 'installed' ? args.layout.id : 'AI temporary Layout'
+  const styleLabel = displayStyleForTheme(args.styleIds, theme) ?? 'not set'
+
+  useEffect(() => subscribeTheme(setThemeState), [])
   const repairedStatus =
     outcome === 'applied'
       ? statuses.filter((status) => status.phase === 'repairing').at(-1)
@@ -329,8 +335,8 @@ function CanvasProposalCard({
 
       <dl className="canvas-assistant-card__facts">
         <div>
-          <dt>Style</dt>
-          <dd>{args.styleId}</dd>
+          <dt>{`Style (${theme})`}</dt>
+          <dd>{styleLabel}</dd>
         </div>
         <div>
           <dt>Layout</dt>

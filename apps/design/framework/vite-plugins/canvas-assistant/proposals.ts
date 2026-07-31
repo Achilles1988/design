@@ -6,8 +6,11 @@ import {
   RawCanvasProposalSchema,
   type CanvasProposalCardArgs,
   type RawCanvasProposal,
+  type StyleSlotIds,
 } from '../../src/lib/canvasAssistantProtocol'
+import type { StyleSlot } from '../../src/lib/styleSlots'
 import {
+  STYLE_SLOTS,
   validateCandidatePath,
   type CandidateOperation,
   type CanvasAuthoringContext,
@@ -24,19 +27,20 @@ const INTENT_CREDENTIAL_PATTERN = new RegExp(
   'gi',
 )
 
+export type StyleContractFingerprints = Partial<
+  Record<StyleSlot, { id: string; hash: string }>
+>
+
 export type TrustedProposalContext = {
   appConfigHash: string
-  styleContract: {
-    id: string
-    hash: string
-  }
+  styleContracts: StyleContractFingerprints
   selectedLayoutContract: {
     id: string
     hash: string
   } | null
   originalUserIntent: string
   constraints: {
-    styleId: string
+    styleIds: StyleSlotIds
     layout: RawCanvasProposal['layout']
     preserved: string[]
   }
@@ -86,6 +90,28 @@ function exactlyMatches(
     actualPaths.size === expectedPaths.size &&
     [...actualPaths].every((path) => expectedPaths.has(path))
   )
+}
+
+function styleSlotIds(context: CanvasAuthoringContext): StyleSlotIds {
+  const ids: StyleSlotIds = {}
+  for (const slot of STYLE_SLOTS) {
+    const contract = context.styles[slot]
+    if (contract) ids[slot] = contract.id
+  }
+  return ids
+}
+
+function styleContractFingerprints(
+  context: CanvasAuthoringContext,
+): StyleContractFingerprints {
+  const fingerprints: StyleContractFingerprints = {}
+  for (const slot of STYLE_SLOTS) {
+    const contract = context.styles[slot]
+    if (contract) {
+      fingerprints[slot] = { id: contract.id, hash: contract.hash }
+    }
+  }
+  return fingerprints
 }
 
 function candidateOperation(
@@ -525,7 +551,7 @@ export function createProposalStore({
       proposalId: id,
       mode: raw.mode,
       summary: raw.summary,
-      styleId: context.style.id,
+      styleIds: styleSlotIds(context),
       layout: raw.layout,
       changedFiles: candidatePaths,
       reusedComponents: raw.reusedComponents,
@@ -584,10 +610,7 @@ export function createProposalStore({
       candidateFiles: raw.files.map((file) => ({ ...file })),
       trusted: {
         appConfigHash: context.appConfigHash,
-        styleContract: {
-          id: context.style.id,
-          hash: context.style.hash,
-        },
+        styleContracts: styleContractFingerprints(context),
         selectedLayoutContract: selectedLayoutContract
           ? {
               id: selectedLayoutContract.id,
@@ -597,7 +620,7 @@ export function createProposalStore({
         originalUserIntent:
           sanitizeOriginalUserIntent(originalUserIntent),
         constraints: {
-          styleId: context.style.id,
+          styleIds: styleSlotIds(context),
           layout: { ...raw.layout },
           preserved: [...raw.preserved],
         },

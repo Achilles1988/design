@@ -7,11 +7,15 @@ import {
   parseIndexMarkdown,
   type AssetMeta,
 } from '../../src/lib/ai/assetIndex'
+import type { StyleSlot } from '../../src/lib/styleSlots'
 import type { AppConfig, CanvasEntry } from '../../src/lib/types'
 import {
   createContentStore,
   normalizeAppConfig,
 } from '../design-fs/store'
+
+/** Style slots in the order every consumer must present them. */
+export const STYLE_SLOTS: readonly StyleSlot[] = ['light', 'dark']
 
 const USER_COMPONENT_EXTENSIONS = new Set(['.ts', '.tsx', '.css'])
 const NEW_COMPONENT_EXTENSIONS = new Set(['.tsx', '.css'])
@@ -32,11 +36,16 @@ export type AuthoringContract = {
   hash: string
 }
 
+/** Loaded Style contract per configured slot; at least one slot is present. */
+export type CanvasStyleContracts = Partial<
+  Record<StyleSlot, AuthoringContract>
+>
+
 export type CanvasAuthoringContext = {
   app: AppConfig
   appConfigHash: string
   canvas: CanvasEntry
-  style: AuthoringContract
+  styles: CanvasStyleContracts
   installedLayouts: AuthoringContract[]
   layoutIndex: AssetMeta[]
   files: AuthoringFile[]
@@ -432,13 +441,23 @@ export function createCanvasContextLoader(
       throw new Error('Canvas source could not be loaded.')
     }
 
-    const style = await loadContract(
-      stylesRoot,
-      app.style,
-      ['DESIGN.md', 'design.md'],
-    )
-    if (!style) {
-      throw new Error('The configured Style contract could not be loaded.')
+    const styles: CanvasStyleContracts = {}
+    for (const slot of STYLE_SLOTS) {
+      const styleId = app.style[slot]
+      if (!styleId) continue
+      const contract = await loadContract(stylesRoot, styleId, [
+        'DESIGN.md',
+        'design.md',
+      ])
+      if (!contract) {
+        throw new Error(
+          `The configured ${slot} Style contract could not be loaded.`,
+        )
+      }
+      styles[slot] = contract
+    }
+    if (!styles.light && !styles.dark) {
+      throw new Error('No Style is configured for this App.')
     }
 
     const installedLayouts = (
@@ -462,7 +481,7 @@ export function createCanvasContextLoader(
       app,
       appConfigHash: sha256(appConfigSource),
       canvas,
-      style,
+      styles,
       installedLayouts,
       layoutIndex,
       files,

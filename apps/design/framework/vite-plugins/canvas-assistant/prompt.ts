@@ -1,4 +1,4 @@
-import type { CanvasAuthoringContext } from './context'
+import { STYLE_SLOTS, type CanvasAuthoringContext } from './context'
 
 export const FIXED_CANVAS_RULES = `You are the UI authoring assistant for the current Canvas. Create or update previewable UI according to the user's request.
 
@@ -19,6 +19,8 @@ export const FIXED_CANVAS_RULES = `You are the UI authoring assistant for the cu
 - Follow its colors, typography, spacing, components, motion, and anti-patterns.
 - The user's request determines product intent; Style determines visual language.
 - Never invent or ignore Style rules.
+- The App configures a Style per theme; every provided Style section is mandatory for its theme.
+- When two Style sections are provided, the UI must satisfy both without duplicating page structure.
 
 ### Layout
 
@@ -86,17 +88,22 @@ function formatAppAndCanvas(context: CanvasAuthoringContext): string {
   )
 }
 
-function formatStyle(
-  style: CanvasAuthoringContext['style'],
-): string {
-  return fencedContent(
-    'Mandatory Style',
-    [
-      `Style ID: ${style.id}`,
-      `Contract path: ${style.relativePath}`,
-      style.source,
-    ].join('\n'),
-  )
+function formatStyles(
+  styles: CanvasAuthoringContext['styles'],
+): string[] {
+  return STYLE_SLOTS.flatMap((slot) => {
+    const style = styles[slot]
+    if (!style) return []
+    return fencedContent(
+      `Mandatory Style (${slot})`,
+      [
+        `Theme: ${slot}`,
+        `Style ID: ${style.id}`,
+        `Contract path: ${style.relativePath}`,
+        style.source,
+      ].join('\n'),
+    )
+  })
 }
 
 function formatInstalledLayouts(
@@ -186,7 +193,7 @@ export function buildCanvasSystemPrompt(
   return [
     FIXED_CANVAS_RULES,
     formatAppAndCanvas(context),
-    formatStyle(context.style),
+    ...formatStyles(context.styles),
     formatInstalledLayouts(context.installedLayouts),
     formatLayoutIndex(context.layoutIndex.slice(0, 40)),
     formatSharedComponents(readOnlyComponents(context.files)),

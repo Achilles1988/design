@@ -67,7 +67,7 @@ function card(): StoredProposal['card'] {
     proposalId: 'proposal-1',
     mode: 'update',
     summary: ['Update the current Canvas'],
-    styleId: 'dashboard',
+    styleIds: { light: 'daylight', dark: 'dashboard' },
     layout: {
       kind: 'installed',
       id: 'sidebar-shell',
@@ -174,7 +174,7 @@ describe('applyProposalTransaction', () => {
       app: {
         id: 'design',
         name: 'Design',
-        style: 'dashboard',
+        style: { light: 'daylight', dark: 'dashboard' },
         layouts: ['sidebar-shell'],
       },
       appConfigHash: 'app-config-hash',
@@ -183,11 +183,19 @@ describe('applyProposalTransaction', () => {
         name: 'Home',
         component: 'Home.tsx',
       },
-      style: {
-        id: 'dashboard',
-        relativePath: 'dashboard/DESIGN.md',
-        source: '# Dashboard',
-        hash: 'style-contract-hash',
+      styles: {
+        light: {
+          id: 'daylight',
+          relativePath: 'daylight/DESIGN.md',
+          source: '# Daylight',
+          hash: 'light-style-contract-hash',
+        },
+        dark: {
+          id: 'dashboard',
+          relativePath: 'dashboard/DESIGN.md',
+          source: '# Dashboard',
+          hash: 'style-contract-hash',
+        },
       },
       installedLayouts: [
         {
@@ -247,9 +255,15 @@ describe('applyProposalTransaction', () => {
       ],
       trusted: {
         appConfigHash: 'app-config-hash',
-        styleContract: {
-          id: 'dashboard',
-          hash: 'style-contract-hash',
+        styleContracts: {
+          light: {
+            id: 'daylight',
+            hash: 'light-style-contract-hash',
+          },
+          dark: {
+            id: 'dashboard',
+            hash: 'style-contract-hash',
+          },
         },
         selectedLayoutContract: {
           id: 'sidebar-shell',
@@ -257,7 +271,7 @@ describe('applyProposalTransaction', () => {
         },
         originalUserIntent: 'Update the current Canvas.',
         constraints: {
-          styleId: 'dashboard',
+          styleIds: { light: 'daylight', dark: 'dashboard' },
           layout: {
             kind: 'installed',
             id: 'sidebar-shell',
@@ -427,14 +441,38 @@ describe('applyProposalTransaction', () => {
       }),
     },
     {
-      name: 'Style contract',
+      name: 'dark Style contract',
       change: (current: CanvasAuthoringContext) => ({
         ...current,
-        style: {
-          ...current.style,
-          source: '# Changed Dashboard',
-          hash: 'changed-style-contract-hash',
+        styles: {
+          ...current.styles,
+          dark: {
+            ...current.styles.dark!,
+            source: '# Changed Dashboard',
+            hash: 'changed-style-contract-hash',
+          },
         },
+      }),
+    },
+    {
+      name: 'light Style contract',
+      change: (current: CanvasAuthoringContext) => ({
+        ...current,
+        styles: {
+          ...current.styles,
+          light: {
+            ...current.styles.light!,
+            source: '# Changed Daylight',
+            hash: 'changed-light-style-contract-hash',
+          },
+        },
+      }),
+    },
+    {
+      name: 'cleared light Style slot',
+      change: (current: CanvasAuthoringContext) => ({
+        ...current,
+        styles: { dark: current.styles.dark },
       }),
     },
     {
@@ -923,9 +961,15 @@ describe('applyProposalTransaction', () => {
     expect(repairRequest.attempt).toBe(1)
     expect(repairRequest).toMatchObject({
       originalUserIntent: 'Update the current Canvas.',
-      styleContract: {
-        id: 'dashboard',
-        source: '# Dashboard',
+      styleContracts: {
+        light: {
+          id: 'daylight',
+          source: '# Daylight',
+        },
+        dark: {
+          id: 'dashboard',
+          source: '# Dashboard',
+        },
       },
       layoutDecision: {
         kind: 'installed',
@@ -967,9 +1011,12 @@ describe('applyProposalTransaction', () => {
         ? current
         : {
             ...current,
-            style: {
-              ...current.style,
-              source: '# Reloaded Dashboard',
+            styles: {
+              ...current.styles,
+              dark: {
+                ...current.styles.dark!,
+                source: '# Reloaded Dashboard',
+              },
             },
           }
     }
@@ -990,7 +1037,7 @@ describe('applyProposalTransaction', () => {
     )
 
     expect(result).toMatchObject({ ok: true, repairAttempts: 1 })
-    expect(repair.mock.calls[0]?.[0].styleContract.source).toBe(
+    expect(repair.mock.calls[0]?.[0].styleContracts.dark?.source).toBe(
       '# Reloaded Dashboard',
     )
   })
@@ -1049,10 +1096,13 @@ describe('applyProposalTransaction', () => {
       return styleChanged
         ? {
             ...current,
-            style: {
-              ...current.style,
-              source: '# Changed during repair',
-              hash: 'changed-style-contract-hash',
+            styles: {
+              ...current.styles,
+              dark: {
+                ...current.styles.dark!,
+                source: '# Changed during repair',
+                hash: 'changed-style-contract-hash',
+              },
             },
           }
         : current
@@ -1918,9 +1968,15 @@ describe('createCanvasRepair', () => {
   ]
   const trustedRepairContext = {
     originalUserIntent: 'Build an account analytics Canvas.',
-    styleContract: {
-      id: 'dashboard',
-      source: '# Dashboard Style\nUse compact metric cards.',
+    styleContracts: {
+      light: {
+        id: 'daylight',
+        source: '# Daylight Style\nUse airy surfaces.',
+      },
+      dark: {
+        id: 'dashboard',
+        source: '# Dashboard Style\nUse compact metric cards.',
+      },
     },
     layoutDecision: {
       kind: 'installed' as const,
@@ -1963,6 +2019,7 @@ describe('createCanvasRepair', () => {
     ).toBe(false)
     const prompt = String(options.prompt)
     expect(prompt).toContain('Build an account analytics Canvas.')
+    expect(prompt).toContain('# Daylight Style')
     expect(prompt).toContain('# Dashboard Style')
     expect(prompt).toContain('# Sidebar Shell')
     expect(prompt).toContain('Existing navigation')
