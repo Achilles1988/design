@@ -93,6 +93,13 @@ See also: [Design project marker and contract resolution](design-project.md).
 | `style` | object | `{ light?: string; dark?: string }` — design-rule ids under stock `stylesRoot`, one per theme slot; both optional (default: `{}`); the legacy single-string shape is rejected |
 | `layouts` | string[] | Layout package ids under stock `layoutsRoot` (default: `["sidebar-shell"]`) |
 
+> **Legacy `style: string`**: an `app.json` with the retired single-string
+> `style` shape fails to parse (`normalizeStyleSlots` throws). `getApp`/`readAppFile`
+> surfaces that as an error for the one app; `listApps` silently skips that app
+> directory instead of failing the whole list. Fix by rewriting the app's
+> `style` field from a string id to `{ "light": "<id>" }` or
+> `{ "dark": "<id>" }` (or both) in `app.json`.
+
 ### `canvases.json`
 
 ```json
