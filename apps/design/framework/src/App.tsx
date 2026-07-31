@@ -9,6 +9,7 @@ import {
 import { SettingsPage } from './features/settings/SettingsPage'
 import { CanvasPreview } from './preview/CanvasPreview'
 import { SidebarShell } from './shell/SidebarShell'
+import { ChooseStyleSlotHost } from './ui/ChooseStyleSlotHost'
 import { ConfirmTipHost } from './ui/ConfirmTipHost'
 
 export function App() {
@@ -30,6 +31,7 @@ export function App() {
         </Routes>
       </SidebarShell>
       <ConfirmTipHost />
+      <ChooseStyleSlotHost />
     </BrowserRouter>
   )
 }

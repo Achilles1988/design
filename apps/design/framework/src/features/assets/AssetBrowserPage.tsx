@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { designApi } from '@/lib/api'
-import { LAYOUT_INSTALL_TIP, STYLE_REPLACE_TIP } from '@/lib/assetNotices'
+import { DesignFsError, designApi } from '@/lib/api'
+import { LAYOUT_INSTALL_TIP, STYLE_INSTALL_TIP } from '@/lib/assetNotices'
+import { chooseStyleSlot } from '@/lib/chooseStyleSlot'
 import { confirmTip } from '@/lib/confirmTip'
 import {
   applyThemeToFrame,
@@ -9,7 +10,13 @@ import {
   subscribeTheme,
   type ThemeMode,
 } from '@/lib/theme'
-import type { AppConfig, AssetEntry, AssetKind } from '@/lib/types'
+import type {
+  AppConfig,
+  AssetEntry,
+  AssetKind,
+  StyleApplySlot,
+  StyleSlot,
+} from '@/lib/types'
 import { applyFilter, emptyFilter } from '@/lib/ai/filterState'
 import { fetchAssetIndex, type AssetMeta } from '@/lib/ai/assetIndex'
 import { buildSystemPrompt } from '@/lib/ai/promptBuild'
@@ -23,7 +30,7 @@ type AssetBrowserPageProps = {
   kind: AssetKind
   title: string
   lead: string
-  /** Primary apply action label (Install layout / Replace style). */
+  /** Primary apply action label (Install layout / Install style). */
   applyLabel: string
 }
 
@@ -129,6 +136,9 @@ export function AssetBrowserPage({
   const titleId = useId()
   const [searchParams] = useSearchParams()
   const contextAppId = searchParams.get('appId')?.trim() || null
+  const rawSlot = searchParams.get('slot')
+  const urlSlot: StyleSlot | undefined =
+    rawSlot === 'light' || rawSlot === 'dark' ? rawSlot : undefined
 
   const [items, setItems] = useState<AssetEntry[] | null>(null)
   const [apps, setApps] = useState<AppConfig[] | null>(null)
@@ -328,9 +338,8 @@ export function AssetBrowserPage({
 
   async function runApply(entry: AssetEntry, appId: string) {
     const ok = await confirmTip({
-      message: kind === 'designmd' ? STYLE_REPLACE_TIP : LAYOUT_INSTALL_TIP,
-      confirmLabel: kind === 'designmd' ? 'Replace' : 'Install',
-      danger: kind === 'designmd',
+      message: kind === 'designmd' ? STYLE_INSTALL_TIP : LAYOUT_INSTALL_TIP,
+      confirmLabel: 'Install',
     })
     if (!ok) return
     if (busyLock.current) return
@@ -339,13 +348,35 @@ export function AssetBrowserPage({
     setBusyKind('apply')
     setError(null)
     setNotice(null)
+
+    let slot: StyleApplySlot | undefined = kind === 'designmd' ? urlSlot : undefined
     try {
-      const app = await designApi.applyAsset(kind, entry.id, appId)
-      const verb = kind === 'designmd' ? 'Replaced style on' : 'Installed layout on'
-      setNotice(`${verb} “${app.name}” (${app.id}).`)
-      setPickerFor(null)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Apply failed')
+      for (;;) {
+        try {
+          const app = await designApi.applyAsset(kind, entry.id, appId, slot)
+          if (kind === 'designmd') {
+            const light = app.style.light === entry.id
+            const dark = app.style.dark === entry.id
+            const slotLabel = light && dark ? 'both' : light ? 'light' : dark ? 'dark' : null
+            setNotice(
+              `Installed style on “${app.name}” (${app.id})${slotLabel ? ` — ${slotLabel}` : ''}.`,
+            )
+          } else {
+            setNotice(`Installed layout on “${app.name}” (${app.id}).`)
+          }
+          setPickerFor(null)
+          return
+        } catch (err: unknown) {
+          if (kind === 'designmd' && err instanceof DesignFsError && err.needsSlot) {
+            const chosen = await chooseStyleSlot(err.options ?? ['light', 'dark', 'both'])
+            if (chosen === null) return
+            slot = chosen
+            continue
+          }
+          setError(err instanceof Error ? err.message : 'Apply failed')
+          return
+        }
+      }
     } finally {
       busyLock.current = false
       setBusyId(null)
@@ -626,8 +657,8 @@ export function AssetsRulePage() {
     <AssetBrowserPage
       kind="designmd"
       title="Rule"
-      lead="Pick a design-rule package, copy its id, or replace the style id on a target App. "
-      applyLabel="Replace style"
+      lead="Pick a design-rule package, copy its id, or install it onto a target App’s light or dark style slot. "
+      applyLabel="Install style"
     />
   )
 }
