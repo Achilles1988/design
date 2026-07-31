@@ -239,7 +239,7 @@ Run: `cd apps/design && npm run test -- framework/src/lib/styleSlots.test.ts fra
   - Apply path may throw `NeedsStyleSlotError` with `options: StyleApplySlot[]`
 - Consumes: `store.setAppStyle`, `assets.assertPackageDir`, read `DESIGN.md`/`design.md` from package dir
 
-- [ ] **Step 1: Write failing polarity tests**
+- [x] **Step 1: Write failing polarity tests**
 
 ```ts
 it('detects light-only, dark-only, both tags, and neither as both', () => {
@@ -261,9 +261,9 @@ it('slotSupported matches polarity', () => {
 
 Parser rules: first YAML frontmatter block only; collect sequence items under `tags:`; match exact lowercase `light` / `dark` (ignore `dark-accent`). No new YAML dependency — line-oriented scan is enough.
 
-- [ ] **Step 2: Implement `stylePolarity.ts` — tests PASS**
+- [x] **Step 2: Implement `stylePolarity.ts` — tests PASS**
 
-- [ ] **Step 3: Write failing plugin/store apply tests**
+- [x] **Step 3: Write failing plugin/store apply tests**
 
 Cover:
 
@@ -276,7 +276,7 @@ Cover:
 
 Use existing plugin test harness patterns in `plugin.test.ts`.
 
-- [ ] **Step 4: Implement apply + DELETE in `plugin.ts`**
+- [x] **Step 4: Implement apply + DELETE in `plugin.ts`**
 
 ```ts
 // POST apply designmd excerpt
@@ -336,9 +336,9 @@ DELETE handler mirror layouts:
 
 `DELETE /__design_fs/apps/:id/style/:slot` → `store.removeAppStyle`.
 
-- [ ] **Step 5: Document endpoints in `design-fs.md`**
+- [x] **Step 5: Document endpoints in `design-fs.md`**
 
-- [ ] **Step 6: Run plugin + polarity tests — expect PASS**
+- [x] **Step 6: Run plugin + polarity tests — expect PASS**
 
 Run: `cd apps/design && npm run test -- framework/vite-plugins/design-fs/`
 

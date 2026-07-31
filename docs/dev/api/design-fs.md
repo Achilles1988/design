@@ -157,6 +157,7 @@ mutations remain same-origin and are accepted.
 | `POST` | `/apps` | `{ "id", "name", "path"? }` | `AppConfig` |
 | `DELETE` | `/apps/:id` | — | `{ "ok": true }` |
 | `DELETE` | `/apps/:id/layouts/:layoutId` | — | Updated `AppConfig` (removes id from `layouts` in `app.json` only; does not delete stock packages; refuses when it would leave the list empty) |
+| `DELETE` | `/apps/:id/style/:slot` | — | Updated `AppConfig` (`slot`: `light` \| `dark`; clears that slot in `app.json`; `400` if `slot` is not `light`/`dark`) |
 
 ### Canvases
 
@@ -173,7 +174,7 @@ mutations remain same-origin and are accepted.
 |--------|------|------|---------|
 | `GET` | `/assets/:kind` | — | `AssetEntry[]` (`kind`: `designmd` \| `layoutmd`) |
 | `GET` | `/assets/:kind/:id/download` | — | ZIP bytes (`application/zip`) |
-| `POST` | `/assets/:kind/:id/apply` | `{ "appId" }` | Updated `AppConfig` |
+| `POST` | `/assets/:kind/:id/apply` | `{ "appId", "slot"? }` | Updated `AppConfig`, or `409` `needsSlot` for `designmd` |
 
 `POST …/apply` validates that the stock package exists under `assetsRoot`, then
 updates the target App’s `app.json` only (no disk copy). The target App is
@@ -181,8 +182,29 @@ validated (`GET`-equivalent) before writing:
 
 | `kind` | Disk mutation | `app.json` update |
 |--------|---------------|-------------------|
-| `designmd` | none (stock read-only) | replaces `style` with `<id>` |
+| `designmd` | none (stock read-only) | sets `style.<slot>` per polarity/`slot` (see below) |
 | `layoutmd` | none (stock read-only) | appends `<id>` to `layouts` if missing |
+
+#### `designmd` apply: polarity and slot
+
+Every stock style package declares its **polarity** via the `tags:` sequence
+in the first YAML frontmatter block of its `DESIGN.md` (or `design.md`): an
+exact `light` or `dark` tag restricts the style to that theme; having both
+tags (or neither) means the style supports both themes (`both`). Tags are
+matched case-sensitively lowercase and exactly — e.g. `dark-accent` does not
+count as `dark`.
+
+Request body: `{ "appId": string, "slot"?: "light" | "dark" | "both" }`.
+
+| `slot` in body | Style polarity | Result |
+|----------------|-----------------|--------|
+| omitted | `light` or `dark` | writes that single slot automatically; `200` |
+| omitted | `both` | `409` `{ "needsSlot": true, "options": ["light","dark","both"], "error": "Choose Light, Dark, or Both for this style." }` — caller must resend with `slot` |
+| `light` / `dark` | matches polarity (or polarity is `both`) | writes that one slot; `200` |
+| `light` / `dark` | does not match polarity | `400` `{ "error": "This style does not support the <slot> slot." }` |
+| `both` | polarity `both` | writes `style.light` and `style.dark` to the same id; `200` |
+| `both` | polarity `light` or `dark` | `400` (unsupported slot) |
+| anything else | — | `400` `{ "error": "slot must be light, dark, or both" }` |
 
 ## Browser client
 

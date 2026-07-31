@@ -1,7 +1,14 @@
+import fs from 'node:fs/promises'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import path from 'node:path'
 import type { Plugin } from 'vite'
 import { createAssetsStore, isAssetKind } from './assets'
 import { createContentStore } from './store'
+import {
+  NeedsStyleSlotError,
+  parseStylePolarityFromDesignMd,
+  slotSupported,
+} from './stylePolarity'
 
 const DESIGN_FS_NOT_FOUND = 'Not found'
 const DESIGN_FS_FORBIDDEN =
@@ -92,6 +99,20 @@ function sendBinary(
     res.setHeader(key, value)
   }
   res.end(body)
+}
+
+async function findDesignMdPath(pkgDir: string): Promise<string> {
+  for (const name of ['DESIGN.md', 'design.md']) {
+    const candidate = path.join(pkgDir, name)
+    try {
+      await fs.access(candidate)
+      return candidate
+    } catch {
+      // try next candidate
+    }
+  }
+  // assertPackageDir already guarantees one of these exists for designmd.
+  throw new Error(`Style contract missing: ${pkgDir}`)
 }
 
 async function parseJsonBody(req: IncomingMessage): Promise<unknown> {
@@ -202,20 +223,65 @@ export function designFsPlugin(options: {
                 sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
                 return
               }
-              const body = (await parseJsonBody(req)) as { appId?: string }
+              const body = (await parseJsonBody(req)) as {
+                appId?: string
+                slot?: string
+              }
               if (typeof body.appId !== 'string' || !body.appId.trim()) {
                 sendJson(res, 400, { error: 'appId is required' })
                 return
               }
               const appId = body.appId.trim()
               // Validate stock package + target App before writing app.json.
-              await assets.assertPackageDir(kind, id)
+              const pkgDir = await assets.assertPackageDir(kind, id)
               await store.getApp(appId)
-              const app =
-                kind === 'designmd'
-                  ? await store.setAppStyle(appId, id)
-                  : await store.addAppLayout(appId, id)
-              sendJson(res, 200, app)
+
+              if (kind === 'layoutmd') {
+                sendJson(res, 200, await store.addAppLayout(appId, id))
+                return
+              }
+
+              const mdPath = await findDesignMdPath(pkgDir)
+              const source = await fs.readFile(mdPath, 'utf8')
+              const polarity = parseStylePolarityFromDesignMd(source)
+
+              const rawSlot = body.slot
+              if (
+                rawSlot !== undefined &&
+                rawSlot !== 'light' &&
+                rawSlot !== 'dark' &&
+                rawSlot !== 'both'
+              ) {
+                sendJson(res, 400, {
+                  error: 'slot must be light, dark, or both',
+                })
+                return
+              }
+
+              if (rawSlot === undefined) {
+                if (polarity === 'both') {
+                  throw new NeedsStyleSlotError(['light', 'dark', 'both'])
+                }
+                sendJson(
+                  res,
+                  200,
+                  await store.setAppStyle(appId, { [polarity]: id }),
+                )
+                return
+              }
+
+              if (!slotSupported(polarity, rawSlot)) {
+                sendJson(res, 400, {
+                  error: `This style does not support the ${rawSlot} slot.`,
+                })
+                return
+              }
+
+              const patch: { light?: string; dark?: string } =
+                rawSlot === 'both'
+                  ? { light: id, dark: id }
+                  : { [rawSlot]: id }
+              sendJson(res, 200, await store.setAppStyle(appId, patch))
               return
             }
 
@@ -292,6 +358,21 @@ export function designFsPlugin(options: {
             return
           }
 
+          // DELETE /__design_fs/apps/:id/style/:slot
+          if (
+            parts.length === 5 &&
+            parts[3] === 'style' &&
+            method === 'DELETE'
+          ) {
+            const slot = decodeURIComponent(parts[4] ?? '')
+            if (slot !== 'light' && slot !== 'dark') {
+              sendJson(res, 400, { error: 'slot must be light or dark' })
+              return
+            }
+            sendJson(res, 200, await store.removeAppStyle(appId, slot))
+            return
+          }
+
           // /__design_fs/apps/:id/canvases[...]
           if (parts[3] !== 'canvases') {
             sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
@@ -355,6 +436,14 @@ export function designFsPlugin(options: {
 
           sendJson(res, 404, { error: DESIGN_FS_NOT_FOUND })
         } catch (err) {
+          if (err instanceof NeedsStyleSlotError) {
+            sendJson(res, 409, {
+              error: err.message,
+              needsSlot: true,
+              options: err.options,
+            })
+            return
+          }
           const status = statusForError(err)
           const message = sanitizeErrorMessage(err)
           sendJson(res, status, { error: message })

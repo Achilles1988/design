@@ -54,6 +54,7 @@ const servers: Array<ReturnType<typeof createServer>> = []
 async function startHarness(): Promise<{
   baseUrl: string
   contentRoot: string
+  assetsRoot: string
 }> {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'design-fs-origin-'))
   temporaryRoots.push(root)
@@ -94,7 +95,23 @@ async function startHarness(): Promise<{
   return {
     baseUrl: `http://127.0.0.1:${address.port}`,
     contentRoot,
+    assetsRoot,
   }
+}
+
+async function createStylePackage(
+  assetsRoot: string,
+  id: string,
+  tags: string[],
+): Promise<void> {
+  const dir = path.join(assetsRoot, 'designmd', id)
+  await fs.mkdir(dir, { recursive: true })
+  const tagLines = tags.map((tag) => `- ${tag}`).join('\n')
+  await fs.writeFile(
+    path.join(dir, 'DESIGN.md'),
+    `---\ntags:\n${tagLines}\n---\n# ${id}\n`,
+    'utf8',
+  )
 }
 
 function request(
@@ -225,5 +242,147 @@ describe('designFsPlugin mutation origin boundary', () => {
       origin: baseUrl,
     })
     expect(shellDelete.status).toBe(200)
+  })
+})
+
+describe('designFsPlugin style apply + delete', () => {
+  it('applies with no slot on a light-only style, writing style.light', async () => {
+    const { baseUrl, assetsRoot } = await startHarness()
+    await createStylePackage(assetsRoot, 'sunny', ['light'])
+    await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/apps',
+      origin: baseUrl,
+      body: { id: 'a', name: 'A' },
+    })
+
+    const res = await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/assets/designmd/sunny/apply',
+      origin: baseUrl,
+      body: { appId: 'a' },
+    })
+
+    expect(res.status).toBe(200)
+    expect(JSON.parse(res.body).style).toEqual({ light: 'sunny' })
+  })
+
+  it('returns 409 needsSlot for a both-polarity style with no slot', async () => {
+    const { baseUrl, assetsRoot } = await startHarness()
+    await createStylePackage(assetsRoot, 'dual', ['spec'])
+    await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/apps',
+      origin: baseUrl,
+      body: { id: 'a', name: 'A' },
+    })
+
+    const res = await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/assets/designmd/dual/apply',
+      origin: baseUrl,
+      body: { appId: 'a' },
+    })
+
+    expect(res.status).toBe(409)
+    const body = JSON.parse(res.body) as {
+      error: string
+      needsSlot: boolean
+      options: string[]
+    }
+    expect(body.needsSlot).toBe(true)
+    expect(body.options).toEqual(['light', 'dark', 'both'])
+    expect(typeof body.error).toBe('string')
+  })
+
+  it('applies with slot dark on a dark-polarity style, writing style.dark', async () => {
+    const { baseUrl, assetsRoot } = await startHarness()
+    await createStylePackage(assetsRoot, 'midnight', ['dark'])
+    await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/apps',
+      origin: baseUrl,
+      body: { id: 'a', name: 'A' },
+    })
+
+    const res = await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/assets/designmd/midnight/apply',
+      origin: baseUrl,
+      body: { appId: 'a', slot: 'dark' },
+    })
+
+    expect(res.status).toBe(200)
+    expect(JSON.parse(res.body).style).toEqual({ dark: 'midnight' })
+  })
+
+  it('rejects slot light on a dark-polarity style with 400', async () => {
+    const { baseUrl, assetsRoot } = await startHarness()
+    await createStylePackage(assetsRoot, 'midnight', ['dark'])
+    await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/apps',
+      origin: baseUrl,
+      body: { id: 'a', name: 'A' },
+    })
+
+    const res = await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/assets/designmd/midnight/apply',
+      origin: baseUrl,
+      body: { appId: 'a', slot: 'light' },
+    })
+
+    expect(res.status).toBe(400)
+  })
+
+  it('applies with slot both on a both-polarity style, setting both ids', async () => {
+    const { baseUrl, assetsRoot } = await startHarness()
+    await createStylePackage(assetsRoot, 'dual', ['spec'])
+    await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/apps',
+      origin: baseUrl,
+      body: { id: 'a', name: 'A' },
+    })
+
+    const res = await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/assets/designmd/dual/apply',
+      origin: baseUrl,
+      body: { appId: 'a', slot: 'both' },
+    })
+
+    expect(res.status).toBe(200)
+    expect(JSON.parse(res.body).style).toEqual({
+      light: 'dual',
+      dark: 'dual',
+    })
+  })
+
+  it('DELETE /apps/:id/style/light clears the light slot', async () => {
+    const { baseUrl, assetsRoot } = await startHarness()
+    await createStylePackage(assetsRoot, 'dual', ['spec'])
+    await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/apps',
+      origin: baseUrl,
+      body: { id: 'a', name: 'A' },
+    })
+    await request(baseUrl, {
+      method: 'POST',
+      path: '/__design_fs/assets/designmd/dual/apply',
+      origin: baseUrl,
+      body: { appId: 'a', slot: 'both' },
+    })
+
+    const res = await request(baseUrl, {
+      method: 'DELETE',
+      path: '/__design_fs/apps/a/style/light',
+      origin: baseUrl,
+    })
+
+    expect(res.status).toBe(200)
+    expect(JSON.parse(res.body).style).toEqual({ dark: 'dual' })
   })
 })
