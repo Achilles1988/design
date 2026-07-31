@@ -212,9 +212,14 @@ Request body: `{ "appId": string, "slot"?: "light" | "dark" | "both" }`.
 
 - `listApps()`, `getApp(id)`, `createApp({ id, name, path? })`, `deleteApp(id)`
 - `removeAppLayout(appId, layoutId)` (drop a layout id from `app.json` `layouts` only; does not delete stock packages)
+- `removeAppStyle(appId, slot)` (`slot`: `light` \| `dark`; clears that slot; returns updated `AppConfig`)
 - `listCanvases(appId)`, `addCanvas(appId, { id, name })`, `deleteCanvas(appId, canvasId)`, `renameCanvas(appId, canvasId, { id, name })`
 - `listAssets(kind)`, `downloadAssetUrl(kind, id)` (URL helper for ZIP download)
-- `applyAsset(kind, id, appId)` (install layout / replace style ids on the App)
+- `applyAsset(kind, id, appId, slot?)` (install layout / set style slot ids on the App; optional `slot`: `light` \| `dark` \| `both` for `designmd`)
 
-On non-2xx JSON responses the client throws `Error` with the server `error`
-message (or `statusText` if the body has no string `error`).
+Most methods throw plain `Error` on failure (or `DESIGN_FS_UNAVAILABLE` when the
+plugin is absent). `applyAsset` and `removeAppStyle` throw `DesignFsError`
+(subclass of `Error`) with `status` and, when the server sends them,
+`needsSlot` and `options` (`StyleApplySlot[]`). The `409` `needsSlot` response
+from `designmd` apply surfaces as `DesignFsError` so the UI can prompt for
+Light / Dark / Both and retry with `slot`.
