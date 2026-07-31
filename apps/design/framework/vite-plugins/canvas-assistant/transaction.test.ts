@@ -510,6 +510,61 @@ describe('applyProposalTransaction', () => {
     },
   )
 
+  it('rejects a dark Style slot added after staging (missing fingerprint, now present in context and constraints)', async () => {
+    const baseline = proposal()
+    const stagedWithoutDark = proposal({
+      trusted: {
+        ...baseline.trusted,
+        styleContracts: { light: baseline.trusted.styleContracts.light },
+        constraints: {
+          ...baseline.trusted.constraints,
+          styleIds: { light: 'daylight' },
+        },
+      },
+    })
+    const writer = vi.fn(writeAtomically)
+
+    const result = await applyProposalTransaction(
+      input({ proposal: stagedWithoutDark, writer }),
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'The Canvas changed after this proposal was created. Generate a new proposal.',
+      rolledBack: true,
+    })
+    expect(writer).not.toHaveBeenCalled()
+  })
+
+  it('rejects a dark Style constraint id drifted from its trusted fingerprint', async () => {
+    const baseline = proposal()
+    const driftedConstraint = proposal({
+      trusted: {
+        ...baseline.trusted,
+        constraints: {
+          ...baseline.trusted.constraints,
+          styleIds: { light: 'daylight', dark: 'drifted-style-id' },
+        },
+      },
+    })
+    const writer = vi.fn(writeAtomically)
+
+    const result = await applyProposalTransaction(
+      input({ proposal: driftedConstraint, writer }),
+    )
+
+    expect(result).toEqual({
+      ok: false,
+      proposalId: 'proposal-1',
+      error:
+        'The Canvas changed after this proposal was created. Generate a new proposal.',
+      rolledBack: true,
+    })
+    expect(writer).not.toHaveBeenCalled()
+  })
+
   it('rejects a create-shared path that no longer is absent', async () => {
     await fs.writeFile(selectPath, 'created by another actor')
     const writer = vi.fn(writeAtomically)

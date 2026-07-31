@@ -127,6 +127,14 @@ describe('buildCanvasSystemPrompt', () => {
     )
   })
 
+  it('explains the theme-switching mechanism when the App configures two Style slots', () => {
+    const prompt = buildCanvasSystemPrompt(context())
+
+    expect(prompt).toContain('<html data-theme="light|dark">')
+    expect(prompt).toContain('theme-aware tokens or branches')
+    expect(prompt).toContain('never implement only one polarity')
+  })
+
   it('formats only the configured slot when one slot is empty', () => {
     const prompt = buildCanvasSystemPrompt(
       context({
@@ -185,7 +193,7 @@ describe('buildCanvasSystemPrompt', () => {
       "The user's request determines product intent; Style determines visual language.",
       'Never invent or ignore Style rules.',
       'The App configures a Style per theme; every provided Style section is mandatory for its theme.',
-      'When two Style sections are provided, the UI must satisfy both without duplicating page structure.',
+      'The Shell/preview selects the active theme via <html data-theme="light|dark">; when two Style sections are provided, express both contracts through theme-aware tokens or branches in the same structure, never duplicate page structure, and never implement only one polarity.',
       'Evaluate each installed Layout first',
       'requires confirmed installation before use.',
       'Never claim an uninstalled Layout is installed.',

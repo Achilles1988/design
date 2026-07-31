@@ -452,7 +452,7 @@ Vite validation, immediately after each asynchronous repair, and immediately
 before a successful return. Every reload rechecks the App configuration, every
 configured Style contract, selected installed Layout contract, current Canvas
 identity, and all read-only file baselines. A slot added, cleared, repointed,
-or edited after staging rejects the proposal. A change rejects with the normal proposal-conflict
+or edited after staging rejects the proposal with the normal proposal-conflict
 result. Read-only baselines retain their initial absolute path, real path, and
 source and are rechecked as regular non-symlink files at every checkpoint.
 When the refreshed context still discovers one, its path and source must match

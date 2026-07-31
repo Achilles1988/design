@@ -20,7 +20,7 @@ export const FIXED_CANVAS_RULES = `You are the UI authoring assistant for the cu
 - The user's request determines product intent; Style determines visual language.
 - Never invent or ignore Style rules.
 - The App configures a Style per theme; every provided Style section is mandatory for its theme.
-- When two Style sections are provided, the UI must satisfy both without duplicating page structure.
+- The Shell/preview selects the active theme via <html data-theme="light|dark">; when two Style sections are provided, express both contracts through theme-aware tokens or branches in the same structure, never duplicate page structure, and never implement only one polarity.
 
 ### Layout
 
