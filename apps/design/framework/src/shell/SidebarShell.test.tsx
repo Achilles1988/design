@@ -11,7 +11,7 @@ vi.mock('@/lib/api', () => ({
         id: 'acme',
         name: 'Acme',
         path: 'apps/acme',
-        style: 'dashboard',
+        style: { light: 'default', dark: 'dashboard' },
         layouts: ['sidebar-shell'],
       },
     ]),

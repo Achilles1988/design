@@ -124,11 +124,15 @@ Lock down **one item at a time**:
 - Fake-data rules.
 - **Separate non-UI requirements** (verbatim at this stage) → refined again at Step 9 / 10.
 
-**Style (required):**
+**Style (required, dual slots — `light` / `dark`):**
 
-1. Read `app.json.style`. Valid iff `<stylesRoot>/<style>/DESIGN.md` or `design.md` exists.
-2. If invalid/missing: list stock ids (dirs under `<stylesRoot>` with `DESIGN.md` / `design.md`). Recommend one. After confirm, write `app.json.style`.
-3. Empty stock list → STOP (do not create contract files). Do not copy stock packages into a project-local tree.
+`app.json.style` is `{ light?: string; dark?: string }` — **never** a string. Each slot is an independent style id; an App may configure one slot or both.
+
+1. Read `app.json.style.light` and `app.json.style.dark` separately. A slot is valid iff `<stylesRoot>/<that slot's id>/DESIGN.md` or `design.md` exists.
+2. For each invalid/missing slot: list stock ids (dirs under `<stylesRoot>` with `DESIGN.md` / `design.md`), filtered by that slot's polarity when a stock package declares one via its `tags:` frontmatter (`light`/`dark`/neither-or-both = fits any slot). Recommend one per slot. After confirm, write **only that slot** — `app.json.style.light` or `app.json.style.dark` — never overwrite the other slot and never write a bare string.
+3. **Hard-stop**: at least one slot must resolve to a valid contract before implementation. If neither slot is configured/valid and the filtered stock list is empty, STOP (do not create contract files, do not implement Canvas code). Do not copy stock packages into a project-local tree.
+4. **Generate against every configured slot.** When both `light` and `dark` are configured, the Canvas must satisfy both contracts in the same structure — theme-aware tokens/branches, never two duplicated page structures, never only one polarity implemented. When only one slot is configured, implement against that slot alone.
+5. **Display follows theme, no fallback.** The Shell/preview selects the active theme via `<html data-theme="light|dark">`. Design review (Step 7) judges each configured slot against its own theme only — an unset slot is "not set" on that theme, it does not borrow the other slot's look.
 
 **Layout (preferred):**
 
@@ -162,7 +166,7 @@ Purpose: same-session anchor so execution does not drift. Not primarily cross-co
 - track: `canvas`
 - App id
 - Canvas list (add / modify / delete)
-- style id + resolved repo-relative contract path
+- style id(s) per configured slot (`light` / `dark` — at least one) + resolved repo-relative contract path(s)
 - layout id(s) + resolved contract path(s) (`AI improvise` / `n/a` when no layout file is used)
 - Page intent per Canvas (3–8 bullets)
 - Fake-data rules
@@ -174,7 +178,7 @@ Purpose: same-session anchor so execution does not drift. Not primarily cross-co
 
 1. No TBD / TODO / vague placeholders
 2. Canvas list internally consistent
-3. style file exists on disk (mandatory)
+3. style file exists on disk for every configured slot (mandatory — at least one of `light`/`dark`)
 4. layout file exists on disk — unless layout is `AI improvise` (path `n/a`; skip this check only for that case)
 5. UI vs non-UI not mixed
 6. Scope fits one delivery batch (else decompose first)
@@ -198,7 +202,7 @@ When `using-git-worktrees` creates the isolated worktree, it does **not** see th
 Before Step 5, inside the isolation flow:
 
 1. **Pack:** Move the approved pack into the worktree at the **same relative path** (`docs/dev/superpowers/specs/...-canvas-pack.md`), or copy then **delete** the origin-tree duplicate. After handoff, the origin working tree must not retain an untracked/uncommitted file at that pack path (avoids blocked merges and failed worktree cleanup).
-2. **`app.json`:** Re-apply **only** fields this skill locked during interrogation — `style`, and any **stock** layout directory ids appended to `layouts`. Do **not** wholesale-copy `app.json` (that can smuggle unrelated local edits). Prefer patching those fields in the worktree file to match the pack.
+2. **`app.json`:** Re-apply **only** fields this skill locked during interrogation — `style` (per slot: only the `light` / `dark` keys actually confirmed, never a bare string), and any **stock** layout directory ids appended to `layouts`. Do **not** wholesale-copy `app.json` (that can smuggle unrelated local edits). Prefer patching those fields in the worktree file to match the pack.
 3. From here on, **Read and implement only inside that worktree** (Step 5 pack re-read, Step 7 dev server, finish, etc.).
 
 If Step 3 already wrote the pack inside the eventual worktree (no pre-isolation copy), skip the move — keep a single pack owner.
@@ -220,7 +224,7 @@ Delegate to `agents/design-review.md`. Prerequisites:
 - Dev server from `<designRoot>` (`npm run dev`); in a worktree, run inside that worktree.
 - Restarted after any new Canvas add.
 - Preview URL (commonly `http://localhost:5173/apps/<appId>/canvases/<canvasId>` — confirm from router).
-- Pass resolved absolute-from-repo style/layout contract paths.
+- Pass resolved absolute-from-repo style contract path(s) per configured slot (`light` / `dark`) and layout contract path(s).
 
 If preview unreachable → ERROR; never skip silently. Fix until PASS before finish (detected).
 
@@ -257,6 +261,8 @@ Stable file paths only — no `localhost` URLs. UI points at delivered design ar
 | "Handoff is optional so skip asking" | Always ask once after Step 9; default no. |
 | "Invoke brainstorming for Canvas clarifying" | No — interrogation + pack only. Brainstorming is for Exit ramp. |
 | "No shell contracts, invent some" | Say there is no shell style/layout contract; do not invent files. |
+| "Write `app.json.style` as a plain string, it's simpler" | `style` is always `{ light?, dark? }`; a bare string is never valid — write the specific slot key. |
+| "Only implement the light contract, dark can inherit" | When both slots are configured, generate against both — theme-aware tokens/branches, never only one polarity. |
 
 ## Red flags — stop and fix
 
@@ -271,3 +277,5 @@ Stable file paths only — no `localhost` URLs. UI points at delivered design ar
 - Dropping or stale-pasting non-UI requirements.
 - Previewing a newly added Canvas without restarting the dev server.
 - Inventing style/layout contract files.
+- Writing `app.json.style` as a string, or overwriting the sibling slot when confirming just one.
+- Implementing only one polarity when both `light` and `dark` slots are configured.

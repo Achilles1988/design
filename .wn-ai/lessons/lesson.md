@@ -1,4 +1,5 @@
 ## Lessons
 For Shell-related UI, read the app entry where `id = "design"` in `.../apps/design/apps/design/app.json`.
 - Style is MANDATORY: strictly follow the configured `style` (design tokens, color/typography/spacing/motion rules). Do not introduce off-spec colors, fonts, or ad-hoc visuals.
+- `style` is `{ light?: string; dark?: string }` — two independent slots, never a single string. An App may configure one slot or both. Generate/implement against every configured slot (theme-aware tokens/branches, never only one polarity); display/preview follows the active theme with no cross-slot fallback for display (`<html data-theme="light|dark">`); hard-stop (no implementation) if neither slot is configured.
 - Layout is a PREFERENCE, not a hard rule: prefer picking a fit from the configured `layouts`; if none fits, it is fine to blend a new surface in naturally. Do not force UI into a layout region that does not fit.
