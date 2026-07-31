@@ -224,9 +224,11 @@ Request body: `{ "appId": string, "slot"?: "light" | "dark" | "both" }`.
 - `listAssets(kind)`, `downloadAssetUrl(kind, id)` (URL helper for ZIP download)
 - `applyAsset(kind, id, appId, slot?)` (install layout / set style slot ids on the App; optional `slot`: `light` \| `dark` \| `both` for `designmd`)
 
-Most methods throw plain `Error` on failure (or `DESIGN_FS_UNAVAILABLE` when the
-plugin is absent). `applyAsset` and `removeAppStyle` throw `DesignFsError`
-(subclass of `Error`) with `status` and, when the server sends them,
-`needsSlot` and `options` (`StyleApplySlot[]`). The `409` `needsSlot` response
-from `designmd` apply surfaces as `DesignFsError` so the UI can prompt for
-Light / Dark / Both and retry with `slot`.
+All methods share one request path and reject with `DesignFsError` (subclass
+of `Error`, so existing `catch (err) { err instanceof Error }` call sites keep
+working unchanged) carrying `status` and, when the server sends them,
+`needsSlot` and `options` (`StyleApplySlot[]`). Network failure or the plugin
+being absent (e.g. `vite preview` / production) also throws `DesignFsError`
+with message `DESIGN_FS_UNAVAILABLE`. The `409` `needsSlot` response from
+`designmd` apply surfaces the same way so the UI can prompt for Light / Dark /
+Both and retry with `slot`.

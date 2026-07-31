@@ -35,6 +35,7 @@ export class DesignFsError extends Error {
   }
 }
 
+/** Shared `/__design_fs` fetch path: always rejects with `DesignFsError`. */
 async function request<T>(input: string, init?: RequestInit): Promise<T> {
   let res: Response
   try {
@@ -46,7 +47,7 @@ async function request<T>(input: string, init?: RequestInit): Promise<T> {
       },
     })
   } catch {
-    throw new Error(DESIGN_FS_UNAVAILABLE)
+    throw new DesignFsError(DESIGN_FS_UNAVAILABLE, 0)
   }
 
   const contentType = res.headers.get('content-type') ?? ''
@@ -57,42 +58,7 @@ async function request<T>(input: string, init?: RequestInit): Promise<T> {
 
   // Plugin absent: HTML SPA fallback (often 200) or non-JSON 404.
   if (data === null) {
-    throw new Error(DESIGN_FS_UNAVAILABLE)
-  }
-
-  if (!res.ok) {
-    throw new Error(
-      typeof data.error === 'string' ? data.error : res.statusText,
-    )
-  }
-  return data as T
-}
-
-async function requestDesignFs<T>(
-  input: string,
-  init?: RequestInit,
-): Promise<T> {
-  let res: Response
-  try {
-    res = await fetch(input, {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(init?.headers ?? {}),
-      },
-    })
-  } catch {
-    throw new Error(DESIGN_FS_UNAVAILABLE)
-  }
-
-  const contentType = res.headers.get('content-type') ?? ''
-  const isJson = contentType.includes('application/json')
-  const data = isJson
-    ? ((await res.json().catch(() => null)) as DesignFsErrorBody | null)
-    : null
-
-  if (data === null) {
-    throw new Error(DESIGN_FS_UNAVAILABLE)
+    throw new DesignFsError(DESIGN_FS_UNAVAILABLE, res.status)
   }
 
   if (!res.ok) {
@@ -124,10 +90,9 @@ export const designApi = {
       { method: 'DELETE' },
     ),
   removeAppStyle: (appId: string, slot: StyleSlot) =>
-    requestDesignFs<AppConfig>(
-      `/__design_fs/apps/${appId}/style/${slot}`,
-      { method: 'DELETE' },
-    ),
+    request<AppConfig>(`/__design_fs/apps/${appId}/style/${slot}`, {
+      method: 'DELETE',
+    }),
   listCanvases: (appId: string) =>
     request<CanvasEntry[]>(`/__design_fs/apps/${appId}/canvases`),
   addCanvas: (appId: string, body: { id: string; name: string }) =>
@@ -164,7 +129,7 @@ export const designApi = {
     appId: string,
     slot?: StyleApplySlot,
   ) =>
-    requestDesignFs<AppConfig>(
+    request<AppConfig>(
       `/__design_fs/assets/${kind}/${encodeURIComponent(id)}/apply`,
       {
         method: 'POST',

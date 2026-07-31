@@ -1,5 +1,57 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { DesignFsError, designApi } from './api'
+import { DESIGN_FS_UNAVAILABLE, DesignFsError, designApi } from './api'
+
+describe('designApi request (shared path)', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('rejects with DesignFsError when the plugin is unreachable', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new TypeError('fetch failed')),
+    )
+
+    const err = designApi.listApps()
+    await expect(err).rejects.toBeInstanceOf(DesignFsError)
+    await expect(err).rejects.toMatchObject({ message: DESIGN_FS_UNAVAILABLE })
+  })
+
+  it('rejects with DesignFsError on non-JSON responses (SPA fallback)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response('<!doctype html>', {
+          status: 200,
+          headers: { 'Content-Type': 'text/html' },
+        }),
+      ),
+    )
+
+    const err = designApi.listApps()
+    await expect(err).rejects.toBeInstanceOf(DesignFsError)
+    await expect(err).rejects.toMatchObject({ message: DESIGN_FS_UNAVAILABLE })
+  })
+
+  it('rejects with a plain-Error-compatible DesignFsError on JSON error bodies', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ error: 'App not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      ),
+    )
+
+    const err = designApi.getApp('missing')
+    await expect(err).rejects.toBeInstanceOf(Error)
+    await expect(err).rejects.toMatchObject({
+      status: 404,
+      message: 'App not found',
+    })
+  })
+})
 
 describe('designApi.applyAsset', () => {
   beforeEach(() => {
