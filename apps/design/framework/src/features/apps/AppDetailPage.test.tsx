@@ -16,7 +16,7 @@ const api = vi.hoisted(() => ({
     id,
     name: id === 'acme' ? 'Acme' : 'Beta',
     path: `apps/${id}`,
-    style: 'dashboard',
+    style: { dark: 'dashboard' },
     layouts: ['sidebar-shell'],
   })),
   listCanvases: vi.fn(async () => [
@@ -35,6 +35,7 @@ const api = vi.hoisted(() => ({
   })),
   deleteCanvas: vi.fn(),
   removeAppLayout: vi.fn(),
+  removeAppStyle: vi.fn(),
   applyAsset: vi.fn(),
 }))
 
@@ -203,6 +204,50 @@ describe('AppDetailPage', () => {
     expect(api.renameCanvas).not.toHaveBeenCalled()
     expect(screen.getByLabelText('Name')).toBeTruthy()
     expect(screen.getByLabelText('ID')).toBeTruthy()
+  })
+
+  it('shows a Light row with a link to set the missing style', async () => {
+    renderPage()
+
+    await screen.findByText('Light')
+    expect(screen.getByText('—')).toBeTruthy()
+    const link = screen.getByRole('link', { name: 'Set light style' })
+    expect(link.getAttribute('href')).toBe('/assets/rule?appId=acme&slot=light')
+    expect(screen.queryByRole('button', { name: 'Clear light style' })).toBeNull()
+  })
+
+  it('shows a Dark row with the installed style, an Edit link, and a Clear button', async () => {
+    renderPage()
+
+    const code = await screen.findByText('dashboard')
+    expect(code.tagName).toBe('CODE')
+    const link = screen.getByRole('link', { name: 'Edit dark style dashboard' })
+    expect(link.getAttribute('href')).toBe('/assets/rule?appId=acme&slot=dark')
+    expect(screen.getByRole('button', { name: 'Clear dark style' })).toBeTruthy()
+  })
+
+  it('clears the dark style and refreshes from the returned App', async () => {
+    api.removeAppStyle.mockResolvedValueOnce({
+      id: 'acme',
+      name: 'Acme',
+      path: 'apps/acme',
+      style: {},
+      layouts: ['sidebar-shell'],
+    })
+    renderPage()
+
+    await screen.findByText('dashboard')
+    fireEvent.click(screen.getByRole('button', { name: 'Clear dark style' }))
+
+    await waitFor(() =>
+      expect(api.removeAppStyle).toHaveBeenCalledWith('acme', 'dark'),
+    )
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', { name: 'Clear dark style' }),
+      ).toBeNull(),
+    )
+    expect(screen.getByRole('link', { name: 'Set dark style' })).toBeTruthy()
   })
 
   it('cancels edit mode without calling rename', async () => {

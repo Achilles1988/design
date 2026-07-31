@@ -65,6 +65,12 @@
   opacity: 1;
 }
 
+.apps-style-field {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) * 0.75);
+}
+
 .apps-meta__layouts {
   grid-column: 1 / -1;
 }

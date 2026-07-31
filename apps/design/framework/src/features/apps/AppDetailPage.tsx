@@ -6,7 +6,7 @@ import { emitCanvasesChanged } from '@/lib/canvasEvents'
 import { writeCanvasRenameNotice } from '@/lib/canvasRenameNotice'
 import { confirmTip } from '@/lib/confirmTip'
 import { isValidAppId, slugify } from '@/lib/slug'
-import type { AppConfig, AssetEntry, CanvasEntry } from '@/lib/types'
+import type { AppConfig, AssetEntry, CanvasEntry, StyleSlot } from '@/lib/types'
 import { DisclosureForm } from '@/ui/DisclosureForm'
 import { SectionHeader } from '@/ui/SectionHeader'
 import './apps.css'
@@ -316,6 +316,25 @@ export function AppDetailPage() {
     }
   }
 
+  async function onRemoveStyle(slot: StyleSlot) {
+    if (!app || busy) return
+    const targetAppId = appId
+    const runId = loadRun.current
+    setBusy(true)
+    setFormError(null)
+    try {
+      const next = await designApi.removeAppStyle(targetAppId, slot)
+      if (isCurrentOperation(targetAppId, runId)) setApp(next)
+    } catch (err: unknown) {
+      if (!isCurrentOperation(targetAppId, runId)) return
+      setFormError(
+        err instanceof Error ? err.message : 'Failed to clear style',
+      )
+    } finally {
+      if (isCurrentOperation(targetAppId, runId)) setBusy(false)
+    }
+  }
+
   async function onRemoveLayout(layoutId: string) {
     if (!app || busy) return
     const ok = await confirmTip({
@@ -408,22 +427,51 @@ export function AppDetailPage() {
               {app.path ?? '—'}
             </dd>
           </div>
-          <div>
-            <dt>Style</dt>
-            <dd>
-              <Link
-                className="apps-meta__editable"
-                to={`/assets/rule?appId=${encodeURIComponent(app.id)}`}
-                title="Open style library to replace"
-                aria-label={`Edit style ${app.style}`}
-              >
-                <code>{app.style}</code>
-                <span className="apps-meta__edit-hint" aria-hidden="true">
-                  Edit
-                </span>
-              </Link>
-            </dd>
-          </div>
+          {(['light', 'dark'] as const).map((slot) => {
+            const value = app.style[slot]
+            const label = slot === 'light' ? 'Light' : 'Dark'
+            const lowerLabel = label.toLowerCase()
+            return (
+              <div key={slot}>
+                <dt>{label}</dt>
+                <dd>
+                  <div className="apps-style-field">
+                    <Link
+                      className="apps-meta__editable"
+                      to={`/assets/rule?appId=${encodeURIComponent(app.id)}&slot=${slot}`}
+                      title={`Open style library to ${value ? 'replace' : 'set'} the ${lowerLabel} style`}
+                      aria-label={
+                        value
+                          ? `Edit ${lowerLabel} style ${value}`
+                          : `Set ${lowerLabel} style`
+                      }
+                    >
+                      {value ? (
+                        <code>{value}</code>
+                      ) : (
+                        <span className="apps-muted">—</span>
+                      )}
+                      <span className="apps-meta__edit-hint" aria-hidden="true">
+                        Edit
+                      </span>
+                    </Link>
+                    {value ? (
+                      <button
+                        type="button"
+                        className="apps-layout-chip__remove"
+                        onClick={() => onRemoveStyle(slot)}
+                        disabled={busy}
+                        aria-label={`Clear ${lowerLabel} style`}
+                        title={`Clear ${lowerLabel} style`}
+                      >
+                        ×
+                      </button>
+                    ) : null}
+                  </div>
+                </dd>
+              </div>
+            )
+          })}
           <div className="apps-meta__layouts">
             <dt>Layouts</dt>
             <dd>
