@@ -51,6 +51,68 @@ describe('createAssetsStore', () => {
         id: 'alpha',
         name: 'alpha',
         previewUrl: '/assets/designmd/alpha/components.html',
+        slots: ['light', 'dark'],
+      },
+    ])
+  })
+
+  it('attaches supported slots from DESIGN.md tags for designmd', async () => {
+    const root = await makeTemp()
+    async function pkg(id: string, tags: string[]) {
+      const dir = path.join(root, 'designmd', id)
+      await fs.mkdir(dir, { recursive: true })
+      await fs.writeFile(path.join(dir, 'components.html'), '<html></html>')
+      const tagLines = tags.map((t) => `- ${t}`).join('\n')
+      await fs.writeFile(
+        path.join(dir, 'DESIGN.md'),
+        `---\ntags:\n${tagLines}\n---\n# ${id}\n`,
+      )
+    }
+    await pkg('sunny', ['light'])
+    await pkg('midnight', ['dark'])
+    await pkg('dual', ['light', 'dark'])
+    await pkg('untagged', ['brand'])
+
+    const list = await createAssetsStore(root).listAssets('designmd')
+    expect(list).toEqual([
+      {
+        id: 'dual',
+        name: 'dual',
+        previewUrl: '/assets/designmd/dual/components.html',
+        slots: ['light', 'dark'],
+      },
+      {
+        id: 'midnight',
+        name: 'midnight',
+        previewUrl: '/assets/designmd/midnight/components.html',
+        slots: ['dark'],
+      },
+      {
+        id: 'sunny',
+        name: 'sunny',
+        previewUrl: '/assets/designmd/sunny/components.html',
+        slots: ['light'],
+      },
+      {
+        id: 'untagged',
+        name: 'untagged',
+        previewUrl: '/assets/designmd/untagged/components.html',
+        slots: ['light', 'dark'],
+      },
+    ])
+  })
+
+  it('does not attach slots for layoutmd', async () => {
+    const root = await makeTemp()
+    const dir = path.join(root, 'layoutmd', 'shell')
+    await fs.mkdir(dir, { recursive: true })
+    await fs.writeFile(path.join(dir, 'preview.html'), '<html></html>')
+    const list = await createAssetsStore(root).listAssets('layoutmd')
+    expect(list).toEqual([
+      {
+        id: 'shell',
+        name: 'shell',
+        previewUrl: '/assets/layoutmd/shell/preview.html',
       },
     ])
   })

@@ -2,6 +2,11 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { AssetEntry, AssetKind } from '../../src/lib/types'
 import { resolveContentPath } from './paths'
+import {
+  parseStylePolarityFromDesignMd,
+  slotsForPolarity,
+  type StylePolarity,
+} from './stylePolarity'
 import { zipPackageUnderRoot } from './zip'
 
 export const ASSET_KINDS = ['designmd', 'layoutmd'] as const
@@ -46,11 +51,35 @@ export function createAssetsStore(assetsRoot: string) {
       } catch {
         continue
       }
-      entries.push({
+      const entry: AssetEntry = {
         id,
         name: id,
         previewUrl: `/assets/${kind}/${id}/${previewFile}`,
-      })
+      }
+      if (kind === 'designmd') {
+        let polarity: StylePolarity = 'both'
+        try {
+          let designMdPath: string | null = null
+          for (const name of ['DESIGN.md', 'design.md'] as const) {
+            const candidate = path.join(kindDir, id, name)
+            try {
+              await fs.access(candidate)
+              designMdPath = candidate
+              break
+            } catch {
+              // try next
+            }
+          }
+          if (designMdPath) {
+            const source = await fs.readFile(designMdPath, 'utf8')
+            polarity = parseStylePolarityFromDesignMd(source)
+          }
+        } catch {
+          polarity = 'both'
+        }
+        entry.slots = slotsForPolarity(polarity)
+      }
+      entries.push(entry)
     }
 
     return entries

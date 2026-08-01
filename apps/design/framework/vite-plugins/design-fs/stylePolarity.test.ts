@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   NeedsStyleSlotError,
   parseStylePolarityFromDesignMd,
+  slotsForPolarity,
   slotSupported,
 } from './stylePolarity'
 
@@ -39,6 +40,14 @@ describe('parseStylePolarityFromDesignMd', () => {
   it('only reads the first frontmatter block', () => {
     const source = `---\ntags:\n- light\n---\nsome body\n---\ntags:\n- dark\n---\n`
     expect(parseStylePolarityFromDesignMd(source)).toBe('light')
+  })
+})
+
+describe('slotsForPolarity', () => {
+  it('maps polarity to ordered StyleSlot arrays', () => {
+    expect(slotsForPolarity('light')).toEqual(['light'])
+    expect(slotsForPolarity('dark')).toEqual(['dark'])
+    expect(slotsForPolarity('both')).toEqual(['light', 'dark'])
   })
 })
 

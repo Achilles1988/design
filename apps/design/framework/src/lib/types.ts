@@ -1,4 +1,4 @@
-import type { AppStyleSlots } from './styleSlots'
+import type { AppStyleSlots, StyleSlot } from './styleSlots'
 export type { AppStyleSlots, StyleApplySlot, StyleSlot } from './styleSlots'
 
 export type AppConfig = {
@@ -26,6 +26,8 @@ export type AssetEntry = {
   id: string
   name: string
   previewUrl: string
+  /** designmd only: supported theme slots from DESIGN.md tags. */
+  slots?: StyleSlot[]
 }
 
 export const DEFAULT_LAYOUT = 'sidebar-shell'

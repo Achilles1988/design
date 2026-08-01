@@ -185,6 +185,12 @@ mutations remain same-origin and are accepted.
 | `GET` | `/assets/:kind/:id/download` | — | ZIP bytes (`application/zip`) |
 | `POST` | `/assets/:kind/:id/apply` | `{ "appId", "slot"? }` | Updated `AppConfig`, or `409` `needsSlot` for `designmd` |
 
+For `kind=designmd`, each `AssetEntry` includes
+`slots: ('light'|'dark')[]` derived from stock `DESIGN.md` frontmatter tags via
+the same polarity rules as apply (`light` only / `dark` only / both-or-neither →
+both slots). Missing or unreadable contract on list defaults to both slots.
+`layoutmd` entries omit `slots`.
+
 `POST …/apply` validates that the stock package exists under `assetsRoot`, then
 updates the target App’s `app.json` only (no disk copy). The target App is
 validated (`GET`-equivalent) before writing:

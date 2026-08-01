@@ -1,4 +1,4 @@
-import type { StyleApplySlot } from '../../src/lib/styleSlots'
+import type { StyleApplySlot, StyleSlot } from '../../src/lib/styleSlots'
 
 export type StylePolarity = 'light' | 'dark' | 'both'
 
@@ -56,6 +56,13 @@ export function parseStylePolarityFromDesignMd(
   if (hasLight && !hasDark) return 'light'
   if (hasDark && !hasLight) return 'dark'
   return 'both'
+}
+
+/** Maps polarity to ordered supported StyleSlot values for list/UI. */
+export function slotsForPolarity(polarity: StylePolarity): StyleSlot[] {
+  if (polarity === 'light') return ['light']
+  if (polarity === 'dark') return ['dark']
+  return ['light', 'dark']
 }
 
 /** `both` polarity supports every slot; `light`/`dark` only support themselves. */

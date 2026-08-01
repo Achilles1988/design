@@ -52,12 +52,14 @@ function LazyPreview({
   title,
   height,
   theme,
+  slots,
   onOpen,
 }: {
   src: string
   title: string
   height: number
   theme: ThemeMode
+  slots?: StyleSlot[]
   onOpen: () => void
 }) {
   const hostRef = useRef<HTMLButtonElement>(null)
@@ -123,6 +125,15 @@ function LazyPreview({
             transform: `scale(${SCALE})`,
           }}
         />
+      ) : null}
+      {slots && slots.length > 0 ? (
+        <span className="assets-card__slots" aria-hidden="true">
+          {slots.map((slot) => (
+            <span key={slot} className="assets-card__slot">
+              {slot}
+            </span>
+          ))}
+        </span>
       ) : null}
     </button>
   )
@@ -539,6 +550,7 @@ export function AssetBrowserPage({
                   title={entry.name}
                   height={height}
                   theme={theme}
+                  slots={kind === 'designmd' ? entry.slots : undefined}
                   onOpen={() => setLightbox(entry)}
                 />
                 <div className="assets-card__meta">
