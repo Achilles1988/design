@@ -100,3 +100,4 @@ engineering app’s routing (e.g. `/apps/<appId>/canvases/<canvasId>`).
 
 - [design-fs HTTP API](design-fs.md) — dev filesystem and asset listing under
   `<designRoot>`.
+- [app-tokens.md](app-tokens.md) — per-App Canvas `tokens.css` fingerprint protocol
