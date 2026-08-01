@@ -43,3 +43,12 @@ export function displayStyleForTheme(
 ): string | undefined {
   return style[theme]
 }
+
+/** Whether a stock style package lists the given slot in its supported slots. */
+export function entrySupportsStyleSlot(
+  slots: StyleSlot[] | undefined,
+  slot: StyleSlot,
+): boolean {
+  if (!slots?.length) return true
+  return slots.includes(slot)
+}

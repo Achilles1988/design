@@ -159,7 +159,7 @@ describe('AssetBrowserPage runApply', () => {
   })
 
   it('from App deep-link surfaces unsupported-slot errors without chooser', async () => {
-    api.listAssets.mockResolvedValue([ENTRY])
+    api.listAssets.mockResolvedValue([{ ...ENTRY, slots: ['light'] }])
     api.listApps.mockResolvedValue([APP])
     api.applyAsset.mockRejectedValueOnce(
       new DesignFsError('This style does not support the light slot.', 400),
@@ -173,5 +173,36 @@ describe('AssetBrowserPage runApply', () => {
     )
     expect(chooseStyleSlotMock).not.toHaveBeenCalled()
     expect(confirmTipMock).not.toHaveBeenCalled()
+  })
+
+  it('from App deep-link lists only slot-compatible Rule packages', async () => {
+    api.listAssets.mockResolvedValue([
+      {
+        id: 'sunny',
+        name: 'sunny',
+        previewUrl: '/assets/designmd/sunny/components.html',
+        slots: ['light'],
+      },
+      {
+        id: 'midnight',
+        name: 'midnight',
+        previewUrl: '/assets/designmd/midnight/components.html',
+        slots: ['dark'],
+      },
+      {
+        id: 'dual',
+        name: 'dual',
+        previewUrl: '/assets/designmd/dual/components.html',
+        slots: ['light', 'dark'],
+      },
+    ])
+    api.listApps.mockResolvedValue([APP])
+
+    renderPage('/assets/rule?appId=acme&slot=light')
+
+    await screen.findByText('sunny')
+    expect(screen.getByText('dual')).toBeTruthy()
+    expect(screen.queryByText('midnight')).toBeNull()
+    expect(screen.getByText('2 / 3 packages')).toBeTruthy()
   })
 })

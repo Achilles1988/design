@@ -5,6 +5,7 @@ import { LAYOUT_INSTALL_TIP } from '@/lib/assetNotices'
 import { chooseStyleSlot } from '@/lib/chooseStyleSlot'
 import { confirmTip } from '@/lib/confirmTip'
 import { resolveAppliedSlot } from '@/lib/resolveAppliedSlot'
+import { entrySupportsStyleSlot } from '@/lib/styleSlots'
 import {
   applyThemeToFrame,
   getTheme,
@@ -36,7 +37,7 @@ type AssetBrowserPageProps = {
 }
 
 const PREVIEW_WIDTH = 1280
-const SCALE = 0.28
+const FALLBACK_SCALE = 0.28
 
 function hashHeight(id: string): number {
   let h = 0
@@ -52,20 +53,34 @@ function LazyPreview({
   title,
   height,
   theme,
-  slots,
   onOpen,
 }: {
   src: string
   title: string
   height: number
   theme: ThemeMode
-  slots?: StyleSlot[]
   onOpen: () => void
 }) {
   const hostRef = useRef<HTMLButtonElement>(null)
   const frameRef = useRef<HTMLIFrameElement>(null)
   const [mounted, setMounted] = useState(false)
   const [ready, setReady] = useState(false)
+  const [previewScale, setPreviewScale] = useState(FALLBACK_SCALE)
+
+  useEffect(() => {
+    const el = hostRef.current
+    if (!el) return
+    const updateScale = () => {
+      const width = el.clientWidth
+      if (width > 0) {
+        setPreviewScale(width / PREVIEW_WIDTH)
+      }
+    }
+    updateScale()
+    const ro = new ResizeObserver(updateScale)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   useEffect(() => {
     const el = hostRef.current
@@ -88,7 +103,7 @@ function LazyPreview({
     applyThemeToFrame(frameRef.current, theme)
   }, [ready, theme])
 
-  const frameHeight = Math.round(height / SCALE)
+  const frameHeight = Math.round(height / previewScale)
 
   return (
     <button
@@ -122,18 +137,9 @@ function LazyPreview({
           style={{
             width: PREVIEW_WIDTH,
             height: frameHeight,
-            transform: `scale(${SCALE})`,
+            transform: `scale(${previewScale})`,
           }}
         />
-      ) : null}
-      {slots && slots.length > 0 ? (
-        <span className="assets-card__slots" aria-hidden="true">
-          {slots.map((slot) => (
-            <span key={slot} className="assets-card__slot">
-              {slot}
-            </span>
-          ))}
-        </span>
       ) : null}
     </button>
   )
@@ -475,11 +481,26 @@ export function AssetBrowserPage({
   const filteredIds = new Set(
     applyFilter(assetIndex ?? [], filter).map((meta) => meta.id),
   )
-  const visibleItems = items
+  const slotScopedItems =
+    items && kind === 'designmd' && urlSlot
+      ? items.filter((entry) => entrySupportsStyleSlot(entry.slots, urlSlot))
+      : items
+  const visibleItems = slotScopedItems
     ? filter.chips.length === 0 || !assetIndex || assetIndex.length === 0
-      ? items
-      : items.filter((e) => filteredIds.has(e.id))
+      ? slotScopedItems
+      : slotScopedItems.filter((e) => filteredIds.has(e.id))
     : null
+  const packageCount =
+    items === null
+      ? '…'
+      : filter.chips.length > 0
+        ? `${visibleItems?.length ?? 0} / ${slotScopedItems?.length ?? 0} packages`
+        : kind === 'designmd' &&
+            urlSlot &&
+            slotScopedItems &&
+            slotScopedItems.length !== items.length
+          ? `${slotScopedItems.length} / ${items.length} packages`
+          : `${items.length} packages`
 
   return (
     <div className="assets-page">
@@ -490,17 +511,17 @@ export function AssetBrowserPage({
           {contextAppId ? (
             <p className="assets-page__context">
               Target App: <code>{contextAppId}</code>
+              {kind === 'designmd' && urlSlot ? (
+                <>
+                  {' '}
+                  — <code>{urlSlot}</code> slot
+                </>
+              ) : null}
             </p>
           ) : null}
         </div>
         <div className="assets-page__header-actions">
-          <p className="assets-page__count">
-            {items === null
-              ? '…'
-              : filter.chips.length > 0
-                ? `${visibleItems?.length ?? 0} / ${items.length} packages`
-                : `${items.length} packages`}
-          </p>
+          <p className="assets-page__count">{packageCount}</p>
         </div>
       </div>
 
@@ -550,12 +571,22 @@ export function AssetBrowserPage({
                   title={entry.name}
                   height={height}
                   theme={theme}
-                  slots={kind === 'designmd' ? entry.slots : undefined}
                   onOpen={() => setLightbox(entry)}
                 />
                 <div className="assets-card__meta">
-                  <div className="assets-card__id" title={entry.id}>
-                    {entry.id}
+                  <div className="assets-card__title-row">
+                    <div className="assets-card__id" title={entry.id}>
+                      {entry.id}
+                    </div>
+                    {kind === 'designmd' && entry.slots && entry.slots.length > 0 ? (
+                      <span className="assets-card__slots" aria-hidden="true">
+                        {entry.slots.map((slot) => (
+                          <span key={slot} className="assets-card__slot">
+                            {slot}
+                          </span>
+                        ))}
+                      </span>
+                    ) : null}
                   </div>
                   {actionButtons(entry)}
                 </div>

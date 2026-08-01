@@ -47,8 +47,17 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
+function cardFor(id: string): HTMLElement {
+  const idNode = screen.getByText(id)
+  const card = idNode.closest('[role="listitem"]')
+  if (!(card instanceof HTMLElement)) {
+    throw new Error(`Missing card for ${id}`)
+  }
+  return card
+}
+
 describe('Rule polarity badges', () => {
-  it('shows supported slots on each Rule preview', async () => {
+  it('shows supported slots beside each Rule asset name', async () => {
     const entries: AssetEntry[] = [
       {
         id: 'sunny',
@@ -76,26 +85,26 @@ describe('Rule polarity badges', () => {
       </MemoryRouter>,
     )
 
-    const sunny = await screen.findByRole('button', {
-      name: 'Open preview for sunny',
-    })
+    await screen.findByText('sunny')
+
+    const sunny = cardFor('sunny')
     expect(within(sunny).getByText('light')).toBeTruthy()
     expect(within(sunny).queryByText('dark')).toBeNull()
+    expect(
+      within(sunny).queryByRole('button', { name: 'Open preview for sunny' })
+        ?.textContent,
+    ).not.toMatch(/light|dark/)
 
-    const midnight = screen.getByRole('button', {
-      name: 'Open preview for midnight',
-    })
+    const midnight = cardFor('midnight')
     expect(within(midnight).getByText('dark')).toBeTruthy()
     expect(within(midnight).queryByText('light')).toBeNull()
 
-    const dual = screen.getByRole('button', {
-      name: 'Open preview for dual',
-    })
+    const dual = cardFor('dual')
     expect(within(dual).getByText('light')).toBeTruthy()
     expect(within(dual).getByText('dark')).toBeTruthy()
   })
 
-  it('does not show polarity badges on Layout previews', async () => {
+  it('does not show polarity badges on Layout cards', async () => {
     api.listAssets.mockResolvedValue([
       {
         id: 'shell',
@@ -108,10 +117,9 @@ describe('Rule polarity badges', () => {
         <AssetsLayoutPage />
       </MemoryRouter>,
     )
-    const preview = await screen.findByRole('button', {
-      name: 'Open preview for shell',
-    })
-    expect(within(preview).queryByText('light')).toBeNull()
-    expect(within(preview).queryByText('dark')).toBeNull()
+    await screen.findByText('shell')
+    const card = cardFor('shell')
+    expect(within(card).queryByText('light')).toBeNull()
+    expect(within(card).queryByText('dark')).toBeNull()
   })
 })

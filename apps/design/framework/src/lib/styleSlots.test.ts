@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   displayStyleForTheme,
+  entrySupportsStyleSlot,
   normalizeStyleSlots,
   resolveStyleForPreview,
 } from './styleSlots'
@@ -38,5 +39,15 @@ describe('displayStyleForTheme', () => {
   it('does not fall back', () => {
     expect(displayStyleForTheme({ dark: 'b' }, 'light')).toBeUndefined()
     expect(displayStyleForTheme({ dark: 'b' }, 'dark')).toBe('b')
+  })
+})
+
+describe('entrySupportsStyleSlot', () => {
+  it('matches listed slots and treats missing slots as both', () => {
+    expect(entrySupportsStyleSlot(['light'], 'light')).toBe(true)
+    expect(entrySupportsStyleSlot(['light'], 'dark')).toBe(false)
+    expect(entrySupportsStyleSlot(['light', 'dark'], 'dark')).toBe(true)
+    expect(entrySupportsStyleSlot(undefined, 'light')).toBe(true)
+    expect(entrySupportsStyleSlot([], 'dark')).toBe(true)
   })
 })
