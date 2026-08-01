@@ -22,6 +22,8 @@ const RUNTIME_MODULE_PATHS = new Set([
 ])
 const RUNTIME_MODULE_PREFIXES = ['/node_modules/.vite/deps/']
 const COMPONENT_MODULE_EXTENSIONS = new Set(['.ts', '.tsx', '.css'])
+const APP_TOKENS_CSS_IMPORT = '../tokens.css'
+const APP_TOKENS_CSS_FILE = 'tokens.css'
 
 export type CanvasPreviewTarget = CanvasPreviewSessionRequest & {
   componentFile: string
@@ -120,6 +122,26 @@ export function createCanvasPreviewTargetLoader(options: {
     ]
 
     for (const importedFile of importedCanvasCss(source)) {
+      if (importedFile === APP_TOKENS_CSS_IMPORT) {
+        const tokensPath = path.resolve(appDir, APP_TOKENS_CSS_FILE)
+        const tokensStat = await fs.lstat(tokensPath)
+        if (!tokensStat.isFile() || tokensStat.isSymbolicLink()) {
+          throw new Error('Canvas preview CSS target is invalid.')
+        }
+        const realTokensPath = await requireRealPathWithin(
+          realAppDir,
+          tokensPath,
+        )
+        const modulePath = `/apps/${request.appId}/${APP_TOKENS_CSS_FILE}`
+        canvasModulePaths.push(modulePath)
+        guardedModuleFiles.push({
+          modulePath,
+          absolutePath: tokensPath,
+          realPath: realTokensPath,
+        })
+        continue
+      }
+
       const localName = importedFile.slice(2)
       if (
         !importedFile.startsWith('./') ||

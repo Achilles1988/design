@@ -86,6 +86,38 @@ describe('Canvas preview sessions', () => {
     await fs.rm(root, { recursive: true, force: true })
   })
 
+  it('includes App tokens.css when a Canvas imports ../tokens.css', async () => {
+    await fs.writeFile(
+      path.join(appDir, 'tokens.css'),
+      ':root { --color-primary: #000; }',
+    )
+    await fs.writeFile(
+      path.join(appDir, 'canvases/Home.tsx'),
+      "import '../tokens.css'\nimport './Home.css'\nexport default function Home() { return null }",
+    )
+
+    const load = createCanvasPreviewTargetLoader({ contentRoot })
+    const target = await load({
+      appId: 'design',
+      canvasId: 'home',
+    })
+
+    expect(target.canvasModulePaths).toEqual([
+      '/apps/design/canvases/Home.tsx',
+      '/apps/design/tokens.css',
+      '/apps/design/canvases/Home.css',
+    ])
+    expect(
+      target.guardedModuleFiles.map((entry) => entry.modulePath),
+    ).toEqual([
+      '/apps/design/canvases/Home.css',
+      '/apps/design/canvases/Home.tsx',
+      '/apps/design/components/Button.tsx',
+      '/apps/design/components/nested/Card.ts',
+      '/apps/design/tokens.css',
+    ])
+  })
+
   it('derives an exact current-Canvas and real component allowlist from disk', async () => {
     const load = createCanvasPreviewTargetLoader({ contentRoot })
 

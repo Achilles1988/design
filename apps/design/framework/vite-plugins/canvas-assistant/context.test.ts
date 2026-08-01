@@ -124,6 +124,31 @@ afterEach(async () => {
 })
 
 describe('createCanvasContextLoader', () => {
+  it('loads App tokens.css when a Canvas imports ../tokens.css', async () => {
+    const fixture = await createFixture()
+    await fs.writeFile(
+      path.join(fixture.appDir, 'tokens.css'),
+      '[data-theme="light"] { --color-primary: #000; }',
+      'utf8',
+    )
+    await fs.writeFile(
+      path.join(fixture.canvasesDir, 'Home.tsx'),
+      "import '../tokens.css'\nimport './Home.css'\nexport default function Home() { return null }\n",
+      'utf8',
+    )
+
+    const context = await fixture.loader.load('shop', 'home')
+
+    expect(
+      context.files.map((file) => [file.relativePath, file.permission]),
+    ).toEqual([
+      ['canvases/Home.css', 'write-existing'],
+      ['canvases/Home.tsx', 'write-existing'],
+      ['components/Select.tsx', 'read-only'],
+      ['tokens.css', 'read-only'],
+    ])
+  })
+
   it('loads only the current Canvas, its direct local CSS, and App components', async () => {
     const fixture = await createFixture()
 

@@ -20,6 +20,8 @@ export const STYLE_SLOTS: readonly StyleSlot[] = ['light', 'dark']
 const USER_COMPONENT_EXTENSIONS = new Set(['.ts', '.tsx', '.css'])
 const NEW_COMPONENT_EXTENSIONS = new Set(['.tsx', '.css'])
 const CANVAS_STYLE_EXTENSION = '.css'
+const APP_TOKENS_CSS_IMPORT = '../tokens.css'
+const APP_TOKENS_CSS_FILE = 'tokens.css'
 
 export type AuthoringFile = {
   relativePath: string
@@ -420,6 +422,16 @@ export function createCanvasContextLoader(
       )
       cssFiles = await Promise.all(
         importedCssFiles(canvasFile.source).map(async (importedFile) => {
+          if (importedFile === APP_TOKENS_CSS_IMPORT) {
+            const tokensPath = path.resolve(appDir, APP_TOKENS_CSS_FILE)
+            const tokensStat = await fs.lstat(tokensPath)
+            if (!tokensStat.isFile() || tokensStat.isSymbolicLink()) {
+              throw new Error('App tokens.css must be a regular file.')
+            }
+            await existingPathWithin(appDir, tokensPath)
+            return readAuthoringFile(appDir, tokensPath, 'read-only')
+          }
+
           const canvasDirectory = path.dirname(canvasPath)
           const localFileName = importedFile.slice(2)
           if (
