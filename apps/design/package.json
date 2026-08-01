@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "prepare:playwright": "playwright install chromium",
     "sync:tokens": "node scripts/sync-shell-tokens.mjs",
     "sync:tokens:check": "node scripts/sync-shell-tokens.mjs --check"
   },
