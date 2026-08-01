@@ -95,10 +95,12 @@ See also: [Design project marker and contract resolution](design-project.md).
 
 > **Legacy `style: string`**: an `app.json` with the retired single-string
 > `style` shape fails to parse (`normalizeStyleSlots` throws). `getApp`/`readAppFile`
-> surfaces that as an error for the one app; `listApps` silently skips that app
-> directory instead of failing the whole list. Fix by rewriting the app's
-> `style` field from a string id to `{ "light": "<id>" }` or
-> `{ "dark": "<id>" }` (or both) in `app.json`.
+> surfaces that as an error for the one app; `listApps` skips that app
+> directory instead of failing the whole list, but logs a `console.warn`
+> (server-side, dev only) naming the app id/path and the error, with a
+> migration hint, so the failure stays visible instead of vanishing. Fix by
+> rewriting the app's `style` field from a string id to `{ "light": "<id>" }`
+> or `{ "dark": "<id>" }` (or both) in `app.json`.
 
 ### `canvases.json`
 

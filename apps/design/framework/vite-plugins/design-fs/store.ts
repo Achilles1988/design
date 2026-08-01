@@ -130,8 +130,24 @@ export function createContentStore(contentRoot: string) {
     for (const entry of entries) {
       try {
         apps.push(await readAppFile(entry))
-      } catch {
-        // skip dirs without valid app.json / invalid entry ids
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code
+        const isInvalidId = err instanceof Error && /^Invalid app id/.test(err.message)
+        if (code === 'ENOENT' || isInvalidId) {
+          // Not an app directory: no app.json, or entry doesn't look like an
+          // app id (e.g. `.DS_Store`). Nothing to surface.
+          continue
+        }
+        // The directory has an app.json but it failed to parse/normalize
+        // (e.g. legacy `style: string`); skip it from the result but make
+        // the failure visible instead of swallowing it silently.
+        const message = err instanceof Error ? err.message : String(err)
+        const migrationHint = /style must be an object/i.test(message)
+          ? ' Fix: rewrite "style" to { "light"?: "<id>", "dark"?: "<id>" } in app.json.'
+          : ''
+        console.warn(
+          `[design-fs] listApps: skipping app "${entry}" at ${appDir(entry)}: ${message}${migrationHint}`,
+        )
       }
     }
     return apps

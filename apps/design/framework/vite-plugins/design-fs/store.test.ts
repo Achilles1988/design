@@ -111,6 +111,46 @@ describe('createContentStore', () => {
     expect(await fs.readFile(appPath, 'utf8')).toBe(before)
   })
 
+  it('warns and skips an app whose app.json has the legacy string style', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await fs.mkdir(path.join(root, 'legacy'), { recursive: true })
+    await fs.writeFile(
+      path.join(root, 'legacy', 'app.json'),
+      `${JSON.stringify({
+        id: 'legacy',
+        name: 'Legacy',
+        style: 'dashboard',
+      }, null, 2)}\n`,
+      'utf8',
+    )
+
+    const apps = await store.listApps()
+
+    expect(apps.map((a) => a.id)).toEqual(['orders'])
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+    const [message] = warnSpy.mock.calls[0] as [string]
+    expect(message).toContain('legacy')
+    expect(message).toContain('style must be an object')
+    expect(message).toContain('light')
+    expect(message).toContain('dark')
+    warnSpy.mockRestore()
+  })
+
+  it('does not warn for directories without an app.json', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const store = createContentStore(root)
+    await store.createApp({ id: 'orders', name: 'Orders' })
+    await fs.mkdir(path.join(root, '.DS_Store'), { recursive: true })
+
+    const apps = await store.listApps()
+
+    expect(apps.map((a) => a.id)).toEqual(['orders'])
+    expect(warnSpy).not.toHaveBeenCalled()
+    warnSpy.mockRestore()
+  })
+
   it('sets, updates, and clears style slots independently', async () => {
     const store = createContentStore(root)
     await store.createApp({ id: 'orders', name: 'Orders' })
