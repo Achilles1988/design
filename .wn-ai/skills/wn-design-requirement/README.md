@@ -11,12 +11,18 @@ style contracts and `tokens.css`.
 
 ## Checks
 
+Run from the repository root:
+
 ```bash
-node scripts/find-design-root.mjs <repoRoot>
-node scripts/list-apps.mjs <designRoot>
-node scripts/check-app-style.mjs <designRoot> <appId>
-node scripts/check-app-tokens.mjs <designRoot> <appId>
+S=.wn-ai/skills/wn-design-requirement/scripts
+node $S/find-design-root.mjs <repoRoot>
+node $S/list-apps.mjs <designRoot>
+node $S/check-app-style.mjs <designRoot> <appId>
+node $S/check-app-tokens.mjs <designRoot> <appId>
 ```
+
+`find-design-root.mjs` prints an absolute path and skips `node_modules`,
+`.git`, `.worktrees`, and `worktrees`.
 
 ## Docs
 

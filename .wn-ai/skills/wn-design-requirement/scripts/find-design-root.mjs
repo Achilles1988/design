@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+import { resolve } from 'node:path'
 import { findDesignRoots } from './lib.mjs'
 
-const repoRoot = process.argv[2] ?? process.cwd()
+const repoRoot = resolve(process.argv[2] ?? process.cwd())
 const roots = findDesignRoots(repoRoot)
 if (roots.length === 0) {
   console.error('No design.project.json found. Install a design-engineering project.')

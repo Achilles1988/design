@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, realpathSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
@@ -9,9 +9,10 @@ import { expectedFingerprintLines } from './lib.mjs'
 
 const scriptsDir = fileURLToPath(new URL('.', import.meta.url))
 
-function run(script, args) {
+function run(script, args, options = {}) {
   return spawnSync(process.execPath, [join(scriptsDir, script), ...args], {
     encoding: 'utf8',
+    ...options,
   })
 }
 
@@ -44,6 +45,12 @@ describe('cli', () => {
     const r = run('find-design-root.mjs', [root])
     assert.equal(r.status, 0)
     assert.equal(r.stdout.trim(), designRoot)
+  })
+
+  it('find-design-root prints an absolute path for a relative repoRoot', () => {
+    const r = run('find-design-root.mjs', ['.'], { cwd: root })
+    assert.equal(r.status, 0)
+    assert.equal(r.stdout.trim(), join(realpathSync(root), 'proj'))
   })
 
   it('find-design-root exits 2 for none', () => {
