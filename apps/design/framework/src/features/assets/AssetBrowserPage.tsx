@@ -25,6 +25,11 @@ import { buildSystemPrompt } from '@/lib/ai/promptBuild'
 import { usePageAssistant } from '@/shell/assistant/usePageAssistant'
 import { AssetFilterChips } from './AssetFilterChips'
 import { AssetFilterTool } from './assistantFilterTool'
+import {
+  computePreviewScale,
+  FALLBACK_PREVIEW_SCALE,
+  PREVIEW_WIDTH,
+} from './previewScale'
 import { usePersistentAssetFilter } from './usePersistentAssetFilter'
 import './assets.css'
 
@@ -35,9 +40,6 @@ type AssetBrowserPageProps = {
   /** Primary apply action label (Install layout / Install style). */
   applyLabel: string
 }
-
-const PREVIEW_WIDTH = 1280
-const FALLBACK_SCALE = 0.28
 
 function hashHeight(id: string): number {
   let h = 0
@@ -65,16 +67,13 @@ function LazyPreview({
   const frameRef = useRef<HTMLIFrameElement>(null)
   const [mounted, setMounted] = useState(false)
   const [ready, setReady] = useState(false)
-  const [previewScale, setPreviewScale] = useState(FALLBACK_SCALE)
+  const [previewScale, setPreviewScale] = useState(FALLBACK_PREVIEW_SCALE)
 
   useEffect(() => {
     const el = hostRef.current
     if (!el) return
     const updateScale = () => {
-      const width = el.clientWidth
-      if (width > 0) {
-        setPreviewScale(width / PREVIEW_WIDTH)
-      }
+      setPreviewScale(computePreviewScale(el.clientWidth))
     }
     updateScale()
     const ro = new ResizeObserver(updateScale)

@@ -35,6 +35,7 @@ From `apps/design`:
 ```bash
 npm run sync:tokens        # rewrite generated blocks in tokens.css
 npm run sync:tokens:check  # exit 1 if tokens.css drifts from app.json + DESIGN.md
+npm run prepare:playwright # install Chromium for capture.integration.test.ts
 ```
 
 ## When to run

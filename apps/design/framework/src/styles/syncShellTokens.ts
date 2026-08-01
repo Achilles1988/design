@@ -131,6 +131,7 @@ const STATIC_HEADER = `/* Shell design tokens — generated color/font blocks sy
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
+  --font-weight-bold: 700;
   --line-height-body: 1.5;
   --line-height-heading: 1.2;
   --font-mono: ui-monospace, 'JetBrains Mono', monospace;

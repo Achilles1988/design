@@ -64,7 +64,7 @@ Overlay/shadow bases use fixed neutrals (`#111` light scrim, `#000` dark scrim) 
 | Variable | Light | Dark |
 |----------|-------|------|
 | `--font-sans` | `'Inter', -apple-system, system-ui, sans-serif` | `'IBM Plex Sans', system-ui, sans-serif` |
-| `--font-mono` | `ui-monospace, 'JetBrains Mono', monospace` | same |
+| `--font-mono` | `ui-monospace, 'JetBrains Mono', monospace` | same (not synced from DESIGN.md mono field) |
 | `--font-weight-normal` | `400` | `400` |
 | `--font-weight-medium` | `500` | `500` |
 | `--font-weight-semibold` | `600` | `600` |
