@@ -7,7 +7,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 ## What it does
 
 - Locates `<designRoot>` via `design.project.json` (no hardcoded install path).
-- Interrogates one item at a time; configures missing style (required) / layout (preferred) from **stock** packages; separates **non-UI**.
+- Interrogates one item at a time; configures missing style slots (`light` / `dark`, at least one required) / layout (preferred) from **stock** packages; separates **non-UI**.
 - Writes a **requirement pack** to `docs/dev/superpowers/specs/YYYY-MM-DD-<appId>-<topic>-canvas-pack.md`, self-reviews, and **HARD-GATE**s on user approval before implement.
 - Re-reads the pack before implement and before design-review (same-session drift control).
 - Implements Canvas drafts (framework-agnostic: match existing Canvases).
@@ -22,7 +22,7 @@ Turn a PRD / design requirement into **real, previewable Canvas design drafts** 
 ## Prerequisites
 
 - A `design.project.json` in the design-engineering project.
-- Style contract at `<stylesRoot>/<styleId>/DESIGN.md` (or `design.md`); skill can recommend a stock id and write `app.json` after confirmation. Do not copy stock into a project-local mirror.
+- Style contract at `<stylesRoot>/<styleId>/DESIGN.md` (or `design.md`) per configured slot (`app.json.style.light` / `app.json.style.dark`, at least one); skill can recommend a stock id per slot and write `app.json` after confirmation. Do not copy stock into a project-local mirror.
 - For design review: `npm run dev` from `<designRoot>`; restart after adding Canvases.
 
 ## Bundled agent

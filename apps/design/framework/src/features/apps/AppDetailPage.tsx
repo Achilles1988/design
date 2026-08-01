@@ -318,6 +318,12 @@ export function AppDetailPage() {
 
   async function onRemoveStyle(slot: StyleSlot) {
     if (!app || busy) return
+    const ok = await confirmTip({
+      message: `Clear the ${slot} style from this App?`,
+      confirmLabel: 'Clear',
+      danger: true,
+    })
+    if (!ok) return
     const targetAppId = appId
     const runId = loadRun.current
     setBusy(true)
