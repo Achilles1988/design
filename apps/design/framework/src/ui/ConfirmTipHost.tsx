@@ -2,16 +2,12 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   subscribeConfirmTip,
-  type ConfirmTipOptions,
+  type ConfirmTipRequest,
 } from '@/lib/confirmTip'
 import './ConfirmTipHost.css'
 
-type ActiveTip = ConfirmTipOptions & {
-  resolve: (value: boolean) => void
-}
-
 export function ConfirmTipHost() {
-  const [active, setActive] = useState<ActiveTip | null>(null)
+  const [active, setActive] = useState<ConfirmTipRequest | null>(null)
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
