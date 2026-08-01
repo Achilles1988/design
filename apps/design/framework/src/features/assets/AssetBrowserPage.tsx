@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { DesignFsError, designApi } from '@/lib/api'
-import { LAYOUT_INSTALL_TIP, STYLE_INSTALL_TIP } from '@/lib/assetNotices'
+import { LAYOUT_INSTALL_TIP } from '@/lib/assetNotices'
 import { chooseStyleSlot } from '@/lib/chooseStyleSlot'
 import { confirmTip } from '@/lib/confirmTip'
 import { resolveAppliedSlot } from '@/lib/resolveAppliedSlot'
@@ -338,11 +338,17 @@ export function AssetBrowserPage({
   }
 
   async function runApply(entry: AssetEntry, appId: string) {
-    const ok = await confirmTip({
-      message: kind === 'designmd' ? STYLE_INSTALL_TIP : LAYOUT_INSTALL_TIP,
-      confirmLabel: 'Install',
-    })
-    if (!ok) return
+    // Styles: no pre-confirm. With a deep-linked slot (from App detail),
+    // apply that slot immediately (server 400 if unsupported). Without a
+    // slot, the server auto-writes light/dark-only packages or returns
+    // needsSlot for the Light/Dark/Both chooser. Layouts still confirm.
+    if (kind === 'layoutmd') {
+      const ok = await confirmTip({
+        message: LAYOUT_INSTALL_TIP,
+        confirmLabel: 'Install',
+      })
+      if (!ok) return
+    }
     if (busyLock.current) return
     busyLock.current = true
     setBusyId(entry.id)
@@ -376,8 +382,15 @@ export function AssetBrowserPage({
           setPickerFor(null)
           return
         } catch (err: unknown) {
-          if (kind === 'designmd' && err instanceof DesignFsError && err.needsSlot) {
-            const chosen = await chooseStyleSlot(err.options ?? ['light', 'dark', 'both'])
+          if (
+            kind === 'designmd' &&
+            !urlSlot &&
+            err instanceof DesignFsError &&
+            err.needsSlot
+          ) {
+            const chosen = await chooseStyleSlot(
+              err.options ?? ['light', 'dark', 'both'],
+            )
             if (chosen === null) return
             slot = chosen
             continue

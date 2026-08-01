@@ -121,7 +121,7 @@ User-facing copy: English only.
 ### App detail
 
 - Two rows: **Light** and **Dark**.
-- Set: `<code>id</code>`, Edit → `/assets/rule?appId=…&slot=light|dark`, Clear → DELETE.
+- Set: `<code>id</code>`, Edit → `/assets/rule?appId=…&slot=light|dark`. No Clear control — style slots are replaced via Edit / install only.
 - Unset: placeholder `—`, Edit with same deep-link.
 
 ### Rule library (`AssetBrowserPage` designmd)

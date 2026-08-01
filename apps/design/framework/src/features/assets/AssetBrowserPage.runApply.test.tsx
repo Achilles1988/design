@@ -64,9 +64,9 @@ const APP: AppConfig = {
   layouts: ['sidebar-shell'],
 }
 
-function renderPage() {
+function renderPage(path = '/assets/rule') {
   return render(
-    <MemoryRouter initialEntries={['/assets/rule']}>
+    <MemoryRouter initialEntries={[path]}>
       <AssetsRulePage />
     </MemoryRouter>,
   )
@@ -130,5 +130,48 @@ describe('AssetBrowserPage runApply', () => {
     await waitFor(() => expect(api.applyAsset).toHaveBeenCalledTimes(1))
 
     expect(screen.queryByText(/Installed style on/)).toBeNull()
+  })
+
+  it('from App deep-link applies the URL slot directly without confirm or chooser', async () => {
+    api.listAssets.mockResolvedValue([ENTRY])
+    api.listApps.mockResolvedValue([APP])
+    api.applyAsset.mockResolvedValue({
+      ...APP,
+      style: { light: 'style-a' },
+    })
+
+    renderPage('/assets/rule?appId=acme&slot=light')
+    fireEvent.click(await screen.findByRole('button', { name: 'Install style' }))
+
+    await waitFor(() =>
+      expect(api.applyAsset).toHaveBeenCalledWith(
+        'designmd',
+        'style-a',
+        'acme',
+        'light',
+      ),
+    )
+    expect(confirmTipMock).not.toHaveBeenCalled()
+    expect(chooseStyleSlotMock).not.toHaveBeenCalled()
+    await waitFor(() => {
+      expect(screen.getByText(/Installed style on/).textContent).toContain('light')
+    })
+  })
+
+  it('from App deep-link surfaces unsupported-slot errors without chooser', async () => {
+    api.listAssets.mockResolvedValue([ENTRY])
+    api.listApps.mockResolvedValue([APP])
+    api.applyAsset.mockRejectedValueOnce(
+      new DesignFsError('This style does not support the light slot.', 400),
+    )
+
+    renderPage('/assets/rule?appId=acme&slot=light')
+    fireEvent.click(await screen.findByRole('button', { name: 'Install style' }))
+
+    await waitFor(() =>
+      expect(screen.getByText('This style does not support the light slot.')).toBeTruthy(),
+    )
+    expect(chooseStyleSlotMock).not.toHaveBeenCalled()
+    expect(confirmTipMock).not.toHaveBeenCalled()
   })
 })

@@ -6,7 +6,7 @@ import { emitCanvasesChanged } from '@/lib/canvasEvents'
 import { writeCanvasRenameNotice } from '@/lib/canvasRenameNotice'
 import { confirmTip } from '@/lib/confirmTip'
 import { isValidAppId, slugify } from '@/lib/slug'
-import type { AppConfig, AssetEntry, CanvasEntry, StyleSlot } from '@/lib/types'
+import type { AppConfig, AssetEntry, CanvasEntry } from '@/lib/types'
 import { DisclosureForm } from '@/ui/DisclosureForm'
 import { SectionHeader } from '@/ui/SectionHeader'
 import './apps.css'
@@ -316,31 +316,6 @@ export function AppDetailPage() {
     }
   }
 
-  async function onRemoveStyle(slot: StyleSlot) {
-    if (!app || busy) return
-    const ok = await confirmTip({
-      message: `Clear the ${slot} style from this App?`,
-      confirmLabel: 'Clear',
-      danger: true,
-    })
-    if (!ok) return
-    const targetAppId = appId
-    const runId = loadRun.current
-    setBusy(true)
-    setFormError(null)
-    try {
-      const next = await designApi.removeAppStyle(targetAppId, slot)
-      if (isCurrentOperation(targetAppId, runId)) setApp(next)
-    } catch (err: unknown) {
-      if (!isCurrentOperation(targetAppId, runId)) return
-      setFormError(
-        err instanceof Error ? err.message : 'Failed to clear style',
-      )
-    } finally {
-      if (isCurrentOperation(targetAppId, runId)) setBusy(false)
-    }
-  }
-
   async function onRemoveLayout(layoutId: string) {
     if (!app || busy) return
     const ok = await confirmTip({
@@ -461,18 +436,6 @@ export function AppDetailPage() {
                         Edit
                       </span>
                     </Link>
-                    {value ? (
-                      <button
-                        type="button"
-                        className="apps-layout-chip__remove"
-                        onClick={() => onRemoveStyle(slot)}
-                        disabled={busy}
-                        aria-label={`Clear ${lowerLabel} style`}
-                        title={`Clear ${lowerLabel} style`}
-                      >
-                        ×
-                      </button>
-                    ) : null}
                   </div>
                 </dd>
               </div>
