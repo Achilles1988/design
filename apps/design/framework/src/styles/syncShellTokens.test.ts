@@ -6,7 +6,7 @@ import {
   buildGeneratedBlocks,
   parseDesignMdColors,
   parseDesignMdFontSans,
-} from '../../../scripts/sync-shell-tokens.mjs'
+} from './syncShellTokens'
 
 const designRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..')
 const defaultMd = readFileSync(

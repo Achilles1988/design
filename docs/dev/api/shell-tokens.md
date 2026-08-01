@@ -24,7 +24,7 @@ Each slot id resolves to a stock package under `framework/public/assets/designmd
 | Region | Maintained by |
 |--------|-------------|
 | Typography scale, spacing, radius, motion (`:root` static block) | Hand-edited |
-| Color and `--font-sans` per theme | `scripts/sync-shell-tokens.mjs` between `@generated colors:start` / `@generated colors:end` markers |
+| Color and `--font-sans` per theme | `framework/src/styles/syncShellTokens.ts` (CLI: `syncShellTokens.cli.ts`) between `@generated colors:start` / `@generated colors:end` markers |
 
 Semantic tokens derived from palette (`--color-border`, `--color-muted`, overlay/shadow) are emitted by the script using fixed rules documented in the shell token alignment spec.
 

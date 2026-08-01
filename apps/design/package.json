@@ -10,8 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare:playwright": "playwright install chromium",
-    "sync:tokens": "node scripts/sync-shell-tokens.mjs",
-    "sync:tokens:check": "node scripts/sync-shell-tokens.mjs --check"
+    "sync:tokens": "node --experimental-strip-types framework/src/styles/syncShellTokens.cli.ts",
+    "sync:tokens:check": "node --experimental-strip-types framework/src/styles/syncShellTokens.cli.ts --check"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",

@@ -27,7 +27,7 @@
   --reveal-stagger: 80ms;
 }
 
-/* @generated colors:start — sync-shell-tokens.mjs */
+/* @generated colors:start — sync-shell-tokens */
 :root,
 [data-theme='dark'] {
   --color-primary: #0c5cab;

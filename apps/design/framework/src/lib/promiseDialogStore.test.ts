@@ -29,7 +29,7 @@ describe('createPromiseDialogStore', () => {
     const unsub = store.subscribe((req) => seen.push(req?.label ?? null))
 
     const first = store.open((resolve) => ({ label: 'first', resolve }), 'default')
-    const second = store.open((resolve) => ({ label: 'second', resolve }), 'default')
+    store.open((resolve) => ({ label: 'second', resolve }), 'default')
 
     expect(seen).toEqual([null, 'first', 'second'])
     await expect(first).resolves.toBe('default')

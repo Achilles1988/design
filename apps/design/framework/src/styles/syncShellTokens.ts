@@ -2,13 +2,9 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const designRoot = join(__dirname, '..')
-const appJsonPath = join(designRoot, 'apps/design/app.json')
-const tokensPath = join(designRoot, 'framework/src/styles/tokens.css')
-const stylesRoot = join(designRoot, 'framework/public/assets/designmd')
+export type StyleSlot = 'light' | 'dark'
 
-const LIGHT_LABELS = {
+const LIGHT_LABELS: Record<string, string> = {
   Accent: 'primary',
   Background: 'surface',
   Foreground: 'text',
@@ -17,7 +13,7 @@ const LIGHT_LABELS = {
   Muted: 'muted',
 }
 
-const DARK_LABELS = {
+const DARK_LABELS: Record<string, string> = {
   Primary: 'primary',
   Secondary: 'secondary',
   Surface: 'surface',
@@ -27,12 +23,12 @@ const DARK_LABELS = {
   Danger: 'danger',
 }
 
-/** @param {string} markdown */
-/** @param {'light' | 'dark'} slot */
-export function parseDesignMdColors(markdown, slot) {
+export function parseDesignMdColors(
+  markdown: string,
+  slot: StyleSlot,
+): Record<string, string> {
   const labels = slot === 'light' ? LIGHT_LABELS : DARK_LABELS
-  /** @type {Record<string, string>} */
-  const out = {}
+  const out: Record<string, string> = {}
   const re = /\*\*([^:*]+):\*\*\s*`(#[0-9A-Fa-f]{3,8})`/g
   for (const [, label, hex] of markdown.matchAll(re)) {
     const key = labels[label.trim()]
@@ -49,8 +45,7 @@ export function parseDesignMdColors(markdown, slot) {
   return out
 }
 
-/** @param {string} markdown */
-export function parseDesignMdFontSans(markdown) {
+export function parseDesignMdFontSans(markdown: string): string {
   const body = markdown.match(/\*\*Body:\*\*\s*`([^`]+)`/)
   if (body) return body[1].trim()
   const families = markdown.match(/primary=([^,\n]+)/i)
@@ -58,20 +53,28 @@ export function parseDesignMdFontSans(markdown) {
   throw new Error('font sans not found in DESIGN.md')
 }
 
-/** @param {Record<string, string>} c */
-function requireKeys(c, keys, label) {
+function requireKeys(c: Record<string, string>, keys: string[], label: string): void {
   for (const key of keys) {
     if (!c[key]) throw new Error(`Missing ${label} color: ${key}`)
   }
 }
 
-/** @param {Record<string, string>} light */
-/** @param {Record<string, string>} dark */
-/** @param {string} lightFont */
-/** @param {string} darkFont */
-export function buildGeneratedBlocks(light, dark, lightFont, darkFont) {
-  requireKeys(light, ['primary', 'surface', 'text', 'border', 'muted', 'success', 'warning', 'danger', 'surface2'], 'light')
-  requireKeys(dark, ['primary', 'secondary', 'surface', 'text', 'success', 'warning', 'danger'], 'dark')
+export function buildGeneratedBlocks(
+  light: Record<string, string>,
+  dark: Record<string, string>,
+  lightFont: string,
+  darkFont: string,
+): { darkBlock: string; lightBlock: string } {
+  requireKeys(
+    light,
+    ['primary', 'surface', 'text', 'border', 'muted', 'success', 'warning', 'danger', 'surface2'],
+    'light',
+  )
+  requireKeys(
+    dark,
+    ['primary', 'secondary', 'surface', 'text', 'success', 'warning', 'danger'],
+    'dark',
+  )
 
   const darkBlock = `:root,
 [data-theme='dark'] {
@@ -146,8 +149,19 @@ const STATIC_HEADER = `/* Shell design tokens — generated color/font blocks sy
 
 `
 
-export function generateTokensCss() {
-  const appJson = JSON.parse(readFileSync(appJsonPath, 'utf8'))
+export const GENERATED_START = '/* @generated colors:start — sync-shell-tokens */'
+export const GENERATED_END = '/* @generated colors:end */'
+
+export function generateTokensCss({
+  appJsonPath,
+  stylesRoot,
+}: {
+  appJsonPath: string
+  stylesRoot: string
+}): string {
+  const appJson = JSON.parse(readFileSync(appJsonPath, 'utf8')) as {
+    style?: { light?: string; dark?: string }
+  }
   const lightId = appJson.style?.light
   const darkId = appJson.style?.dark
   if (!lightId || !darkId) {
@@ -162,31 +176,38 @@ export function generateTokensCss() {
   const darkFont = parseDesignMdFontSans(darkMd)
   const { darkBlock, lightBlock } = buildGeneratedBlocks(light, dark, lightFont, darkFont)
 
-  return `${STATIC_HEADER}/* @generated colors:start — sync-shell-tokens.mjs */
+  return `${STATIC_HEADER}${GENERATED_START}
 ${darkBlock}
 
 ${lightBlock}
-/* @generated colors:end */
+${GENERATED_END}
 `
 }
 
-function spliceGenerated(content, generated) {
-  const start = '/* @generated colors:start — sync-shell-tokens.mjs */'
-  const end = '/* @generated colors:end */'
-  const startIdx = content.indexOf(start)
-  const endIdx = content.indexOf(end)
-  if (startIdx === -1 || endIdx === -1) {
-    return generated
-  }
+function spliceGenerated(content: string, generated: string): string {
+  const startIdx = content.indexOf(GENERATED_START)
+  const endIdx = content.indexOf(GENERATED_END)
+  if (startIdx === -1 || endIdx === -1) return generated
   const before = content.slice(0, startIdx)
-  const after = content.slice(endIdx + end.length)
-  const middle = generated.slice(generated.indexOf(start), generated.indexOf(end) + end.length)
+  const after = content.slice(endIdx + GENERATED_END.length)
+  const middle = generated.slice(
+    generated.indexOf(GENERATED_START),
+    generated.indexOf(GENERATED_END) + GENERATED_END.length,
+  )
   return `${before}${middle}${after}`
 }
 
-function main() {
-  const check = process.argv.includes('--check')
-  const generated = generateTokensCss()
+export function runSyncShellTokensCli({
+  check = false,
+  designRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..'),
+}: {
+  check?: boolean
+  designRoot?: string
+} = {}): void {
+  const appJsonPath = join(designRoot, 'apps/design/app.json')
+  const tokensPath = join(designRoot, 'framework/src/styles/tokens.css')
+  const stylesRoot = join(designRoot, 'framework/public/assets/designmd')
+  const generated = generateTokensCss({ appJsonPath, stylesRoot })
   const current = readFileSync(tokensPath, 'utf8')
   const next = current.includes('@generated colors:start')
     ? spliceGenerated(current, generated)
@@ -204,6 +225,3 @@ function main() {
   writeFileSync(tokensPath, next)
   console.log(`Wrote ${tokensPath}`)
 }
-
-const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]
-if (isMain) main()
