@@ -53,6 +53,21 @@ describe('cli', () => {
     rmSync(empty, { recursive: true, force: true })
   })
 
+  it('find-design-root exits 3 for multiple', () => {
+    const multi = mkdtempSync(join(tmpdir(), 'wn-multi-'))
+    const rootA = join(multi, 'a')
+    const rootB = join(multi, 'b')
+    mkdirSync(rootA, { recursive: true })
+    mkdirSync(rootB, { recursive: true })
+    writeFileSync(join(rootA, 'design.project.json'), '{}')
+    writeFileSync(join(rootB, 'design.project.json'), '{}')
+    const r = run('find-design-root.mjs', [multi])
+    assert.equal(r.status, 3)
+    assert.match(r.stderr, /multiple/i)
+    assert.deepEqual(r.stdout.trim().split('\n').sort(), [rootA, rootB].sort())
+    rmSync(multi, { recursive: true, force: true })
+  })
+
   it('list-apps prints demo', () => {
     const r = run('list-apps.mjs', [designRoot])
     assert.equal(r.status, 0)
@@ -64,9 +79,35 @@ describe('cli', () => {
     assert.equal(r.status, 0)
   })
 
+  it('check-app-style fails with reason when DESIGN.md missing', () => {
+    const bad = mkdtempSync(join(tmpdir(), 'wn-style-'))
+    const badRoot = join(bad, 'proj')
+    mkdirSync(join(badRoot, 'apps', 'ghost'), { recursive: true })
+    mkdirSync(join(badRoot, 'styles', 'missing'), { recursive: true })
+    writeFileSync(
+      join(badRoot, 'design.project.json'),
+      JSON.stringify({
+        schemaVersion: 1,
+        contentRoot: 'apps',
+        stylesRoot: 'styles',
+        layoutsRoot: 'layouts',
+        defaultAppId: 'ghost',
+      }),
+    )
+    writeFileSync(
+      join(badRoot, 'apps', 'ghost', 'app.json'),
+      JSON.stringify({ id: 'ghost', style: { light: 'missing' }, layouts: [] }),
+    )
+    const r = run('check-app-style.mjs', [badRoot, 'ghost'])
+    assert.equal(r.status, 1)
+    assert.match(r.stderr, /DESIGN\.md/i)
+    rmSync(bad, { recursive: true, force: true })
+  })
+
   it('check-app-tokens fails without file', () => {
     const r = run('check-app-tokens.mjs', [designRoot, 'demo'])
     assert.equal(r.status, 1)
+    assert.match(r.stderr, /tokens\.css missing/i)
   })
 
   it('check-app-tokens ok with fingerprint', () => {
