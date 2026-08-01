@@ -728,7 +728,7 @@ describe('CanvasPreview Canvas Assistant integration', () => {
     )
 
     expect(appStyles).toMatch(
-      /\.canvas-assistant-context-error \{[\s\S]*?border: 1px solid color-mix\(in srgb, var\(--color-danger\) 40%, transparent\);[\s\S]*?background: color-mix\(in srgb, var\(--color-danger\) 12%, transparent\);[\s\S]*?color: var\(--color-text\);[\s\S]*?font-size: 14px;/,
+      /\.canvas-assistant-context-error \{[\s\S]*?border: 1px solid color-mix\(in srgb, var\(--color-danger\) 40%, transparent\);[\s\S]*?background: color-mix\(in srgb, var\(--color-danger\) 12%, transparent\);[\s\S]*?color: var\(--color-text\);[\s\S]*?font-size: var\(--text-sm\);/,
     )
     expect(appStyles).toMatch(
       /\.canvas-assistant-context-error::before \{[\s\S]*?background: var\(--color-danger\);/,

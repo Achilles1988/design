@@ -1,20 +1,20 @@
 @media (prefers-reduced-motion: no-preference) {
   [data-canvas-reveal] > * {
-    animation: canvas-reveal-in 220ms ease-out both;
-    animation-delay: calc(var(--reveal-index, 0) * 80ms);
+    animation: canvas-reveal-in var(--transition-base) ease-out both;
+    animation-delay: calc(var(--reveal-index, 0) * var(--reveal-stagger));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   [data-canvas-reveal] > * {
-    animation: canvas-reveal-in-reduced 150ms ease-out both;
+    animation: canvas-reveal-in-reduced var(--transition-fast) ease-out both;
   }
 }
 
 @keyframes canvas-reveal-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(calc(var(--space) * 0.75));
   }
   to {
     opacity: 1;

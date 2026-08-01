@@ -12,10 +12,10 @@
 }
 
 .form-row__label {
-  padding-top: 10px;
+  padding-top: calc(var(--space) * 1.25);
   color: var(--color-muted);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
 .form-row__control {
@@ -25,7 +25,7 @@
 .form-row__hint,
 .form-row__error {
   margin-top: calc(var(--space) * 0.5);
-  font-size: 12px;
+  font-size: var(--text-xs);
 }
 
 .form-row__hint {

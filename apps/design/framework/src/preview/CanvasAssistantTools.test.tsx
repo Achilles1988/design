@@ -603,10 +603,10 @@ describe('CanvasAssistantTools', () => {
       /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.canvas-assistant-card__actions button \{\s*transition: none;\s*\}[\s\S]*?\}/,
     )
     expect(assistantStyles).toMatch(
-      /\.canvas-assistant-card \{[\s\S]*?font-size: 14px;/,
+      /\.canvas-assistant-card \{[\s\S]*?font-size: var\(--text-sm\);/,
     )
     expect(assistantStyles).toMatch(
-      /\.canvas-assistant-card h4,[\s\S]*?\.canvas-assistant-card__eyebrow \{[\s\S]*?color: var\(--color-text\);[\s\S]*?font-size: 12px;/,
+      /\.canvas-assistant-card h4,[\s\S]*?\.canvas-assistant-card__eyebrow \{[\s\S]*?color: var\(--color-text\);[\s\S]*?font-size: var\(--text-xs\);/,
     )
     expect(assistantStyles).toMatch(
       /\.canvas-assistant-card__reason \{\s*color: var\(--color-text\);/,
@@ -615,7 +615,7 @@ describe('CanvasAssistantTools', () => {
       /\.canvas-assistant-card__empty \{\s*color: var\(--color-text\);/,
     )
     expect(assistantStyles).toMatch(
-      /\.canvas-assistant-card__actions button \{[\s\S]*?font-size: 14px;/,
+      /\.canvas-assistant-card__actions button \{[\s\S]*?font-size: var\(--text-sm\);/,
     )
     expect(assistantStyles).toMatch(
       /\.canvas-assistant-card__actions \.canvas-assistant-card__primary:active:not\(:disabled\) \{\s*border-color: var\(--color-primary\);\s*background: var\(--color-primary\);\s*transform: translateY\(1px\);\s*\}/,

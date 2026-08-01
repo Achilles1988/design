@@ -1,3 +1,33 @@
+/* Shell design tokens — generated color/font blocks synced from design app.json style slots */
+
+:root {
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --line-height-body: 1.5;
+  --line-height-heading: 1.2;
+  --font-mono: ui-monospace, 'JetBrains Mono', monospace;
+  --space: 8px;
+  --sidebar-w: 256px;
+  --header-h: 60px;
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-md: 12px;
+  --radius-full: 999px;
+  --radius-circle: 50%;
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --reveal-stagger: 80ms;
+}
+
+/* @generated colors:start — sync-shell-tokens.mjs */
 :root,
 [data-theme='dark'] {
   --color-primary: #0c5cab;
@@ -7,27 +37,33 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-surface: #09090b;
-  --color-text: #fafafa;
-  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --space: 8px;
-  --radius: 8px;
-  --sidebar-w: 256px;
-  --header-h: 60px;
-  --color-border: color-mix(in srgb, var(--color-text) 12%, transparent);
   --color-surface-2: color-mix(in srgb, var(--color-text) 6%, var(--color-surface));
+  --color-text: #fafafa;
+  --color-border: color-mix(in srgb, var(--color-text) 12%, transparent);
   --color-muted: color-mix(in srgb, var(--color-text) 55%, transparent);
+  --color-on-primary: #ffffff;
+  --color-overlay: color-mix(in srgb, #000000 45%, transparent);
+  --shadow-elevated: 0 16px 48px color-mix(in srgb, #000000 28%, transparent);
+  --shadow-modal: 0 24px 64px color-mix(in srgb, #000000 45%, transparent);
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
 }
 
 [data-theme='light'] {
-  --color-primary: #0c5cab;
-  --color-primary-content: #0c5cab;
-  --color-secondary: #0a4a8a;
-  --color-success: #059669;
-  --color-warning: #d97706;
+  --color-primary: #2f6feb;
+  --color-primary-content: #2f6feb;
+  --color-secondary: #2f6feb;
+  --color-success: #17a34a;
+  --color-warning: #eab308;
   --color-danger: #dc2626;
-  --color-surface: #f4f4f5;
-  --color-text: #18181b;
-  --color-border: color-mix(in srgb, var(--color-text) 12%, transparent);
+  --color-surface: #fafafa;
   --color-surface-2: #ffffff;
-  --color-muted: color-mix(in srgb, var(--color-text) 55%, transparent);
+  --color-text: #111111;
+  --color-border: #e5e5e5;
+  --color-muted: #6b6b6b;
+  --color-on-primary: #ffffff;
+  --color-overlay: color-mix(in srgb, #111111 45%, transparent);
+  --shadow-elevated: 0 2px 8px color-mix(in srgb, #111111 8%, transparent);
+  --shadow-modal: 0 24px 64px color-mix(in srgb, #111111 20%, transparent);
+  --font-sans: 'Inter', -apple-system, system-ui, sans-serif;
 }
+/* @generated colors:end */

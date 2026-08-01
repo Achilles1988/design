@@ -50,8 +50,8 @@
 }
 
 .sidebar-shell__title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: -0.02em;
   color: var(--color-text);
 }
@@ -125,7 +125,7 @@
 
 .sidebar-shell__workspace::-webkit-scrollbar-thumb {
   background: var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 2px solid transparent;
   background-clip: padding-box;
 }
@@ -152,8 +152,8 @@
 
 .sidebar-shell__group-label {
   padding: calc(var(--space) * 1.75) calc(var(--space) * 1.5) calc(var(--space) * 0.75);
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-muted);
@@ -166,8 +166,8 @@
   padding: 9px 12px;
   border-radius: var(--radius);
   color: var(--color-muted);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
   transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -193,7 +193,7 @@
 .sidebar-shell__nav-link--active {
   background: color-mix(in srgb, var(--color-primary) 22%, transparent);
   color: var(--color-primary-content);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .sidebar-shell__nav-link--active .sidebar-shell__icon {
@@ -247,8 +247,8 @@
 
 .sidebar-shell__nav-link--canvas {
   padding: 7px 12px 7px calc(var(--space) * 1.5 + 24px);
-  font-size: 13px;
-  font-weight: 400;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-normal);
 }
 
 .sidebar-shell__icon {
@@ -284,8 +284,8 @@
 
 .sidebar-shell__main h1 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: -0.02em;
 }
 

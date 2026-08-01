@@ -97,7 +97,7 @@ describe('theme', () => {
 
   it('defines a readable primary-content token for light mode', () => {
     expect(tokensCss).toMatch(
-      /\[data-theme='light'\][\s\S]*--color-primary-content:\s*#0c5cab;/,
+      /\[data-theme='light'\][\s\S]*--color-primary-content:\s*#2f6feb;/,
     )
   })
 })
