@@ -51,4 +51,5 @@ Shell chrome only (sidebar, apps/settings/assets pages, assistant, dialogs). Ass
 ## See also
 
 - [design-project.md](./design-project.md) — style slot resolution
+- [app-tokens.md](./app-tokens.md) — per-App Canvas `tokens.css` (not Shell chrome)
 - Spec: `docs/dev/superpowers/specs/2026-08-01-shell-token-alignment-design.md`
