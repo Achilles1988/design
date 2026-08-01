@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { join } from 'node:path'
+
+const SKIP_DIRS = new Set(['node_modules', '.git', '.worktrees', 'worktrees'])
 
 export function findDesignRoots(repoRoot) {
   const hits = []
@@ -12,7 +14,7 @@ export function findDesignRoots(repoRoot) {
       return
     }
     for (const ent of entries) {
-      if (ent.name === 'node_modules' || ent.name === '.git') continue
+      if (SKIP_DIRS.has(ent.name)) continue
       const p = join(dir, ent.name)
       if (ent.isDirectory()) walk(p)
       else if (ent.name === 'design.project.json') hits.push(dir)
@@ -138,5 +140,3 @@ export function checkAppTokens(designRoot, appId) {
   }
   return { ok: true }
 }
-
-export { dirname, join }

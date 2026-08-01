@@ -43,6 +43,15 @@ describe('lib', () => {
     assert.deepEqual(roots, [join(root, 'proj')])
   })
 
+  it('findDesignRoots skips .worktrees and worktrees', () => {
+    mkdirSync(join(root, '.worktrees', 'feature', 'apps', 'design'), { recursive: true })
+    writeFileSync(join(root, '.worktrees', 'feature', 'apps', 'design', 'design.project.json'), '{}')
+    mkdirSync(join(root, 'worktrees', 'other', 'apps', 'design'), { recursive: true })
+    writeFileSync(join(root, 'worktrees', 'other', 'apps', 'design', 'design.project.json'), '{}')
+    const roots = findDesignRoots(root)
+    assert.deepEqual(roots, [join(root, 'proj')])
+  })
+
   it('getConfiguredSlots skips empty', () => {
     assert.deepEqual(getConfiguredSlots({ style: { light: 'default' } }), [
       { slot: 'light', styleId: 'default' },
